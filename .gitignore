@@ -1,0 +1,29 @@
+# Reproducible build outputs and installed dependencies
+**/target/
+**/node_modules/
+**/node_modules.incomplete/
+**/dist/
+
+# Original/commercial binaries and generated artifacts
+/artifacts/
+/inputs/
+/libs/
+/gen/
+
+# Decompilation, validation, and scratch workspaces
+/build-data/
+/decompiled-others/
+/frontend/
+/logs/
+/scratch/
+/tools/
+/vineflower_src/
+/work/
+/compile*.args
+/compile*.log
+
+# Alternate extraction trees retained locally for audit only
+/project/urule-core-pro/src/main/java_vf/
+/project/urule-core-pro/src/main/java_restored/
+/project/urule-console-js/src/_decompiled/
+/project/urule-console-js/src/_webcrack/

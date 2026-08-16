@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<complex-scorecard scoring-type="sum" assign-target-type="none">
+<cell row="0" col="2" rowspan="1"></cell>
+<cell row="0" col="1" rowspan="1">
+<joint type="and"/>
+</cell>
+<cell row="0" col="0" rowspan="1">
+<joint type="and"/>
+</cell>
+<cell row="1" col="2" rowspan="1">
+</cell>
+<cell row="1" col="1" rowspan="1">
+<joint type="and"/>
+</cell>
+<cell row="1" col="0" rowspan="1">
+<joint type="and"/>
+</cell>
+<row num="0" height="40"/>
+<row num="1" height="40"/>
+<col num="0" width="150" type="Criteria"/>
+<col num="1" width="150" type="Criteria"/>
+<col num="2" width="120" type="Score"/>
+</complex-scorecard>

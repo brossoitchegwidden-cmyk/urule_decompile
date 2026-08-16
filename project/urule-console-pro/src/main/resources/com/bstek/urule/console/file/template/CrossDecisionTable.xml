@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<crosstab>
+  <header>LEFT &amp;&amp; TOP</header>
+  <row number="1" type="top"/>
+  <column number="1" type="left"/>
+  <column number="2" type="top"/>
+  <row number="2" type="left"/>
+  <condition-cell row="1" col="2"/>
+  <condition-cell row="2" col="1"/>
+  <value-cell row="2" col="2"/>
+</crosstab>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decision-table>
+  <cell row="0" col="2" rowspan="1"/>
+  <cell row="0" col="1" rowspan="1">
+    <joint type="and"/>
+  </cell>
+  <cell row="0" col="0" rowspan="1">
+    <joint type="and"/>
+  </cell>
+  <cell row="1" col="2" rowspan="1"/>
+  <cell row="1" col="1" rowspan="1">
+    <joint type="and"/>
+  </cell>
+  <cell row="1" col="0" rowspan="1">
+    <joint type="and"/>
+  </cell>
+  <row num="0" height="40"/>
+  <row num="1" height="40"/>
+  <col num="0" width="150" type="Criteria"/>
+  <col num="1" width="150" type="Criteria"/>
+  <col num="2" width="200" type="Assignment"/>
+</decision-table>
