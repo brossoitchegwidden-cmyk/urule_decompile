@@ -22,6 +22,10 @@ if ([string]::IsNullOrWhiteSpace($ConsoleJar)) {
 if ([string]::IsNullOrWhiteSpace($OutputJar)) {
     $OutputJar = Join-Path $workspace 'artifacts\urule-pro-boot-restored.jar'
 }
+$outputDirectory = Split-Path -Parent $OutputJar
+if (-not [string]::IsNullOrWhiteSpace($outputDirectory)) {
+    New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+}
 
 foreach ($path in @($HostJar, $CoreJar, $ConsoleJar)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {

@@ -132,21 +132,35 @@ public class DynamicSpringConfigLoaderImpl implements DynamicSpringConfigLoader,
       return Secret.b.a(var1, var2, var3, var4);
    }
 
+   private static String t;
+   private static boolean u;
+
    private void d() throws Exception {
       boolean var1 = false;
       ObjectMapper var2 = JsonMapper.builder().build();
       String var3 = Secret.b.a("dXJ1bGUtbGljZW5zZQ==", true);
       String var4 = var3 + Secret.b.a("LnR4dA==", true);
+      t = null;
 
-      for (int var5 = 0; var5 <= 10; var5++) {
-         if (var5 > 0) {
-            var4 = var3 + var5 + Secret.b.a("LnR4dA==", true);
+      String var5 = resolveLicenseHome();
+      if (StringUtils.isNotBlank(var5)) {
+         File var6 = new File(var5, var4);
+         if (var6.isFile()) {
+            String var7 = this.a(var6);
+            if (var7 != null && this.a(var7, var2, var4)) {
+               var1 = true;
+               t = "home";
+            }
          }
+      }
 
-         String var6 = this.a(var4);
-         if (var6 != null) {
-            var1 = this.a(var6, var2, var4);
-            if (var1) {
+      if (!var1) {
+         for (int var8 = 0; var8 <= 10; var8++) {
+            String var9 = var8 == 0 ? var4 : var3 + var8 + Secret.b.a("LnR4dA==", true);
+            String var10 = this.a(var9);
+            if (var10 != null && this.a(var10, var2, var9)) {
+               var1 = true;
+               t = "classpath:" + var9;
                break;
             }
          }
@@ -154,6 +168,56 @@ public class DynamicSpringConfigLoaderImpl implements DynamicSpringConfigLoader,
 
       if (!var1) {
          Secret.b.b();
+      }
+   }
+
+   private static String resolveLicenseHome() {
+      String var0 = null;
+      InputStream var1 = null;
+
+      try {
+         try {
+            var1 = new FileInputStream("urule-init.properties");
+         } catch (FileNotFoundException var8) {
+            var1 = DynamicSpringConfigLoaderImpl.class.getClassLoader().getResourceAsStream("urule-init.properties");
+         }
+
+         if (var1 != null) {
+            java.util.Properties var2 = new java.util.Properties();
+            var2.load(var1);
+            var0 = var2.getProperty("urule.home");
+         }
+      } catch (IOException var9) {
+      } finally {
+         IOUtils.closeQuietly(var1);
+      }
+
+      if (StringUtils.isBlank(var0)) {
+         var0 = System.getProperty("urule.home");
+      }
+
+      if (StringUtils.isBlank(var0)) {
+         var0 = System.getProperty("uruleHome");
+      }
+
+      if (StringUtils.isBlank(var0)) {
+         var0 = System.getenv("URULE_HOME");
+      }
+
+      return var0;
+   }
+
+   private String a(File var1) {
+      try {
+         FileInputStream var2 = new FileInputStream(var1);
+
+         try {
+            return IOUtils.toString(var2, "UTF-8");
+         } finally {
+            var2.close();
+         }
+      } catch (Exception var5) {
+         return null;
       }
    }
 
@@ -179,48 +243,161 @@ public class DynamicSpringConfigLoaderImpl implements DynamicSpringConfigLoader,
          return false;
       }
 
+      Object var5 = var4.get(Secret.b.a("dG8=", true));
+      Object var6 = var4.get(Secret.b.a("bGltaXQ=", true));
+      if (!(var5 instanceof String) || StringUtils.isBlank((String)var5) || var6 == null) {
+         return false;
+      }
+
+      long var7 = Long.parseLong(var6.toString());
+      if (var7 < -1L) {
+         return false;
+      }
+
       KnowledgeSessionFactory.a(true);
-      h = (String)var4.get(Secret.b.a("dG8=", true));
+      h = (String)var5;
+      u = "portable".equals(var4.get("binding"));
       KnowledgeSessionFactory.a(var4);
-      f = Long.valueOf(var4.get(Secret.b.a("bGltaXQ=", true)).toString());
+      f = var7;
       if (f == -1L) {
          e = Secret.b.a("VW5saW1pdGVk", true);
       } else {
-         Calendar var5 = Calendar.getInstance();
-         var5.setTimeInMillis(f);
-         Date var6 = var5.getTime();
-         e = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(var6);
+         Calendar var8 = Calendar.getInstance();
+         var8.setTimeInMillis(f);
+         Date var9 = var8.getTime();
+         e = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(var9);
       }
 
       Secret.b.b(h, e);
-      String var7 = "TGljZW5zZSBmaWxlWw==";
-      String var8 = "XSBpcyB2YWxpZA==";
-      System.out.println(Secret.b.a(var7, true) + var3 + Secret.b.a(var8, true));
+      String var10 = "TGljZW5zZSBmaWxlWw==";
+      String var11 = "XSBpcyB2YWxpZA==";
+      System.out.println(Secret.b.a(var10, true) + var3 + Secret.b.a(var11, true));
       return true;
    }
 
    private HashMap<?, ?> b(String var1, ObjectMapper var2, String var3) {
       try {
-         byte[] var4 = Base64.getDecoder().decode(var1);
-         HashMap var5 = (HashMap)var2.readValue(var4, HashMap.class);
-         byte[] var6 = Base64.getDecoder().decode((String)var5.get(Secret.b.a("a2V5", true)));
-         byte[] var7 = Secret.b.a(var6);
-         byte[] var8 = Base64.getDecoder().decode((String)var5.get(Secret.b.a("ZGF0YQ==", true)));
-         byte[] var9 = Secret.b.a(var7, var8);
-         HashMap var10 = (HashMap)var2.readValue(var9, HashMap.class);
-         String var11 = Secret.b.a(var10);
-         if (!this.d.contentEquals(var11)) {
-            String var12 = "TGljZW5zZSBmaWxlWw==";
-            String var13 = "XSBpcyBpbnZhbGlk";
-            System.err.println(Secret.b.a(var12, true) + var3 + Secret.b.a(var13, true));
-            return null;
-         } else {
-            return var10;
-         }
-      } catch (Exception var14) {
+         return d(var1, var2, this.d);
+      } catch (Exception var5) {
          System.err.println("License file[" + var3 + "] is broken.");
          return null;
       }
+   }
+
+   private static HashMap<?, ?> d(String var0, ObjectMapper var1, String var2) throws Exception {
+      Exception var3 = null;
+      try {
+         HashMap<?, ?> var4 = c(var0, var1, var2, null);
+         if (var4 != null) {
+            return var4;
+         }
+      } catch (Exception var8) {
+         var3 = var8;
+      }
+
+      String var5 = supplementalPublicKey();
+      if (StringUtils.isBlank(var5)) {
+         if (var3 != null) {
+            throw var3;
+         }
+         return null;
+      }
+
+      try {
+         return c(var0, var1, var2, var5);
+      } catch (Exception var7) {
+         throw var7;
+      }
+   }
+
+   private static HashMap<?, ?> c(String var0, ObjectMapper var1, String var2, String var3) throws Exception {
+      byte[] var4 = Base64.getDecoder().decode(var0);
+      HashMap var5 = (HashMap)var1.readValue(var4, HashMap.class);
+      byte[] var6 = Base64.getDecoder().decode((String)var5.get(Secret.b.a("a2V5", true)));
+      byte[] var7 = var3 == null ? Secret.b.b(var6) : Secret.b.b(var6, var3);
+      byte[] var8 = Base64.getDecoder().decode((String)var5.get(Secret.b.a("ZGF0YQ==", true)));
+      byte[] var9 = Secret.b.a(var7, var8);
+      HashMap var10 = (HashMap)var1.readValue(var9, HashMap.class);
+      if ("portable".equals(var10.get("binding"))) {
+         if (var3 == null) {
+            return null;
+         }
+         Object var11 = var10.get("licenseId");
+         Object var12 = var10.get("issuedAt");
+         Object var13 = var10.get("productVersion");
+         if (!(var11 instanceof String) || StringUtils.isBlank((String)var11) || var12 == null || !Secret.b.a().equals(var13)) {
+            return null;
+         }
+         long var14 = Long.parseLong(var12.toString());
+         return var14 > 0L && var14 <= System.currentTimeMillis() + 300000L ? var10 : null;
+      }
+      String var15 = Secret.b.a(var10);
+      return var2.contentEquals(var15) ? var10 : null;
+   }
+
+   private static String supplementalPublicKey() {
+      String var0 = System.getProperty("urule.license.issuer.public-key");
+      if (StringUtils.isBlank(var0)) {
+         return null;
+      }
+
+      File var1 = new File(var0);
+      if (!var1.isFile() || var1.length() < 1L || var1.length() > 4096L) {
+         return null;
+      }
+
+      FileInputStream var2 = null;
+      try {
+         var2 = new FileInputStream(var1);
+         String var3 = IOUtils.toString(var2, "UTF-8").trim();
+         Base64.getDecoder().decode(var3);
+         return var3;
+      } catch (Exception var4) {
+         return null;
+      } finally {
+         IOUtils.closeQuietly(var2);
+      }
+   }
+
+   /**
+    * Validates a license without changing the active license or session state.
+    */
+   public static LicenseValidationResult validateLicense(String var0) {
+      if (StringUtils.isBlank(var0)) {
+         return LicenseValidationResult.invalid("empty_license");
+      }
+
+      try {
+         ObjectMapper var1 = JsonMapper.builder().build();
+         String var2 = Secret.b.a(SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.JAVA_VENDOR, SystemUtils.JAVA_VERSION);
+         String var3 = Secret.b.b(var2);
+         HashMap<?, ?> var4 = d(var0, var1, var3);
+         if (var4 == null) {
+            return LicenseValidationResult.invalid("signature_or_environment_invalid");
+         }
+
+         Object var5 = var4.get(Secret.b.a("dG8=", true));
+         Object var6 = var4.get(Secret.b.a("bGltaXQ=", true));
+         if (!(var5 instanceof String) || StringUtils.isBlank((String)var5) || var6 == null) {
+            return LicenseValidationResult.invalid("required_fields_missing");
+         }
+
+         long var7 = Long.parseLong(var6.toString());
+         if (var7 < -1L) {
+            return LicenseValidationResult.invalid("invalid_limit");
+         }
+         return LicenseValidationResult.valid((String)var5, var7, "portable".equals(var4.get("binding")));
+      } catch (Exception var9) {
+         return LicenseValidationResult.invalid("signature_or_format_invalid");
+      }
+   }
+
+   public static String getLicenseSource() {
+      return t;
+   }
+
+   public static boolean isLicensePortable() {
+      return u;
    }
 
    private void a(File var1, boolean var2) {

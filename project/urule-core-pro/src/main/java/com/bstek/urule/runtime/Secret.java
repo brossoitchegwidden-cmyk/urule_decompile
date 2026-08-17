@@ -9,6 +9,7 @@ import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
@@ -53,20 +54,35 @@ class Secret {
    }
 
    protected byte[] a(byte[] var1) {
+      return this.a(var1, this.f);
+   }
+
+   protected byte[] a(byte[] var1, String var2) {
       try {
-         KeyFactory var2 = KeyFactory.getInstance(this.d);
-         byte[] var3 = Base64.getDecoder()
-            .decode(
-               "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCOTVYtYbbBYWsC6BQJRcoKx62FQnAeFoI9R3/7ZhRT+g46sgJxZLVGvaHp6ZX7mwdDuGcF9QJT9hsAe713PN/9QrVuNfEokKaE4+eQhFjDnHPNRcyTZDmNDmWWfyONbLXfv/hJjlfdc3PsWFg99/U3519biUpsvm+34MoKHBkQ/wIDAQAB"
-                  .getBytes("UTF-8")
-            );
-         PublicKey var4 = var2.generatePublic(new X509EncodedKeySpec(var3));
-         Cipher var5 = Cipher.getInstance(this.d);
-         var5.init(2, var4);
-         return var5.doFinal(var1);
-      } catch (Exception var6) {
-         throw new RuleException(var6);
+         return this.b(var1, var2);
+      } catch (Exception var3) {
+         throw new RuleException(var3);
       }
+   }
+
+   protected byte[] b(byte[] var1) throws Exception {
+      return this.b(var1, this.f);
+   }
+
+   protected byte[] b(byte[] var1, String var2) throws Exception {
+      KeyFactory var3 = KeyFactory.getInstance(this.d);
+      byte[] var4 = Base64.getDecoder().decode(var2.getBytes("UTF-8"));
+      PublicKey var5 = var3.generatePublic(new X509EncodedKeySpec(var4));
+      if (!(var5 instanceof RSAPublicKey)) {
+         throw new IllegalArgumentException("Configured license public key is not RSA.");
+      }
+      RSAPublicKey var6 = (RSAPublicKey)var5;
+      if (var6.getModulus().bitLength() != 1024 || !BigInteger.valueOf(65537L).equals(var6.getPublicExponent())) {
+         throw new IllegalArgumentException("Configured license public key parameters do not match the original trust strength.");
+      }
+      Cipher var7 = Cipher.getInstance(this.d);
+      var7.init(2, var5);
+      return var7.doFinal(var1);
    }
 
    protected String a(String var1, String var2) {

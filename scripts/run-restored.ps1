@@ -6,6 +6,13 @@ param(
     [string]$Profile = 'embed',
     [string]$UruleHome = '',
     [string]$DatabaseUrl = '',
+    [string]$LicenseAdmins = 'admin',
+    [switch]$LicenseIssuerEnabled,
+    [string]$LicenseIssuerPrivateKey = '',
+    [string]$LicenseIssuerPublicKey = '',
+    [string]$LicenseIssuerDefaultLicensee = 'Portable License',
+    [long]$LicenseIssuerDefaultLimit = -1,
+    [bool]$LicenseIssuerDefaultPortable = $true,
     [switch]$Background
 )
 
@@ -42,8 +49,39 @@ if ([string]::IsNullOrWhiteSpace($JavaPath) -or -not (Test-Path -LiteralPath $Ja
 }
 
 New-Item -ItemType Directory -Path $UruleHome -Force | Out-Null
-$arguments = @(
+$jvmArguments = @(
     "-DuruleHome=$UruleHome",
+    "-Durule.license.admins=$LicenseAdmins"
+)
+if (-not [string]::IsNullOrWhiteSpace($LicenseIssuerPublicKey)) {
+    if (-not (Test-Path -LiteralPath $LicenseIssuerPublicKey -PathType Leaf)) {
+        throw "License issuer public key not found: $LicenseIssuerPublicKey"
+    }
+    $LicenseIssuerPublicKey = (Resolve-Path -LiteralPath $LicenseIssuerPublicKey).Path
+    $jvmArguments += "-Durule.license.issuer.public-key=$LicenseIssuerPublicKey"
+}
+if ($LicenseIssuerEnabled) {
+    if ([string]::IsNullOrWhiteSpace($LicenseIssuerPrivateKey) -or [string]::IsNullOrWhiteSpace($LicenseIssuerPublicKey)) {
+        throw 'LicenseIssuerEnabled requires both LicenseIssuerPrivateKey and LicenseIssuerPublicKey.'
+    }
+    if (-not (Test-Path -LiteralPath $LicenseIssuerPrivateKey -PathType Leaf)) {
+        throw "License issuer private key not found: $LicenseIssuerPrivateKey"
+    }
+    if ([string]::IsNullOrWhiteSpace($LicenseIssuerDefaultLicensee) -or $LicenseIssuerDefaultLicensee.Trim().Length -gt 256) {
+        throw 'LicenseIssuerDefaultLicensee must contain between 1 and 256 characters.'
+    }
+    if ($LicenseIssuerDefaultLimit -lt -1 -or ($LicenseIssuerDefaultLimit -ge 0 -and $LicenseIssuerDefaultLimit -le [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())) {
+        throw 'LicenseIssuerDefaultLimit must be -1 or a future epoch millisecond value.'
+    }
+    $LicenseIssuerPrivateKey = (Resolve-Path -LiteralPath $LicenseIssuerPrivateKey).Path
+    $portableValue = $LicenseIssuerDefaultPortable.ToString().ToLowerInvariant()
+    $jvmArguments += '-Durule.license.issuer.enabled=true'
+    $jvmArguments += "-Durule.license.issuer.private-key=$LicenseIssuerPrivateKey"
+    $jvmArguments += "-Durule.license.issuer.default-licensee=$($LicenseIssuerDefaultLicensee.Trim())"
+    $jvmArguments += "-Durule.license.issuer.default-limit=$LicenseIssuerDefaultLimit"
+    $jvmArguments += "-Durule.license.issuer.default-portable=$portableValue"
+}
+$arguments = $jvmArguments + @(
     '-jar', $HostJar,
     "--server.port=$Port",
     "--spring.profiles.active=$Profile",
@@ -54,13 +92,24 @@ Write-Output "HOST_JAR=$HostJar"
 Write-Output "PORT=$Port"
 Write-Output "URULE_HOME=$UruleHome"
 Write-Output "DATABASE_URL=$DatabaseUrl"
+Write-Output "LICENSE_ADMINS=$LicenseAdmins"
+Write-Output "LICENSE_ISSUER_ENABLED=$($LicenseIssuerEnabled.IsPresent)"
+Write-Output "LICENSE_ISSUER_PUBLIC_KEY_CONFIGURED=$(-not [string]::IsNullOrWhiteSpace($LicenseIssuerPublicKey))"
+Write-Output "LICENSE_ISSUE_DEFAULT_CONFIGURED=$($LicenseIssuerEnabled.IsPresent)"
 
 if ($Background) {
     $logDirectory = Join-Path $workspace 'logs'
     New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
     $stdout = Join-Path $logDirectory "urule-$Port.out.log"
     $stderr = Join-Path $logDirectory "urule-$Port.err.log"
-    $process = Start-Process -FilePath $JavaPath -ArgumentList $arguments -WorkingDirectory $workspace `
+    $processArguments = @($arguments | ForEach-Object {
+        if ($_ -match '[\s"]') {
+            '"' + $_.Replace('"', '\"') + '"'
+        } else {
+            $_
+        }
+    })
+    $process = Start-Process -FilePath $JavaPath -ArgumentList $processArguments -WorkingDirectory $workspace `
         -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
     Write-Output "PID=$($process.Id)"
     Write-Output "STDOUT=$stdout"

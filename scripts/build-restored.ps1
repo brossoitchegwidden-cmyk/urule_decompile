@@ -92,8 +92,14 @@ $integrityJson = Join-Path $workspace "work\validation\console-integrity-$stamp-
 $integrity = Get-Content -LiteralPath $integrityJson -Raw | ConvertFrom-Json
 
 $allowedMissingClass = 'com/bstek/urule/console/database/model/datasource/FieldType$1.class'
+$allowedExtraClasses = @(
+    'com/bstek/urule/console/admin/license/LicenseIssuer.class',
+    'com/bstek/urule/console/admin/license/LicenseServletHandler.class'
+)
 $unexpectedMissingClasses = @($integrity.class_set.missing | Where-Object { $_ -ne $allowedMissingClass })
-if ($unexpectedMissingClasses.Count -ne 0 -or $integrity.class_set.extra.Count -ne 0) {
+$unexpectedExtraClasses = @($integrity.class_set.extra | Where-Object { $_ -notin $allowedExtraClasses })
+$missingExpectedExtraClasses = @($allowedExtraClasses | Where-Object { $_ -notin @($integrity.class_set.extra) })
+if ($unexpectedMissingClasses.Count -ne 0 -or $unexpectedExtraClasses.Count -ne 0 -or $missingExpectedExtraClasses.Count -ne 0) {
     throw "Unexpected class-set differences. See $integrityJson"
 }
 $resourceDifferenceCount = @($integrity.runtime_resources.missing).Count +
@@ -105,6 +111,7 @@ if ($resourceDifferenceCount -ne 0) {
 }
 
 $artifacts = Join-Path $workspace 'artifacts'
+New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 Copy-Item -LiteralPath $coreJar -Destination (Join-Path $artifacts 'urule-core-pro-4.3.0-restored.jar') -Force
 Copy-Item -LiteralPath $consoleJar -Destination (Join-Path $artifacts 'urule-console-pro-4.3.0-restored.jar') -Force
 

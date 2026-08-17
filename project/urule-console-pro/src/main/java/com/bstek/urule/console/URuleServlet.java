@@ -35,12 +35,15 @@ public class URuleServlet extends HttpServlet {
       for(ServletHandler var4 : ServiceLoader.load(ServletHandler.class)) {
          var4.init();
          String var5 = var4.url();
-         if (this.c.containsKey(var5) && this.d.containsKey(var5)) {
+         if (var4 instanceof ApiServletHandler && ((ApiServletHandler)var4).useApiPrefix()) {
+            var5 = "/api" + var5;
+         }
+
+         if (this.c.containsKey(var5) || this.d.containsKey(var5)) {
             throw new RuntimeException("Handler [" + var5 + "] not unique.");
          }
 
          if (var4 instanceof ApiServletHandler) {
-            var5 = "/api" + var5;
             this.c.put(var5, var4);
          } else {
             if (!(var4 instanceof AnonymousServletHandler)) {
@@ -50,6 +53,14 @@ public class URuleServlet extends HttpServlet {
             this.d.put(var5, var4);
          }
       }
+
+      ServletHandler var6 = new com.bstek.urule.console.admin.license.LicenseServletHandler();
+      var6.init();
+      String var7 = var6.url();
+      if (this.c.containsKey(var7) || this.d.containsKey(var7)) {
+         throw new RuntimeException("Handler [" + var7 + "] not unique.");
+      }
+      this.c.put(var7, var6);
 
       this.b = new PageServletHandler();
       this.b.init();

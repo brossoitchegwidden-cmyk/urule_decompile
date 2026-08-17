@@ -22,6 +22,14 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class ApiServletHandler extends BaseServletHandler {
    protected static final String a = "/api";
 
+   public boolean useApiPrefix() {
+      return true;
+   }
+
+   protected boolean handleUnauthenticated(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
+      return false;
+   }
+
    public final void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
       this.b(var1);
       String var3 = var1.getContextPath() + "/urule";
@@ -49,7 +57,9 @@ public abstract class ApiServletHandler extends BaseServletHandler {
       if (var5 != null) {
          this.a(var4, var2, var3);
       } else if (SecurityUtils.getLoginUser(var2) == null) {
-         throw new InfoException("请先登录<br/>Please Login first! ");
+         if (!this.handleUnauthenticated(var2, var3)) {
+            throw new InfoException("请先登录<br/>Please Login first! ");
+         }
       } else {
          User var6 = SecurityUtils.getLoginUser(var2);
          URuleAuthorization var7 = (URuleAuthorization)var4.getAnnotation(URuleAuthorization.class);
