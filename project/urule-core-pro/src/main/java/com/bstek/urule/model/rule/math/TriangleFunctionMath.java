@@ -13,44 +13,44 @@ public class TriangleFunctionMath implements MathSign {
    private Value value;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.value, context, factMap);
       if (this.name.equals("sin")) {
-         double var16 = Math.sin(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var16).stripTrailingZeros();
+         double doubleValue = Math.sin(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue).stripTrailingZeros();
       } else if (this.name.equals("cos")) {
-         double var15 = Math.cos(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var15).stripTrailingZeros();
+         double doubleValue2 = Math.cos(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue2).stripTrailingZeros();
       } else if (this.name.equals("tan")) {
-         double var14 = Math.tan(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var14).stripTrailingZeros();
+         double doubleValue3 = Math.tan(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue3).stripTrailingZeros();
       } else if (this.name.equals("cot")) {
-         double var13 = 1.0 / Math.tan(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var13).stripTrailingZeros();
+         double doubleValue4 = 1.0 / Math.tan(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue4).stripTrailingZeros();
       } else if (this.name.equals("sec")) {
-         double var12 = 1.0 / Math.cos(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var12).stripTrailingZeros();
+         double doubleValue5 = 1.0 / Math.cos(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue5).stripTrailingZeros();
       } else if (this.name.equals("csc")) {
-         double var11 = 1.0 / Math.sin(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var11).stripTrailingZeros();
+         double doubleValue6 = 1.0 / Math.sin(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue6).stripTrailingZeros();
       } else if (this.name.equals("arcsin")) {
-         double var10 = Math.asin(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var10).stripTrailingZeros();
+         double doubleValue7 = Math.asin(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue7).stripTrailingZeros();
       } else if (this.name.equals("arccos")) {
-         double var9 = Math.acos(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var9).stripTrailingZeros();
+         double doubleValue8 = Math.acos(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue8).stripTrailingZeros();
       } else if (this.name.equals("arctan")) {
-         double var8 = Math.atan(Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var8).stripTrailingZeros();
+         double doubleValue9 = Math.atan(Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue9).stripTrailingZeros();
       } else if (this.name.equals("arccot")) {
-         double var7 = Math.atan(1.0 / Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var7).stripTrailingZeros();
+         double doubleValue10 = Math.atan(1.0 / Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue10).stripTrailingZeros();
       } else if (this.name.equals("arcsec")) {
-         double var6 = Math.acos(1.0 / Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var6).stripTrailingZeros();
+         double doubleValue11 = Math.acos(1.0 / Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue11).stripTrailingZeros();
       } else if (this.name.equals("arccsc")) {
-         double var4 = Math.asin(1.0 / Utils.toBigDecimal(var3).doubleValue());
-         return new BigDecimal(var4).stripTrailingZeros();
+         double doubleValue12 = Math.asin(1.0 / Utils.toBigDecimal(objectValue).doubleValue());
+         return new BigDecimal(doubleValue12).stripTrailingZeros();
       } else {
          throw new RuleException("Unknow triangle function name :" + this.name + "");
       }
@@ -60,22 +60,22 @@ public class TriangleFunctionMath implements MathSign {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Triangle" : "三角函数";
-      return "[" + var1 + "(" + this.name + ")](" + this.value.getId() + ")";
+      String text = LocaleHolder.isEnglish() ? "Triangle" : "三角函数";
+      return "[" + text + "(" + this.name + ")](" + this.value.getId() + ")";
    }
 
    @Override

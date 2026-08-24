@@ -41,240 +41,240 @@ import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.dom4j.Document;
 
 public class DecisionTableExcelBuilder {
-   private ExcelSupport a = new ExcelSupport();
-   private DecisionTableDeserializer b = (DecisionTableDeserializer)Utils.getApplicationContext().getBean("urule.decisionTableDeserializer");
+   private ExcelSupport excelSupport = new ExcelSupport();
+   private DecisionTableDeserializer decisionTableDeserializer = (DecisionTableDeserializer)Utils.getApplicationContext().getBean("urule.decisionTableDeserializer");
 
-   public DecisionTable buildTable(String var1) {
+   public DecisionTable buildTable(String content) {
       try {
-         Document var2 = DocumentHelper.parseText(var1);
-         return this.b.deserialize(var2.getRootElement());
-      } catch (Exception var3) {
-         throw new InfoException(var3);
+         Document text = DocumentHelper.parseText(content);
+         return this.decisionTableDeserializer.deserialize(text.getRootElement());
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
 
-   public void buildExcel(DecisionTable var1, OutputStream var2) throws IOException {
-      SXSSFWorkbook var3 = new SXSSFWorkbook(100000);
-      SXSSFSheet var4 = var3.createSheet();
-      int var5 = 0;
-      SXSSFRow var6 = var4.createRow(0);
-      CellStyle var7 = var3.createCellStyle();
-      var7.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-      var7.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var7.setBorderBottom(BorderStyle.THIN);
-      var7.setBorderLeft(BorderStyle.THIN);
-      var7.setBorderRight(BorderStyle.THIN);
-      var7.setBorderTop(BorderStyle.THIN);
-      Font var8 = var3.createFont();
-      var8.setBold(true);
-      var7.setFont(var8);
-      CellStyle var9 = var3.createCellStyle();
-      var9.setFillForegroundColor(IndexedColors.ORCHID.getIndex());
-      var9.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var9.setBorderBottom(BorderStyle.THIN);
-      var9.setBorderLeft(BorderStyle.THIN);
-      var9.setBorderRight(BorderStyle.THIN);
-      var9.setBorderTop(BorderStyle.THIN);
-      var8 = var3.createFont();
-      var8.setBold(true);
-      var9.setFont(var8);
-      CellStyle var10 = var3.createCellStyle();
-      var10.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-      var10.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var10.setBorderBottom(BorderStyle.THIN);
-      var10.setBorderLeft(BorderStyle.THIN);
-      var10.setBorderRight(BorderStyle.THIN);
-      var10.setBorderTop(BorderStyle.THIN);
-      var8 = var3.createFont();
-      var8.setBold(true);
-      var10.setFont(var8);
-      CellStyle var11 = var3.createCellStyle();
-      var11.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
-      var11.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var11.setBorderBottom(BorderStyle.THIN);
-      var11.setBorderLeft(BorderStyle.THIN);
-      var11.setBorderRight(BorderStyle.THIN);
-      var11.setBorderTop(BorderStyle.THIN);
-      var8 = var3.createFont();
-      var8.setBold(true);
-      var8.setColor(IndexedColors.WHITE.getIndex());
-      var11.setFont(var8);
-      CellStyle var12 = var3.createCellStyle();
-      var12.setVerticalAlignment(VerticalAlignment.CENTER);
-      var12.setBorderBottom(BorderStyle.THIN);
-      var12.setBorderLeft(BorderStyle.THIN);
-      var12.setBorderRight(BorderStyle.THIN);
-      var12.setBorderTop(BorderStyle.THIN);
-      var12.setWrapText(true);
-      SXSSFDrawing var13 = var4.createDrawingPatriarch();
+   public void buildExcel(DecisionTable table, OutputStream outputStream) throws IOException {
+      SXSSFWorkbook sXSSFWorkbook = new SXSSFWorkbook(100000);
+      SXSSFSheet sheet = sXSSFWorkbook.createSheet();
+      int number = 0;
+      SXSSFRow row = sheet.createRow(0);
+      CellStyle cellStyle = sXSSFWorkbook.createCellStyle();
+      cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+      cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle.setBorderBottom(BorderStyle.THIN);
+      cellStyle.setBorderLeft(BorderStyle.THIN);
+      cellStyle.setBorderRight(BorderStyle.THIN);
+      cellStyle.setBorderTop(BorderStyle.THIN);
+      Font font = sXSSFWorkbook.createFont();
+      font.setBold(true);
+      cellStyle.setFont(font);
+      CellStyle cellStyle2 = sXSSFWorkbook.createCellStyle();
+      cellStyle2.setFillForegroundColor(IndexedColors.ORCHID.getIndex());
+      cellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle2.setBorderBottom(BorderStyle.THIN);
+      cellStyle2.setBorderLeft(BorderStyle.THIN);
+      cellStyle2.setBorderRight(BorderStyle.THIN);
+      cellStyle2.setBorderTop(BorderStyle.THIN);
+      font = sXSSFWorkbook.createFont();
+      font.setBold(true);
+      cellStyle2.setFont(font);
+      CellStyle cellStyle3 = sXSSFWorkbook.createCellStyle();
+      cellStyle3.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+      cellStyle3.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle3.setBorderBottom(BorderStyle.THIN);
+      cellStyle3.setBorderLeft(BorderStyle.THIN);
+      cellStyle3.setBorderRight(BorderStyle.THIN);
+      cellStyle3.setBorderTop(BorderStyle.THIN);
+      font = sXSSFWorkbook.createFont();
+      font.setBold(true);
+      cellStyle3.setFont(font);
+      CellStyle cellStyle4 = sXSSFWorkbook.createCellStyle();
+      cellStyle4.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+      cellStyle4.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle4.setBorderBottom(BorderStyle.THIN);
+      cellStyle4.setBorderLeft(BorderStyle.THIN);
+      cellStyle4.setBorderRight(BorderStyle.THIN);
+      cellStyle4.setBorderTop(BorderStyle.THIN);
+      font = sXSSFWorkbook.createFont();
+      font.setBold(true);
+      font.setColor(IndexedColors.WHITE.getIndex());
+      cellStyle4.setFont(font);
+      CellStyle cellStyle5 = sXSSFWorkbook.createCellStyle();
+      cellStyle5.setVerticalAlignment(VerticalAlignment.CENTER);
+      cellStyle5.setBorderBottom(BorderStyle.THIN);
+      cellStyle5.setBorderLeft(BorderStyle.THIN);
+      cellStyle5.setBorderRight(BorderStyle.THIN);
+      cellStyle5.setBorderTop(BorderStyle.THIN);
+      cellStyle5.setWrapText(true);
+      SXSSFDrawing drawingPatriarch = sheet.createDrawingPatriarch();
 
-      for(Column var15 : var1.getColumns()) {
-         double var16 = (double)var15.getWidth() * 1.3281472327365;
-         Double var18 = (double)256.0F * (var16 / (double)7.0F);
-         Cell var19 = var6.createCell(var5);
-         if (ColumnType.ExecuteMethod == var15.getType()) {
-            var19.setCellStyle(var9);
-            var19.setCellValue("ExecuteMethod");
-            XSSFComment var20 = (XSSFComment)var13.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)var15.getNum(), 0, (short)var15.getNum() + 1, 2));
-            var20.setString("执行方法");
-            var19.setCellComment(var20);
-         } else if (ColumnType.ConsolePrint == var15.getType()) {
-            var19.setCellStyle(var7);
-            var19.setCellValue("控制台输出");
-            XSSFComment var32 = (XSSFComment)var13.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)var15.getNum(), 0, (short)var15.getNum() + 1, 2));
-            var32.setString("out");
-            var19.setCellComment(var32);
-         } else if (ColumnType.Assignment == var15.getType()) {
-            var19.setCellStyle(var10);
-            if (var15.isPredefine()) {
-               String var33 = var15.getPredefineName();
-               if (StringUtils.isNotBlank(var15.getPredefinePropertyLabel())) {
-                  var33 = var33 + "." + var15.getPredefinePropertyLabel();
+      for(Column column : table.getColumns()) {
+         double doubleValue = (double)column.getWidth() * 1.3281472327365;
+         Double doubleValue2 = (double)256.0F * (doubleValue / (double)7.0F);
+         Cell cell = row.createCell(number);
+         if (ColumnType.ExecuteMethod == column.getType()) {
+            cell.setCellStyle(cellStyle2);
+            cell.setCellValue("ExecuteMethod");
+            XSSFComment cellComment = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)column.getNum(), 0, (short)column.getNum() + 1, 2));
+            cellComment.setString("执行方法");
+            cell.setCellComment(cellComment);
+         } else if (ColumnType.ConsolePrint == column.getType()) {
+            cell.setCellStyle(cellStyle);
+            cell.setCellValue("控制台输出");
+            XSSFComment xSSFComment = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)column.getNum(), 0, (short)column.getNum() + 1, 2));
+            xSSFComment.setString("out");
+            cell.setCellComment(xSSFComment);
+         } else if (ColumnType.Assignment == column.getType()) {
+            cell.setCellStyle(cellStyle3);
+            if (column.isPredefine()) {
+               String predefineName = column.getPredefineName();
+               if (StringUtils.isNotBlank(column.getPredefinePropertyLabel())) {
+                  predefineName = predefineName + "." + column.getPredefinePropertyLabel();
                }
 
-               var19.setCellValue(var33);
-               XSSFComment var21 = (XSSFComment)var13.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)var15.getNum(), 0, (short)var15.getNum() + 1, 2));
-               var21.setString("赋值:预定义变量");
-               var19.setCellComment(var21);
+               cell.setCellValue(predefineName);
+               XSSFComment xSSFComment2 = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)column.getNum(), 0, (short)column.getNum() + 1, 2));
+               xSSFComment2.setString("赋值:预定义变量");
+               cell.setCellComment(xSSFComment2);
             } else {
-               if (ExcelSupport.isParameter(var15.getVariableCategory())) {
-                  var19.setCellValue(this.a(var15));
+               if (ExcelSupport.isParameter(column.getVariableCategory())) {
+                  cell.setCellValue(this.formatParameterColumnLabel(column));
                } else {
-                  var19.setCellValue(var15.getVariableCategory() + "." + var15.getVariableLabel());
+                  cell.setCellValue(column.getVariableCategory() + "." + column.getVariableLabel());
                }
 
-               XSSFComment var34 = (XSSFComment)var13.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, (short)var15.getNum(), 0, (short)var15.getNum() + 1, 2));
-               var34.setString("赋值");
-               var19.setCellComment(var34);
+               XSSFComment xSSFComment3 = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, (short)column.getNum(), 0, (short)column.getNum() + 1, 2));
+               xSSFComment3.setString("赋值");
+               cell.setCellComment(xSSFComment3);
             }
          } else {
-            var19.setCellStyle(var11);
-            if (ExcelSupport.isParameter(var15.getVariableCategory())) {
-               var19.setCellValue(this.a(var15));
+            cell.setCellStyle(cellStyle4);
+            if (ExcelSupport.isParameter(column.getVariableCategory())) {
+               cell.setCellValue(this.formatParameterColumnLabel(column));
             } else {
-               var19.setCellValue(var15.getVariableCategory() + "." + var15.getVariableLabel());
+               cell.setCellValue(column.getVariableCategory() + "." + column.getVariableLabel());
             }
 
-            if (var15.isPredefine()) {
-               String var35 = var15.getPredefineName();
-               if (StringUtils.isNotBlank(var15.getPredefinePropertyLabel())) {
-                  var35 = var35 + "." + var15.getPredefinePropertyLabel();
+            if (column.isPredefine()) {
+               String predefineName2 = column.getPredefineName();
+               if (StringUtils.isNotBlank(column.getPredefinePropertyLabel())) {
+                  predefineName2 = predefineName2 + "." + column.getPredefinePropertyLabel();
                }
 
-               var19.setCellValue(var35);
-               XSSFComment var38 = (XSSFComment)var13.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)var15.getNum(), 0, (short)var15.getNum() + 1, 2));
-               var38.setString("条件:预定义变量");
-               var19.setCellComment(var38);
+               cell.setCellValue(predefineName2);
+               XSSFComment xSSFComment4 = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)column.getNum(), 0, (short)column.getNum() + 1, 2));
+               xSSFComment4.setString("条件:预定义变量");
+               cell.setCellComment(xSSFComment4);
             } else {
-               XSSFComment var36 = (XSSFComment)var13.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)var15.getNum(), 0, (short)var15.getNum() + 1, 2));
-               var36.setString("条件");
-               var19.setCellComment(var36);
+               XSSFComment xSSFComment5 = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 100, 100, (short)column.getNum(), 0, (short)column.getNum() + 1, 2));
+               xSSFComment5.setString("条件");
+               cell.setCellComment(xSSFComment5);
             }
          }
 
-         var4.setColumnWidth(var5++, Math.min(var18.intValue(), 65280));
+         sheet.setColumnWidth(number++, Math.min(doubleValue2.intValue(), 65280));
       }
 
-      int var27 = 0;
+      int number2 = 0;
 
-      for(Row var29 : var1.getRows()) {
-         SXSSFRow var17 = var4.createRow(var27 + 1);
-         var17.setHeight((short)(var29.getHeight() * 20));
-         var5 = 0;
+      for(Row row2 : table.getRows()) {
+         SXSSFRow row3 = sheet.createRow(number2 + 1);
+         row3.setHeight((short)(row2.getHeight() * 20));
+         number = 0;
 
-         for(Column var31 : var1.getColumns()) {
-            com.bstek.urule.model.table.Cell var37 = (com.bstek.urule.model.table.Cell)var1.getCellMap().get(var27 + "," + var5);
-            if (var37 != null) {
-               if (var37.getRowspan() > 1) {
-                  CellRangeAddress var39 = new CellRangeAddress(var37.getRow() + 1, var37.getRow() + var37.getRowspan(), var31.getNum(), var31.getNum());
-                  var4.addMergedRegion(var39);
-                  RegionUtil.setBorderTop(BorderStyle.THIN, var39, var4);
-                  RegionUtil.setBorderBottom(BorderStyle.THIN, var39, var4);
-                  RegionUtil.setBorderLeft(BorderStyle.THIN, var39, var4);
-                  RegionUtil.setBorderRight(BorderStyle.THIN, var39, var4);
+         for(Column column2 : table.getColumns()) {
+            com.bstek.urule.model.table.Cell cell2 = (com.bstek.urule.model.table.Cell)table.getCellMap().get(number2 + "," + number);
+            if (cell2 != null) {
+               if (cell2.getRowspan() > 1) {
+                  CellRangeAddress cellRangeAddress = new CellRangeAddress(cell2.getRow() + 1, cell2.getRow() + cell2.getRowspan(), column2.getNum(), column2.getNum());
+                  sheet.addMergedRegion(cellRangeAddress);
+                  RegionUtil.setBorderTop(BorderStyle.THIN, cellRangeAddress, sheet);
+                  RegionUtil.setBorderBottom(BorderStyle.THIN, cellRangeAddress, sheet);
+                  RegionUtil.setBorderLeft(BorderStyle.THIN, cellRangeAddress, sheet);
+                  RegionUtil.setBorderRight(BorderStyle.THIN, cellRangeAddress, sheet);
                }
 
-               Cell var40 = var17.createCell(var5);
-               var40.setCellStyle(var12);
-               if (ColumnType.Criteria == var31.getType()) {
-                  if (var37.getJoint() == null || var37.getJoint().getConditions() == null || var37.getJoint().getConditions().size() == 0) {
-                     var40.setCellValue("");
-                     ++var5;
+               Cell cell3 = row3.createCell(number);
+               cell3.setCellStyle(cellStyle5);
+               if (ColumnType.Criteria == column2.getType()) {
+                  if (cell2.getJoint() == null || cell2.getJoint().getConditions() == null || cell2.getJoint().getConditions().size() == 0) {
+                     cell3.setCellValue("");
+                     ++number;
                      continue;
                   }
 
-                  String var22 = ExcelExportUtils.conditions2Label(this.a, var37.getJoint().getConditions(), var37.getJoint().getType());
-                  var40.setCellValue(var22);
-               } else if (ColumnType.Assignment == var31.getType()) {
-                  if (var37.getValue() != null) {
-                     var40.setCellValue(ExcelExportUtils.getLabelValue(this.a, (Condition)null, var37.getValue()));
+                  String text = ExcelExportUtils.conditions2Label(this.excelSupport, cell2.getJoint().getConditions(), cell2.getJoint().getType());
+                  cell3.setCellValue(text);
+               } else if (ColumnType.Assignment == column2.getType()) {
+                  if (cell2.getValue() != null) {
+                     cell3.setCellValue(ExcelExportUtils.getLabelValue(this.excelSupport, (Condition)null, cell2.getValue()));
                   }
-               } else if (ColumnType.ConsolePrint == var31.getType()) {
-                  if (var37.getValue() != null) {
-                     var40.setCellValue(ExcelExportUtils.getLabelValue(this.a, (Condition)null, var37.getValue()));
+               } else if (ColumnType.ConsolePrint == column2.getType()) {
+                  if (cell2.getValue() != null) {
+                     cell3.setCellValue(ExcelExportUtils.getLabelValue(this.excelSupport, (Condition)null, cell2.getValue()));
                   }
-               } else if (ColumnType.ExecuteMethod == var31.getType() && var37.getAction() != null) {
-                  var40.setCellValue(this.a(var37.getAction()));
+               } else if (ColumnType.ExecuteMethod == column2.getType() && cell2.getAction() != null) {
+                  cell3.setCellValue(this.formatActionLabel(cell2.getAction()));
                }
             }
 
-            ++var5;
+            ++number;
          }
 
-         ++var27;
+         ++number2;
       }
 
-      if (var1.getPredefineGroup() != null && var1.getPredefineGroup().getPredefines().size() > 0) {
-         ExcelExportUtils.exportPredefine(var3, var1.getPredefineGroup(), this.a);
+      if (table.getPredefineGroup() != null && table.getPredefineGroup().getPredefines().size() > 0) {
+         ExcelExportUtils.exportPredefine(sXSSFWorkbook, table.getPredefineGroup(), this.excelSupport);
       }
 
-      ExcelExportUtils.exportProperties(var3, var1);
-      var3.write(var2);
+      ExcelExportUtils.exportProperties(sXSSFWorkbook, table);
+      sXSSFWorkbook.write(outputStream);
    }
 
-   private String a(Column var1) {
-      if (StringUtils.isNotBlank(var1.getKeyCategoryUuid())) {
-         Variable var2 = null;
-         VariableCategory var3 = this.a.findVariableCategoryByUUID(var1.getKeyCategoryUuid());
-         if (var3 != null) {
-            var2 = (Variable)var3.getVariableNames().get(var1.getVariableName());
+   private String formatParameterColumnLabel(Column column) {
+      if (StringUtils.isNotBlank(column.getKeyCategoryUuid())) {
+         Variable variable = null;
+         VariableCategory variableCategoryByUUID = this.excelSupport.findVariableCategoryByUUID(column.getKeyCategoryUuid());
+         if (variableCategoryByUUID != null) {
+            variable = (Variable)variableCategoryByUUID.getVariableNames().get(column.getVariableName());
          }
 
-         if (var2 != null) {
-            return "参数." + var1.getKeyLabel() + "." + var2.getLabel();
+         if (variable != null) {
+            return "参数." + column.getKeyLabel() + "." + variable.getLabel();
          }
       }
 
-      return "参数." + var1.getVariableLabel();
+      return "参数." + column.getVariableLabel();
    }
 
-   private String a(Action var1) {
-      String var2 = "";
-      if (var1 instanceof ConsolePrintAction) {
-         ConsolePrintAction var3 = (ConsolePrintAction)var1;
-         var2 = var3.getValue() != null ? var3.getValue().toString() : "";
-      } else if (var1 instanceof ExecuteCommonFunctionAction) {
-         ExecuteCommonFunctionAction var5 = (ExecuteCommonFunctionAction)var1;
-         var2 = var5.getLabel();
-      } else if (var1 instanceof ExecuteMethodAction) {
-         ExecuteMethodAction var6 = (ExecuteMethodAction)var1;
-         var2 = var6.getBeanLabel() + "." + var6.getMethodLabel();
-      } else if (var1 instanceof ScoringAction) {
-         ScoringAction var7 = (ScoringAction)var1;
-         var2 = var7.getName();
-      } else if (var1 instanceof ScoringAction) {
-         ScoringAction var8 = (ScoringAction)var1;
-         var2 = var8.getName();
-      } else if (var1 instanceof TemplateAction) {
-         TemplateAction var9 = (TemplateAction)var1;
-         var2 = var9.getName();
-      } else if (var1 instanceof VariableAssignAction) {
-         VariableAssignAction var10 = (VariableAssignAction)var1;
-         var2 = var10.getVariableCategory() + "." + var10.getVariableLabel();
+   private String formatActionLabel(Action action) {
+      String text = "";
+      if (action instanceof ConsolePrintAction) {
+         ConsolePrintAction consolePrintAction = (ConsolePrintAction)action;
+         text = consolePrintAction.getValue() != null ? consolePrintAction.getValue().toString() : "";
+      } else if (action instanceof ExecuteCommonFunctionAction) {
+         ExecuteCommonFunctionAction executeCommonFunctionAction = (ExecuteCommonFunctionAction)action;
+         text = executeCommonFunctionAction.getLabel();
+      } else if (action instanceof ExecuteMethodAction) {
+         ExecuteMethodAction executeMethodAction = (ExecuteMethodAction)action;
+         text = executeMethodAction.getBeanLabel() + "." + executeMethodAction.getMethodLabel();
+      } else if (action instanceof ScoringAction) {
+         ScoringAction scoringAction = (ScoringAction)action;
+         text = scoringAction.getName();
+      } else if (action instanceof ScoringAction) {
+         ScoringAction scoringAction2 = (ScoringAction)action;
+         text = scoringAction2.getName();
+      } else if (action instanceof TemplateAction) {
+         TemplateAction templateAction = (TemplateAction)action;
+         text = templateAction.getName();
+      } else if (action instanceof VariableAssignAction) {
+         VariableAssignAction variableAssignAction = (VariableAssignAction)action;
+         text = variableAssignAction.getVariableCategory() + "." + variableAssignAction.getVariableLabel();
       } else {
-         var2 = "";
+         text = "";
       }
 
-      return var2;
+      return text;
    }
 }

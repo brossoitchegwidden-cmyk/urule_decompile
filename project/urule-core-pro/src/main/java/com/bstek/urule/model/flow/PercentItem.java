@@ -10,31 +10,31 @@ public class PercentItem {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public long getPercent() {
       return this.percent;
    }
 
-   public void setPercent(long var1) {
-      this.percent = var1;
+   public void setPercent(long percent) {
+      this.percent = percent;
    }
 
    public long getTotal() {
       return this.total;
    }
 
-   public void setTotal(long var1) {
-      this.total = var1;
+   public void setTotal(long total) {
+      this.total = total;
    }
 
    public DecisionItem getItem() {
       return this.item;
    }
 
-   public void setItem(DecisionItem var1) {
-      this.item = var1;
+   public void setItem(DecisionItem item) {
+      this.item = item;
    }
 }

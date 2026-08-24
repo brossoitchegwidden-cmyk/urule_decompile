@@ -12,31 +12,31 @@ public class ExprValue {
       return this.total;
    }
 
-   public void setTotal(int var1) {
-      this.total = var1;
+   public void setTotal(int total) {
+      this.total = total;
    }
 
    public int getMatch() {
       return this.match;
    }
 
-   public void setMatch(int var1) {
-      this.match = var1;
+   public void setMatch(int match) {
+      this.match = match;
    }
 
    public int getNotMatch() {
       return this.notMatch;
    }
 
-   public void setNotMatch(int var1) {
-      this.notMatch = var1;
+   public void setNotMatch(int notMatch) {
+      this.notMatch = notMatch;
    }
 
    public List<Object> getFacts() {
       return this.facts;
    }
 
-   public void setFacts(List<Object> var1) {
-      this.facts = var1;
+   public void setFacts(List<Object> facts) {
+      this.facts = facts;
    }
 }

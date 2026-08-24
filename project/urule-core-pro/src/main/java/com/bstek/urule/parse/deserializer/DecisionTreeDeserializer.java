@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class DecisionTreeDeserializer implements Deserializer<DecisionTree> {
    public static final String BEAN_ID = "urule.decisionTreeDeserializer";
-   private DecisionTreeParser a;
+   private DecisionTreeParser decisionTreeParser;
 
-   public DecisionTree deserialize(Element var1) {
-      return this.a.parse(var1);
+   public DecisionTree deserialize(Element root) {
+      return this.decisionTreeParser.parse(root);
    }
 
-   public void setDecisionTreeParser(DecisionTreeParser var1) {
-      this.a = var1;
+   public void setDecisionTreeParser(DecisionTreeParser decisionTreeParser) {
+      this.decisionTreeParser = decisionTreeParser;
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.decisionTreeParser.support(root.getName());
    }
 }

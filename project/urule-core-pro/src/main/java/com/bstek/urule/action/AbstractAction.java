@@ -1,24 +1,24 @@
 package com.bstek.urule.action;
 
 public abstract class AbstractAction implements Action {
-   private int b;
-   protected boolean a;
+   private int priority;
+   protected boolean debug;
 
-   public int compareTo(Action var1) {
-      return var1.getPriority() - this.b;
+   public int compareTo(Action action) {
+      return action.getPriority() - this.priority;
    }
 
    @Override
    public int getPriority() {
-      return this.b;
+      return this.priority;
    }
 
    @Override
-   public void setDebug(boolean var1) {
-      this.a = var1;
+   public void setDebug(boolean debug) {
+      this.debug = debug;
    }
 
-   public void setPriority(int var1) {
-      this.b = var1;
+   public void setPriority(int priority) {
+      this.priority = priority;
    }
 }

@@ -12,37 +12,37 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class ActionTreeNodeParser implements Parser<ActionTreeNode>, ApplicationContextAware {
-   private Collection<ActionParser> a;
+   private Collection<ActionParser> actionParsers;
 
-   public ActionTreeNode parse(Element var1) {
-      ActionTreeNode var2 = new ActionTreeNode();
-      var2.setNodeType(TreeNodeType.action);
-      ArrayList var3 = new ArrayList();
+   public ActionTreeNode parse(Element element) {
+      ActionTreeNode actionTreeNode = new ActionTreeNode();
+      actionTreeNode.setNodeType(TreeNodeType.action);
+      ArrayList items = new ArrayList();
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            String var7 = var6.getName();
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for (ActionParser var9 : this.a) {
-               if (var9.support(var7)) {
-                  var3.add(var9.parse(var6));
+            for (ActionParser actionParser : this.actionParsers) {
+               if (actionParser.support(name)) {
+                  items.add(actionParser.parse(element2));
                   break;
                }
             }
          }
       }
 
-      var2.setActions(var3);
-      return var2;
+      actionTreeNode.setActions(items);
+      return actionTreeNode;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("action-tree-node");
+   public boolean support(String name) {
+      return name.equals("action-tree-node");
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.a = var1.getBeansOfType(ActionParser.class).values();
+   public void setApplicationContext(ApplicationContext context) throws BeansException {
+      this.actionParsers = context.getBeansOfType(ActionParser.class).values();
    }
 }

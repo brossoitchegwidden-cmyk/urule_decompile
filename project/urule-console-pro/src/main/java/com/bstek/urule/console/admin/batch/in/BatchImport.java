@@ -30,120 +30,120 @@ import org.dom4j.Element;
 public class BatchImport {
    public static final BatchImport ins = new BatchImport();
 
-   public void doImport(InputStream var1, Project var2) throws Exception {
-      byte[] var3 = IOUtils.toByteArray(var1);
-      String var4 = Utils.uncompress(var3);
-      Document var5 = DocumentHelper.parseText(var4);
-      Element var6 = var5.getRootElement();
-      if (!var6.getName().contentEquals("batchs")) {
+   public void doImport(InputStream inputStream, Project project) throws Exception {
+      byte[] bytes = IOUtils.toByteArray(inputStream);
+      String text2 = Utils.uncompress(bytes);
+      Document text = DocumentHelper.parseText(text2);
+      Element rootElement = text.getRootElement();
+      if (!rootElement.getName().contentEquals("batchs")) {
          throw new InfoException("文件不合法，不能导入，请选择一个URule Pro4+项目导出的备份文件");
       } else {
-         this.doImport(var6, var2);
+         this.doImport(rootElement, project);
       }
    }
 
-   public void doImport(Element var1, Project var2) throws Exception {
-      for(Object var4 : var1.elements()) {
-         if (var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            Batch var6 = new Batch();
-            var6.setName(var5.attributeValue("name"));
-            if (StringUtils.isBlank(var6.getName())) {
+   public void doImport(Element batchs, Project project) throws Exception {
+      for(Object objectValue : batchs.elements()) {
+         if (objectValue instanceof Element) {
+            Element element = (Element)objectValue;
+            Batch batch = new Batch();
+            batch.setName(element.attributeValue("name"));
+            if (StringUtils.isBlank(batch.getName())) {
                throw new InfoException("文件不合法，不能导入，请选择一个URule Pro4+项目导出的备份文件");
             }
 
-            String var7 = var6.getName();
-            List var8 = BatchManager.ins.createQuery().projectId(var2.getId()).list();
-            var7 = this.a(var8, var7);
-            var6.setName(var7);
-            User var9 = SecurityUtils.getLoginUser(RequestHolder.getRequest());
-            var6.setProjectId(var2.getId());
-            String var10 = this.a(var5, "desc");
-            var6.setDesc(var10);
-            var6.setSkipLimit(Integer.valueOf(var5.attributeValue("skip-limit")));
-            var6.setAsync(Boolean.valueOf(var5.attributeValue("async")));
-            var6.setCallbackUrl(var5.attributeValue("callback-url"));
-            var6.setListener(var5.attributeValue("listener"));
-            var6.setThreadMulti(Boolean.valueOf(var5.attributeValue("thread-multi")));
-            var6.setThreadSize(Integer.valueOf(var5.attributeValue("thread-size")));
-            var6.setThreadDataSize(Integer.valueOf(var5.attributeValue("thread-data-size")));
-            var6.setPacketId(Long.valueOf(var5.attributeValue("packet-id")));
-            var6.setProviderId(Long.valueOf(var5.attributeValue("provider-id")));
-            var6.setResolverId(Long.valueOf(var5.attributeValue("resolver-id")));
-            var6.setPacketInputData(this.a(var5, "packet-input-data"));
-            var6.setRestEnable(Boolean.valueOf(var5.attributeValue("rest-enable")));
-            var6.setRestSecurityEnable(Boolean.valueOf(var5.attributeValue("rest-security-enable")));
-            var6.setRestSecurityUser(var5.attributeValue("rest-security-user"));
-            var6.setRestSecurityPassword(var5.attributeValue("rest-security-password"));
-            var6.setInputData(this.a(var5, "input-data"));
+            String name = batch.getName();
+            List items = BatchManager.ins.createQuery().projectId(project.getId()).list();
+            name = this.ensureUniqueBatchName(items, name);
+            batch.setName(name);
+            User loginUser = SecurityUtils.getLoginUser(RequestHolder.getRequest());
+            batch.setProjectId(project.getId());
+            String text = this.readEncodedChild(element, "desc");
+            batch.setDesc(text);
+            batch.setSkipLimit(Integer.valueOf(element.attributeValue("skip-limit")));
+            batch.setAsync(Boolean.valueOf(element.attributeValue("async")));
+            batch.setCallbackUrl(element.attributeValue("callback-url"));
+            batch.setListener(element.attributeValue("listener"));
+            batch.setThreadMulti(Boolean.valueOf(element.attributeValue("thread-multi")));
+            batch.setThreadSize(Integer.valueOf(element.attributeValue("thread-size")));
+            batch.setThreadDataSize(Integer.valueOf(element.attributeValue("thread-data-size")));
+            batch.setPacketId(Long.valueOf(element.attributeValue("packet-id")));
+            batch.setProviderId(Long.valueOf(element.attributeValue("provider-id")));
+            batch.setResolverId(Long.valueOf(element.attributeValue("resolver-id")));
+            batch.setPacketInputData(this.readEncodedChild(element, "packet-input-data"));
+            batch.setRestEnable(Boolean.valueOf(element.attributeValue("rest-enable")));
+            batch.setRestSecurityEnable(Boolean.valueOf(element.attributeValue("rest-security-enable")));
+            batch.setRestSecurityUser(element.attributeValue("rest-security-user"));
+            batch.setRestSecurityPassword(element.attributeValue("rest-security-password"));
+            batch.setInputData(this.readEncodedChild(element, "input-data"));
 
-            for(Object var12 : var5.elements()) {
-               if (var12 instanceof Element) {
-                  Element var13 = (Element)var12;
-                  if (var13.getName().contentEquals("provider")) {
-                     BatchDataProvider var14 = new BatchDataProvider();
-                     var6.setDataProvider(var14);
-                     this.a(var13, var14);
-                  } else if (var13.getName().contentEquals("resolver")) {
-                     BatchDataResolver var16 = new BatchDataResolver();
-                     var6.setDataResolver(var16);
-                     this.a(var13, var16);
+            for(Object objectValue2 : element.elements()) {
+               if (objectValue2 instanceof Element) {
+                  Element element2 = (Element)objectValue2;
+                  if (element2.getName().contentEquals("provider")) {
+                     BatchDataProvider batchDataProvider = new BatchDataProvider();
+                     batch.setDataProvider(batchDataProvider);
+                     this.importProvider(element2, batchDataProvider);
+                  } else if (element2.getName().contentEquals("resolver")) {
+                     BatchDataResolver batchDataResolver = new BatchDataResolver();
+                     batch.setDataResolver(batchDataResolver);
+                     this.importResolver(element2, batchDataResolver);
                   }
                }
             }
 
-            SchemeService.ins.add(var6, var9.getName());
+            SchemeService.ins.add(batch, loginUser.getName());
          }
       }
 
    }
 
-   private String a(List var1, String var2) {
-      for(int var3 = 0; var3 < 10000; ++var3) {
-         String var4 = var2;
-         if (var3 > 0) {
-            var4 = var2 + var3;
+   private String ensureUniqueBatchName(List items, String text) {
+      for(int index = 0; index < 10000; ++index) {
+         String text2 = text;
+         if (index > 0) {
+            text2 = text + index;
          }
 
-         boolean var5 = false;
+         boolean flag = false;
 
-         for(Batch var7 : (Iterable<Batch>)(Iterable<?>)(var1)) {
-            if (var7.getName().contentEquals(var4)) {
-               var5 = true;
+         for(Batch batch : (Iterable<Batch>)(Iterable<?>)(items)) {
+            if (batch.getName().contentEquals(text2)) {
+               flag = true;
                break;
             }
          }
 
-         if (!var5) {
-            var2 = var4;
+         if (!flag) {
+            text = text2;
             break;
          }
       }
 
-      return var2;
+      return text;
    }
 
-   private boolean a(Element var1, BatchDataProvider var2) {
-      var2.setName(var1.attributeValue("name"));
-      var2.setDatasourceId(Long.valueOf(var1.attributeValue("datasource-id")));
-      var2.setListener(var1.attributeValue("listener"));
-      var2.setDesc(this.a(var1, "desc"));
-      var2.setInputData(this.a(var1, "input-data"));
-      var2.setPacketVarName(var1.attributeValue("packet-var-name"));
-      var2.setSupportsPaging(Boolean.valueOf(var1.attributeValue("support-paging")));
-      var2.setPageSize(Integer.valueOf(var1.attributeValue("page-size")));
-      var2.setPageSql(this.a(var1, "page-sql"));
-      var2.setOrderField(var1.attributeValue("order-field"));
-      var2.setOrderFieldParamName(var1.attributeValue("order-field-param-name"));
-      var2.setPageLimitType(var1.attributeValue("page-limit-type"));
-      var2.setCountSql(this.a(var1, "count-sql"));
-      var2.setFilterData(this.a(var1, "filter-data"));
+   private boolean importProvider(Element element, BatchDataProvider batchDataProvider) {
+      batchDataProvider.setName(element.attributeValue("name"));
+      batchDataProvider.setDatasourceId(Long.valueOf(element.attributeValue("datasource-id")));
+      batchDataProvider.setListener(element.attributeValue("listener"));
+      batchDataProvider.setDesc(this.readEncodedChild(element, "desc"));
+      batchDataProvider.setInputData(this.readEncodedChild(element, "input-data"));
+      batchDataProvider.setPacketVarName(element.attributeValue("packet-var-name"));
+      batchDataProvider.setSupportsPaging(Boolean.valueOf(element.attributeValue("support-paging")));
+      batchDataProvider.setPageSize(Integer.valueOf(element.attributeValue("page-size")));
+      batchDataProvider.setPageSql(this.readEncodedChild(element, "page-sql"));
+      batchDataProvider.setOrderField(element.attributeValue("order-field"));
+      batchDataProvider.setOrderFieldParamName(element.attributeValue("order-field-param-name"));
+      batchDataProvider.setPageLimitType(element.attributeValue("page-limit-type"));
+      batchDataProvider.setCountSql(this.readEncodedChild(element, "count-sql"));
+      batchDataProvider.setFilterData(this.readEncodedChild(element, "filter-data"));
 
-      for(Object var4 : var1.elements()) {
-         if (var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().contentEquals("field")) {
-               this.b(var5, var2);
+      for(Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().contentEquals("field")) {
+               this.importProviderField(element2, batchDataProvider);
             }
          }
       }
@@ -151,24 +151,24 @@ public class BatchImport {
       return true;
    }
 
-   private void b(Element var1, BatchDataProvider var2) {
-      BatchDataProviderField var3 = new BatchDataProviderField();
-      var2.getFields().add(var3);
-      var3.setSrcProperty(var1.attributeValue("src-property"));
-      var3.setDataType(var1.attributeValue("data-type"));
-      var3.setClassPath(var1.attributeValue("classpath"));
-      var3.setDestProperty(var1.attributeValue("dest-property"));
-      String var4 = var1.attributeValue("provider-id");
-      if (StringUtils.isNotBlank(var4)) {
-         long var5 = Long.valueOf(var4);
-         if (var5 > 0L) {
-            for(Object var8 : var1.elements()) {
-               if (var8 instanceof Element) {
-                  Element var9 = (Element)var8;
-                  if (var9.getName().contentEquals("provider")) {
-                     BatchDataProvider var10 = new BatchDataProvider();
-                     var3.setDataProvider(var10);
-                     this.a(var9, var10);
+   private void importProviderField(Element element, BatchDataProvider batchDataProvider) {
+      BatchDataProviderField batchDataProviderField = new BatchDataProviderField();
+      batchDataProvider.getFields().add(batchDataProviderField);
+      batchDataProviderField.setSrcProperty(element.attributeValue("src-property"));
+      batchDataProviderField.setDataType(element.attributeValue("data-type"));
+      batchDataProviderField.setClassPath(element.attributeValue("classpath"));
+      batchDataProviderField.setDestProperty(element.attributeValue("dest-property"));
+      String text = element.attributeValue("provider-id");
+      if (StringUtils.isNotBlank(text)) {
+         long longValue = Long.valueOf(text);
+         if (longValue > 0L) {
+            for(Object objectValue : element.elements()) {
+               if (objectValue instanceof Element) {
+                  Element element2 = (Element)objectValue;
+                  if (element2.getName().contentEquals("provider")) {
+                     BatchDataProvider batchDataProvider2 = new BatchDataProvider();
+                     batchDataProviderField.setDataProvider(batchDataProvider2);
+                     this.importProvider(element2, batchDataProvider2);
                   }
                }
             }
@@ -177,19 +177,19 @@ public class BatchImport {
 
    }
 
-   private boolean a(Element var1, BatchDataResolver var2) {
-      var2.setName(var1.attributeValue("name"));
-      var2.setListener(var1.attributeValue("listener"));
-      var2.setTranScope(TranScope.valueOf(var1.attributeValue("tran-scope")));
-      var2.setFilterData(this.a(var1, "filter-data"));
-      var2.setDatasourceId(Long.valueOf(var1.attributeValue("datasource-id")));
-      var2.setDesc(this.a(var1, "desc"));
+   private boolean importResolver(Element element, BatchDataResolver batchDataResolver) {
+      batchDataResolver.setName(element.attributeValue("name"));
+      batchDataResolver.setListener(element.attributeValue("listener"));
+      batchDataResolver.setTranScope(TranScope.valueOf(element.attributeValue("tran-scope")));
+      batchDataResolver.setFilterData(this.readEncodedChild(element, "filter-data"));
+      batchDataResolver.setDatasourceId(Long.valueOf(element.attributeValue("datasource-id")));
+      batchDataResolver.setDesc(this.readEncodedChild(element, "desc"));
 
-      for(Object var4 : var1.elements()) {
-         if (var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().contentEquals("item")) {
-               this.b(var5, var2);
+      for(Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().contentEquals("item")) {
+               this.importResolverItem(element2, batchDataResolver);
             }
          }
       }
@@ -197,59 +197,59 @@ public class BatchImport {
       return true;
    }
 
-   private void b(Element var1, BatchDataResolver var2) {
-      BatchDataResolverItem var3 = new BatchDataResolverItem();
-      var2.getItems().add(var3);
-      var3.setName(var1.attributeValue("name"));
-      var3.setUpdateMode(BatchUpdateMode.valueOf(var1.attributeValue("update-mode")));
-      var3.setTableName(var1.attributeValue("table-name"));
-      var3.setFilterData(this.a(var1, "filter-data"));
-      var3.setPartitionName(var1.attributeValue("partition-name"));
-      var3.setPartitionValue(var1.attributeValue("partition-value"));
-      var3.setCommitLimit(Integer.parseInt(var1.attributeValue("commit-limit")));
-      var3.setDesc(this.a(var1, "desc"));
+   private void importResolverItem(Element element, BatchDataResolver batchDataResolver) {
+      BatchDataResolverItem batchDataResolverItem = new BatchDataResolverItem();
+      batchDataResolver.getItems().add(batchDataResolverItem);
+      batchDataResolverItem.setName(element.attributeValue("name"));
+      batchDataResolverItem.setUpdateMode(BatchUpdateMode.valueOf(element.attributeValue("update-mode")));
+      batchDataResolverItem.setTableName(element.attributeValue("table-name"));
+      batchDataResolverItem.setFilterData(this.readEncodedChild(element, "filter-data"));
+      batchDataResolverItem.setPartitionName(element.attributeValue("partition-name"));
+      batchDataResolverItem.setPartitionValue(element.attributeValue("partition-value"));
+      batchDataResolverItem.setCommitLimit(Integer.parseInt(element.attributeValue("commit-limit")));
+      batchDataResolverItem.setDesc(this.readEncodedChild(element, "desc"));
 
-      for(Object var5 : var1.elements()) {
-         if (var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            if (var6.getName().contentEquals("field")) {
-               this.a(var6, var3);
+      for(Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().contentEquals("field")) {
+               this.importResolverItemField(element2, batchDataResolverItem);
             }
          }
       }
 
    }
 
-   private void a(Element var1, BatchDataResolverItem var2) {
-      BatchDataResolverItemField var3 = new BatchDataResolverItemField();
-      var3.setSrcProperty(var1.attributeValue("src-property"));
-      var3.setKey(Boolean.valueOf(var1.attributeValue("key")));
-      var3.setDataType(var1.attributeValue("data-type"));
-      var3.setDestProperty(var1.attributeValue("dest-property"));
-      var2.getFields().add(var3);
+   private void importResolverItemField(Element element, BatchDataResolverItem batchDataResolverItem) {
+      BatchDataResolverItemField batchDataResolverItemField = new BatchDataResolverItemField();
+      batchDataResolverItemField.setSrcProperty(element.attributeValue("src-property"));
+      batchDataResolverItemField.setKey(Boolean.valueOf(element.attributeValue("key")));
+      batchDataResolverItemField.setDataType(element.attributeValue("data-type"));
+      batchDataResolverItemField.setDestProperty(element.attributeValue("dest-property"));
+      batchDataResolverItem.getFields().add(batchDataResolverItemField);
    }
 
-   private String a(Element var1, String var2) {
-      String var3 = null;
+   private String readEncodedChild(Element element, String text) {
+      String text2 = null;
 
-      for(Object var5 : var1.elements()) {
-         if (var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            if (var6.getName().contentEquals(var2)) {
-               var3 = var6.getText();
+      for(Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().contentEquals(text)) {
+               text2 = element2.getText();
                break;
             }
          }
       }
 
-      if (StringUtils.isNotBlank(var3)) {
+      if (StringUtils.isNotBlank(text2)) {
          try {
-            var3 = IOUtils.toString(Base64.getDecoder().decode(var3), "utf-8");
-         } catch (IOException var7) {
-            throw new RuleException(var7);
+            text2 = IOUtils.toString(Base64.getDecoder().decode(text2), "utf-8");
+         } catch (IOException iOException) {
+            throw new RuleException(iOException);
          }
       }
 
-      return var3;
+      return text2;
    }
 }

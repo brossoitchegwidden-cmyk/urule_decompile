@@ -12,75 +12,75 @@ public class ConditionItem {
    private Op op;
    private Value value;
 
-   public EvaluateResponse eval(Map<String, CalculateData> var1, EvaluationContext var2, Map<String, Object> var3) {
-      EvaluateResponse var4 = new EvaluateResponse();
-      if (!var1.containsKey(this.left)) {
-         var4.setResult(false);
-         var4.setRightResult("not null");
-         return var4;
+   public EvaluateResponse eval(Map<String, CalculateData> resultMap, EvaluationContext context, Map<String, Object> factMap) {
+      EvaluateResponse evaluateResponse = new EvaluateResponse();
+      if (!resultMap.containsKey(this.left)) {
+         evaluateResponse.setResult(false);
+         evaluateResponse.setRightResult("not null");
+         return evaluateResponse;
       }
 
-      CalculateData var5 = (CalculateData)var1.get(this.left);
-      Object var6 = var5.getResultValue();
-      if (var6 == null) {
-         var4.setResult(false);
-         var4.setRightResult("not null");
-         return var4;
+      CalculateData calculateData = (CalculateData)resultMap.get(this.left);
+      Object resultValue = calculateData.getResultValue();
+      if (resultValue == null) {
+         evaluateResponse.setResult(false);
+         evaluateResponse.setRightResult("not null");
+         return evaluateResponse;
       }
 
-      Object var7 = var2.getValueCompute().complexValueCompute(this.value, var2, var3);
-      if (var7 == null) {
-         var4.setResult(false);
-         var4.setRightResult(var6);
-         return var4;
+      Object objectValue = context.getValueCompute().complexValueCompute(this.value, context, factMap);
+      if (objectValue == null) {
+         evaluateResponse.setResult(false);
+         evaluateResponse.setRightResult(resultValue);
+         return evaluateResponse;
       }
 
-      BigDecimal var8 = Utils.toBigDecimal(var6);
-      BigDecimal var9 = Utils.toBigDecimal(var7);
-      boolean var10 = false;
-      int var11 = var8.compareTo(var9);
+      BigDecimal decimalValue = Utils.toBigDecimal(resultValue);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(objectValue);
+      boolean flag = false;
+      int number = decimalValue.compareTo(decimalValue2);
       if (this.op.equals(Op.Equals)) {
-         var10 = var11 == 0;
+         flag = number == 0;
       } else if (this.op.equals(Op.NotEquals)) {
-         var10 = var11 != 0;
+         flag = number != 0;
       } else if (this.op.equals(Op.LessThen)) {
-         var10 = var11 == -1;
+         flag = number == -1;
       } else if (this.op.equals(Op.LessThenEquals)) {
-         var10 = var11 == 0 || var11 == -1;
+         flag = number == 0 || number == -1;
       } else if (this.op.equals(Op.GreaterThen)) {
-         var10 = var11 == 1;
+         flag = number == 1;
       } else if (this.op.equals(Op.GreaterThenEquals)) {
-         var10 = var11 == 1 || var11 == 0;
+         flag = number == 1 || number == 0;
       }
 
-      var4.setOp(this.op);
-      var4.setResult(var10);
-      var4.setLeftResult(var8);
-      var4.setRightResult(var9);
-      return var4;
+      evaluateResponse.setOp(this.op);
+      evaluateResponse.setResult(flag);
+      evaluateResponse.setLeftResult(decimalValue);
+      evaluateResponse.setRightResult(decimalValue2);
+      return evaluateResponse;
    }
 
    public String getLeft() {
       return this.left;
    }
 
-   public void setLeft(String var1) {
-      this.left = var1;
+   public void setLeft(String left) {
+      this.left = left;
    }
 
    public Op getOp() {
       return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.op = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 }

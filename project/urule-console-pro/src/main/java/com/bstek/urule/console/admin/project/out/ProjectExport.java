@@ -29,127 +29,127 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultCDATA;
 
 public class ProjectExport {
-   private static final Log a = LogFactory.getLog(ProjectExport.class);
+   private static final Log logger = LogFactory.getLog(ProjectExport.class);
    public static final ProjectExport ins = new ProjectExport();
 
    private ProjectExport() {
    }
 
-   public void doExport(OutputStream var1, Project var2) throws Exception {
-      Document var3 = this.a(var2);
-      StringWriter var4 = new StringWriter();
-      XMLWriter var5 = new XMLWriter(var4, new OutputFormat());
-      var5.write(var3);
-      String var6 = var4.toString();
-      byte[] var7 = Utils.compress(var6);
-      IOUtils.write(var7, var1);
+   public void doExport(OutputStream output, Project project) throws Exception {
+      Document document = this.buildProjectDocument(project);
+      StringWriter stringWriter = new StringWriter();
+      XMLWriter xMLWriter = new XMLWriter(stringWriter, new OutputFormat());
+      xMLWriter.write(document);
+      String text = stringWriter.toString();
+      byte[] bytes = Utils.compress(text);
+      IOUtils.write(bytes, output);
    }
 
-   private Document a(Project var1) {
-      Document var2 = DocumentHelper.createDocument();
-      Element var3 = var2.addElement("project");
-      var3.addAttribute("name", var1.getName());
-      var3.addAttribute("id", String.valueOf(var1.getId()));
-      var3.addAttribute("type", var1.getType());
-      var3.addAttribute("viewModel", var1.getViewModel().name());
-      this.a(var3, var1.getDesc(), "desc");
-      this.b(var1, var3);
-      this.a(var1, var3);
-      return var2;
+   private Document buildProjectDocument(Project project) {
+      Document document = DocumentHelper.createDocument();
+      Element element = document.addElement("project");
+      element.addAttribute("name", project.getName());
+      element.addAttribute("id", String.valueOf(project.getId()));
+      element.addAttribute("type", project.getType());
+      element.addAttribute("viewModel", project.getViewModel().name());
+      this.appendEncodedChild(element, project.getDesc(), "desc");
+      this.appendRuleFiles(project, element);
+      this.appendPackets(project, element);
+      return document;
    }
 
-   private void a(Project var1, Element var2) {
-      PacketQuery var3 = PacketManager.ins.newQuery();
+   private void appendPackets(Project project, Element element) {
+      PacketQuery packetQuery = PacketManager.ins.newQuery();
 
-      for(Packet var6 : (Iterable<Packet>)(Iterable<?>)(var3.projectId(var1.getId()).list())) {
-         Element var7 = var2.addElement("packet");
-         var7.addAttribute("name", var6.getName());
-         var7.addAttribute("code", var6.getCode());
-         var7.addAttribute("desc", var6.getDesc());
-         var7.addAttribute("id", String.valueOf(var6.getId()));
-         if (var6.getType() != null) {
-            var7.addAttribute("type", var6.getType().name());
+      for(Packet packet : (Iterable<Packet>)(Iterable<?>)(packetQuery.projectId(project.getId()).list())) {
+         Element element2 = element.addElement("packet");
+         element2.addAttribute("name", packet.getName());
+         element2.addAttribute("code", packet.getCode());
+         element2.addAttribute("desc", packet.getDesc());
+         element2.addAttribute("id", String.valueOf(packet.getId()));
+         if (packet.getType() != null) {
+            element2.addAttribute("type", packet.getType().name());
          }
 
-         var7.addAttribute("enable", String.valueOf(var6.isEnable()));
-         var7.addAttribute("audit-enable", String.valueOf(var6.isAuditEnable()));
-         var7.addAttribute("rest-enable", String.valueOf(var6.isRestEnable()));
-         var7.addAttribute("rest-security-enable", String.valueOf(var6.isRestSecurityEnable()));
-         if (var6.isRestSecurityEnable()) {
-            var7.addAttribute("rest-security-user", var6.getRestSecurityUser());
-            var7.addAttribute("rest-security-password", var6.getRestSecurityPassword());
+         element2.addAttribute("enable", String.valueOf(packet.isEnable()));
+         element2.addAttribute("audit-enable", String.valueOf(packet.isAuditEnable()));
+         element2.addAttribute("rest-enable", String.valueOf(packet.isRestEnable()));
+         element2.addAttribute("rest-security-enable", String.valueOf(packet.isRestSecurityEnable()));
+         if (packet.isRestSecurityEnable()) {
+            element2.addAttribute("rest-security-user", packet.getRestSecurityUser());
+            element2.addAttribute("rest-security-password", packet.getRestSecurityPassword());
          }
 
-         this.a(var7, var6.getAuditInput(), "audit-input");
-         this.a(var7, var6.getAuditOutput(), "audit-output");
-         this.a(var7, var6.getRestInput(), "rest-input");
-         this.a(var7, var6.getRestOutput(), "rest-output");
-         this.a(var7, var6.getInputData(), "input-data");
-         this.a(var7, var6.getOutputData(), "output-data");
-         a.debug("buildPacket:" + var6.getName());
-         this.a(var6.getFiles(), var7);
+         this.appendEncodedChild(element2, packet.getAuditInput(), "audit-input");
+         this.appendEncodedChild(element2, packet.getAuditOutput(), "audit-output");
+         this.appendEncodedChild(element2, packet.getRestInput(), "rest-input");
+         this.appendEncodedChild(element2, packet.getRestOutput(), "rest-output");
+         this.appendEncodedChild(element2, packet.getInputData(), "input-data");
+         this.appendEncodedChild(element2, packet.getOutputData(), "output-data");
+         ProjectExport.logger.debug("buildPacket:" + packet.getName());
+         this.appendPacketFiles(packet.getFiles(), element2);
       }
 
    }
 
-   private void a(List var1, Element var2) {
-      for(PacketFile var4 : (Iterable<PacketFile>)(Iterable<?>)(var1)) {
-         a.debug("buildPacketFile:" + var4.getFileId());
-         Element var5 = var2.addElement("file");
-         var5.addAttribute("id", String.valueOf(var4.getFileId()));
-         var5.addAttribute("desc", var4.getDesc());
-         var5.addAttribute("path", var4.getPath());
-         var5.addAttribute("version", var4.getVersion());
+   private void appendPacketFiles(List items, Element element) {
+      for(PacketFile packetFile : (Iterable<PacketFile>)(Iterable<?>)(items)) {
+         ProjectExport.logger.debug("buildPacketFile:" + packetFile.getFileId());
+         Element element2 = element.addElement("file");
+         element2.addAttribute("id", String.valueOf(packetFile.getFileId()));
+         element2.addAttribute("desc", packetFile.getDesc());
+         element2.addAttribute("path", packetFile.getPath());
+         element2.addAttribute("version", packetFile.getVersion());
       }
 
    }
 
-   private void b(Project var1, Element var2) {
-      FileQuery var3 = FileManager.ins.newQuery();
+   private void appendRuleFiles(Project project, Element element) {
+      FileQuery fileQuery = FileManager.ins.newQuery();
 
-      for(RuleFile var6 : (Iterable<RuleFile>)(Iterable<?>)(var3.list(var1.getId()))) {
-         if (!var6.isDeleted()) {
-            a.debug("buildFile:" + var6.getName());
-            Element var7 = var2.addElement("file");
-            var7.addAttribute("name", var6.getName());
-            var7.addAttribute("deleted", String.valueOf(var6.isDeleted()));
-            var7.addAttribute("id", String.valueOf(var6.getId()));
-            var7.addAttribute("path", var6.getPath());
-            var7.addAttribute("fileSet", String.valueOf(var6.isFileSet()));
-            var7.addAttribute("digest", var6.getDigest());
-            var7.addAttribute("type", var6.getType());
-            var7.addAttribute("latest-version", var6.getLatestVersion());
-            String var8 = FileManager.ins.loadContent(var6.getId());
-            this.a(var7, var8, "content");
-            this.a(var6, var7);
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(fileQuery.list(project.getId()))) {
+         if (!ruleFile.isDeleted()) {
+            ProjectExport.logger.debug("buildFile:" + ruleFile.getName());
+            Element element2 = element.addElement("file");
+            element2.addAttribute("name", ruleFile.getName());
+            element2.addAttribute("deleted", String.valueOf(ruleFile.isDeleted()));
+            element2.addAttribute("id", String.valueOf(ruleFile.getId()));
+            element2.addAttribute("path", ruleFile.getPath());
+            element2.addAttribute("fileSet", String.valueOf(ruleFile.isFileSet()));
+            element2.addAttribute("digest", ruleFile.getDigest());
+            element2.addAttribute("type", ruleFile.getType());
+            element2.addAttribute("latest-version", ruleFile.getLatestVersion());
+            String content = FileManager.ins.loadContent(ruleFile.getId());
+            this.appendEncodedChild(element2, content, "content");
+            this.appendVersionFiles(ruleFile, element2);
          }
       }
 
    }
 
-   private void a(RuleFile var1, Element var2) {
-      for(VersionFile var5 : (Iterable<VersionFile>)(Iterable<?>)(VersionFileManager.ins.loadFiles(var1.getId()))) {
-         Element var6 = var2.addElement("version");
-         var6.addAttribute("version", var5.getVersion());
-         var6.addAttribute("digest", var5.getDigest());
-         this.a(var6, var5.getNote(), "note");
-         var6.addAttribute("id", String.valueOf(var5.getId()));
-         String var7 = VersionFileManager.ins.loadFileContent(var5.getId());
-         this.a(var6, var7, "content");
+   private void appendVersionFiles(RuleFile ruleFile, Element element) {
+      for(VersionFile versionFile : (Iterable<VersionFile>)(Iterable<?>)(VersionFileManager.ins.loadFiles(ruleFile.getId()))) {
+         Element element2 = element.addElement("version");
+         element2.addAttribute("version", versionFile.getVersion());
+         element2.addAttribute("digest", versionFile.getDigest());
+         this.appendEncodedChild(element2, versionFile.getNote(), "note");
+         element2.addAttribute("id", String.valueOf(versionFile.getId()));
+         String fileContent = VersionFileManager.ins.loadFileContent(versionFile.getId());
+         this.appendEncodedChild(element2, fileContent, "content");
       }
 
    }
 
-   private void a(Element var1, String var2, String var3) {
-      if (!StringUtils.isBlank(var2)) {
+   private void appendEncodedChild(Element element, String text, String text2) {
+      if (!StringUtils.isBlank(text)) {
          try {
-            var2 = Base64.getEncoder().encodeToString(var2.getBytes("utf-8"));
-         } catch (UnsupportedEncodingException var5) {
-            throw new RuleException(var5);
+            text = Base64.getEncoder().encodeToString(text.getBytes("utf-8"));
+         } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            throw new RuleException(unsupportedEncodingException);
          }
 
-         Element var4 = var1.addElement(var3);
-         var4.add(new DefaultCDATA(var2));
+         Element element2 = element.addElement(text2);
+         element2.add(new DefaultCDATA(text));
       }
    }
 }

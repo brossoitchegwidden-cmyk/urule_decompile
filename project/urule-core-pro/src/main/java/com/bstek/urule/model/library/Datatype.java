@@ -32,273 +32,273 @@ public enum Datatype {
    Enum,
    Object;
 
-   private static Set<String> set = new HashSet<>();
+   private static final Set<String> SUPPORTED_TYPE_NAMES = new HashSet<>();
 
-   public static final Datatype parse(String var0) {
-      if (var0.equals(String.toString())) {
+   public static final Datatype parse(String type) {
+      if (type.equals(String.toString())) {
          return String;
-      } else if (var0.equals(Integer.toString())) {
+      } else if (type.equals(Integer.toString())) {
          return Integer;
-      } else if (var0.equals(Char.toString())) {
+      } else if (type.equals(Char.toString())) {
          return Char;
-      } else if (var0.equals(Double.toString())) {
+      } else if (type.equals(Double.toString())) {
          return Double;
-      } else if (var0.equals(Long.toString())) {
+      } else if (type.equals(Long.toString())) {
          return Long;
-      } else if (var0.equals(Float.toString())) {
+      } else if (type.equals(Float.toString())) {
          return Float;
-      } else if (var0.equals(BigDecimal.toString())) {
+      } else if (type.equals(BigDecimal.toString())) {
          return BigDecimal;
-      } else if (var0.equals(Boolean.toString())) {
+      } else if (type.equals(Boolean.toString())) {
          return Boolean;
-      } else if (var0.equals(Date.toString())) {
+      } else if (type.equals(Date.toString())) {
          return Date;
-      } else if (var0.equals(List.toString())) {
+      } else if (type.equals(List.toString())) {
          return List;
-      } else if (var0.equals(Set.toString())) {
+      } else if (type.equals(Set.toString())) {
          return Set;
-      } else if (var0.equals(Map.toString())) {
+      } else if (type.equals(Map.toString())) {
          return Map;
       } else {
-         return var0.equals(Enum.toString()) ? Enum : Object;
+         return type.equals(Enum.toString()) ? Enum : Object;
       }
    }
 
-   public static boolean isType(String var0) {
-      return set.contains(var0);
+   public static boolean isType(String type) {
+      return SUPPORTED_TYPE_NAMES.contains(type);
    }
 
-   public String convertObjectToString(Object var1) {
-      if (var1 == null) {
+   public String convertObjectToString(Object value) {
+      if (value == null) {
          return "";
       }
 
-      if (var1 instanceof String) {
-         return var1.toString();
+      if (value instanceof String) {
+         return value.toString();
       }
 
       switch (this) {
          case Object:
-            return var1.toString();
+            return value.toString();
          case Date:
-            SimpleDateFormat var2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            return var2.format((Date)var1);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return simpleDateFormat.format((Date)value);
          case List:
-            List var3 = (List)var1;
-            String var4 = "";
+            List items = (List)value;
+            String text = "";
 
-            for (int var10 = 0; var10 < var3.size(); var10++) {
-               Object var11 = var3.get(var10);
-               if (var10 > 0) {
-                  var4 = var4 + ",";
+            for (int index = 0; index < items.size(); index++) {
+               Object objectValue = items.get(index);
+               if (index > 0) {
+                  text = text + ",";
                }
 
-               var4 = var4 + var11;
+               text = text + objectValue;
             }
 
-            return (String)var4;
+            return (String)text;
          case Set:
-            Set var5 = (Set)var1;
-            String var6 = "";
-            int var7 = 0;
+            Set uniqueItems = (Set)value;
+            String text2 = "";
+            int number = 0;
 
-            for (Object var13 : var5) {
-               if (var7 > 0) {
-                  var6 = var6 + ",";
+            for (Object objectValue2 : uniqueItems) {
+               if (number > 0) {
+                  text2 = text2 + ",";
                }
 
-               var6 = var6 + var13;
-               var7++;
+               text2 = text2 + objectValue2;
+               number++;
             }
 
-            return (String)var6;
+            return (String)text2;
          case BigDecimal:
-            BigDecimal var8 = Utils.toBigDecimal(var1);
-            return var8.floatValue() + "";
+            BigDecimal decimalValue = Utils.toBigDecimal(value);
+            return decimalValue.floatValue() + "";
          case Double:
-            Double var9 = Utils.toBigDecimal(var1).doubleValue();
-            return var9.floatValue() + "";
+            Double doubleValue = Utils.toBigDecimal(value).doubleValue();
+            return doubleValue.floatValue() + "";
          default:
-            return var1.toString();
+            return value.toString();
       }
    }
 
-   public Object convert(Object var1) {
+   public Object convert(Object value) {
       switch (this) {
          case Object:
-            return var1;
+            return value;
          case Date:
-            if (var1 == null) {
+            if (value == null) {
                return null;
             } else {
                try {
-                  if (var1 instanceof Date) {
-                     return (Date)var1;
-                  } else if (var1.toString().equals("")) {
+                  if (value instanceof Date) {
+                     return (Date)value;
+                  } else if (value.toString().equals("")) {
                      return null;
                   } else {
                      try {
-                        SimpleDateFormat var21 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        return var21.parse(var1.toString());
-                     } catch (Exception var16) {
-                        SimpleDateFormat var23 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        return simpleDateFormat.parse(value.toString());
+                     } catch (Exception exception) {
+                        SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
                         try {
-                           return var23.parse(var1.toString());
-                        } catch (Exception var12) {
-                           var23 = new SimpleDateFormat("yyyy-MM-dd");
-                           return var23.parse(var1.toString());
+                           return simpleDateFormat2.parse(value.toString());
+                        } catch (Exception exception2) {
+                           simpleDateFormat2 = new SimpleDateFormat("yyyy-MM-dd");
+                           return simpleDateFormat2.parse(value.toString());
                         }
                      }
                   }
-               } catch (ParseException var17) {
-                  throw new RuleException(var17);
+               } catch (ParseException parseException) {
+                  throw new RuleException(parseException);
                }
             }
          case List:
-            if (var1 == null) {
+            if (value == null) {
                return null;
-            } else if (var1 instanceof List) {
-               return (List)var1;
-            } else if (var1 instanceof Collection) {
-               Collection var20 = (Collection)var1;
-               return new ArrayList(var20);
+            } else if (value instanceof List) {
+               return (List)value;
+            } else if (value instanceof Collection) {
+               Collection items = (Collection)value;
+               return new ArrayList(items);
             } else {
-               String var19 = var1.toString();
-               if (var19.startsWith("[") && var19.endsWith("]")) {
-                  ObjectMapper var22 = JsonMapper.builder().build();
+               String text = value.toString();
+               if (text.startsWith("[") && text.endsWith("]")) {
+                  ObjectMapper objectMapper = JsonMapper.builder().build();
 
                   try {
-                     return var22.readValue(var1.toString(), ArrayList.class);
-                  } catch (Exception var15) {
-                     throw new RuleException(var15);
+                     return objectMapper.readValue(value.toString(), ArrayList.class);
+                  } catch (Exception exception3) {
+                     throw new RuleException(exception3);
                   }
                }
 
-               ArrayList var4 = new ArrayList();
-               String[] var5 = var19.split(",");
+               ArrayList convertResult = new ArrayList();
+               String[] parts = text.split(",");
 
-               for (String var31 : var5) {
-                  var4.add(var31);
+               for (String text2 : parts) {
+                  convertResult.add(text2);
                }
 
-               return var4;
+               return convertResult;
             }
          case Set:
-            if (var1 == null) {
+            if (value == null) {
                return null;
-            } else if (var1 instanceof Set) {
-               return (Set)var1;
-            } else if (var1 instanceof Collection) {
-               Collection var25 = (Collection)var1;
-               return new HashSet(var25);
+            } else if (value instanceof Set) {
+               return (Set)value;
+            } else if (value instanceof Collection) {
+               Collection items2 = (Collection)value;
+               return new HashSet(items2);
             } else {
-               String var6 = var1.toString();
-               if (var6.startsWith("[") && var6.endsWith("]")) {
-                  ObjectMapper var27 = JsonMapper.builder().build();
+               String text3 = value.toString();
+               if (text3.startsWith("[") && text3.endsWith("]")) {
+                  ObjectMapper objectMapper2 = JsonMapper.builder().build();
 
                   try {
-                     return var27.readValue(var1.toString(), HashSet.class);
-                  } catch (Exception var14) {
-                     throw new RuleException(var14);
+                     return objectMapper2.readValue(value.toString(), HashSet.class);
+                  } catch (Exception exception4) {
+                     throw new RuleException(exception4);
                   }
                }
 
-               TreeSet var7 = new TreeSet();
+               TreeSet treeSet = new TreeSet();
 
-               for (String var11 : var6.split(",")) {
-                  var7.add(var11);
+               for (String text4 : text3.split(",")) {
+                  treeSet.add(text4);
                }
 
-               return var7;
+               return treeSet;
             }
          case BigDecimal:
-            if (var1 == null) {
-               var1 = "0";
+            if (value == null) {
+               value = "0";
             }
 
-            return Utils.toBigDecimal(var1);
+            return Utils.toBigDecimal(value);
          case Double:
-            if (var1 == null) {
-               var1 = "0";
+            if (value == null) {
+               value = "0";
             }
 
-            return Utils.toBigDecimal(var1).doubleValue();
+            return Utils.toBigDecimal(value).doubleValue();
          case String:
-            if (var1 == null) {
-               return var1;
+            if (value == null) {
+               return value;
             }
 
-            if (var1 instanceof Number) {
-               BigDecimal var18 = Utils.toBigDecimal(var1);
-               var1 = var18.toPlainString();
+            if (value instanceof Number) {
+               BigDecimal decimalValue = Utils.toBigDecimal(value);
+               value = decimalValue.toPlainString();
             }
 
-            return var1.toString();
+            return value.toString();
          case Integer:
-            if (var1 == null || var1.toString().equals("")) {
-               var1 = "0";
+            if (value == null || value.toString().equals("")) {
+               value = "0";
             }
 
-            return Utils.toBigDecimal(var1).intValue();
+            return Utils.toBigDecimal(value).intValue();
          case Char:
-            if (var1 == null) {
+            if (value == null) {
                return '\u0000';
-            } else if (var1 instanceof Character) {
-               return (Character)var1;
+            } else if (value instanceof Character) {
+               return (Character)value;
             } else {
-               String var2 = var1.toString();
-               if (var2.length() == 1) {
-                  return var2.toCharArray()[0];
+               String text5 = value.toString();
+               if (text5.length() == 1) {
+                  return text5.toCharArray()[0];
                }
 
-               int var3 = Utils.toBigDecimal(var1).intValue();
-               return (char)var3;
+               int number = Utils.toBigDecimal(value).intValue();
+               return (char)number;
             }
          case Long:
-            if (var1 == null) {
-               var1 = "0";
+            if (value == null) {
+               value = "0";
             }
 
-            return Utils.toBigDecimal(var1).longValue();
+            return Utils.toBigDecimal(value).longValue();
          case Float:
-            if (var1 == null) {
-               var1 = "0";
+            if (value == null) {
+               value = "0";
             }
 
-            return Utils.toBigDecimal(var1).floatValue();
+            return Utils.toBigDecimal(value).floatValue();
          case Boolean:
-            if (var1 == null) {
-               var1 = "false";
+            if (value == null) {
+               value = "false";
             }
 
-            return java.lang.Boolean.valueOf(var1.toString());
+            return java.lang.Boolean.valueOf(value.toString());
          case Map:
-            if (var1 == null) {
+            if (value == null) {
                return null;
-            } else if (var1 instanceof Map) {
-               return (Map)var1;
+            } else if (value instanceof Map) {
+               return (Map)value;
             } else {
-               ObjectMapper var8 = JsonMapper.builder().build();
+               ObjectMapper objectMapper3 = JsonMapper.builder().build();
 
                try {
-                  return (Map)var8.readValue(var1.toString(), new HashMapTypeReference());
-               } catch (Exception var13) {
-                  throw new RuleException(var13);
+                  return (Map)objectMapper3.readValue(value.toString(), new HashMapTypeReference());
+               } catch (Exception exception5) {
+                  throw new RuleException(exception5);
                }
             }
          case Enum:
-            return var1;
+            return value;
          default:
             return null;
       }
    }
 
    static {
-      Datatype[] var0 = values();
+      Datatype[] datatypes = values();
 
-      for (Datatype var4 : var0) {
-         set.add(var4.name());
+      for (Datatype datatype : datatypes) {
+         SUPPORTED_TYPE_NAMES.add(datatype.name());
       }
    }
 }

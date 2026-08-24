@@ -19,347 +19,333 @@ public class FileManagerImpl implements FileManager {
    public FileQuery newQuery() {
       return new FileQueryImpl();
    }
-
-   public RuleFile get(long var1) {
-      FileQueryImpl var3 = new FileQueryImpl();
-      List var4 = var3.id(var1).list((Long)null);
-      if (var4.size() == 0) {
-         throw new RuleException("File 【" + var1 + "】 not exist!");
+   public RuleFile get(long id) {
+      FileQueryImpl fileQueryImpl = new FileQueryImpl();
+      List items = fileQueryImpl.id(id).list((Long)null);
+      if (items.size() == 0) {
+         throw new RuleException("File 【" + id + "】 not exist!");
       } else {
-         return (RuleFile)var4.get(0);
+         return (RuleFile)items.get(0);
       }
    }
+   public String loadContent(long id) {
+      Connection connection = JdbcUtils.getConnection();
+      String string = null;
 
-   public String loadContent(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
-      String var4 = null;
-
-      String var7;
+      String content;
       try {
-         PreparedStatement var5 = var3.prepareStatement("select CONTENT_ from URULE_FILE where ID_=?");
-         var5.setLong(1, var1);
+         PreparedStatement preparedStatement = connection.prepareStatement("select CONTENT_ from URULE_FILE where ID_=?");
+         preparedStatement.setLong(1, id);
 
-         ResultSet var6;
-         for(var6 = var5.executeQuery(); var6.next(); var4 = var6.getString(1)) {
+         ResultSet resultSet;
+         for(resultSet = preparedStatement.executeQuery(); resultSet.next(); string = resultSet.getString(1)) {
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-         var7 = var4;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         content = string;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return content;
    }
-
-   public void add(RuleFile var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(RuleFile file) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setId(IDGenerator.getInstance().nextId(IDType.FILE));
-         var1.setCreateDate(new Date(System.currentTimeMillis()));
-         var1.setModifyDate(new Date(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_FILE (ID_, NAME_, TYPE_, PACKAGE_ID_, CONTENT_, CREATE_USER_, CREATE_DATE_,UPDATE_USER_, UPDATE_DATE_,PROJECT_ID_,LATEST_VERSION_,DELETED_) values (?,?,?,?, ?, ?, ?, ?, ?, ?, ?, ?)");
-         var3.setLong(1, var1.getId());
-         var3.setString(2, var1.getName());
-         var3.setString(3, var1.getType());
-         var3.setLong(4, var1.getParentId());
-         var3.setString(5, var1.getContent());
-         var3.setString(6, var1.getCreateUser());
-         var3.setTimestamp(7, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setString(8, var1.getCreateUser());
-         var3.setTimestamp(9, new Timestamp(var1.getModifyDate().getTime()));
-         var3.setLong(10, var1.getProjectId());
-         var3.setString(11, var1.getLatestVersion());
-         var3.setBoolean(12, var1.isDeleted());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         file.setId(IDGenerator.getInstance().nextId(IDType.FILE));
+         file.setCreateDate(new Date(System.currentTimeMillis()));
+         file.setModifyDate(new Date(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_FILE (ID_, NAME_, TYPE_, PACKAGE_ID_, CONTENT_, CREATE_USER_, CREATE_DATE_,UPDATE_USER_, UPDATE_DATE_,PROJECT_ID_,LATEST_VERSION_,DELETED_) values (?,?,?,?, ?, ?, ?, ?, ?, ?, ?, ?)");
+         preparedStatement.setLong(1, file.getId());
+         preparedStatement.setString(2, file.getName());
+         preparedStatement.setString(3, file.getType());
+         preparedStatement.setLong(4, file.getParentId());
+         preparedStatement.setString(5, file.getContent());
+         preparedStatement.setString(6, file.getCreateUser());
+         preparedStatement.setTimestamp(7, new Timestamp(file.getCreateDate().getTime()));
+         preparedStatement.setString(8, file.getCreateUser());
+         preparedStatement.setTimestamp(9, new Timestamp(file.getModifyDate().getTime()));
+         preparedStatement.setLong(10, file.getProjectId());
+         preparedStatement.setString(11, file.getLatestVersion());
+         preparedStatement.setBoolean(12, file.isDeleted());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void updateContent(long var1, String var3, String var4) {
-      Connection var5 = JdbcUtils.getConnection();
+   public void updateContent(long id, String account, String content) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var6 = var5.prepareStatement("update URULE_FILE set CONTENT_=?, DIGEST_=?, UPDATE_USER_=?, UPDATE_DATE_=? where ID_=?");
-         var6.setString(1, var4);
-         var6.setString(2, MD5Utils.stringToMD5(var4));
-         var6.setString(3, var3);
-         var6.setTimestamp(4, new Timestamp((new Date()).getTime()));
-         var6.setLong(5, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set CONTENT_=?, DIGEST_=?, UPDATE_USER_=?, UPDATE_DATE_=? where ID_=?");
+         preparedStatement.setString(1, content);
+         preparedStatement.setString(2, MD5Utils.stringToMD5(content));
+         preparedStatement.setString(3, account);
+         preparedStatement.setTimestamp(4, new Timestamp((new Date()).getTime()));
+         preparedStatement.setLong(5, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public List list(long var1, long var3) {
-      ArrayList var5 = new ArrayList();
-      var5.addAll(this.a(var1, var3));
-      return var5;
+   public List list(long projectId, long parentId) {
+      ArrayList listResult = new ArrayList();
+      listResult.addAll(this.loadChildren(projectId, parentId));
+      return listResult;
    }
-
-   public List list(long var1, long var3, String var5) {
-      ArrayList var6 = new ArrayList();
-      if (var5.contentEquals(ResourceType.Library.name())) {
-         var6.addAll(this.a(var1, var3, ResourceType.VariableLibrary.name()));
-         var6.addAll(this.a(var1, var3, ResourceType.ParameterLibrary.name()));
-         var6.addAll(this.a(var1, var3, ResourceType.ConstantLibrary.name()));
-         var6.addAll(this.a(var1, var3, ResourceType.ActionLibrary.name()));
-      } else if (var5.contentEquals(ResourceType.DecisionTable.name())) {
-         var6.addAll(this.a(var1, var3, ResourceType.DecisionTable.name()));
-         var6.addAll(this.a(var1, var3, ResourceType.CrossDecisionTable.name()));
-      } else if (var5.contentEquals(ResourceType.Scorecard.name())) {
-         var6.addAll(this.a(var1, var3, ResourceType.Scorecard.name()));
-         var6.addAll(this.a(var1, var3, ResourceType.ComplexScorecard.name()));
+   public List list(long projectId, long parentId, String type) {
+      ArrayList listResult = new ArrayList();
+      if (type.contentEquals(ResourceType.Library.name())) {
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.VariableLibrary.name()));
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.ParameterLibrary.name()));
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.ConstantLibrary.name()));
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.ActionLibrary.name()));
+      } else if (type.contentEquals(ResourceType.DecisionTable.name())) {
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.DecisionTable.name()));
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.CrossDecisionTable.name()));
+      } else if (type.contentEquals(ResourceType.Scorecard.name())) {
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.Scorecard.name()));
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, ResourceType.ComplexScorecard.name()));
       } else {
-         var6.addAll(this.a(var1, var3, var5));
+         listResult.addAll(this.loadChildrenByType(projectId, parentId, type));
       }
 
-      return var6;
+      return listResult;
    }
 
-   private List a(long var1, long var3) {
-      Connection var5 = JdbcUtils.getConnection();
+   private List loadChildren(long longValue, long longValue2) {
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var15;
+      ArrayList items;
       try {
-         PreparedStatement var6 = var5.prepareStatement("select ID_,NAME_, TYPE_, CREATE_USER_, LOCKED_USER_, UPDATE_DATE_,DIGEST_ from URULE_FILE where PACKAGE_ID_=? and PROJECT_ID_=? and DELETED_=? order by NAME_ asc");
-         var6.setLong(1, var3);
-         var6.setLong(2, var1);
-         var6.setBoolean(3, false);
-         ArrayList var7 = new ArrayList();
-         ResultSet var8 = var6.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement("select ID_,NAME_, TYPE_, CREATE_USER_, LOCKED_USER_, UPDATE_DATE_,DIGEST_ from URULE_FILE where PACKAGE_ID_=? and PROJECT_ID_=? and DELETED_=? order by NAME_ asc");
+         preparedStatement.setLong(1, longValue2);
+         preparedStatement.setLong(2, longValue);
+         preparedStatement.setBoolean(3, false);
+         ArrayList items2 = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var8.next()) {
-            RuleFile var9 = new RuleFile();
-            var9.setDirectory(false);
-            var9.setId(var8.getLong(1));
-            var9.setName(var8.getString(2));
-            var9.setType(var8.getString(3));
-            var9.setCreateUser(var8.getString(4));
-            var9.setLockedUser(var8.getString(5));
-            var9.setModifyDate(var8.getTimestamp(6));
-            var9.setDigest(var8.getString(7));
-            var9.setParentId(var3);
-            var9.setProjectId(var1);
-            var7.add(var9);
+         while(resultSet.next()) {
+            RuleFile ruleFile = new RuleFile();
+            ruleFile.setDirectory(false);
+            ruleFile.setId(resultSet.getLong(1));
+            ruleFile.setName(resultSet.getString(2));
+            ruleFile.setType(resultSet.getString(3));
+            ruleFile.setCreateUser(resultSet.getString(4));
+            ruleFile.setLockedUser(resultSet.getString(5));
+            ruleFile.setModifyDate(resultSet.getTimestamp(6));
+            ruleFile.setDigest(resultSet.getString(7));
+            ruleFile.setParentId(longValue2);
+            ruleFile.setProjectId(longValue);
+            items2.add(ruleFile);
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var6);
-         var15 = var7;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         items = items2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var15;
+      return items;
    }
 
-   private List a(long var1, long var3, String var5) {
-      Connection var6 = JdbcUtils.getConnection();
+   private List loadChildrenByType(long longValue, long longValue2, String text) {
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var16;
+      ArrayList items;
       try {
-         PreparedStatement var7 = var6.prepareStatement("select ID_,NAME_, TYPE_, CREATE_USER_, LOCKED_USER_, UPDATE_DATE_,DIGEST_ from URULE_FILE where PACKAGE_ID_=? and TYPE_=? and PROJECT_ID_=? and DELETED_=? order by NAME_ asc");
-         var7.setLong(1, var3);
-         var7.setString(2, var5);
-         var7.setLong(3, var1);
-         var7.setBoolean(4, false);
-         ArrayList var8 = new ArrayList();
-         ResultSet var9 = var7.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement("select ID_,NAME_, TYPE_, CREATE_USER_, LOCKED_USER_, UPDATE_DATE_,DIGEST_ from URULE_FILE where PACKAGE_ID_=? and TYPE_=? and PROJECT_ID_=? and DELETED_=? order by NAME_ asc");
+         preparedStatement.setLong(1, longValue2);
+         preparedStatement.setString(2, text);
+         preparedStatement.setLong(3, longValue);
+         preparedStatement.setBoolean(4, false);
+         ArrayList items2 = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var9.next()) {
-            RuleFile var10 = new RuleFile();
-            var10.setDirectory(false);
-            var10.setId(var9.getLong(1));
-            var10.setName(var9.getString(2));
-            var10.setType(var9.getString(3));
-            var10.setCreateUser(var9.getString(4));
-            var10.setLockedUser(var9.getString(5));
-            var10.setModifyDate(var9.getTimestamp(6));
-            var10.setDigest(var9.getString(7));
-            var10.setParentId(var3);
-            var10.setProjectId(var1);
-            var8.add(var10);
+         while(resultSet.next()) {
+            RuleFile ruleFile = new RuleFile();
+            ruleFile.setDirectory(false);
+            ruleFile.setId(resultSet.getLong(1));
+            ruleFile.setName(resultSet.getString(2));
+            ruleFile.setType(resultSet.getString(3));
+            ruleFile.setCreateUser(resultSet.getString(4));
+            ruleFile.setLockedUser(resultSet.getString(5));
+            ruleFile.setModifyDate(resultSet.getTimestamp(6));
+            ruleFile.setDigest(resultSet.getString(7));
+            ruleFile.setParentId(longValue2);
+            ruleFile.setProjectId(longValue);
+            items2.add(ruleFile);
          }
 
-         JdbcUtils.closeResultSet(var9);
-         JdbcUtils.closeStatement(var7);
-         var16 = var8;
-      } catch (Exception var14) {
-         throw new RuleException(var14);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         items = items2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var6);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var16;
+      return items;
    }
-
-   public void changeParent(long var1, long var3) {
-      Connection var5 = JdbcUtils.getConnection();
+   public void changeParent(long id, long newPackageId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var6 = var5.prepareStatement("update URULE_FILE set PACKAGE_ID_=? where ID_=?");
-         var6.setLong(1, var3);
-         var6.setLong(2, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set PACKAGE_ID_=? where ID_=?");
+         preparedStatement.setLong(1, newPackageId);
+         preparedStatement.setLong(2, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
-      }
-
-   }
-
-   public boolean checkExist(long var1, long var3, String var5, String var6) {
-      Connection var7 = JdbcUtils.getConnection();
-
-      boolean var11;
-      try {
-         PreparedStatement var8 = var7.prepareStatement("select count(*) from URULE_FILE where PROJECT_ID_=? and NAME_=? and PACKAGE_ID_=? and TYPE_=? and DELETED_=?");
-         var8.setLong(1, var1);
-         var8.setString(2, var6);
-         var8.setLong(3, var3);
-         var8.setString(4, var5);
-         var8.setBoolean(5, false);
-         ResultSet var9 = var8.executeQuery();
-         var9.next();
-         int var10 = var9.getInt(1);
-         JdbcUtils.closeResultSet(var9);
-         JdbcUtils.closeStatement(var8);
-         var11 = var10 > 0;
-      } catch (Exception var15) {
-         throw new RuleException(var15);
-      } finally {
-         JdbcUtils.closeConnection(var7);
-      }
-
-      return var11;
-   }
-
-   public void rename(long var1, String var3, String var4) {
-      Connection var5 = JdbcUtils.getConnection();
-
-      try {
-         PreparedStatement var6 = var5.prepareStatement("update URULE_FILE set NAME_=?, UPDATE_USER_=?, UPDATE_DATE_=?  where ID_=?");
-         var6.setString(1, var4);
-         var6.setString(2, var3);
-         var6.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-         var6.setLong(4, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
-      } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public boolean checkExist(long projectId, long parentId, String type, String name) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public void remove(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+      boolean checkExistResult;
+      try {
+         PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from URULE_FILE where PROJECT_ID_=? and NAME_=? and PACKAGE_ID_=? and TYPE_=? and DELETED_=?");
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.setString(2, name);
+         preparedStatement.setLong(3, parentId);
+         preparedStatement.setString(4, type);
+         preparedStatement.setBoolean(5, false);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         resultSet.next();
+         int number = resultSet.getInt(1);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         checkExistResult = number > 0;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
+      }
+
+      return checkExistResult;
+   }
+   public void rename(long id, String account, String newName) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete from URULE_FILE where ID_=?");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set NAME_=?, UPDATE_USER_=?, UPDATE_DATE_=?  where ID_=?");
+         preparedStatement.setString(1, newName);
+         preparedStatement.setString(2, account);
+         preparedStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+         preparedStatement.setLong(4, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void lock(long var1, String var3) {
-      Connection var4 = JdbcUtils.getConnection();
+   public void remove(long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var5 = var4.prepareStatement("update URULE_FILE set LOCKED_USER_=?, UPDATE_USER_=?, UPDATE_DATE_=?  where ID_=?");
-         var5.setString(1, var3);
-         var5.setString(2, var3);
-         var5.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-         var5.setLong(4, var1);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_FILE where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void unlock(long var1, String var3, String var4) {
-      Connection var5 = JdbcUtils.getConnection();
+   public void lock(long id, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var6 = var5.prepareStatement("update URULE_FILE set LOCKED_USER_=null, LATEST_VERSION_=?, UPDATE_USER_=?, UPDATE_DATE_=?  where ID_=?");
-         var6.setString(1, var3);
-         var6.setString(2, var4);
-         var6.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-         var6.setLong(4, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set LOCKED_USER_=?, UPDATE_USER_=?, UPDATE_DATE_=?  where ID_=?");
+         preparedStatement.setString(1, account);
+         preparedStatement.setString(2, account);
+         preparedStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+         preparedStatement.setLong(4, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void updateDeleteFlag(long var1, boolean var3, String var4) {
-      Connection var5 = JdbcUtils.getConnection();
+   public void unlock(long id, String version, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         RuleFile var6 = this.get(var1);
-         if (var6 != null) {
-            PreparedStatement var7 = var5.prepareStatement("update URULE_FILE set DELETED_=?, UPDATE_USER_=?, UPDATE_DATE_=? where ID_=?");
-            var7.setBoolean(1, var3);
-            var7.setString(2, var4);
-            var7.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            var7.setLong(4, var1);
-            var7.executeUpdate();
-            JdbcUtils.closeStatement(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set LOCKED_USER_=null, LATEST_VERSION_=?, UPDATE_USER_=?, UPDATE_DATE_=?  where ID_=?");
+         preparedStatement.setString(1, version);
+         preparedStatement.setString(2, account);
+         preparedStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+         preparedStatement.setLong(4, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
+      }
+
+   }
+   public void updateDeleteFlag(long id, boolean deleted, String account) {
+      Connection connection = JdbcUtils.getConnection();
+
+      try {
+         RuleFile ruleFile = this.get(id);
+         if (ruleFile != null) {
+            PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set DELETED_=?, UPDATE_USER_=?, UPDATE_DATE_=? where ID_=?");
+            preparedStatement.setBoolean(1, deleted);
+            preparedStatement.setString(2, account);
+            preparedStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            preparedStatement.setLong(4, id);
+            preparedStatement.executeUpdate();
+            JdbcUtils.closeStatement(preparedStatement);
          }
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void deleteByProjectId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByProjectId(long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete from URULE_FILE where PROJECT_ID_=?");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_FILE where PROJECT_ID_=?");
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -367,30 +353,29 @@ public class FileManagerImpl implements FileManager {
    public FileCountQuery newCountQuery() {
       return new FileCountQueryImpl();
    }
-
-   public void update(RuleFile var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(RuleFile file) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("update URULE_FILE set NAME_=?, TYPE_=?, PACKAGE_ID_=?, CONTENT_=?, CREATE_USER_=?, CREATE_DATE_=?,UPDATE_USER_=?, UPDATE_DATE_=?,PROJECT_ID_=?,LATEST_VERSION_=?,DELETED_=? where ID_=?");
-         var3.setString(1, var1.getName());
-         var3.setString(2, var1.getType());
-         var3.setLong(3, var1.getParentId());
-         var3.setString(4, var1.getContent());
-         var3.setString(5, var1.getCreateUser());
-         var3.setTimestamp(6, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setString(7, var1.getCreateUser());
-         var3.setTimestamp(8, new Timestamp(var1.getModifyDate().getTime()));
-         var3.setLong(9, var1.getProjectId());
-         var3.setString(10, var1.getLatestVersion());
-         var3.setBoolean(11, var1.isDeleted());
-         var3.setLong(12, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_FILE set NAME_=?, TYPE_=?, PACKAGE_ID_=?, CONTENT_=?, CREATE_USER_=?, CREATE_DATE_=?,UPDATE_USER_=?, UPDATE_DATE_=?,PROJECT_ID_=?,LATEST_VERSION_=?,DELETED_=? where ID_=?");
+         preparedStatement.setString(1, file.getName());
+         preparedStatement.setString(2, file.getType());
+         preparedStatement.setLong(3, file.getParentId());
+         preparedStatement.setString(4, file.getContent());
+         preparedStatement.setString(5, file.getCreateUser());
+         preparedStatement.setTimestamp(6, new Timestamp(file.getCreateDate().getTime()));
+         preparedStatement.setString(7, file.getCreateUser());
+         preparedStatement.setTimestamp(8, new Timestamp(file.getModifyDate().getTime()));
+         preparedStatement.setLong(9, file.getProjectId());
+         preparedStatement.setString(10, file.getLatestVersion());
+         preparedStatement.setBoolean(11, file.isDeleted());
+         preparedStatement.setLong(12, file.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

@@ -3,22 +3,22 @@ package com.bstek.urule.console.database.manager.report;
 import com.bstek.urule.console.database.model.PacketDeploy;
 
 public class PacketDeployVO extends PacketDeploy {
-   private String a;
-   private String b;
+   private String packetName;
+   private String projectName;
 
    public String getPacketName() {
-      return this.a;
+      return this.packetName;
    }
 
-   public void setPacketName(String var1) {
-      this.a = var1;
+   public void setPacketName(String packetName) {
+      this.packetName = packetName;
    }
 
    public String getProjectName() {
-      return this.b;
+      return this.projectName;
    }
 
-   public void setProjectName(String var1) {
-      this.b = var1;
+   public void setProjectName(String projectName) {
+      this.projectName = projectName;
    }
 }

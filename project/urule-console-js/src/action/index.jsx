@@ -12,10 +12,11 @@ import {Provider} from 'react-redux';
 import reducer from './reducer.js';
 import * as action from './action.js';
 import ActionEditor from './components/ActionEditor.jsx';
+import {getParameter} from '../Utils.js';
 
 $(document).ready(function(){
     const store= createStore(reducer,applyMiddleware(thunk));
-    const file=_getParameter('file');
+    const file=getParameter('file');
     if(!file || file.length<1){
         bootbox.alert('请先指定要加载的变量库文件.');
         return;
@@ -28,9 +29,3 @@ $(document).ready(function(){
         document.getElementById("container")
     );
 });
-function _getParameter(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null)return unescape(r[2]);
-    return null;
-};

@@ -8,28 +8,28 @@ public class ParenValue extends AbstractValue {
    @JsonIgnore
    @Override
    public String getId() {
-      String var1 = "(";
+      String id = "(";
       if (this.value != null) {
-         var1 = var1 + this.value.getId();
+         id = id + this.value.getId();
       }
 
-      var1 = var1 + ")";
+      id = id + ")";
       if (this.arithmetic != null) {
-         var1 = var1 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var1;
+      return id;
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      String var1 = "(";
+      String text = "(";
       if (this.value != null) {
-         var1 = var1 + this.value.getId();
+         text = text + this.value.getId();
       }
 
-      return var1 + ")";
+      return text + ")";
    }
 
    @Override
@@ -41,7 +41,7 @@ public class ParenValue extends AbstractValue {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 }

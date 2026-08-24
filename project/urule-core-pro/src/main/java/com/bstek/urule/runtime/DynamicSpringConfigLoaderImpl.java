@@ -37,594 +37,595 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
+/** Loads hot-deployed JARs and initializes the runtime license state. */
 public class DynamicSpringConfigLoaderImpl implements DynamicSpringConfigLoader, ApplicationContextAware {
-   private Logger a = Logger.getGlobal();
-   private static final long b = new Date().getTime();
-   private static long c;
-   private String d;
-   private static String e;
-   private static long f;
-   private static String g;
-   private static String h;
-   private static String i;
-   private String j;
-   private String k;
-   private String l;
-   private String m;
-   private ApplicationContext n;
-   private ClassLoader o;
-   private URLClassLoader p;
-   private DynamicJarCreator q;
-   private BuiltInActionLibraryBuilder r;
-   private RemoteDynamicJarsBuilder s;
+   private Logger logger = Logger.getGlobal();
+   private static final long STARTUP_TIMESTAMP = new Date().getTime();
+   private static long trialExpired;
+   private String licenseDecryptionKey;
+   private static String limitDate;
+   private static long limit;
+   private static String licenseKey;
+   private static String authInfo;
+   private static String productVersion;
+   private String dynamicJarsPath;
+   private String dynamicJarsRootPath;
+   private String dynamicJarsStoreDirectPath;
+   private String dynamicJarsIdDigest;
+   private ApplicationContext applicationContext;
+   private ClassLoader parentClassLoader;
+   private URLClassLoader dynamicJarClassLoader;
+   private DynamicJarCreator dynamicJarCreator;
+   private BuiltInActionLibraryBuilder builtInActionLibraryBuilder;
+   private RemoteDynamicJarsBuilder remoteDynamicJarsBuilder;
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.o = var1.getClassLoader();
-      this.n = var1;
-      Collection var2 = var1.getBeansOfType(DynamicJarCreator.class).values();
-      if (var2.size() > 0) {
-         this.q = (DynamicJarCreator)var2.iterator().next();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.parentClassLoader = applicationContext.getClassLoader();
+      this.applicationContext = applicationContext;
+      Collection dynamicJarCreators = applicationContext.getBeansOfType(DynamicJarCreator.class).values();
+      if (dynamicJarCreators.size() > 0) {
+         this.dynamicJarCreator = (DynamicJarCreator)dynamicJarCreators.iterator().next();
       }
 
       try {
          if (Utils.getApplicationContext() == null) {
-            Utils.resetApplicationContext(var1);
+            Utils.resetApplicationContext(applicationContext);
          }
 
-         this.a();
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         this.initialize();
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   private void a() throws Exception {
-      String var1 = this.buildDynamicJarsStoreDirectPath();
-      File var2 = new File(this.k);
-      this.a(var2, true);
-      boolean var3 = false;
-      if (StringUtils.isNotBlank(this.s.getResporityServerUrl())) {
+   private void initialize() throws Exception {
+      String dynamicJarsStoreDirectPath = this.buildDynamicJarsStoreDirectPath();
+      File file = new File(this.dynamicJarsRootPath);
+      this.deleteRecursively(file, true);
+      boolean flag = false;
+      if (StringUtils.isNotBlank(this.remoteDynamicJarsBuilder.getResporityServerUrl())) {
          try {
-            var3 = this.s.requestRemoteJars(var1);
-            this.s.startIntervalLoadRemoteJars(this);
-            System.out.println("Load hot deployed jars successfully from server : " + this.s.getResporityServerUrl());
-         } catch (Exception var5) {
-            var5.printStackTrace();
-            System.out.println("Load hot deployed jars was fail from server : " + this.s.getResporityServerUrl());
+            flag = this.remoteDynamicJarsBuilder.requestRemoteJars(dynamicJarsStoreDirectPath);
+            this.remoteDynamicJarsBuilder.startIntervalLoadRemoteJars(this);
+            System.out.println("Load hot deployed jars successfully from server : " + this.remoteDynamicJarsBuilder.getResporityServerUrl());
+         } catch (Exception exception) {
+            java.util.logging.Logger.getLogger(DynamicSpringConfigLoaderImpl.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
+            System.out.println("Load hot deployed jars was fail from server : " + this.remoteDynamicJarsBuilder.getResporityServerUrl());
          }
-      } else if (this.q != null) {
-         var3 = this.q.doCreate(var1);
+      } else if (this.dynamicJarCreator != null) {
+         flag = this.dynamicJarCreator.doCreate(dynamicJarsStoreDirectPath);
       }
 
-      if (var3) {
-         this.loadDynamicJars(var1);
+      if (flag) {
+         this.loadDynamicJars(dynamicJarsStoreDirectPath);
       }
 
-      i = Secret.b.a();
-      this.b();
-      this.d();
+      DynamicSpringConfigLoaderImpl.productVersion = Secret.INSTANCE.getProductVersion();
+      this.initializeLicenseKey();
+      this.loadLicense();
    }
 
-   private void b() {
-      String var1 = Secret.b.c();
-      String var2 = this.c();
-      this.d = Secret.b.b(var2);
-      String var3 = Secret.b.a(var1);
-      String var4 = Secret.b.a(var1, var2);
-      StringBuilder var5 = new StringBuilder();
-      var5.append("{");
-      var5.append("\"" + Secret.b.a("a2V5", true) + "\":\"" + var3 + "\",");
-      var5.append("\"" + Secret.b.a("ZGF0YQ==", true) + "\":\"" + var4 + "\"");
-      var5.append("}");
+   private void initializeLicenseKey() {
+      String text = Secret.INSTANCE.generateAesKey();
+      String machineFingerprint = this.buildMachineFingerprint();
+      this.licenseDecryptionKey = Secret.INSTANCE.md5Hex(machineFingerprint);
+      String text2 = Secret.INSTANCE.encryptWithRsaPublicKey(text);
+      String text3 = Secret.INSTANCE.encryptWithAes(text, machineFingerprint);
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("{");
+      stringBuilder.append("\"" + Secret.INSTANCE.decodeEncodedText("a2V5", true) + "\":\"" + text2 + "\",");
+      stringBuilder.append("\"" + Secret.INSTANCE.decodeEncodedText("ZGF0YQ==", true) + "\":\"" + text3 + "\"");
+      stringBuilder.append("}");
 
       try {
-         g = Base64.getEncoder().encodeToString(var5.toString().getBytes("UTF-8"));
-         Secret.b.c(g);
-      } catch (UnsupportedEncodingException var7) {
-         throw new RuleException(var7);
+         DynamicSpringConfigLoaderImpl.licenseKey = Base64.getEncoder().encodeToString(stringBuilder.toString().getBytes("UTF-8"));
+         Secret.INSTANCE.printLicenseKey(DynamicSpringConfigLoaderImpl.licenseKey);
+      } catch (UnsupportedEncodingException unsupportedEncodingException) {
+         throw new RuleException(unsupportedEncodingException);
       }
    }
 
-   private String c() {
-      String var1 = SystemUtils.OS_NAME;
-      String var2 = SystemUtils.OS_VERSION;
-      String var3 = SystemUtils.JAVA_VENDOR;
-      String var4 = SystemUtils.JAVA_VERSION;
-      return Secret.b.a(var1, var2, var3, var4);
+   private String buildMachineFingerprint() {
+      String text = SystemUtils.OS_NAME;
+      String text2 = SystemUtils.OS_VERSION;
+      String text3 = SystemUtils.JAVA_VENDOR;
+      String text4 = SystemUtils.JAVA_VERSION;
+      return Secret.INSTANCE.buildMachineFingerprintJson(text, text2, text3, text4);
    }
 
-   private static String t;
-   private static boolean u;
+   private static String licenseSource;
+   private static boolean licensePortable;
 
-   private void d() throws Exception {
-      boolean var1 = false;
-      ObjectMapper var2 = JsonMapper.builder().build();
-      String var3 = Secret.b.a("dXJ1bGUtbGljZW5zZQ==", true);
-      String var4 = var3 + Secret.b.a("LnR4dA==", true);
-      t = null;
+   private void loadLicense() throws Exception {
+      boolean flag = false;
+      ObjectMapper objectMapper = JsonMapper.builder().build();
+      String text = Secret.INSTANCE.decodeEncodedText("dXJ1bGUtbGljZW5zZQ==", true);
+      String text2 = text + Secret.INSTANCE.decodeEncodedText("LnR4dA==", true);
+      DynamicSpringConfigLoaderImpl.licenseSource = null;
 
-      String var5 = resolveLicenseHome();
-      if (StringUtils.isNotBlank(var5)) {
-         File var6 = new File(var5, var4);
-         if (var6.isFile()) {
-            String var7 = this.a(var6);
-            if (var7 != null && this.a(var7, var2, var4)) {
-               var1 = true;
-               t = "home";
+      String text3 = resolveLicenseHome();
+      if (StringUtils.isNotBlank(text3)) {
+         File file = new File(text3, text2);
+         if (file.isFile()) {
+            String file2 = this.readFile(file);
+            if (file2 != null && this.activateLicense(file2, objectMapper, text2)) {
+               flag = true;
+               DynamicSpringConfigLoaderImpl.licenseSource = "home";
             }
          }
       }
 
-      if (!var1) {
-         for (int var8 = 0; var8 <= 10; var8++) {
-            String var9 = var8 == 0 ? var4 : var3 + var8 + Secret.b.a("LnR4dA==", true);
-            String var10 = this.a(var9);
-            if (var10 != null && this.a(var10, var2, var9)) {
-               var1 = true;
-               t = "classpath:" + var9;
+      if (!flag) {
+         for (int index = 0; index <= 10; index++) {
+            String text4 = index == 0 ? text2 : text + index + Secret.INSTANCE.decodeEncodedText("LnR4dA==", true);
+            String classpathResource = this.readClasspathResource(text4);
+            if (classpathResource != null && this.activateLicense(classpathResource, objectMapper, text4)) {
+               flag = true;
+               DynamicSpringConfigLoaderImpl.licenseSource = "classpath:" + text4;
                break;
             }
          }
       }
 
-      if (!var1) {
-         Secret.b.b();
+      if (!flag) {
+         Secret.INSTANCE.printTrialBanner();
       }
    }
 
    private static String resolveLicenseHome() {
-      String var0 = null;
-      InputStream var1 = null;
+      String licenseHome = null;
+      InputStream inputStream = null;
 
       try {
          try {
-            var1 = new FileInputStream("urule-init.properties");
-         } catch (FileNotFoundException var8) {
-            var1 = DynamicSpringConfigLoaderImpl.class.getClassLoader().getResourceAsStream("urule-init.properties");
+            inputStream = new FileInputStream("urule-init.properties");
+         } catch (FileNotFoundException fileNotFoundException) {
+            inputStream = DynamicSpringConfigLoaderImpl.class.getClassLoader().getResourceAsStream("urule-init.properties");
          }
 
-         if (var1 != null) {
-            java.util.Properties var2 = new java.util.Properties();
-            var2.load(var1);
-            var0 = var2.getProperty("urule.home");
+         if (inputStream != null) {
+            java.util.Properties properties = new java.util.Properties();
+            properties.load(inputStream);
+            licenseHome = properties.getProperty("urule.home");
          }
-      } catch (IOException var9) {
+      } catch (IOException iOException) {
       } finally {
-         IOUtils.closeQuietly(var1);
+         IOUtils.closeQuietly(inputStream);
       }
 
-      if (StringUtils.isBlank(var0)) {
-         var0 = System.getProperty("urule.home");
+      if (StringUtils.isBlank(licenseHome)) {
+         licenseHome = System.getProperty("urule.home");
       }
 
-      if (StringUtils.isBlank(var0)) {
-         var0 = System.getProperty("uruleHome");
+      if (StringUtils.isBlank(licenseHome)) {
+         licenseHome = System.getProperty("uruleHome");
       }
 
-      if (StringUtils.isBlank(var0)) {
-         var0 = System.getenv("URULE_HOME");
+      if (StringUtils.isBlank(licenseHome)) {
+         licenseHome = System.getenv("URULE_HOME");
       }
 
-      return var0;
+      return licenseHome;
    }
 
-   private String a(File var1) {
+   private String readFile(File file) {
       try {
-         FileInputStream var2 = new FileInputStream(var1);
+         FileInputStream fileInputStream = new FileInputStream(file);
 
          try {
-            return IOUtils.toString(var2, "UTF-8");
+            return IOUtils.toString(fileInputStream, "UTF-8");
          } finally {
-            var2.close();
+            fileInputStream.close();
          }
-      } catch (Exception var5) {
+      } catch (Exception exception) {
          return null;
       }
    }
 
-   private String a(String var1) {
-      String var2 = null;
+   private String readClasspathResource(String text) {
+      String classpathResource = null;
 
       try {
-         Resource var3 = this.n.getResource("classpath:" + var1);
-         if (var3 != null) {
-            InputStream var4 = var3.getInputStream();
-            var2 = IOUtils.toString(var4);
-            var4.close();
+         Resource resource = this.applicationContext.getResource("classpath:" + text);
+         if (resource != null) {
+            InputStream inputStream = resource.getInputStream();
+            classpathResource = IOUtils.toString(inputStream);
+            inputStream.close();
          }
-      } catch (Exception var5) {
+      } catch (Exception exception) {
       }
 
-      return var2;
+      return classpathResource;
    }
 
-   private boolean a(String var1, ObjectMapper var2, String var3) throws Exception {
-      HashMap var4 = this.b(var1, var2, var3);
-      if (var4 == null) {
+   private boolean activateLicense(String text, ObjectMapper objectMapper, String text2) throws Exception {
+      HashMap valuesByKey = this.parseLicenseSafely(text, objectMapper, text2);
+      if (valuesByKey == null) {
          return false;
       }
 
-      Object var5 = var4.get(Secret.b.a("dG8=", true));
-      Object var6 = var4.get(Secret.b.a("bGltaXQ=", true));
-      if (!(var5 instanceof String) || StringUtils.isBlank((String)var5) || var6 == null) {
+      Object objectValue = valuesByKey.get(Secret.INSTANCE.decodeEncodedText("dG8=", true));
+      Object objectValue2 = valuesByKey.get(Secret.INSTANCE.decodeEncodedText("bGltaXQ=", true));
+      if (!(objectValue instanceof String) || StringUtils.isBlank((String)objectValue) || objectValue2 == null) {
          return false;
       }
 
-      long var7 = Long.parseLong(var6.toString());
-      if (var7 < -1L) {
+      long parsedLimit = Long.parseLong(objectValue2.toString());
+      if (parsedLimit < -1L) {
          return false;
       }
 
-      KnowledgeSessionFactory.a(true);
-      h = (String)var5;
-      u = "portable".equals(var4.get("binding"));
-      KnowledgeSessionFactory.a(var4);
-      f = var7;
-      if (f == -1L) {
-         e = Secret.b.a("VW5saW1pdGVk", true);
+      KnowledgeSessionFactory.resetReg(true);
+      DynamicSpringConfigLoaderImpl.authInfo = (String)objectValue;
+      DynamicSpringConfigLoaderImpl.licensePortable = "portable".equals(valuesByKey.get("binding"));
+      KnowledgeSessionFactory.resetLimit(valuesByKey);
+      DynamicSpringConfigLoaderImpl.limit = parsedLimit;
+      if (DynamicSpringConfigLoaderImpl.limit == -1L) {
+         DynamicSpringConfigLoaderImpl.limitDate = Secret.INSTANCE.decodeEncodedText("VW5saW1pdGVk", true);
       } else {
-         Calendar var8 = Calendar.getInstance();
-         var8.setTimeInMillis(f);
-         Date var9 = var8.getTime();
-         e = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(var9);
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTimeInMillis(DynamicSpringConfigLoaderImpl.limit);
+         Date time = calendar.getTime();
+         DynamicSpringConfigLoaderImpl.limitDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
       }
 
-      Secret.b.b(h, e);
-      String var10 = "TGljZW5zZSBmaWxlWw==";
-      String var11 = "XSBpcyB2YWxpZA==";
-      System.out.println(Secret.b.a(var10, true) + var3 + Secret.b.a(var11, true));
+      Secret.INSTANCE.printLicensedBanner(DynamicSpringConfigLoaderImpl.authInfo, DynamicSpringConfigLoaderImpl.limitDate);
+      String text3 = "TGljZW5zZSBmaWxlWw==";
+      String text4 = "XSBpcyB2YWxpZA==";
+      System.out.println(Secret.INSTANCE.decodeEncodedText(text3, true) + text2 + Secret.INSTANCE.decodeEncodedText(text4, true));
       return true;
    }
 
-   private HashMap<?, ?> b(String var1, ObjectMapper var2, String var3) {
+   private HashMap<?, ?> parseLicenseSafely(String text, ObjectMapper objectMapper, String text2) {
       try {
-         return d(var1, var2, this.d);
-      } catch (Exception var5) {
-         System.err.println("License file[" + var3 + "] is broken.");
+         return decodeLicense(text, objectMapper, this.licenseDecryptionKey);
+      } catch (Exception exception) {
+         System.err.println("License file[" + text2 + "] is broken.");
          return null;
       }
    }
 
-   private static HashMap<?, ?> d(String var0, ObjectMapper var1, String var2) throws Exception {
-      Exception var3 = null;
+   private static HashMap<?, ?> decodeLicense(String text, ObjectMapper objectMapper, String text2) throws Exception {
+      Exception exception3 = null;
       try {
-         HashMap<?, ?> var4 = c(var0, var1, var2, null);
-         if (var4 != null) {
-            return var4;
+         HashMap<?, ?> valuesByKey = decryptLicensePayload(text, objectMapper, text2, null);
+         if (valuesByKey != null) {
+            return valuesByKey;
          }
-      } catch (Exception var8) {
-         var3 = var8;
+      } catch (Exception exception) {
+         exception3 = exception;
       }
 
-      String var5 = supplementalPublicKey();
-      if (StringUtils.isBlank(var5)) {
-         if (var3 != null) {
-            throw var3;
+      String text3 = supplementalPublicKey();
+      if (StringUtils.isBlank(text3)) {
+         if (exception3 != null) {
+            throw exception3;
          }
          return null;
       }
 
       try {
-         return c(var0, var1, var2, var5);
-      } catch (Exception var7) {
-         throw var7;
+         return decryptLicensePayload(text, objectMapper, text2, text3);
+      } catch (Exception exception2) {
+         throw exception2;
       }
    }
 
-   private static HashMap<?, ?> c(String var0, ObjectMapper var1, String var2, String var3) throws Exception {
-      byte[] var4 = Base64.getDecoder().decode(var0);
-      HashMap var5 = (HashMap)var1.readValue(var4, HashMap.class);
-      byte[] var6 = Base64.getDecoder().decode((String)var5.get(Secret.b.a("a2V5", true)));
-      byte[] var7 = var3 == null ? Secret.b.b(var6) : Secret.b.b(var6, var3);
-      byte[] var8 = Base64.getDecoder().decode((String)var5.get(Secret.b.a("ZGF0YQ==", true)));
-      byte[] var9 = Secret.b.a(var7, var8);
-      HashMap var10 = (HashMap)var1.readValue(var9, HashMap.class);
-      if ("portable".equals(var10.get("binding"))) {
-         if (var3 == null) {
+   private static HashMap<?, ?> decryptLicensePayload(String text, ObjectMapper objectMapper, String text2, String text3) throws Exception {
+      byte[] bytes = Base64.getDecoder().decode(text);
+      HashMap valuesByKey = (HashMap)objectMapper.readValue(bytes, HashMap.class);
+      byte[] bytes2 = Base64.getDecoder().decode((String)valuesByKey.get(Secret.INSTANCE.decodeEncodedText("a2V5", true)));
+      byte[] bytes3 = text3 == null ? Secret.INSTANCE.decryptWithRsaPublicKey(bytes2) : Secret.INSTANCE.decryptWithRsaPublicKey(bytes2, text3);
+      byte[] bytes4 = Base64.getDecoder().decode((String)valuesByKey.get(Secret.INSTANCE.decodeEncodedText("ZGF0YQ==", true)));
+      byte[] bytes5 = Secret.INSTANCE.decryptWithAes(bytes3, bytes4);
+      HashMap valuesByKey2 = (HashMap)objectMapper.readValue(bytes5, HashMap.class);
+      if ("portable".equals(valuesByKey2.get("binding"))) {
+         if (text3 == null) {
             return null;
          }
-         Object var11 = var10.get("licenseId");
-         Object var12 = var10.get("issuedAt");
-         Object var13 = var10.get("productVersion");
-         if (!(var11 instanceof String) || StringUtils.isBlank((String)var11) || var12 == null || !Secret.b.a().equals(var13)) {
+         Object licenseId = valuesByKey2.get("licenseId");
+         Object issuedAt = valuesByKey2.get("issuedAt");
+         Object productVersion = valuesByKey2.get("productVersion");
+         if (!(licenseId instanceof String) || StringUtils.isBlank((String)licenseId) || issuedAt == null || !Secret.INSTANCE.getProductVersion().equals(productVersion)) {
             return null;
          }
-         long var14 = Long.parseLong(var12.toString());
-         return var14 > 0L && var14 <= System.currentTimeMillis() + 300000L ? var10 : null;
+         long issuedAtMillis = Long.parseLong(issuedAt.toString());
+         return issuedAtMillis > 0L && issuedAtMillis <= System.currentTimeMillis() + 300000L ? valuesByKey2 : null;
       }
-      String var15 = Secret.b.a(var10);
-      return var2.contentEquals(var15) ? var10 : null;
+      String text4 = Secret.INSTANCE.calculateMachineFingerprintHash(valuesByKey2);
+      return text2.contentEquals(text4) ? valuesByKey2 : null;
    }
 
    private static String supplementalPublicKey() {
-      String var0 = System.getProperty("urule.license.issuer.public-key");
-      if (StringUtils.isBlank(var0)) {
+      String property = System.getProperty("urule.license.issuer.public-key");
+      if (StringUtils.isBlank(property)) {
          return null;
       }
 
-      File var1 = new File(var0);
-      if (!var1.isFile() || var1.length() < 1L || var1.length() > 4096L) {
+      File file = new File(property);
+      if (!file.isFile() || file.length() < 1L || file.length() > 4096L) {
          return null;
       }
 
-      FileInputStream var2 = null;
+      FileInputStream fileInputStream = null;
       try {
-         var2 = new FileInputStream(var1);
-         String var3 = IOUtils.toString(var2, "UTF-8").trim();
-         Base64.getDecoder().decode(var3);
-         return var3;
-      } catch (Exception var4) {
+         fileInputStream = new FileInputStream(file);
+         String supplementalPublicKeyResult = IOUtils.toString(fileInputStream, "UTF-8").trim();
+         Base64.getDecoder().decode(supplementalPublicKeyResult);
+         return supplementalPublicKeyResult;
+      } catch (Exception exception) {
          return null;
       } finally {
-         IOUtils.closeQuietly(var2);
+         IOUtils.closeQuietly(fileInputStream);
       }
    }
 
    /**
     * Validates a license without changing the active license or session state.
     */
-   public static LicenseValidationResult validateLicense(String var0) {
-      if (StringUtils.isBlank(var0)) {
+   public static LicenseValidationResult validateLicense(String text2) {
+      if (StringUtils.isBlank(text2)) {
          return LicenseValidationResult.invalid("empty_license");
       }
 
       try {
-         ObjectMapper var1 = JsonMapper.builder().build();
-         String var2 = Secret.b.a(SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.JAVA_VENDOR, SystemUtils.JAVA_VERSION);
-         String var3 = Secret.b.b(var2);
-         HashMap<?, ?> var4 = d(var0, var1, var3);
-         if (var4 == null) {
+         ObjectMapper objectMapper = JsonMapper.builder().build();
+         String text = Secret.INSTANCE.buildMachineFingerprintJson(SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.JAVA_VENDOR, SystemUtils.JAVA_VERSION);
+         String text3 = Secret.INSTANCE.md5Hex(text);
+         HashMap<?, ?> valuesByKey = decodeLicense(text2, objectMapper, text3);
+         if (valuesByKey == null) {
             return LicenseValidationResult.invalid("signature_or_environment_invalid");
          }
 
-         Object var5 = var4.get(Secret.b.a("dG8=", true));
-         Object var6 = var4.get(Secret.b.a("bGltaXQ=", true));
-         if (!(var5 instanceof String) || StringUtils.isBlank((String)var5) || var6 == null) {
+         Object objectValue = valuesByKey.get(Secret.INSTANCE.decodeEncodedText("dG8=", true));
+         Object objectValue2 = valuesByKey.get(Secret.INSTANCE.decodeEncodedText("bGltaXQ=", true));
+         if (!(objectValue instanceof String) || StringUtils.isBlank((String)objectValue) || objectValue2 == null) {
             return LicenseValidationResult.invalid("required_fields_missing");
          }
 
-         long var7 = Long.parseLong(var6.toString());
-         if (var7 < -1L) {
+         long parsedLimit = Long.parseLong(objectValue2.toString());
+         if (parsedLimit < -1L) {
             return LicenseValidationResult.invalid("invalid_limit");
          }
-         return LicenseValidationResult.valid((String)var5, var7, "portable".equals(var4.get("binding")));
-      } catch (Exception var9) {
+         return LicenseValidationResult.valid((String)objectValue, parsedLimit, "portable".equals(valuesByKey.get("binding")));
+      } catch (Exception exception) {
          return LicenseValidationResult.invalid("signature_or_format_invalid");
       }
    }
 
    public static String getLicenseSource() {
-      return t;
+      return DynamicSpringConfigLoaderImpl.licenseSource;
    }
 
    public static boolean isLicensePortable() {
-      return u;
+      return DynamicSpringConfigLoaderImpl.licensePortable;
    }
 
-   private void a(File var1, boolean var2) {
-      for (File var6 : var1.listFiles()) {
-         if (var6.isFile()) {
-            var6.delete();
+   private void deleteRecursively(File file, boolean keepRoot) {
+      for (File file2 : file.listFiles()) {
+         if (file2.isFile()) {
+            file2.delete();
          } else {
-            this.a(var6, false);
+            this.deleteRecursively(file2, false);
          }
       }
 
-      if (!var2) {
-         var1.delete();
+      if (!keepRoot) {
+         file.delete();
       }
    }
 
    @Override
-   public void loadDynamicJars(String var1) throws Exception {
-      if (var1 == null) {
-         this.a.warning("Dynamic jars store path not specify,so do not load jars...");
+   public void loadDynamicJars(String storePath) throws Exception {
+      if (storePath == null) {
+         this.logger.warning("Dynamic jars store path not specify,so do not load jars...");
       } else {
-         this.l = var1;
-         AutowireCapableBeanFactory var2 = this.n.getAutowireCapableBeanFactory();
-         if (!(var2 instanceof DefaultListableBeanFactory)) {
-            this.a.warning("Current \"" + var2 + "\" is not DefaultListableBeanFactory type,so can not loading dynamic jars.");
+         this.dynamicJarsStoreDirectPath = storePath;
+         AutowireCapableBeanFactory autowireCapableBeanFactory = this.applicationContext.getAutowireCapableBeanFactory();
+         if (!(autowireCapableBeanFactory instanceof DefaultListableBeanFactory)) {
+            this.logger.warning("Current \"" + autowireCapableBeanFactory + "\" is not DefaultListableBeanFactory type,so can not loading dynamic jars.");
          } else {
             System.out.println("Start loading dynamic jars,this will take a faw seconds...");
-            File var3 = new File(this.l);
-            File[] var4 = var3.listFiles();
-            if (var4 == null) {
-               this.a.warning("Dynamic dir [" + this.l + "] has no files.");
+            File file = new File(this.dynamicJarsStoreDirectPath);
+            File[] file2 = file.listFiles();
+            if (file2 == null) {
+               this.logger.warning("Dynamic dir [" + this.dynamicJarsStoreDirectPath + "] has no files.");
             } else {
-               DefaultListableBeanFactory var5 = (DefaultListableBeanFactory)var2;
-               ArrayList<URL> var6 = new ArrayList();
-               ArrayList<UrlResource> var7 = new ArrayList();
+               DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory)autowireCapableBeanFactory;
+               ArrayList<URL> items = new ArrayList();
+               ArrayList<UrlResource> items2 = new ArrayList();
 
-               for (File var11 : var4) {
-                  String var12 = var11.getName();
-                  if (var12.toLowerCase().endsWith(".jar")) {
-                     URL var13 = var11.toURI().toURL();
-                     var6.add(var13);
-                     String var14 = var11.getAbsolutePath() + "!/urule-spring-context.xml";
-                     if (var14.startsWith("/")) {
-                        var14 = var14.substring(1, var14.length());
+               for (File file3 : file2) {
+                  String name = file3.getName();
+                  if (name.toLowerCase().endsWith(".jar")) {
+                     URL uRL = file3.toURI().toURL();
+                     items.add(uRL);
+                     String substring = file3.getAbsolutePath() + "!/urule-spring-context.xml";
+                     if (substring.startsWith("/")) {
+                        substring = substring.substring(1, substring.length());
                      }
 
-                     String var15 = "jar:file:/" + var14;
-                     UrlResource var16 = new UrlResource(new URL(var15));
-                     if (var16.exists()) {
-                        var7.add(var16);
+                     String text = "jar:file:/" + substring;
+                     UrlResource urlResource = new UrlResource(new URL(text));
+                     if (urlResource.exists()) {
+                        items2.add(urlResource);
                      }
                   }
                }
 
-               URL[] var18 = var6.toArray(new URL[var6.size()]);
-               URLClassLoader var19 = new URLClassLoader(var18, this.o);
+               URL[] uRL2 = items.toArray(new URL[items.size()]);
+               URLClassLoader uRLClassLoader = new URLClassLoader(uRL2, this.parentClassLoader);
 
                try {
-                  var5.setBeanClassLoader(var19);
+                  defaultListableBeanFactory.setBeanClassLoader(uRLClassLoader);
 
-                  for (UrlResource var21 : (Iterable<UrlResource>)(Iterable<?>)(var7)) {
-                     XmlBeanDefinitionReader var22 = new XmlBeanDefinitionReader(var5);
-                     var22.loadBeanDefinitions(var21);
+                  for (UrlResource urlResource2 : (Iterable<UrlResource>)(Iterable<?>)(items2)) {
+                     XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(defaultListableBeanFactory);
+                     xmlBeanDefinitionReader.loadBeanDefinitions(urlResource2);
                   }
-               } catch (Exception var17) {
-                  var5.setBeanClassLoader(this.o);
-                  throw new RuleException(var17);
+               } catch (Exception exception) {
+                  defaultListableBeanFactory.setBeanClassLoader(this.parentClassLoader);
+                  throw new RuleException(exception);
                }
 
-               if (this.p != null) {
-                  this.p.close();
+               if (this.dynamicJarClassLoader != null) {
+                  this.dynamicJarClassLoader.close();
                }
 
-               this.p = var19;
+               this.dynamicJarClassLoader = uRLClassLoader;
                System.out.println("Loading dynamic jars successfully...");
-               this.r.buildActions(this.n);
-               this.b(var3.getName());
+               this.builtInActionLibraryBuilder.buildActions(this.applicationContext);
+               this.cleanOldDynamicJarDirectories(file.getName());
                ClassUtils.cleanClassesCache();
             }
          }
       }
    }
 
-   private void b(String var1) {
+   private void cleanOldDynamicJarDirectories(String text) {
       try {
-         File var2 = new File(this.k);
-         File[] var9 = var2.listFiles();
-         if (var9 == null) {
+         File file = new File(this.dynamicJarsRootPath);
+         File[] file2 = file.listFiles();
+         if (file2 == null) {
             return;
          }
 
-         for (File var7 : var9) {
-            if (!var7.getName().equals(var1)) {
-               this.a(var7, false);
+         for (File file3 : file2) {
+            if (!file3.getName().equals(text)) {
+               this.deleteRecursively(file3, false);
             }
          }
-      } catch (Exception var8) {
-         String var3 = var8.getMessage();
-         if (var3 == null) {
-            var3 = NullPointerException.class.getName();
+      } catch (Exception exception) {
+         String message = exception.getMessage();
+         if (message == null) {
+            message = NullPointerException.class.getName();
          }
 
-         this.a.warning("Clean dynamic jars store path was fail:" + var3);
+         this.logger.warning("Clean dynamic jars store path was fail:" + message);
       }
    }
 
    @Override
    public String buildDynamicJarsStoreDirectPath() {
-      SimpleDateFormat var1 = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-      return this.e() + "/" + var1.format(new Date());
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+      return this.getDynamicJarsRootPath() + "/" + simpleDateFormat.format(new Date());
    }
 
-   private final String e() {
-      if (this.k != null) {
-         return this.k;
+   private final String getDynamicJarsRootPath() {
+      if (this.dynamicJarsRootPath != null) {
+         return this.dynamicJarsRootPath;
       }
 
-      String var1 = this.j;
-      if (StringUtils.isBlank(var1)) {
-         var1 = System.getProperty("java.io.tmpdir");
-         if (!var1.endsWith("/")) {
-            var1 = var1 + "/";
+      String dynamicJarsRootPath = this.dynamicJarsPath;
+      if (StringUtils.isBlank(dynamicJarsRootPath)) {
+         dynamicJarsRootPath = System.getProperty("java.io.tmpdir");
+         if (!dynamicJarsRootPath.endsWith("/")) {
+            dynamicJarsRootPath = dynamicJarsRootPath + "/";
          }
 
-         var1 = var1 + "urule-jars";
+         dynamicJarsRootPath = dynamicJarsRootPath + "urule-jars";
       }
 
-      String var2 = System.getProperty("urule.instance.id");
-      if (StringUtils.isNotBlank(var2)) {
-         var1 = var1 + "/" + var2;
+      String property = System.getProperty("urule.instance.id");
+      if (StringUtils.isNotBlank(property)) {
+         dynamicJarsRootPath = dynamicJarsRootPath + "/" + property;
       }
 
-      File var3 = new File(var1);
-      if (!var3.exists()) {
-         var3.mkdirs();
+      File file = new File(dynamicJarsRootPath);
+      if (!file.exists()) {
+         file.mkdirs();
       }
 
-      this.k = var1;
-      return var1;
+      this.dynamicJarsRootPath = dynamicJarsRootPath;
+      return dynamicJarsRootPath;
    }
 
    @Override
    public byte[] zipDynamicJars() throws IOException, FileNotFoundException {
-      String var1 = this.getDynamicJarsStoreDirectPath();
-      if (var1 == null) {
+      String dynamicJarsStoreDirectPath = this.getDynamicJarsStoreDirectPath();
+      if (dynamicJarsStoreDirectPath == null) {
          throw new RuleException("Current jars dir not exist.");
       }
 
-      ByteArrayOutputStream var2 = new ByteArrayOutputStream();
-      ZipOutputStream var3 = new ZipOutputStream(var2);
-      File var4 = new File(var1);
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+      File file = new File(dynamicJarsStoreDirectPath);
 
-      for (File var8 : var4.listFiles()) {
-         var3.putNextEntry(new ZipEntry(var8.getName()));
-         FileInputStream var9 = new FileInputStream(var8);
-         IOUtils.copy(var9, var3);
-         IOUtils.closeQuietly(var9);
+      for (File file2 : file.listFiles()) {
+         zipOutputStream.putNextEntry(new ZipEntry(file2.getName()));
+         FileInputStream fileInputStream = new FileInputStream(file2);
+         IOUtils.copy(fileInputStream, zipOutputStream);
+         IOUtils.closeQuietly(fileInputStream);
       }
 
-      var3.finish();
-      var3.flush();
-      var3.closeEntry();
-      var3.close();
-      byte[] var10 = var2.toByteArray();
-      IOUtils.closeQuietly(var2);
-      return var10;
+      zipOutputStream.finish();
+      zipOutputStream.flush();
+      zipOutputStream.closeEntry();
+      zipOutputStream.close();
+      byte[] zipDynamicJarsResult = byteArrayOutputStream.toByteArray();
+      IOUtils.closeQuietly(byteArrayOutputStream);
+      return zipDynamicJarsResult;
    }
 
-   public void setRemoteDynamicJarsBuilder(RemoteDynamicJarsBuilder var1) {
-      this.s = var1;
+   public void setRemoteDynamicJarsBuilder(RemoteDynamicJarsBuilder remoteDynamicJarsBuilder) {
+      this.remoteDynamicJarsBuilder = remoteDynamicJarsBuilder;
    }
 
    @Override
    public String getDynamicJarsStoreDirectPath() {
-      return this.l;
+      return this.dynamicJarsStoreDirectPath;
    }
 
    @Override
    public String getDynamicJarsIdDigest() {
-      return this.m;
+      return this.dynamicJarsIdDigest;
    }
 
    @Override
-   public void resetDynamicJarsIdDigest(String var1) {
-      this.m = var1;
+   public void resetDynamicJarsIdDigest(String jarsId) {
+      this.dynamicJarsIdDigest = jarsId;
    }
 
-   public void setDynamicJarsPath(String var1) {
-      this.j = var1;
+   public void setDynamicJarsPath(String dynamicJarsPath) {
+      this.dynamicJarsPath = dynamicJarsPath;
    }
 
-   public void setBuiltInActionLibraryBuilder(BuiltInActionLibraryBuilder var1) {
-      this.r = var1;
+   public void setBuiltInActionLibraryBuilder(BuiltInActionLibraryBuilder builtInActionLibraryBuilder) {
+      this.builtInActionLibraryBuilder = builtInActionLibraryBuilder;
    }
 
    public static String getAuthInfo() {
-      return h;
+      return DynamicSpringConfigLoaderImpl.authInfo;
    }
 
    public static long getLimit() {
-      return f;
+      return DynamicSpringConfigLoaderImpl.limit;
    }
 
    public static String getLimitDate() {
-      return e;
+      return DynamicSpringConfigLoaderImpl.limitDate;
    }
 
    public static String getLicenseKey() {
-      return g;
+      return DynamicSpringConfigLoaderImpl.licenseKey;
    }
 
    public static String getProductVersion() {
-      return i;
+      return DynamicSpringConfigLoaderImpl.productVersion;
    }
 
    public static long getTrialExpired() {
-      return c;
+      return DynamicSpringConfigLoaderImpl.trialExpired;
    }
 
    static {
-      Random var0 = new Random();
-      int var1 = var0.nextInt(20);
-      long var2 = 86400000 * var1;
-      if (var1 < 1) {
-         var2 = 43200000L;
+      Random random = new Random();
+      int trialDays = random.nextInt(20);
+      long trialDurationMillis = 86400000L * trialDays;
+      if (trialDays < 1) {
+         trialDurationMillis = 43200000L;
       }
 
-      c = b + var2;
+      DynamicSpringConfigLoaderImpl.trialExpired = STARTUP_TIMESTAMP + trialDurationMillis;
    }
 }

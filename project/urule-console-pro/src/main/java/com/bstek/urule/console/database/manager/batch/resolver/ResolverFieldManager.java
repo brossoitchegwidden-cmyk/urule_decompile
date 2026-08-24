@@ -5,23 +5,23 @@ import com.bstek.urule.console.database.model.batch.BatchDataResolverItemField;
 public interface ResolverFieldManager {
    ResolverFieldManager ins = new ResolverFieldManagerImpl();
 
-   BatchDataResolverItemField get(Long var1);
+   BatchDataResolverItemField get(Long id);
 
-   void add(BatchDataResolverItemField var1);
+   void add(BatchDataResolverItemField field);
 
-   void update(BatchDataResolverItemField var1);
+   void update(BatchDataResolverItemField field);
 
-   void remove(Long var1);
+   void remove(Long id);
 
-   void removeByItemId(Long var1);
+   void removeByItemId(Long id);
 
-   void removeByResolverId(Long var1);
+   void removeByResolverId(Long id);
 
-   void removeByBatchId(Long var1);
+   void removeByBatchId(Long id);
 
-   void removeByProjectId(Long var1);
+   void removeByProjectId(Long id);
 
-   void removeByGroupId(String var1);
+   void removeByGroupId(String groupId);
 
    ResolverFieldQuery createQuery();
 }

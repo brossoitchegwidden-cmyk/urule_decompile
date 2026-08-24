@@ -19,72 +19,72 @@ import org.springframework.context.ApplicationContextAware;
 
 public class DSLRuleSetBuilder implements ApplicationContextAware {
    public static final String BEAN_ID = "urule.dslRuleSetBuilder";
-   private Collection<ContextBuilder> a;
-   private RulesRebuilder b;
+   private Collection<ContextBuilder> contextBuilders;
+   private RulesRebuilder rulesRebuilder;
 
-   public RuleSet build(String var1, String var2) throws IOException {
-      RuleParserLexer var3 = new RuleParserLexer(CharStreams.fromString(var1));
-      CommonTokenStream var4 = new CommonTokenStream(var3);
-      RuleParserParser var5 = new RuleParserParser(var4);
-      ScriptDecisionTableErrorListener var6 = new ScriptDecisionTableErrorListener();
-      var5.addErrorListener(var6);
-      BuildRulesVisitor var7 = new BuildRulesVisitor(this.a, var4);
-      RuleSet var8 = var7.buildRuleSet(var5.ruleSet(), var2);
-      this.a(var8);
-      String var9 = var6.getErrorMessage();
-      if (var9 != null) {
-         throw new RuleException("Script parse error:" + var9);
+   public RuleSet build(String script, String path) throws IOException {
+      RuleParserLexer ruleParserLexer = new RuleParserLexer(CharStreams.fromString(script));
+      CommonTokenStream commonTokenStream = new CommonTokenStream(ruleParserLexer);
+      RuleParserParser ruleParserParser = new RuleParserParser(commonTokenStream);
+      ScriptDecisionTableErrorListener scriptDecisionTableErrorListener = new ScriptDecisionTableErrorListener();
+      ruleParserParser.addErrorListener(scriptDecisionTableErrorListener);
+      BuildRulesVisitor buildRulesVisitor = new BuildRulesVisitor(this.contextBuilders, commonTokenStream);
+      RuleSet ruleSet = buildRulesVisitor.buildRuleSet(ruleParserParser.ruleSet(), path);
+      this.processRuleSet(ruleSet);
+      String errorMessage = scriptDecisionTableErrorListener.getErrorMessage();
+      if (errorMessage != null) {
+         throw new RuleException("Script parse error:" + errorMessage);
       } else {
-         return var8;
+         return ruleSet;
       }
    }
 
-   public Criterion buildCriterion(String var1) throws IOException {
-      RuleParserLexer var2 = new RuleParserLexer(CharStreams.fromString(var1));
-      CommonTokenStream var3 = new CommonTokenStream(var2);
-      RuleParserParser var4 = new RuleParserParser(var3);
-      ScriptDecisionTableErrorListener var5 = new ScriptDecisionTableErrorListener();
-      var4.addErrorListener(var5);
-      BuildRulesVisitor var6 = new BuildRulesVisitor(this.a, var3);
-      Criterion var7 = var6.buildCriterion(var4.condition());
-      String var8 = var5.getErrorMessage();
-      if (var8 != null) {
-         throw new RuleException("Script parse error:" + var8);
+   public Criterion buildCriterion(String script) throws IOException {
+      RuleParserLexer ruleParserLexer = new RuleParserLexer(CharStreams.fromString(script));
+      CommonTokenStream commonTokenStream = new CommonTokenStream(ruleParserLexer);
+      RuleParserParser ruleParserParser = new RuleParserParser(commonTokenStream);
+      ScriptDecisionTableErrorListener scriptDecisionTableErrorListener = new ScriptDecisionTableErrorListener();
+      ruleParserParser.addErrorListener(scriptDecisionTableErrorListener);
+      BuildRulesVisitor buildRulesVisitor = new BuildRulesVisitor(this.contextBuilders, commonTokenStream);
+      Criterion criterion = buildRulesVisitor.buildCriterion(ruleParserParser.condition());
+      String errorMessage = scriptDecisionTableErrorListener.getErrorMessage();
+      if (errorMessage != null) {
+         throw new RuleException("Script parse error:" + errorMessage);
       } else {
-         return var7;
+         return criterion;
       }
    }
 
-   public AbstractValue buildValue(String var1) throws IOException {
-      RuleParserLexer var2 = new RuleParserLexer(CharStreams.fromString(var1));
-      CommonTokenStream var3 = new CommonTokenStream(var2);
-      RuleParserParser var4 = new RuleParserParser(var3);
-      ScriptDecisionTableErrorListener var5 = new ScriptDecisionTableErrorListener();
-      var4.addErrorListener(var5);
-      AbstractValue var6 = BuildUtils.buildValue(var4.complexValue());
-      String var7 = var5.getErrorMessage();
-      if (var7 != null) {
-         throw new RuleException("Script parse error:" + var7);
+   public AbstractValue buildValue(String script) throws IOException {
+      RuleParserLexer ruleParserLexer = new RuleParserLexer(CharStreams.fromString(script));
+      CommonTokenStream commonTokenStream = new CommonTokenStream(ruleParserLexer);
+      RuleParserParser ruleParserParser = new RuleParserParser(commonTokenStream);
+      ScriptDecisionTableErrorListener scriptDecisionTableErrorListener = new ScriptDecisionTableErrorListener();
+      ruleParserParser.addErrorListener(scriptDecisionTableErrorListener);
+      AbstractValue abstractValue = BuildUtils.buildValue(ruleParserParser.complexValue());
+      String errorMessage = scriptDecisionTableErrorListener.getErrorMessage();
+      if (errorMessage != null) {
+         throw new RuleException("Script parse error:" + errorMessage);
       } else {
-         return var6;
+         return abstractValue;
       }
    }
 
-   private void a(RuleSet var1) {
-      List var2 = var1.getLibraries();
-      List var3 = var1.getRules();
-      this.b.rebuildRulesForDSL(var2, var3, var1.getPredefineGroup().getPredefines());
+   private void processRuleSet(RuleSet ruleSet) {
+      List libraries = ruleSet.getLibraries();
+      List rules = ruleSet.getRules();
+      this.rulesRebuilder.rebuildRulesForDSL(libraries, rules, ruleSet.getPredefineGroup().getPredefines());
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.b = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 
-   public boolean support(Resource var1) {
+   public boolean support(Resource resource) {
       return false;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.a = var1.getBeansOfType(ContextBuilder.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.contextBuilders = applicationContext.getBeansOfType(ContextBuilder.class).values();
    }
 }

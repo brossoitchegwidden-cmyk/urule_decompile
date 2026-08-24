@@ -11,8 +11,8 @@ public class OrNode extends JunctionNode {
       super(0);
    }
 
-   public OrNode(int var1) {
-      super(var1);
+   public OrNode(int id) {
+      super(id);
    }
 
    @Override
@@ -21,18 +21,18 @@ public class OrNode extends JunctionNode {
    }
 
    @Override
-   public Activity newActivity(Map<Object, Object> var1) {
-      if (var1.containsKey(this)) {
-         return (OrActivity)var1.get(this);
+   public Activity newActivity(Map<Object, Object> context) {
+      if (context.containsKey(this)) {
+         return (OrActivity)context.get(this);
       }
 
-      OrActivity var2 = new OrActivity();
+      OrActivity orActivity = new OrActivity();
 
-      for (Line var4 : this.lines) {
-         var2.addPath(var4.newPath(var1));
+      for (Line line : this.lines) {
+         orActivity.addPath(line.newPath(context));
       }
 
-      var1.put(this, var2);
-      return var2;
+      context.put(this, orActivity);
+      return orActivity;
    }
 }

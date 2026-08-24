@@ -3,27 +3,27 @@ package com.bstek.urule.runtime;
 import java.util.TimerTask;
 
 class IntervalTask extends TimerTask {
-   private DynamicSpringConfigLoader a;
-   private RemoteDynamicJarsBuilder b;
+   private DynamicSpringConfigLoader dynamicSpringConfigLoader;
+   private RemoteDynamicJarsBuilder remoteDynamicJarsBuilder;
 
-   public IntervalTask(DynamicSpringConfigLoader var1, RemoteDynamicJarsBuilder var2) {
-      this.a = var1;
-      this.b = var2;
+   public IntervalTask(DynamicSpringConfigLoader dynamicSpringConfigLoader2, RemoteDynamicJarsBuilder remoteDynamicJarsBuilder2) {
+      this.dynamicSpringConfigLoader = dynamicSpringConfigLoader2;
+      this.remoteDynamicJarsBuilder = remoteDynamicJarsBuilder2;
    }
 
    @Override
    public void run() {
-      String var1 = this.a.buildDynamicJarsStoreDirectPath();
+      String dynamicJarsStoreDirectPath = this.dynamicSpringConfigLoader.buildDynamicJarsStoreDirectPath();
 
       try {
-         boolean var2 = this.b.requestRemoteJars(var1);
-         if (!var2) {
+         boolean flag = this.remoteDynamicJarsBuilder.requestRemoteJars(dynamicJarsStoreDirectPath);
+         if (!flag) {
             return;
          }
 
-         this.a.loadDynamicJars(var1);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+         this.dynamicSpringConfigLoader.loadDynamicJars(dynamicJarsStoreDirectPath);
+      } catch (Exception exception) {
+         java.util.logging.Logger.getLogger(IntervalTask.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
       }
    }
 }

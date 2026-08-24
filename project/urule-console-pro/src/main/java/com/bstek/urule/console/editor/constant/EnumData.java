@@ -1,22 +1,22 @@
 package com.bstek.urule.console.editor.constant;
 
 public class EnumData {
-   private String a;
-   private String b;
+   private String name;
+   private String label;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.b;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.b = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 }

@@ -7,45 +7,45 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ReteInstance {
-   private List<RuleData> a;
-   private String b = UUID.randomUUID().toString();
-   private List<ObjectTypeActivity> c;
-   private Map<String, List<ReteInstanceUnit>> d;
-   private Map<String, List<ReteInstanceUnit>> e;
+   private List<RuleData> allRuleData;
+   private String id = UUID.randomUUID().toString();
+   private List<ObjectTypeActivity> objectTypeActivities;
+   private Map<String, List<ReteInstanceUnit>> mutexGroupReteInstancesMap;
+   private Map<String, List<ReteInstanceUnit>> pendedGroupReteInstancesMap;
 
-   public ReteInstance(List<ObjectTypeActivity> var1, Map<String, List<ReteInstanceUnit>> var2, Map<String, List<ReteInstanceUnit>> var3, List<RuleData> var4) {
-      this.c = var1;
-      this.d = var2;
-      this.e = var3;
-      this.a = var4;
+   public ReteInstance(List<ObjectTypeActivity> objectTypeActivities, Map<String, List<ReteInstanceUnit>> mutexGroupReteInstancesMap, Map<String, List<ReteInstanceUnit>> pendedGroupReteInstancesMap, List<RuleData> allRuleData) {
+      this.objectTypeActivities = objectTypeActivities;
+      this.mutexGroupReteInstancesMap = mutexGroupReteInstancesMap;
+      this.pendedGroupReteInstancesMap = pendedGroupReteInstancesMap;
+      this.allRuleData = allRuleData;
    }
 
-   public Collection<FactTracker> enter(EvaluationContext var1, Object var2) {
-      Collection var3 = null;
+   public Collection<FactTracker> enter(EvaluationContext context, Object obj) {
+      Collection enterResult = null;
 
-      for (ObjectTypeActivity var5 : this.c) {
-         if (var5.support(var2)) {
-            var3 = var5.enter(var1, var2, new FactTracker());
+      for (ObjectTypeActivity objectTypeActivity : this.objectTypeActivities) {
+         if (objectTypeActivity.support(obj)) {
+            enterResult = objectTypeActivity.enter(context, obj, new FactTracker());
             break;
          }
       }
 
-      return var3;
+      return enterResult;
    }
 
    public Map<String, List<ReteInstanceUnit>> getMutexGroupReteInstancesMap() {
-      return this.d;
+      return this.mutexGroupReteInstancesMap;
    }
 
    public Map<String, List<ReteInstanceUnit>> getPendedGroupReteInstancesMap() {
-      return this.e;
+      return this.pendedGroupReteInstancesMap;
    }
 
    public List<RuleData> getAllRuleData() {
-      return this.a;
+      return this.allRuleData;
    }
 
    public String getId() {
-      return this.b;
+      return this.id;
    }
 }

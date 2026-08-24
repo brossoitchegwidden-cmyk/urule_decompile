@@ -5,13 +5,13 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 public class SyntaxErrorListener extends BaseErrorListener {
-   private SyntaxErrorReportor a;
+   private SyntaxErrorReportor reportor;
 
-   public SyntaxErrorListener(SyntaxErrorReportor var1) {
-      this.a = var1;
+   public SyntaxErrorListener(SyntaxErrorReportor reportor) {
+      this.reportor = reportor;
    }
 
-   public void syntaxError(Recognizer<?, ?> var1, Object var2, int var3, int var4, String var5, RecognitionException var6) {
-      this.a.addError(var3, var4, var2, var5);
+   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException recognitionException) {
+      this.reportor.addError(line, charPositionInLine, offendingSymbol, msg);
    }
 }

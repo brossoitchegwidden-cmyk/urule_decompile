@@ -34,177 +34,176 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 
 public class ComplexScoreTableBuilder {
-   private ExcelSupport a;
-   private ScoreTableData b;
-   private DSLRuleSetBuilder c;
-   private List d;
-   private ComplexScorecardDeserializer e;
-   private Map f = new HashMap();
+   private ExcelSupport excelSupport;
+   private ScoreTableData scoreTableData;
+   private DSLRuleSetBuilder dSLRuleSetBuilder;
+   private List variableLibraries;
+   private ComplexScorecardDeserializer complexScorecardDeserializer;
+   private Map importedLibrariesById = new HashMap();
 
-   public ComplexScoreTableBuilder(ScoreTableData var1) {
-      this.b = var1;
-      this.a = new ExcelSupport();
-      this.d = VariableLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
-      this.c = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
-      this.e = (ComplexScorecardDeserializer)Utils.getApplicationContext().getBean("urule.complexScorecardDeserializer");
+   public ComplexScoreTableBuilder(ScoreTableData data) {
+      this.scoreTableData = data;
+      this.excelSupport = new ExcelSupport();
+      this.variableLibraries = VariableLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
+      this.dSLRuleSetBuilder = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
+      this.complexScorecardDeserializer = (ComplexScorecardDeserializer)Utils.getApplicationContext().getBean("urule.complexScorecardDeserializer");
    }
 
    public ComplexScorecardDefinition buildTable() {
       try {
-         String var1 = this.a();
-         System.out.println(var1);
-         Document var2 = DocumentHelper.parseText(var1);
-         return this.e.deserialize(var2.getRootElement());
-      } catch (Exception var3) {
-         throw new InfoException(var3);
+         String text2 = this.buildScorecardXml();
+         Document text = DocumentHelper.parseText(text2);
+         return this.complexScorecardDeserializer.deserialize(text.getRootElement());
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
 
-   private String a() throws IOException {
-      StringBuilder var1 = new StringBuilder();
-      var1.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      var1.append("<complex-scorecard ");
-      ScoringType var2 = ExcelImportUtils.getScoringType(this.b.getProperties());
-      var1.append(" scoring-type=\"" + var2.name() + "\" ");
-      ExcelImportUtils.builderProperties(this.a, var1, this.b.getProperties(), true);
-      String var3 = ExcelImportUtils.getScoringBean(this.b.getProperties());
-      if (var2 == ScoringType.custom && StringUtils.isNotBlank(var3)) {
-         var1.append(" custom-scoring-bean=\"" + var3 + "\" ");
+   private String buildScorecardXml() throws IOException {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+      stringBuilder.append("<complex-scorecard ");
+      ScoringType scoringType = ExcelImportUtils.getScoringType(this.scoreTableData.getProperties());
+      stringBuilder.append(" scoring-type=\"" + scoringType.name() + "\" ");
+      ExcelImportUtils.builderProperties(this.excelSupport, stringBuilder, this.scoreTableData.getProperties(), true);
+      String scoringBean = ExcelImportUtils.getScoringBean(this.scoreTableData.getProperties());
+      if (scoringType == ScoringType.custom && StringUtils.isNotBlank(scoringBean)) {
+         stringBuilder.append(" custom-scoring-bean=\"" + scoringBean + "\" ");
       }
 
-      var1.append(">");
-      ExcelImportUtils.builderRemark(var1, this.b.getProperties());
-      List var4 = this.b.getHeaders();
+      stringBuilder.append(">");
+      ExcelImportUtils.builderRemark(stringBuilder, this.scoreTableData.getProperties());
+      List headers = this.scoreTableData.getHeaders();
 
-      for(int var5 = 0; var5 < var4.size(); ++var5) {
-         TableHeader var6 = (TableHeader)var4.get(var5);
-         String var7 = var6.getName();
-         if (var6.isScore()) {
-            var1.append("<col num=\"" + var5 + "\" width=\"120\" type=\"Score\"/>");
-         } else if (var6.isCustom()) {
-            var1.append("<col num=\"" + var5 + "\" width=\"150\" type=\"Custom\" custom-label=\"" + var7 + "\"/>");
+      for(int index = 0; index < headers.size(); ++index) {
+         TableHeader tableHeader = (TableHeader)headers.get(index);
+         String name = tableHeader.getName();
+         if (tableHeader.isScore()) {
+            stringBuilder.append("<col num=\"" + index + "\" width=\"120\" type=\"Score\"/>");
+         } else if (tableHeader.isCustom()) {
+            stringBuilder.append("<col num=\"" + index + "\" width=\"150\" type=\"Custom\" custom-label=\"" + name + "\"/>");
          } else {
-            VariableCategory var8 = this.a(var7);
-            var1.append("<col num=\"" + var5 + "\" width=\"120\" type=\"Criteria\" uuid=\"" + var8.getUuid() + "\" var-category=\"" + var7 + "\"/>");
+            VariableCategory variableCategory = this.findVariableCategoryByName(name);
+            stringBuilder.append("<col num=\"" + index + "\" width=\"120\" type=\"Criteria\" uuid=\"" + variableCategory.getUuid() + "\" var-category=\"" + name + "\"/>");
          }
       }
 
-      List var20 = this.b.getRows();
+      List rows = this.scoreTableData.getRows();
 
-      for(int var21 = 0; var21 < var20.size(); ++var21) {
-         var1.append("<row num=\"" + var21 + "\" height=\"40\"/>");
+      for(int index2 = 0; index2 < rows.size(); ++index2) {
+         stringBuilder.append("<row num=\"" + index2 + "\" height=\"40\"/>");
       }
 
-      for(int var22 = 0; var22 < var20.size(); ++var22) {
-         RowData var25 = (RowData)var20.get(var22);
+      for(int index3 = 0; index3 < rows.size(); ++index3) {
+         RowData rowData = (RowData)rows.get(index3);
 
-         for(CellData var10 : (Iterable<CellData>)(Iterable<?>)(var25.getCells())) {
-            TableHeader var11 = var10.getHeader();
-            String var12 = var10.getContent();
-            int var13 = var10.getSpan();
-            if (var13 == 0) {
-               var13 = 1;
+         for(CellData cellData : (Iterable<CellData>)(Iterable<?>)(rowData.getCells())) {
+            TableHeader header = cellData.getHeader();
+            String content = cellData.getContent();
+            int span = cellData.getSpan();
+            if (span == 0) {
+               span = 1;
             }
 
-            var1.append("<cell row=\"" + var10.getRow() + "\" col=\"" + var10.getCol() + "\" rowspan=\"" + var13 + "\"");
-            if (!var11.isScore() && !var11.isCustom()) {
-               String var14 = var12;
-               if (StringUtils.isNotBlank(var12)) {
-                  int var15 = var12.indexOf("\n");
-                  if (var15 > 0) {
-                     var14 = var12.substring(0, var15);
+            stringBuilder.append("<cell row=\"" + cellData.getRow() + "\" col=\"" + cellData.getCol() + "\" rowspan=\"" + span + "\"");
+            if (!header.isScore() && !header.isCustom()) {
+               String substring = content;
+               if (StringUtils.isNotBlank(content)) {
+                  int number = content.indexOf("\n");
+                  if (number > 0) {
+                     substring = content.substring(0, number);
                   }
                }
 
-               Object var31 = null;
-               Object var16 = null;
-               if (ExcelSupport.isParameter(var11.getName())) {
-                  String[] var17 = var14.split("\\.");
-                  String[] var18 = new String[]{"参数", var17[0]};
-                  Variable var36 = this.a(var18);
-                  if (var36 != null) {
-                     VariableCategory var19 = this.b(var36.getDataType());
-                     if (var19 != null) {
-                        Variable var32 = (Variable)var19.getVariableLabels().get(var17[1]);
-                        var1.append(" var-label=\"" + var32.getLabel() + "\" var=\"" + var32.getName() + "\" datatype=\"" + var32.getDataType() + "\" uuid=\"" + var32.getUuid() + "\"");
-                        var1.append(" key-label=\"" + var36.getLabel() + "\" key-name=\"" + var36.getName() + "\" key-uuid=\"" + var36.getUuid() + "\">");
+               Object objectValue = null;
+               Object objectValue2 = null;
+               if (ExcelSupport.isParameter(header.getName())) {
+                  String[] parts = substring.split("\\.");
+                  String[] values = new String[]{"参数", parts[0]};
+                  Variable variable = this.findVariable(values);
+                  if (variable != null) {
+                     VariableCategory variableCategory2 = this.resolveVariableCategory(variable.getDataType());
+                     if (variableCategory2 != null) {
+                        Variable variable2 = (Variable)variableCategory2.getVariableLabels().get(parts[1]);
+                        stringBuilder.append(" var-label=\"" + variable2.getLabel() + "\" var=\"" + variable2.getName() + "\" datatype=\"" + variable2.getDataType() + "\" uuid=\"" + variable2.getUuid() + "\"");
+                        stringBuilder.append(" key-label=\"" + variable.getLabel() + "\" key-name=\"" + variable.getName() + "\" key-uuid=\"" + variable.getUuid() + "\">");
                      } else {
-                        var1.append(" var-label=\"" + var36.getLabel() + "\" var=\"" + var36.getName() + "\" datatype=\"" + var36.getDataType() + "\" uuid=\"" + var36.getUuid() + "\">");
+                        stringBuilder.append(" var-label=\"" + variable.getLabel() + "\" var=\"" + variable.getName() + "\" datatype=\"" + variable.getDataType() + "\" uuid=\"" + variable.getUuid() + "\">");
                      }
                   } else {
-                     var1.append(" var-label=\"" + var17[0] + "\" var=\"" + var17[0] + "\" datatype=\"String\" uuid=\"\">");
+                     stringBuilder.append(" var-label=\"" + parts[0] + "\" var=\"" + parts[0] + "\" datatype=\"String\" uuid=\"\">");
                   }
                } else {
-                  String[] var37 = new String[]{var11.getName(), var14};
-                  Variable var33 = this.a(var37, true);
-                  if (var33 == null && var14.indexOf(".") > 0) {
-                     var37[1] = var14.split("\\.")[0];
-                     var33 = this.a(var37);
+                  String[] values2 = new String[]{header.getName(), substring};
+                  Variable variable3 = this.findVariable(values2, true);
+                  if (variable3 == null && substring.indexOf(".") > 0) {
+                     values2[1] = substring.split("\\.")[0];
+                     variable3 = this.findVariable(values2);
                   }
 
-                  var1.append(" var-label=\"" + var33.getLabel() + "\" var=\"" + var33.getName() + "\" datatype=\"" + var33.getDataType() + "\" uuid=\"" + var33.getUuid() + "\">");
+                  stringBuilder.append(" var-label=\"" + variable3.getLabel() + "\" var=\"" + variable3.getName() + "\" datatype=\"" + variable3.getDataType() + "\" uuid=\"" + variable3.getUuid() + "\">");
                }
             } else {
-               var1.append(">");
+               stringBuilder.append(">");
             }
 
-            if (StringUtils.isNotBlank(var12)) {
-               if (!var11.isScore() && !var11.isCustom()) {
-                  String var30 = var12;
-                  if (StringUtils.isNotBlank(var12)) {
-                     int var34 = var12.indexOf("\n");
-                     if (var34 > 0) {
-                        var30 = var12.substring(var34);
+            if (StringUtils.isNotBlank(content)) {
+               if (!header.isScore() && !header.isCustom()) {
+                  String substring2 = content;
+                  if (StringUtils.isNotBlank(content)) {
+                     int number2 = content.indexOf("\n");
+                     if (number2 > 0) {
+                        substring2 = content.substring(number2);
                      }
                   }
 
-                  Criterion var35 = this.c.buildCriterion(var30);
-                  var1.append(this.a(var35));
+                  Criterion criterion = this.dSLRuleSetBuilder.buildCriterion(substring2);
+                  stringBuilder.append(this.buildCriterionXml(criterion));
                } else {
-                  var12 = StringEscapeUtils.escapeXml(var12);
-                  var1.append("<value content=\"" + var12 + "\" type=\"Input\"/>");
+                  content = StringEscapeUtils.escapeXml(content);
+                  stringBuilder.append("<value content=\"" + content + "\" type=\"Input\"/>");
                }
             }
 
-            var1.append("</cell>");
+            stringBuilder.append("</cell>");
          }
       }
 
-      for(VariableInfo var26 : (Iterable<VariableInfo>)(Iterable<?>)(this.a.getVariableInfos())) {
-         this.f.put(var26.getId(), var26);
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.excelSupport.getVariableInfos())) {
+         this.importedLibrariesById.put(variableInfo.getId(), variableInfo);
       }
 
-      for(VariableInfo var27 : (Iterable<VariableInfo>)(Iterable<?>)(this.f.values())) {
-         if (var27.getType().endsWith(ResourceType.VariableLibrary.name())) {
-            var1.append("<import-variable-library id=\"" + var27.getId() + "\" path=\"" + var27.getPath() + "\"/>");
+      for(VariableInfo variableInfo2 : (Iterable<VariableInfo>)(Iterable<?>)(this.importedLibrariesById.values())) {
+         if (variableInfo2.getType().endsWith(ResourceType.VariableLibrary.name())) {
+            stringBuilder.append("<import-variable-library id=\"" + variableInfo2.getId() + "\" path=\"" + variableInfo2.getPath() + "\"/>");
          } else {
-            var1.append("<import-parameter-library id=\"" + var27.getId() + "\" path=\"" + var27.getPath() + "\"/>");
+            stringBuilder.append("<import-parameter-library id=\"" + variableInfo2.getId() + "\" path=\"" + variableInfo2.getPath() + "\"/>");
          }
       }
 
-      var1.append("</complex-scorecard>");
-      return var1.toString();
+      stringBuilder.append("</complex-scorecard>");
+      return stringBuilder.toString();
    }
 
-   private VariableCategory a(String var1) {
-      for(VariableInfo var3 : (Iterable<VariableInfo>)(Iterable<?>)(this.d)) {
-         for(VariableCategory var6 : (Iterable<VariableCategory>)(Iterable<?>)(var3.getVariableCategories())) {
-            if (var6.getName().equals(var1)) {
-               this.f.put(var3.getId(), var3);
-               return var6;
+   private VariableCategory findVariableCategoryByName(String text) {
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableLibraries)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getName().equals(text)) {
+               this.importedLibrariesById.put(variableInfo.getId(), variableInfo);
+               return variableCategory;
             }
          }
       }
 
-      throw new InfoException("变量分类[" + var1 + "]在当前项目中未定义!");
+      throw new InfoException("变量分类[" + text + "]在当前项目中未定义!");
    }
 
-   private VariableCategory b(String var1) {
-      for(VariableInfo var3 : (Iterable<VariableInfo>)(Iterable<?>)(this.d)) {
-         for(VariableCategory var6 : (Iterable<VariableCategory>)(Iterable<?>)(var3.getVariableCategories())) {
-            if (var6.getUuid().equals(var1)) {
-               this.f.put(var3.getId(), var3);
-               return var6;
+   private VariableCategory resolveVariableCategory(String text) {
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableLibraries)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getUuid().equals(text)) {
+               this.importedLibrariesById.put(variableInfo.getId(), variableInfo);
+               return variableCategory;
             }
          }
       }
@@ -212,23 +211,23 @@ public class ComplexScoreTableBuilder {
       return null;
    }
 
-   private Variable a(String[] var1) {
-      return this.a(var1, false);
+   private Variable findVariable(String[] values) {
+      return this.findVariable(values, false);
    }
 
-   private Variable a(String[] var1, boolean var2) {
-      String var3 = var1[0];
-      String var4 = var1[1];
+   private Variable findVariable(String[] values, boolean flag) {
+      String text = values[0];
+      String text2 = values[1];
 
-      for(VariableInfo var6 : (Iterable<VariableInfo>)(Iterable<?>)(this.d)) {
-         for(VariableCategory var9 : (Iterable<VariableCategory>)(Iterable<?>)(var6.getVariableCategories())) {
-            if (var9.getName().equals(var3)) {
-               this.f.put(var6.getId(), var6);
-               List var10 = var9.getVariables();
-               if (var10 != null) {
-                  for(Variable var12 : (Iterable<Variable>)(Iterable<?>)(var10)) {
-                     if (var12.getLabel().equals(var4) || var12.getName().equals(var4)) {
-                        return var12;
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableLibraries)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getName().equals(text)) {
+               this.importedLibrariesById.put(variableInfo.getId(), variableInfo);
+               List variables = variableCategory.getVariables();
+               if (variables != null) {
+                  for(Variable variable : (Iterable<Variable>)(Iterable<?>)(variables)) {
+                     if (variable.getLabel().equals(text2) || variable.getName().equals(text2)) {
+                        return variable;
                      }
                   }
                }
@@ -236,86 +235,86 @@ public class ComplexScoreTableBuilder {
          }
       }
 
-      if (!var2) {
-         throw new InfoException("变量[" + var3 + "." + var4 + "]在当前项目中未定义!");
+      if (!flag) {
+         throw new InfoException("变量[" + text + "." + text2 + "]在当前项目中未定义!");
       } else {
          return null;
       }
    }
 
-   private String a(Criterion var1) {
-      StringBuilder var2 = new StringBuilder();
-      if (var1 instanceof Junction) {
-         Junction var3 = (Junction)var1;
-         List var4 = var3.getCriterions();
-         String var5 = "and";
-         if (var3 instanceof Or) {
-            var5 = "or";
+   private String buildCriterionXml(Criterion criterion) {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (criterion instanceof Junction) {
+         Junction junction = (Junction)criterion;
+         List criterions = junction.getCriterions();
+         String text = "and";
+         if (junction instanceof Or) {
+            text = "or";
          }
 
-         var2.append("<joint type=\"" + var5 + "\">");
-         if (var4 != null) {
-            for(Criterion var7 : (Iterable<Criterion>)(Iterable<?>)(var4)) {
-               if (var7 instanceof Criteria) {
-                  Criteria var8 = (Criteria)var7;
-                  var2.append("<condition op=\"" + var8.getOp().name() + "\">");
-                  Value var9 = var8.getValue();
-                  String var10 = this.a(var9);
-                  if (var10 != null) {
-                     var2.append(var10);
+         stringBuilder.append("<joint type=\"" + text + "\">");
+         if (criterions != null) {
+            for(Criterion criterion2 : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+               if (criterion2 instanceof Criteria) {
+                  Criteria criteria = (Criteria)criterion2;
+                  stringBuilder.append("<condition op=\"" + criteria.getOp().name() + "\">");
+                  Value localValue = criteria.getValue();
+                  String text2 = this.buildValueXml(localValue);
+                  if (text2 != null) {
+                     stringBuilder.append(text2);
                   }
 
-                  var2.append("</condition>");
+                  stringBuilder.append("</condition>");
                }
             }
          }
       } else {
-         var2.append("<joint type=\"and\">");
-         Criteria var11 = (Criteria)var1;
-         var2.append("<condition op=\"" + var11.getOp().name() + "\">");
-         Value var12 = var11.getValue();
-         var2.append(this.a(var12));
-         var2.append("</condition>");
+         stringBuilder.append("<joint type=\"and\">");
+         Criteria criteria2 = (Criteria)criterion;
+         stringBuilder.append("<condition op=\"" + criteria2.getOp().name() + "\">");
+         Value localValue2 = criteria2.getValue();
+         stringBuilder.append(this.buildValueXml(localValue2));
+         stringBuilder.append("</condition>");
       }
 
-      var2.append("</joint>");
-      return var2.toString();
+      stringBuilder.append("</joint>");
+      return stringBuilder.toString();
    }
 
-   private String a(Value var1) {
-      if (var1 == null) {
+   private String buildValueXml(Value localValue) {
+      if (localValue == null) {
          return null;
       } else {
-         StringBuilder var2 = new StringBuilder();
-         if (var1 instanceof SimpleValue) {
-            SimpleValue var3 = (SimpleValue)var1;
-            String var4 = StringEscapeUtils.escapeXml(var3.getContent());
-            var2.append(ExcelImportUtils.buildContentXml(var4));
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var6 = (VariableCategoryValue)var1;
-            String var9 = var6.getVariableCategory();
-            String var5 = StringEscapeUtils.escapeXml(var9);
-            var2.append(ExcelImportUtils.buildContentXml(var5));
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var7 = (VariableValue)var1;
-            String var10 = var7.getVariableCategory() + "." + var7.getVariableLabel();
-            var10 = StringEscapeUtils.escapeXml(var10);
-            var2.append(ExcelImportUtils.buildContentXml(var10));
+         StringBuilder stringBuilder = new StringBuilder();
+         if (localValue instanceof SimpleValue) {
+            SimpleValue simpleValue = (SimpleValue)localValue;
+            String text = StringEscapeUtils.escapeXml(simpleValue.getContent());
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text));
+         } else if (localValue instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)localValue;
+            String variableCategory = variableCategoryValue.getVariableCategory();
+            String text2 = StringEscapeUtils.escapeXml(variableCategory);
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text2));
+         } else if (localValue instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)localValue;
+            String text3 = variableValue.getVariableCategory() + "." + variableValue.getVariableLabel();
+            text3 = StringEscapeUtils.escapeXml(text3);
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text3));
          } else {
-            var2.append(ExcelImportUtils.buildContentXml(""));
+            stringBuilder.append(ExcelImportUtils.buildContentXml(""));
          }
 
-         ComplexArithmetic var8 = var1.getArithmetic();
-         if (var8 == null) {
-            var2.append("</value>");
-            return var2.toString();
+         ComplexArithmetic arithmetic = localValue.getArithmetic();
+         if (arithmetic == null) {
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          } else {
-            ArithmeticType var12 = var8.getType();
-            var2.append("<complex-arith type=\"" + var12.name() + "\">");
-            var2.append(this.a(var8.getValue()));
-            var2.append("</complex-arith>");
-            var2.append("</value>");
-            return var2.toString();
+            ArithmeticType type = arithmetic.getType();
+            stringBuilder.append("<complex-arith type=\"" + type.name() + "\">");
+            stringBuilder.append(this.buildValueXml(arithmetic.getValue()));
+            stringBuilder.append("</complex-arith>");
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          }
       }
    }

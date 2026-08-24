@@ -7,18 +7,18 @@ import org.dom4j.Element;
 
 public class ParameterLibraryDeserializer implements Deserializer<List<Variable>> {
    public static final String BEAN_ID = "urule.parameterLibraryDeserializer";
-   private ParameterLibraryParser a;
+   private ParameterLibraryParser parameterLibraryParser;
 
-   public List<Variable> deserialize(Element var1) {
-      return this.a.parse(var1);
+   public List<Variable> deserialize(Element root) {
+      return this.parameterLibraryParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.parameterLibraryParser.support(root.getName());
    }
 
-   public void setParameterLibraryParser(ParameterLibraryParser var1) {
-      this.a = var1;
+   public void setParameterLibraryParser(ParameterLibraryParser parameterLibraryParser) {
+      this.parameterLibraryParser = parameterLibraryParser;
    }
 }

@@ -4,67 +4,67 @@ import java.util.Date;
 import java.util.List;
 
 public class TestScenario {
-   private long a;
-   private String b;
-   private String c;
-   private Date d;
-   private String e;
-   private List f;
-   private List g;
+   private long id;
+   private String name;
+   private String desc;
+   private Date createDate;
+   private String createUser;
+   private List inputData;
+   private List outputData;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getDesc() {
-      return this.c;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.c = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public Date getCreateDate() {
-      return this.d;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.d = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public String getCreateUser() {
-      return this.e;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.e = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public List getInputData() {
-      return this.f;
+      return this.inputData;
    }
 
-   public void setInputData(List var1) {
-      this.f = var1;
+   public void setInputData(List inputData) {
+      this.inputData = inputData;
    }
 
    public List getOutputData() {
-      return this.g;
+      return this.outputData;
    }
 
-   public void setOutputData(List var1) {
-      this.g = var1;
+   public void setOutputData(List outputData) {
+      this.outputData = outputData;
    }
 }

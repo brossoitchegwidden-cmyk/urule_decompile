@@ -16,26 +16,26 @@ public class SimpleValue extends AbstractValue {
       return this.content;
    }
 
-   public void setContent(String var1) {
-      this.content = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    @JsonIgnore
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Text" : "字符";
-      String var2 = "[" + var1 + "]" + this.content;
+      String text = LocaleHolder.isEnglish() ? "Text" : "字符";
+      String id = "[" + text + "]" + this.content;
       if (this.arithmetic != null) {
-         var2 = var2 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var2;
+      return id;
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Text" : "字符";
-      return "[" + var1 + "]" + this.content;
+      String text = LocaleHolder.isEnglish() ? "Text" : "字符";
+      return "[" + text + "]" + this.content;
    }
 }

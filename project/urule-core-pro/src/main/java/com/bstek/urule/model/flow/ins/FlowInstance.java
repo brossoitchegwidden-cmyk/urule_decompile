@@ -11,10 +11,10 @@ public class FlowInstance implements ProcessInstance {
    private FlowNode currentNode;
    private boolean debug;
 
-   public FlowInstance(ProcessDefinition var1, boolean var2) {
-      this.flowDefinition = var1;
+   public FlowInstance(ProcessDefinition flowDefinition, boolean debug) {
+      this.flowDefinition = flowDefinition;
       this.id = UUID.randomUUID().toString();
-      this.debug = var2;
+      this.debug = debug;
    }
 
    public boolean isDebug() {
@@ -36,12 +36,12 @@ public class FlowInstance implements ProcessInstance {
       return this.currentNode;
    }
 
-   public void setCurrentNode(FlowNode var1) {
-      this.currentNode = var1;
+   public void setCurrentNode(FlowNode currentNode) {
+      this.currentNode = currentNode;
    }
 
-   public void setParent(FlowInstance var1) {
-      this.parent = var1;
+   public void setParent(FlowInstance parent) {
+      this.parent = parent;
    }
 
    public FlowInstance getParent() {
@@ -49,8 +49,8 @@ public class FlowInstance implements ProcessInstance {
    }
 
    public FlowInstance newChildInstance() {
-      FlowInstance var1 = new FlowInstance(this.flowDefinition, this.debug);
-      var1.setParent(this);
-      return var1;
+      FlowInstance flowInstance = new FlowInstance(this.flowDefinition, this.debug);
+      flowInstance.setParent(this);
+      return flowInstance;
    }
 }

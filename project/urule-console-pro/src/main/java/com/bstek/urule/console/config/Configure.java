@@ -5,10 +5,10 @@ import com.bstek.urule.console.config.bootstrap.BootstrapManager;
 import com.bstek.urule.console.util.StringUtils;
 
 public class Configure {
-   private static final Configure a = new Configure();
-   private static final String b = "urule.rest.parameter.name";
+   private static final Configure configure = new Configure();
+   private static final String URULE_REST_PARAMETER_NAME = "urule.rest.parameter.name";
 
-   private ConfigManager a() {
+   private ConfigManager resolveConfigManager() {
       return BootstrapManager.get().getConfigManager();
    }
 
@@ -16,34 +16,34 @@ public class Configure {
    }
 
    public static Configure getConfigure() {
-      return a;
+      return Configure.configure;
    }
 
-   public String getProperty(String var1) {
-      String var2 = System.getProperty(var1);
-      if (StringUtils.isBlank(var2)) {
-         var2 = PropertyConfigurer.getProperty(var1);
+   public String getProperty(String property) {
+      String property2 = System.getProperty(property);
+      if (StringUtils.isBlank(property2)) {
+         property2 = PropertyConfigurer.getProperty(property);
       }
 
-      if (StringUtils.isBlank(var2)) {
-         var2 = this.a().getProperty(var1);
+      if (StringUtils.isBlank(property2)) {
+         property2 = this.resolveConfigManager().getProperty(property);
       }
 
-      return var2;
+      return property2;
    }
 
-   public String getProperty(String var1, String var2) {
-      String var3 = this.getProperty(var1);
-      if (StringUtils.isBlank(var3)) {
-         var3 = var2;
+   public String getProperty(String property, String defaultValue) {
+      String property2 = this.getProperty(property);
+      if (StringUtils.isBlank(property2)) {
+         property2 = defaultValue;
       }
 
-      return var3;
+      return property2;
    }
 
-   public boolean getBoolean(String var1, boolean var2) {
-      String var3 = this.getProperty(var1);
-      return StringUtils.isBlank(var3) ? var2 : Boolean.valueOf(var3);
+   public boolean getBoolean(String property, boolean defaultValue) {
+      String property2 = this.getProperty(property);
+      return StringUtils.isBlank(property2) ? defaultValue : Boolean.valueOf(property2);
    }
 
    public boolean isFreeCreateGroup() {

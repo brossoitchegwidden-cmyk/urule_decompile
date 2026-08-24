@@ -6,19 +6,19 @@ import com.bstek.urule.parse.Parser;
 import org.dom4j.Element;
 
 public class ComplexColumnParser implements Parser<ComplexColumn> {
-   public ComplexColumn parse(Element var1) {
-      ComplexColumn var2 = new ComplexColumn();
-      var2.setNum(Integer.valueOf(var1.attributeValue("num")));
-      var2.setType(ComplexColumnType.valueOf(var1.attributeValue("type")));
-      var2.setVariableCategory(var1.attributeValue("var-category"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setWidth(Double.valueOf(var1.attributeValue("width")).intValue());
-      var2.setCustomLabel(var1.attributeValue("custom-label"));
-      return var2;
+   public ComplexColumn parse(Element element) {
+      ComplexColumn complexColumn = new ComplexColumn();
+      complexColumn.setNum(Integer.valueOf(element.attributeValue("num")));
+      complexColumn.setType(ComplexColumnType.valueOf(element.attributeValue("type")));
+      complexColumn.setVariableCategory(element.attributeValue("var-category"));
+      complexColumn.setUuid(element.attributeValue("uuid"));
+      complexColumn.setWidth(Double.valueOf(element.attributeValue("width")).intValue());
+      complexColumn.setCustomLabel(element.attributeValue("custom-label"));
+      return complexColumn;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("col");
+   public boolean support(String name) {
+      return name.equals("col");
    }
 }

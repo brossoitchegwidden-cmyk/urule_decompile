@@ -12,197 +12,197 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VersionFileQueryImpl implements VersionFileQuery {
-   private Long a;
-   private Long b;
-   private Long c;
-   private String d;
-   private String e;
-   private String f;
-   private List g = new ArrayList();
+   private Long id;
+   private Long fileId;
+   private Long projectId;
+   private String exactVersion;
+   private String version;
+   private String note;
+   private List queryParameters = new ArrayList();
 
    protected VersionFileQueryImpl() {
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      List var7;
+      List listResult;
       try {
-         String var2 = "select ID_,FILE_ID_,PROJECT_ID_,NAME_, VERSION_, CREATE_DATE_,CREATE_USER_,NOTE_,DIGEST_ from URULE_VERSION_FILE";
-         StringBuilder var3 = this.a();
-         if (var3.length() > 0) {
-            var2 = var2 + " where" + var3.toString();
+         String text = "select ID_,FILE_ID_,PROJECT_ID_,NAME_, VERSION_, CREATE_DATE_,CREATE_USER_,NOTE_,DIGEST_ from URULE_VERSION_FILE";
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         var2 = var2 + " order by CREATE_DATE_ desc";
-         PreparedStatement var4 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.g, var4);
-         ResultSet var5 = var4.executeQuery();
-         List var6 = this.a(var5);
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         text = text + " order by CREATE_DATE_ desc";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readVersionFiles(resultSet);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listResult;
    }
 
-   public Page paging(int var1, int var2) {
-      Connection var3 = JdbcUtils.getConnection();
+   public Page paging(int pageIndex, int pageSize) {
+      Connection connection = JdbcUtils.getConnection();
 
-      Page var10;
+      Page page;
       try {
-         String var4 = "select ID_,FILE_ID_,PROJECT_ID_,NAME_, VERSION_, CREATE_DATE_,CREATE_USER_,NOTE_,DIGEST_ from URULE_VERSION_FILE";
-         StringBuilder var5 = this.a();
-         if (var5.length() > 0) {
-            var4 = var4 + " where" + var5.toString();
+         String pageSql = "select ID_,FILE_ID_,PROJECT_ID_,NAME_, VERSION_, CREATE_DATE_,CREATE_USER_,NOTE_,DIGEST_ from URULE_VERSION_FILE";
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var4 = var4 + " order by CREATE_DATE_ desc";
-         Page var6 = new Page(var1, var2);
-         var4 = JdbcUtils.getPageSql(var4, var6.getStartRow(), var2);
-         PreparedStatement var7 = var3.prepareStatement(var4);
-         JdbcUtils.fillPreparedStatementParameters(this.g, var7);
-         ResultSet var8 = var7.executeQuery();
-         List var9 = this.a(var8);
-         var6.setData(var9);
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var4 = "select count(*) from URULE_VERSION_FILE";
-         if (var5.length() > 0) {
-            var4 = var4 + " where" + var5.toString();
+         pageSql = pageSql + " order by CREATE_DATE_ desc";
+         Page page2 = new Page(pageIndex, pageSize);
+         pageSql = JdbcUtils.getPageSql(pageSql, page2.getStartRow(), pageSize);
+         PreparedStatement preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readVersionFiles(resultSet);
+         page2.setData(items);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         pageSql = "select count(*) from URULE_VERSION_FILE";
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var7 = var3.prepareStatement(var4);
-         JdbcUtils.fillPreparedStatementParameters(this.g, var7);
-         var8 = var7.executeQuery();
-         if (var8.next()) {
-            var6.setTotalRows(var8.getLong(1));
+         preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page2.setTotalRows(resultSet.getLong(1));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var10 = var6;
-      } catch (Exception var14) {
-         throw new RuleException(var14);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         page = page2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var10;
+      return page;
    }
 
-   private List a(ResultSet var1) throws SQLException {
-      ArrayList var2 = new ArrayList();
+   private List readVersionFiles(ResultSet resultSet) throws SQLException {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         VersionFile var3 = new VersionFile();
-         var3.setId(var1.getLong(1));
-         var3.setFileId(var1.getLong(2));
-         var3.setProjectId(var1.getLong(3));
-         var3.setName(var1.getString(4));
-         var3.setVersion(var1.getString(5));
-         var3.setCreateDate(var1.getTimestamp(6));
-         var3.setCreateUser(var1.getString(7));
-         var3.setNote(var1.getString(8));
-         var3.setDigest(var1.getString(9));
-         var2.add(var3);
+      while(resultSet.next()) {
+         VersionFile versionFile = new VersionFile();
+         versionFile.setId(resultSet.getLong(1));
+         versionFile.setFileId(resultSet.getLong(2));
+         versionFile.setProjectId(resultSet.getLong(3));
+         versionFile.setName(resultSet.getString(4));
+         versionFile.setVersion(resultSet.getString(5));
+         versionFile.setCreateDate(resultSet.getTimestamp(6));
+         versionFile.setCreateUser(resultSet.getString(7));
+         versionFile.setNote(resultSet.getString(8));
+         versionFile.setDigest(resultSet.getString(9));
+         items.add(versionFile);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a() {
-      this.g.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.g.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.fileId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" FILE_ID_=?");
-         this.g.add(this.b);
+         stringBuilder.append(" FILE_ID_=?");
+         this.queryParameters.add(this.fileId);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_=?");
-         this.g.add(this.c);
+         stringBuilder.append(" PROJECT_ID_=?");
+         this.queryParameters.add(this.projectId);
       }
 
-      if (this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.exactVersion != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" VERSION_=?");
-         this.g.add(this.d);
+         stringBuilder.append(" VERSION_=?");
+         this.queryParameters.add(this.exactVersion);
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.version != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" VERSION_ like ?");
-         this.g.add("%" + this.e + "%");
+         stringBuilder.append(" VERSION_ like ?");
+         this.queryParameters.add("%" + this.version + "%");
       }
 
-      if (this.f != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.note != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NOTE_ like ?");
-         this.g.add("%" + this.f + "%");
+         stringBuilder.append(" NOTE_ like ?");
+         this.queryParameters.add("%" + this.note + "%");
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public VersionFileQuery id(long var1) {
-      this.a = var1;
+   public VersionFileQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public VersionFileQuery fileId(long var1) {
-      this.b = var1;
+   public VersionFileQuery fileId(long fileId) {
+      this.fileId = fileId;
       return this;
    }
 
-   public VersionFileQuery versionLike(String var1) {
-      this.e = var1;
+   public VersionFileQuery versionLike(String version) {
+      this.version = version;
       return this;
    }
 
-   public VersionFileQuery version(String var1) {
-      this.d = var1;
+   public VersionFileQuery version(String version) {
+      this.exactVersion = version;
       return this;
    }
 
-   public VersionFileQuery noteLike(String var1) {
-      this.f = var1;
+   public VersionFileQuery noteLike(String note) {
+      this.note = note;
       return this;
    }
 
-   public VersionFileQuery projectId(long var1) {
-      this.c = var1;
+   public VersionFileQuery projectId(long projectId) {
+      this.projectId = projectId;
       return this;
    }
 }

@@ -12,50 +12,47 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 public class DefaultSecurityProvider implements SecurityProvider {
-   String a = "_urule_login_user";
-
-   public User getLoginUser(HttpServletRequest var1) {
-      return (User)var1.getSession().getAttribute(this.a);
+   static final String LOGIN_USER_SESSION_KEY = "_urule_login_user";
+   public User getLoginUser(HttpServletRequest req) {
+      return (User)req.getSession().getAttribute(LOGIN_USER_SESSION_KEY);
    }
 
-   private User a(HttpServletRequest var1, String var2, String var3) {
-      Object var4 = new ArrayList();
-      com.bstek.urule.console.database.model.User var5 = UserServiceManager.getUserService().validate(var2, var3);
+   private User resolveUser(HttpServletRequest httpServletRequest, String text, String text2) {
+      Object groups = new ArrayList();
+      com.bstek.urule.console.database.model.User user = UserServiceManager.getUserService().validate(text, text2);
       if (UserServiceManager.isCustomUserService()) {
-         HashMap var6 = new HashMap();
-         if (var5.getGroups().size() > 0) {
-            for(Group var8 : (Iterable<Group>)(Iterable<?>)(var5.getGroups())) {
-               Group var9 = GroupManager.ins.get(var8.getId());
-               if (var9 != null) {
-                  ((List)var4).add(var9);
-                  var6.put(var8.getId(), var9);
+         HashMap valuesByKey = new HashMap();
+         if (user.getGroups().size() > 0) {
+            for(Group group : (Iterable<Group>)(Iterable<?>)(user.getGroups())) {
+               Group group2 = GroupManager.ins.get(group.getId());
+               if (group2 != null) {
+                  ((List)groups).add(group2);
+                  valuesByKey.put(group.getId(), group2);
                }
 
-               com.bstek.urule.console.database.model.User var10 = GroupManager.ins.getGroupUser(var8.getId(), var2);
-               if (var10 == null && var9 != null) {
-                  GroupService.ins.addGroupUser(var8.getId(), var2);
+               com.bstek.urule.console.database.model.User groupUser = GroupManager.ins.getGroupUser(group.getId(), text);
+               if (groupUser == null && group2 != null) {
+                  GroupService.ins.addGroupUser(group.getId(), text);
                }
             }
          }
 
-         for(Group var13 : (Iterable<Group>)(Iterable<?>)(GroupManager.ins.createQuery().list(var5.getId()))) {
-            if (!var6.containsKey(var13.getId())) {
-               ((List)var4).add(var13);
+         for(Group group3 : (Iterable<Group>)(Iterable<?>)(GroupManager.ins.createQuery().list(user.getId()))) {
+            if (!valuesByKey.containsKey(group3.getId())) {
+               ((List)groups).add(group3);
             }
          }
       } else {
-         var4 = var5.getGroups();
+         groups = user.getGroups();
       }
 
-      return new DefaultUser(var5.getId(), var5.getName(), (List)var4);
+      return new DefaultUser(user.getId(), user.getName(), (List)groups);
    }
-
-   public void login(HttpServletRequest var1, String var2, String var3) {
-      User var4 = this.a(var1, var2, var3);
-      var1.getSession().setAttribute(this.a, var4);
+   public void login(HttpServletRequest req, String account, String password) {
+      User user = this.resolveUser(req, account, password);
+      req.getSession().setAttribute(LOGIN_USER_SESSION_KEY, user);
    }
-
-   public void logout(HttpServletRequest var1) {
-      var1.getSession().removeAttribute(this.a);
+   public void logout(HttpServletRequest req) {
+      req.getSession().removeAttribute(LOGIN_USER_SESSION_KEY);
    }
 }

@@ -12,44 +12,44 @@ import java.util.Set;
 public class MapAction {
    @ActionMethod(name = "添加到Map")
    @ActionMethodParameter(names = {"Map对象", "key", "value"}, enames = {"Map", "key", "value"})
-   public void put(Map<String, Object> var1, String var2, Object var3) {
-      var1.put(var2, var3);
+   public void put(Map<String, Object> map, String key, Object value) {
+      map.put(key, value);
    }
 
    @ActionMethod(name = "从Map中删除")
    @ActionMethodParameter(names = {"Map对象", "key"}, enames = {"Map", "key"})
-   public void remove(Map<String, Object> var1, String var2) {
-      var1.remove(var2);
+   public void remove(Map<String, Object> map, String key) {
+      map.remove(key);
    }
 
    @ActionMethod(name = "指定Key是否存在")
    @ActionMethodParameter(names = {"Map对象", "key"}, enames = {"Map", "key"})
-   public boolean containsKey(Map<String, Object> var1, String var2) {
-      return var1.containsKey(var2);
+   public boolean containsKey(Map<String, Object> map, String key) {
+      return map.containsKey(key);
    }
 
    @ActionMethod(name = "从Map中取值")
    @ActionMethodParameter(names = {"Map对象", "key"}, enames = {"Map", "key"})
-   public Object get(Map<String, Object> var1, String var2) {
-      return var1.get(var2);
+   public Object get(Map<String, Object> map, String key) {
+      return map.get(key);
    }
 
    @ActionMethod(name = "返回Map大小")
    @ActionMethodParameter(names = "Map对象", enames = "Map")
-   public int size(Map<String, Object> var1) {
-      return var1.size();
+   public int size(Map<String, Object> map) {
+      return map.size();
    }
 
    @ActionMethod(name = "返回Map的Key集合")
    @ActionMethodParameter(names = "Map对象", enames = "Map")
-   public Set<String> keys(Map<String, Object> var1) {
-      return var1.keySet();
+   public Set<String> keys(Map<String, Object> map) {
+      return map.keySet();
    }
 
    @ActionMethod(name = "返回Map的值集合")
    @ActionMethodParameter(names = "Map对象", enames = "Map")
-   public Collection<Object> values(Map<String, Object> var1) {
-      return var1.values();
+   public Collection<Object> values(Map<String, Object> map) {
+      return map.values();
    }
 
    @ActionMethod(name = "创建一个HashMap实例")

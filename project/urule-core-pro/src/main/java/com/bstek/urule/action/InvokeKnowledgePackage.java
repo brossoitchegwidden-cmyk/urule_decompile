@@ -3,47 +3,47 @@ package com.bstek.urule.action;
 import org.apache.commons.lang.StringUtils;
 
 public class InvokeKnowledgePackage {
-   private String a;
-   private String b;
-   private String c;
-   private long d;
+   private String project;
+   private String name;
+   private String code;
+   private long id;
 
-   public InvokeKnowledgePackage(String var1, String var2, long var3, String var5) {
-      this.a = var1;
-      this.b = var2;
-      this.d = var3;
-      if (StringUtils.isNotBlank(var5)) {
-         this.c = var5;
+   public InvokeKnowledgePackage(String project, String name, long id, String code) {
+      this.project = project;
+      this.name = name;
+      this.id = id;
+      if (StringUtils.isNotBlank(code)) {
+         this.code = code;
       } else {
-         this.c = String.valueOf(var3);
+         this.code = String.valueOf(id);
       }
    }
 
    public String getProject() {
-      return this.a;
+      return this.project;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
    public long getId() {
-      return this.d;
+      return this.id;
    }
 
    public String getCode() {
-      return this.c;
+      return this.code;
    }
 
-   public void setCode(String var1) {
-      this.c = var1;
+   public void setCode(String code) {
+      this.code = code;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
-   public void setProject(String var1) {
-      this.a = var1;
+   public void setProject(String project) {
+      this.project = project;
    }
 }

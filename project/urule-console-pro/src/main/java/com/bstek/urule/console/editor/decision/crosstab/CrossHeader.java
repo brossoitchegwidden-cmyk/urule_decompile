@@ -1,41 +1,41 @@
 package com.bstek.urule.console.editor.decision.crosstab;
 
 public class CrossHeader {
-   private int a;
-   private int b;
-   private String c;
+   private int rowSpan;
+   private int colSpan;
+   private String content;
 
    public int getRowSpan() {
-      return this.a;
+      return this.rowSpan;
    }
 
-   public void setRowSpan(int var1) {
-      if (var1 == 0) {
-         this.a = 1;
+   public void setRowSpan(int rowSpan) {
+      if (rowSpan == 0) {
+         this.rowSpan = 1;
       } else {
-         this.a = var1;
+         this.rowSpan = rowSpan;
       }
 
    }
 
    public int getColSpan() {
-      return this.b;
+      return this.colSpan;
    }
 
-   public void setColSpan(int var1) {
-      if (var1 == 0) {
-         this.b = 1;
+   public void setColSpan(int colSpan) {
+      if (colSpan == 0) {
+         this.colSpan = 1;
       } else {
-         this.b = var1;
+         this.colSpan = colSpan;
       }
 
    }
 
    public String getContent() {
-      return this.c;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.c = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 }

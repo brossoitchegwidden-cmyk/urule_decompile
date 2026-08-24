@@ -14,115 +14,115 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;
 
 public class LogManager {
-   private Logger a;
-   private Collection<LogWriter> b;
-   private List<MatchedRuleLog> c;
-   private List<RuleData> d = new ArrayList<>();
+   private Logger logger;
+   private Collection<LogWriter> logWriters;
+   private List<MatchedRuleLog> matchedRuleLogs;
+   private List<RuleData> ruleData = new ArrayList<>();
 
-   public LogManager(KnowledgeSession var1) {
-      this.a = new Logger(var1);
-      ApplicationContext var2 = Utils.getApplicationContext();
-      this.b = var2.getBeansOfType(LogWriter.class).values();
-      String var3 = PropertyConfigurer.getProperty("urule.runtime.log.language");
-      if (StringUtils.isNotBlank(var3) && var3.equals("en")) {
+   public LogManager(KnowledgeSession parentSession) {
+      this.logger = new Logger(parentSession);
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      this.logWriters = applicationContext.getBeansOfType(LogWriter.class).values();
+      String property = PropertyConfigurer.getProperty("urule.runtime.log.language");
+      if (StringUtils.isNotBlank(property) && property.equals("en")) {
          LocaleHolder.setLocale(Locale.ENGLISH);
       }
    }
 
    public List<MatchedRuleLog> buildMatchedRuleLog() {
-      if (this.c != null) {
-         return this.c;
+      if (this.matchedRuleLogs != null) {
+         return this.matchedRuleLogs;
       }
 
-      this.c = new ArrayList<>();
-      this.a(this.c, this.a.getLogs());
-      return this.c;
+      this.matchedRuleLogs = new ArrayList<>();
+      this.collectMatchedRuleLogs(this.matchedRuleLogs, this.logger.getLogs());
+      return this.matchedRuleLogs;
    }
 
    public void clean() {
-      this.a.getLogs().clear();
-      if (this.c != null) {
-         this.c.clear();
-         this.c = null;
+      this.logger.getLogs().clear();
+      if (this.matchedRuleLogs != null) {
+         this.matchedRuleLogs.clear();
+         this.matchedRuleLogs = null;
       }
    }
 
-   private void a(List<MatchedRuleLog> var1, List<Log> var2) {
-      for (Log var4 : var2) {
-         if (var4 instanceof MatchedRuleLog) {
-            var1.add((MatchedRuleLog)var4);
-         } else if (var4 instanceof UnitLog) {
-            UnitLog var5 = (UnitLog)var4;
-            this.a(var1, var5.getLogs());
+   private void collectMatchedRuleLogs(List<MatchedRuleLog> matchedRuleLogs, List<Log> logs) {
+      for (Log log : logs) {
+         if (log instanceof MatchedRuleLog) {
+            matchedRuleLogs.add((MatchedRuleLog)log);
+         } else if (log instanceof UnitLog) {
+            UnitLog unitLog = (UnitLog)log;
+            this.collectMatchedRuleLogs(matchedRuleLogs, unitLog.getLogs());
          }
       }
    }
 
    public List<RuleData> buildNotMatchRuleData() {
-      ArrayList var1 = new ArrayList();
-      List var2 = this.buildMatchedRuleLog();
-      ArrayList var3 = new ArrayList();
-      var3.addAll(this.d);
+      ArrayList notMatchRuleData = new ArrayList();
+      List matchedRuleLog = this.buildMatchedRuleLog();
+      ArrayList items = new ArrayList();
+      items.addAll(this.ruleData);
 
-      for (RuleData var5 : (Iterable<RuleData>)(Iterable<?>)(var3)) {
-         boolean var6 = false;
+      for (RuleData ruleData : (Iterable<RuleData>)(Iterable<?>)(items)) {
+         boolean flag = false;
 
-         for (MatchedRuleLog var8 : (Iterable<MatchedRuleLog>)(Iterable<?>)(var2)) {
-            if (var5.getFile().equals(var8.getRuleFile()) && var5.getName().equals(var8.getRuleName())) {
-               var6 = true;
+         for (MatchedRuleLog matchedRuleLog2 : (Iterable<MatchedRuleLog>)(Iterable<?>)(matchedRuleLog)) {
+            if (ruleData.getFile().equals(matchedRuleLog2.getRuleFile()) && ruleData.getName().equals(matchedRuleLog2.getRuleName())) {
+               flag = true;
                break;
             }
          }
 
-         if (!var6) {
-            var1.add(var5);
+         if (!flag) {
+            notMatchRuleData.add(ruleData);
          }
       }
 
-      return var1;
+      return notMatchRuleData;
    }
 
    public List<FlowNodeLog> buildFlowNodeData() {
-      ArrayList var1 = new ArrayList();
-      this.b(var1, this.a.getLogs());
-      return var1;
+      ArrayList flowNodeData = new ArrayList();
+      this.collectFlowNodeLogs(flowNodeData, this.logger.getLogs());
+      return flowNodeData;
    }
 
-   private void b(List<FlowNodeLog> var1, List<Log> var2) {
-      for (Log var4 : var2) {
-         if (var4 instanceof FlowNodeLog) {
-            FlowNodeLog var5 = (FlowNodeLog)var4;
-            if (var5.isEnter()) {
-               var1.add(var5);
+   private void collectFlowNodeLogs(List<FlowNodeLog> flowNodeLogs, List<Log> logs) {
+      for (Log log : logs) {
+         if (log instanceof FlowNodeLog) {
+            FlowNodeLog flowNodeLog = (FlowNodeLog)log;
+            if (flowNodeLog.isEnter()) {
+               flowNodeLogs.add(flowNodeLog);
             }
-         } else if (var4 instanceof UnitLog) {
-            UnitLog var6 = (UnitLog)var4;
-            this.b(var1, var6.getLogs());
+         } else if (log instanceof UnitLog) {
+            UnitLog unitLog = (UnitLog)log;
+            this.collectFlowNodeLogs(flowNodeLogs, unitLog.getLogs());
          }
       }
    }
 
    public void writeLog() {
       try {
-         for (LogWriter var2 : this.b) {
-            var2.write(this.a.getLogs());
+         for (LogWriter logWriter : this.logWriters) {
+            logWriter.write(this.logger.getLogs());
          }
-      } catch (Exception var3) {
-         throw new RuleException(var3);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public void addRuleData(List<RuleData> var1) {
-      if (var1 != null) {
-         this.d.addAll(var1);
+   public void addRuleData(List<RuleData> list) {
+      if (list != null) {
+         this.ruleData.addAll(list);
       }
    }
 
    public Logger getLogger() {
-      return this.a;
+      return this.logger;
    }
 
    public List<RuleData> getRuleData() {
-      return this.d;
+      return this.ruleData;
    }
 }

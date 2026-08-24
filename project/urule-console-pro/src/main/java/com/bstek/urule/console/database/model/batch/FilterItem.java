@@ -6,49 +6,49 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class FilterItem {
-   private String a;
-   private FilterType b;
-   private String c;
-   private String d;
-   private Object e;
+   private String uuid;
+   private FilterType type;
+   private String name;
+   private String value;
+   private Object itemObject;
 
    public FilterType getType() {
-      return this.b;
+      return this.type;
    }
 
-   public void setType(FilterType var1) {
-      this.b = var1;
+   public void setType(FilterType type) {
+      this.type = type;
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getValue() {
-      return this.d;
+      return this.value;
    }
 
-   public void setValue(String var1) {
-      this.d = var1;
+   public void setValue(String value) {
+      this.value = value;
    }
 
    public String getUuid() {
-      return this.a;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.a = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public Object getItemObject() {
-      return this.e;
+      return this.itemObject;
    }
 
-   public void setItemObject(Object var1) {
-      this.e = var1;
+   public void setItemObject(Object itemObject) {
+      this.itemObject = itemObject;
    }
 }

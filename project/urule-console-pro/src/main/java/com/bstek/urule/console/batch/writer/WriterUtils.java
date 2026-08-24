@@ -29,113 +29,112 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class WriterUtils {
-   private static Log a = LogFactory.getLog(WriterUtils.class);
-   private static final String b = ".";
-   private static final String c = "\\.";
-   private static final String d = "parameter";
+   private static Log logger = LogFactory.getLog(WriterUtils.class);
+   private static final String DOT = ".";
+   private static final String PARAMETER = "parameter";
 
-   public static void write(BatchContext var0, Writer var1, Map var2, Map var3, GeneralEntity var4, Map var5) throws WriterException {
+   public static void write(BatchContext batchContext, Writer writer, Map stmtMap, Map outParams, GeneralEntity data, Map resultMap) throws WriterException {
       try {
-         BatchDataResolver var6 = var0.getBatch().getDataResolver();
+         BatchDataResolver dataResolver = batchContext.getBatch().getDataResolver();
 
-         for(BatchDataResolverItem var9 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var6.getItems())) {
-            BatchItemResult var10 = (BatchItemResult)var5.get(var9.getName());
-            ArrayList var11 = new ArrayList();
-            List var12 = a((KnowledgePackage)var0.getKnowledgePackage(), (BatchDataResolverItem)var9, (List)var11, (Map)var3, (GeneralEntity)var4);
-            if (var12.size() <= 0 || var11 != null && var11.size() != 0) {
-               if (var12.size() > 0) {
-                  for(int var22 = 0; var22 < var11.size(); ++var22) {
-                     Object var14 = var11.get(var22);
-                     GeneralEntity var15 = new GeneralEntity();
+         for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(dataResolver.getItems())) {
+            BatchItemResult batchItemResult = (BatchItemResult)resultMap.get(batchDataResolverItem.getName());
+            ArrayList items = new ArrayList();
+            List items2 = findListSourceFields((KnowledgePackage)batchContext.getKnowledgePackage(), (BatchDataResolverItem)batchDataResolverItem, (List)items, (Map)outParams, (GeneralEntity)data);
+            if (items2.size() <= 0 || items != null && items.size() != 0) {
+               if (items2.size() > 0) {
+                  for(int index = 0; index < items.size(); ++index) {
+                     Object objectValue = items.get(index);
+                     GeneralEntity generalEntity = new GeneralEntity();
 
-                     for(BatchDataResolverItemField var17 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var12)) {
-                        String var18 = var17.getSrcProperty().split("\\.")[2];
-                        if (var14 instanceof GeneralEntity) {
-                           var15.put(var17.getSrcProperty(), ((GeneralEntity)var14).get(var18));
+                     for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(items2)) {
+                        String text = batchDataResolverItemField.getSrcProperty().split("\\.")[2];
+                        if (objectValue instanceof GeneralEntity) {
+                           generalEntity.put(batchDataResolverItemField.getSrcProperty(), ((GeneralEntity)objectValue).get(text));
                         } else {
-                           Field var19 = var14.getClass().getDeclaredField(var18);
-                           var19.setAccessible(true);
-                           Object var20 = var19.get(var14);
-                           if ("Boolean".equals(var17.getDataType()) && var20 instanceof String) {
-                              var15.put(var17.getSrcProperty(), Boolean.valueOf(var20.toString()));
+                           Field declaredField = objectValue.getClass().getDeclaredField(text);
+                           declaredField.setAccessible(true);
+                           Object objectValue2 = declaredField.get(objectValue);
+                           if ("Boolean".equals(batchDataResolverItemField.getDataType()) && objectValue2 instanceof String) {
+                              generalEntity.put(batchDataResolverItemField.getSrcProperty(), Boolean.valueOf(objectValue2.toString()));
                            } else {
-                              var15.put(var17.getSrcProperty(), var20);
+                              generalEntity.put(batchDataResolverItemField.getSrcProperty(), objectValue2);
                            }
 
-                           var15.put(var17.getSrcProperty(), var19.get(var14));
+                           generalEntity.put(batchDataResolverItemField.getSrcProperty(), declaredField.get(objectValue));
                         }
                      }
 
-                     a(var0, var15, var4, var3, var9, var12);
-                     var10.setReadCount(var10.getReadCount() + 1);
-                     if (!a((BatchContext)var0, (BatchDataResolverItem)var9, (GeneralEntity)var4, (Map)var3, (Map)var15)) {
-                        var10.setFilterCount(var10.getFilterCount() + 1);
+                     populateRecordValues(batchContext, generalEntity, data, outParams, batchDataResolverItem, items2);
+                     batchItemResult.setReadCount(batchItemResult.getReadCount() + 1);
+                     if (!passesFilters((BatchContext)batchContext, (BatchDataResolverItem)batchDataResolverItem, (GeneralEntity)data, (Map)outParams, (Map)generalEntity)) {
+                        batchItemResult.setFilterCount(batchItemResult.getFilterCount() + 1);
                      } else {
-                        a(var1, var2, var6, var9, var15);
+                        storeRecord(writer, stmtMap, dataResolver, batchDataResolverItem, generalEntity);
                      }
                   }
                } else {
-                  GeneralEntity var13 = new GeneralEntity();
-                  a(var0, var13, var4, var3, var9, (List)null);
-                  var10.setReadCount(var10.getReadCount() + 1);
-                  if (!a((BatchContext)var0, (BatchDataResolverItem)var9, (GeneralEntity)var4, (Map)var3, (Map)var13)) {
-                     var10.setFilterCount(var10.getFilterCount() + 1);
+                  GeneralEntity generalEntity2 = new GeneralEntity();
+                  populateRecordValues(batchContext, generalEntity2, data, outParams, batchDataResolverItem, (List)null);
+                  batchItemResult.setReadCount(batchItemResult.getReadCount() + 1);
+                  if (!passesFilters((BatchContext)batchContext, (BatchDataResolverItem)batchDataResolverItem, (GeneralEntity)data, (Map)outParams, (Map)generalEntity2)) {
+                     batchItemResult.setFilterCount(batchItemResult.getFilterCount() + 1);
                   } else {
-                     a(var1, var2, var6, var9, var13);
+                     storeRecord(writer, stmtMap, dataResolver, batchDataResolverItem, generalEntity2);
                   }
                }
             }
          }
 
-      } catch (Exception var21) {
-         throw new WriterException(var21.getMessage(), var21, var4);
+      } catch (Exception exception) {
+         throw new WriterException(exception.getMessage(), exception, data);
       }
    }
 
-   private static List a(KnowledgePackage var0, BatchDataResolverItem var1, List var2, Map var3, GeneralEntity var4) {
-      VariableCategory var5 = null;
-      VariableCategoryNotFoundException var6 = null;
+   private static List findListSourceFields(KnowledgePackage knowledgePackage, BatchDataResolverItem batchDataResolverItem, List items, Map valuesByKey, GeneralEntity generalEntity) {
+      VariableCategory variableCategory = null;
+      VariableCategoryNotFoundException variableCategoryNotFoundException2 = null;
 
       try {
-         var5 = JsonBuilder.getInstance().findVariableCategory(var0.getVariableCategories(), "参数");
-      } catch (VariableCategoryNotFoundException var17) {
-         var6 = var17;
+         variableCategory = JsonBuilder.getInstance().findVariableCategory(knowledgePackage.getVariableCategories(), "参数");
+      } catch (VariableCategoryNotFoundException variableCategoryNotFoundException) {
+         variableCategoryNotFoundException2 = variableCategoryNotFoundException;
       }
 
-      ArrayList var7 = new ArrayList();
+      ArrayList items2 = new ArrayList();
 
-      for(BatchDataResolverItemField var9 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var1.getFields())) {
-         String var10 = var9.getSrcProperty();
-         if (var10.indexOf(".") != -1) {
-            List var11 = Arrays.asList(var10.split("\\."));
-            if (var11.size() > 2) {
-               boolean var12 = "parameter".equals(var11.get(0));
-               if (var12) {
-                  if (var5 == null) {
-                     throw var6;
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(batchDataResolverItem.getFields())) {
+         String srcProperty = batchDataResolverItemField.getSrcProperty();
+         if (srcProperty.indexOf(".") != -1) {
+            List items3 = Arrays.asList(srcProperty.split("\\."));
+            if (items3.size() > 2) {
+               boolean flag = "parameter".equals(items3.get(0));
+               if (flag) {
+                  if (variableCategory == null) {
+                     throw variableCategoryNotFoundException2;
                   }
 
-                  String var13 = (String)var11.get(1);
-                  Variable var14 = JsonBuilder.getInstance().findVariable(var5, var13);
-                  if (var14.getType() == Datatype.List) {
-                     var7.add(var9);
-                     if (var2.size() == 0) {
-                        Object var15 = var3.get(var13);
-                        if (var15 instanceof List) {
-                           var2.addAll((List)var15);
+                  String text = (String)items3.get(1);
+                  Variable variable = JsonBuilder.getInstance().findVariable(variableCategory, text);
+                  if (variable.getType() == Datatype.List) {
+                     items2.add(batchDataResolverItemField);
+                     if (items.size() == 0) {
+                        Object objectValue = valuesByKey.get(text);
+                        if (objectValue instanceof List) {
+                           items.addAll((List)objectValue);
                         }
                      }
                   }
                } else {
-                  VariableCategory var18 = JsonBuilder.getInstance().findVariableCategory(var0.getVariableCategories(), (String)var11.get(0));
-                  String var19 = (String)var11.get(1);
-                  Variable var20 = JsonBuilder.getInstance().findVariable(var18, var19);
-                  if (var20.getType() == Datatype.List) {
-                     var7.add(var9);
-                     if (var2.size() == 0) {
-                        Object var16 = var4.get(var19);
-                        if (var16 instanceof List) {
-                           var2.addAll((List)var16);
+                  VariableCategory variableCategory2 = JsonBuilder.getInstance().findVariableCategory(knowledgePackage.getVariableCategories(), (String)items3.get(0));
+                  String text2 = (String)items3.get(1);
+                  Variable variable2 = JsonBuilder.getInstance().findVariable(variableCategory2, text2);
+                  if (variable2.getType() == Datatype.List) {
+                     items2.add(batchDataResolverItemField);
+                     if (items.size() == 0) {
+                        Object objectValue2 = generalEntity.get(text2);
+                        if (objectValue2 instanceof List) {
+                           items.addAll((List)objectValue2);
                         }
                      }
                   }
@@ -144,35 +143,35 @@ public class WriterUtils {
          }
       }
 
-      return var7;
+      return items2;
    }
 
-   protected static void a(BatchContext var0, Map var1, GeneralEntity var2, Map var3, BatchDataResolverItem var4, List var5) {
-      VariableCategory var6 = var0.getParameterVariableCategory();
-      VariableCategory var7 = var0.getProviderVariableCategory();
+   protected static void populateRecordValues(BatchContext batchContext, Map valuesByKey, GeneralEntity generalEntity, Map valuesByKey2, BatchDataResolverItem batchDataResolverItem, List items2) {
+      VariableCategory parameterVariableCategory = batchContext.getParameterVariableCategory();
+      VariableCategory providerVariableCategory = batchContext.getProviderVariableCategory();
 
-      for(BatchDataResolverItemField var9 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var4.getFields())) {
-         boolean var10 = false;
-         if (var5 != null) {
-            for(BatchDataResolverItemField var12 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var5)) {
-               if (var12.getSrcProperty().equals(var9.getSrcProperty())) {
-                  var10 = true;
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(batchDataResolverItem.getFields())) {
+         boolean flag = false;
+         if (items2 != null) {
+            for(BatchDataResolverItemField batchDataResolverItemField2 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(items2)) {
+               if (batchDataResolverItemField2.getSrcProperty().equals(batchDataResolverItemField.getSrcProperty())) {
+                  flag = true;
                   break;
                }
             }
          }
 
-         if (!var10) {
-            String var15 = var9.getSrcProperty();
-            if (var15.indexOf(".") == -1) {
-               var1.put(var15, var2.get(var15));
+         if (!flag) {
+            String srcProperty = batchDataResolverItemField.getSrcProperty();
+            if (srcProperty.indexOf(".") == -1) {
+               valuesByKey.put(srcProperty, generalEntity.get(srcProperty));
             } else {
-               List var13 = Arrays.asList(var15.split("\\."));
-               boolean var14 = "parameter".equals(var13.get(0));
-               if (var14) {
-                  a((Map)var1, (BatchDataResolverItemField)var9, (List)var13, (VariableCategory)var6, (Object)var3);
+               List items = Arrays.asList(srcProperty.split("\\."));
+               boolean flag2 = "parameter".equals(items.get(0));
+               if (flag2) {
+                  copyNestedProperty((Map)valuesByKey, (BatchDataResolverItemField)batchDataResolverItemField, (List)items, (VariableCategory)parameterVariableCategory, (Object)valuesByKey2);
                } else {
-                  a((Map)var1, (BatchDataResolverItemField)var9, (List)var13, (VariableCategory)var7, (Object)var2);
+                  copyNestedProperty((Map)valuesByKey, (BatchDataResolverItemField)batchDataResolverItemField, (List)items, (VariableCategory)providerVariableCategory, (Object)generalEntity);
                }
             }
          }
@@ -180,148 +179,148 @@ public class WriterUtils {
 
    }
 
-   private static void a(Map var0, BatchDataResolverItemField var1, List var2, VariableCategory var3, Object var4) {
-      String var5 = var1.getSrcProperty();
-      String var6 = (String)var2.get(1);
-      Object var7 = null;
-      if (var4 instanceof GeneralEntity) {
-         GeneralEntity var8 = (GeneralEntity)var4;
-         var7 = var8.get(var6);
-      } else if (var4 instanceof HashMap) {
-         HashMap var13 = (HashMap)var4;
-         var7 = var13.get(var6);
+   private static void copyNestedProperty(Map valuesByKey, BatchDataResolverItemField batchDataResolverItemField, List items, VariableCategory variableCategory, Object objectValue) {
+      String srcProperty = batchDataResolverItemField.getSrcProperty();
+      String text = (String)items.get(1);
+      Object objectValue2 = null;
+      if (objectValue instanceof GeneralEntity) {
+         GeneralEntity generalEntity = (GeneralEntity)objectValue;
+         objectValue2 = generalEntity.get(text);
+      } else if (objectValue instanceof HashMap) {
+         HashMap valuesByKey2 = (HashMap)objectValue;
+         objectValue2 = valuesByKey2.get(text);
       }
 
-      if (var7 != null) {
-         Variable var14 = JsonBuilder.getInstance().findVariable(var3, var6);
-         if (!var14.getType().equals(Datatype.List)) {
-            if (var14.getType().equals(Datatype.Object)) {
-               String var9 = (String)var2.get(2);
-               if (var7 instanceof GeneralEntity) {
-                  GeneralEntity var10 = (GeneralEntity)var7;
-                  var0.put(var5, var10.get(var9));
+      if (objectValue2 != null) {
+         Variable variable = JsonBuilder.getInstance().findVariable(variableCategory, text);
+         if (!variable.getType().equals(Datatype.List)) {
+            if (variable.getType().equals(Datatype.Object)) {
+               String text2 = (String)items.get(2);
+               if (objectValue2 instanceof GeneralEntity) {
+                  GeneralEntity generalEntity2 = (GeneralEntity)objectValue2;
+                  valuesByKey.put(srcProperty, generalEntity2.get(text2));
                } else {
                   try {
-                     Field var16 = var7.getClass().getDeclaredField(var9);
-                     var16.setAccessible(true);
-                     Object var11 = var16.get(var7);
-                     if ("Boolean".equals(var1.getDataType()) && var11 instanceof String) {
-                        var0.put(var1.getSrcProperty(), Boolean.valueOf(var11.toString()));
+                     Field declaredField = objectValue2.getClass().getDeclaredField(text2);
+                     declaredField.setAccessible(true);
+                     Object objectValue3 = declaredField.get(objectValue2);
+                     if ("Boolean".equals(batchDataResolverItemField.getDataType()) && objectValue3 instanceof String) {
+                        valuesByKey.put(batchDataResolverItemField.getSrcProperty(), Boolean.valueOf(objectValue3.toString()));
                      } else {
-                        var0.put(var1.getSrcProperty(), var11);
+                        valuesByKey.put(batchDataResolverItemField.getSrcProperty(), objectValue3);
                      }
-                  } catch (Exception var12) {
-                     a.error(var12);
-                     var12.printStackTrace();
+                  } catch (Exception exception) {
+                     WriterUtils.logger.error(exception);
+                     java.util.logging.Logger.getLogger(WriterUtils.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
                   }
                }
-            } else if (var14.getType().equals(Datatype.Map)) {
-               String var15 = (String)var2.get(2);
-               Map var17 = (Map)var7;
-               var0.put(var5, var17.get(var15));
+            } else if (variable.getType().equals(Datatype.Map)) {
+               String text3 = (String)items.get(2);
+               Map objectValue22 = (Map)objectValue2;
+               valuesByKey.put(srcProperty, objectValue22.get(text3));
             } else {
-               var0.put(var5, var7);
+               valuesByKey.put(srcProperty, objectValue2);
             }
          }
 
       }
    }
 
-   protected static boolean a(BatchContext var0, BatchDataResolverItem var1, GeneralEntity var2, Map var3, Map var4) {
-      if (var1.getFilters().size() == 0) {
+   protected static boolean passesFilters(BatchContext batchContext, BatchDataResolverItem batchDataResolverItem, GeneralEntity generalEntity, Map valuesByKey, Map valuesByKey2) {
+      if (batchDataResolverItem.getFilters().size() == 0) {
          return true;
       } else {
-         VariableCategory var5 = var0.getParameterVariableCategory();
-         VariableCategory var6 = var0.getProviderVariableCategory();
-         boolean var7 = true;
+         VariableCategory parameterVariableCategory = batchContext.getParameterVariableCategory();
+         VariableCategory providerVariableCategory = batchContext.getProviderVariableCategory();
+         boolean flag = true;
 
-         for(Filter var9 : (Iterable<Filter>)(Iterable<?>)(var1.getFilters())) {
-            for(FilterItem var11 : (Iterable<FilterItem>)(Iterable<?>)(var9.getItems())) {
-               if (var11.getType() == FilterType.bean) {
-                  WriterFilter var12 = (WriterFilter)Utils.getApplicationContext().getBean(var11.getValue());
-                  boolean var13 = var12.filter(var0, var1, var2, var3, var4);
-                  if (!var13) {
-                     var7 = false;
+         for(Filter filter : (Iterable<Filter>)(Iterable<?>)(batchDataResolverItem.getFilters())) {
+            for(FilterItem filterItem : (Iterable<FilterItem>)(Iterable<?>)(filter.getItems())) {
+               if (filterItem.getType() == FilterType.bean) {
+                  WriterFilter writerFilter = (WriterFilter)Utils.getApplicationContext().getBean(filterItem.getValue());
+                  boolean flag2 = writerFilter.filter(batchContext, batchDataResolverItem, generalEntity, valuesByKey, valuesByKey2);
+                  if (!flag2) {
+                     flag = false;
                      break;
                   }
-               } else if (var11.getType() == FilterType.property) {
-                  PropertyFilter var17 = (PropertyFilter)var11.getItemObject();
-                  String var18 = var17.getProperty();
-                  Object var14 = null;
-                  if (var18.indexOf(".") == -1) {
-                     var14 = var2.get(var18);
+               } else if (filterItem.getType() == FilterType.property) {
+                  PropertyFilter itemObject = (PropertyFilter)filterItem.getItemObject();
+                  String property = itemObject.getProperty();
+                  Object objectValue = null;
+                  if (property.indexOf(".") == -1) {
+                     objectValue = generalEntity.get(property);
                   } else {
-                     List var15 = Arrays.asList(var18.split("\\."));
-                     boolean var16 = "parameter".equals(var15.get(0));
-                     if (var16) {
-                        var14 = a((List)var15, (VariableCategory)var5, (Object)var3, (String)var18, (Map)var4);
+                     List items = Arrays.asList(property.split("\\."));
+                     boolean flag3 = "parameter".equals(items.get(0));
+                     if (flag3) {
+                        objectValue = resolveNestedProperty((List)items, (VariableCategory)parameterVariableCategory, (Object)valuesByKey, (String)property, (Map)valuesByKey2);
                      } else {
-                        var14 = a((List)var15, (VariableCategory)var6, (Object)var2, (String)var18, (Map)var4);
+                        objectValue = resolveNestedProperty((List)items, (VariableCategory)providerVariableCategory, (Object)generalEntity, (String)property, (Map)valuesByKey2);
                      }
                   }
 
-                  boolean var20 = PropertyFilterUtils.valueMatchFilters(var17, var14);
-                  if (!var20) {
-                     var7 = false;
+                  boolean flag4 = PropertyFilterUtils.valueMatchFilters(itemObject, objectValue);
+                  if (!flag4) {
+                     flag = false;
                      break;
                   }
                }
 
-               if (!var7) {
+               if (!flag) {
                   break;
                }
             }
          }
 
-         return var7;
+         return flag;
       }
    }
 
-   private static Object a(List var0, VariableCategory var1, Object var2, String var3, Map var4) {
-      String var5 = (String)var0.get(1);
-      Object var6 = null;
-      if (var2 instanceof GeneralEntity) {
-         GeneralEntity var7 = (GeneralEntity)var2;
-         var6 = var7.get(var5);
-      } else if (var2 instanceof HashMap) {
-         HashMap var12 = (HashMap)var2;
-         var6 = var12.get(var5);
+   private static Object resolveNestedProperty(List items, VariableCategory variableCategory, Object objectValue, String text, Map valuesByKey) {
+      String text2 = (String)items.get(1);
+      Object objectValue2 = null;
+      if (objectValue instanceof GeneralEntity) {
+         GeneralEntity generalEntity = (GeneralEntity)objectValue;
+         objectValue2 = generalEntity.get(text2);
+      } else if (objectValue instanceof HashMap) {
+         HashMap valuesByKey2 = (HashMap)objectValue;
+         objectValue2 = valuesByKey2.get(text2);
       }
 
-      if (var6 == null) {
+      if (objectValue2 == null) {
          return null;
       } else {
-         Variable var13 = JsonBuilder.getInstance().findVariable(var1, var5);
-         if (var13.getType().equals(Datatype.List)) {
-            return var4.get(var3);
-         } else if (var13.getType().equals(Datatype.Object)) {
-            String var14 = (String)var0.get(2);
-            if (var6 instanceof GeneralEntity) {
-               GeneralEntity var16 = (GeneralEntity)var6;
-               return var16.get(var14);
+         Variable variable = JsonBuilder.getInstance().findVariable(variableCategory, text2);
+         if (variable.getType().equals(Datatype.List)) {
+            return valuesByKey.get(text);
+         } else if (variable.getType().equals(Datatype.Object)) {
+            String text3 = (String)items.get(2);
+            if (objectValue2 instanceof GeneralEntity) {
+               GeneralEntity generalEntity2 = (GeneralEntity)objectValue2;
+               return generalEntity2.get(text3);
             } else {
                try {
-                  Field var15 = var6.getClass().getDeclaredField(var14);
-                  var15.setAccessible(true);
-                  Object var10 = var15.get(var6);
-                  return var10;
-               } catch (Exception var11) {
-                  a.error(var11);
-                  var11.printStackTrace();
+                  Field declaredField = objectValue2.getClass().getDeclaredField(text3);
+                  declaredField.setAccessible(true);
+                  Object objectValue3 = declaredField.get(objectValue2);
+                  return objectValue3;
+               } catch (Exception exception) {
+                  WriterUtils.logger.error(exception);
+                  java.util.logging.Logger.getLogger(WriterUtils.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
                   return null;
                }
             }
-         } else if (var13.getType().equals(Datatype.Map)) {
-            String var8 = (String)var0.get(2);
-            Map var9 = (Map)var6;
-            return var9.get(var8);
+         } else if (variable.getType().equals(Datatype.Map)) {
+            String text4 = (String)items.get(2);
+            Map objectValue22 = (Map)objectValue2;
+            return objectValue22.get(text4);
          } else {
-            return var6;
+            return objectValue2;
          }
       }
    }
 
-   private static void a(Writer var0, Map var1, BatchDataResolver var2, BatchDataResolverItem var3, GeneralEntity var4) throws Exception {
-      var0.storeRecord(var1, var2, var3, var4);
+   private static void storeRecord(Writer writer, Map valuesByKey, BatchDataResolver batchDataResolver, BatchDataResolverItem batchDataResolverItem, GeneralEntity generalEntity) throws Exception {
+      writer.storeRecord(valuesByKey, batchDataResolver, batchDataResolverItem, generalEntity);
    }
 }

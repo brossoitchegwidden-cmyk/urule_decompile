@@ -28,15 +28,15 @@ public class RuleParserParser$NamedConditionSetContext extends ParserRuleContext
       return (RuleParserParser$ColonContext)this.getRuleContext(RuleParserParser$ColonContext.class, 0);
    }
 
-   public RuleParserParser$NamedConditionSetContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$NamedConditionSetContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 33;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitNamedConditionSet(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitNamedConditionSet(this) : parseTreeVisitor.visitChildren(this));
    }
 }

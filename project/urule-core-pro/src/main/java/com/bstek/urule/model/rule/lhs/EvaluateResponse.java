@@ -12,16 +12,16 @@ public class EvaluateResponse {
       return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.op = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
-   public void setLeftResult(Object var1) {
-      this.leftResult = var1;
+   public void setLeftResult(Object leftResult) {
+      this.leftResult = leftResult;
    }
 
-   public void setRightResult(Object var1) {
-      this.rightResult = var1;
+   public void setRightResult(Object rightResult) {
+      this.rightResult = rightResult;
    }
 
    public Object getLeftResult() {
@@ -32,8 +32,8 @@ public class EvaluateResponse {
       return this.rightResult;
    }
 
-   public void setResult(boolean var1) {
-      this.result = var1;
+   public void setResult(boolean result) {
+      this.result = result;
    }
 
    public boolean getResult() {

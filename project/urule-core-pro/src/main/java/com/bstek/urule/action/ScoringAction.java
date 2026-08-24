@@ -9,59 +9,59 @@ import java.util.List;
 import java.util.Map;
 
 public class ScoringAction extends AbstractAction {
-   private Value b;
-   private int c;
-   private String d;
-   private String e;
-   private ActionType f = ActionType.Scoring;
+   private Value value;
+   private int rowNumber;
+   private String name;
+   private String weight;
+   private ActionType actionType = ActionType.Scoring;
    public static final String SCORE_CARD_RUNTIME_VALUE = "_score_card_runtime_value_";
 
-   public ScoringAction(int var1, String var2, String var3) {
-      this.c = var1;
-      this.d = var2;
-      this.e = var3;
+   public ScoringAction(int rowNumber, String name, String weight) {
+      this.rowNumber = rowNumber;
+      this.name = name;
+      this.weight = weight;
    }
 
    @Override
-   public ActionValue execute(Context var1, Map<String, Object> var2) {
-      ValueCompute var3 = (ValueCompute)var1.getApplicationContext().getBean("urule.valueCompute");
-      Object var4 = var3.complexValueCompute(this.b, var1, var2);
-      ScoreRuntimeValue var5 = new ScoreRuntimeValue(this.c, this.d, this.e, var4);
-      Map var6 = var1.getWorkingMemory().getParameters();
-      List var7 = null;
-      if (var6.containsKey("_score_card_runtime_value_")) {
-         var7 = (List)var6.get("_score_card_runtime_value_");
+   public ActionValue execute(Context context, Map<String, Object> factMap) {
+      ValueCompute valueCompute = (ValueCompute)context.getApplicationContext().getBean("urule.valueCompute");
+      Object objectValue = valueCompute.complexValueCompute(this.value, context, factMap);
+      ScoreRuntimeValue scoreRuntimeValue = new ScoreRuntimeValue(this.rowNumber, this.name, this.weight, objectValue);
+      Map parameters = context.getWorkingMemory().getParameters();
+      List _score_card_runtime_value_ = null;
+      if (parameters.containsKey("_score_card_runtime_value_")) {
+         _score_card_runtime_value_ = (List)parameters.get("_score_card_runtime_value_");
       } else {
-         var7 = new ArrayList();
-         var6.put("_score_card_runtime_value_", var7);
+         _score_card_runtime_value_ = new ArrayList();
+         parameters.put("_score_card_runtime_value_", _score_card_runtime_value_);
       }
 
-      var7.add(var5);
+      _score_card_runtime_value_.add(scoreRuntimeValue);
       return null;
    }
 
    public Value getValue() {
-      return this.b;
+      return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.b = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public String getName() {
-      return this.d;
+      return this.name;
    }
 
    public String getWeight() {
-      return this.e;
+      return this.weight;
    }
 
    @Override
    public ActionType getActionType() {
-      return this.f;
+      return this.actionType;
    }
 
    public int getRowNumber() {
-      return this.c;
+      return this.rowNumber;
    }
 }

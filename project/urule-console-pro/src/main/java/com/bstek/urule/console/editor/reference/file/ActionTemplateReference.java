@@ -12,35 +12,21 @@ public class ActionTemplateReference extends PacketSupportReference {
    protected ActionTemplateReference() {
    }
 
-   public boolean exist(Object var1, Long var2) {
-      ActionTemplate var3 = (ActionTemplate)var1;
-      List var4 = var3.getLibraries();
-      if (var4 != null) {
-         for(Library var6 : (Iterable<Library>)(Iterable<?>)(var4)) {
-            if (var6.getId() == var2) {
+   public boolean exist(Object obj, Long fileId) {
+      ActionTemplate actionTemplate = (ActionTemplate)obj;
+      List libraries = actionTemplate.getLibraries();
+      if (libraries != null) {
+         for(Library library : (Iterable<Library>)(Iterable<?>)(libraries)) {
+            if (library.getId() == fileId) {
                return true;
             }
          }
       }
 
-      List var8 = var3.getTemplates();
-      if (var8 != null) {
-         for(ActionTemplateUnit var7 : (Iterable<ActionTemplateUnit>)(Iterable<?>)(var8)) {
-            if (this.a(var7.getActions(), var2)) {
-               return true;
-            }
-         }
-      }
-
-      return false;
-   }
-
-   public boolean existPacket(Object var1, Long var2, String var3) {
-      ActionTemplate var4 = (ActionTemplate)var1;
-      List var5 = var4.getTemplates();
-      if (var5 != null) {
-         for(ActionTemplateUnit var7 : (Iterable<ActionTemplateUnit>)(Iterable<?>)(var5)) {
-            if (this.a(var7.getActions(), var2, var3)) {
+      List templates = actionTemplate.getTemplates();
+      if (templates != null) {
+         for(ActionTemplateUnit actionTemplateUnit : (Iterable<ActionTemplateUnit>)(Iterable<?>)(templates)) {
+            if (this.containsFileReference(actionTemplateUnit.getActions(), fileId)) {
                return true;
             }
          }
@@ -49,32 +35,46 @@ public class ActionTemplateReference extends PacketSupportReference {
       return false;
    }
 
-   public FileReference build(Object var1) {
-      FileReference var2 = new FileReference();
-      ActionTemplate var3 = (ActionTemplate)var1;
-      List var4 = var3.getLibraries();
-      ArrayList var5 = new ArrayList();
-      var2.setChildren(var5);
-      var2.setType(ResourceType.ActionTemplate);
-      FileReference var6 = this.b(var4);
-      if (var6 != null) {
-         var5.add(var6);
+   public boolean existPacket(Object obj, Long packetId, String code) {
+      ActionTemplate actionTemplate = (ActionTemplate)obj;
+      List templates = actionTemplate.getTemplates();
+      if (templates != null) {
+         for(ActionTemplateUnit actionTemplateUnit : (Iterable<ActionTemplateUnit>)(Iterable<?>)(templates)) {
+            if (this.containsPacketReference(actionTemplateUnit.getActions(), packetId, code)) {
+               return true;
+            }
+         }
       }
 
-      List var7 = var3.getTemplates();
-      if (var7 == null) {
-         return var2;
+      return false;
+   }
+
+   public FileReference build(Object obj) {
+      FileReference fileReference = new FileReference();
+      ActionTemplate actionTemplate = (ActionTemplate)obj;
+      List libraries = actionTemplate.getLibraries();
+      ArrayList items = new ArrayList();
+      fileReference.setChildren(items);
+      fileReference.setType(ResourceType.ActionTemplate);
+      FileReference fileReference2 = this.buildLibraryReferences(libraries);
+      if (fileReference2 != null) {
+         items.add(fileReference2);
+      }
+
+      List templates = actionTemplate.getTemplates();
+      if (templates == null) {
+         return fileReference;
       } else {
-         for(ActionTemplateUnit var9 : (Iterable<ActionTemplateUnit>)(Iterable<?>)(var7)) {
-            List var10 = var9.getActions();
-            var5.addAll(this.a(var10));
+         for(ActionTemplateUnit actionTemplateUnit : (Iterable<ActionTemplateUnit>)(Iterable<?>)(templates)) {
+            List actions = actionTemplateUnit.getActions();
+            items.addAll(this.buildActionReferences(actions));
          }
 
-         return var2;
+         return fileReference;
       }
    }
 
-   public boolean support(Object var1) {
-      return var1 instanceof ActionTemplate;
+   public boolean support(Object obj) {
+      return obj instanceof ActionTemplate;
    }
 }

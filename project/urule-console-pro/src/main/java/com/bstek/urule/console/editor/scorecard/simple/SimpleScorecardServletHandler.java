@@ -27,101 +27,101 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class SimpleScorecardServletHandler extends ApiServletHandler {
-   public void excel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      InputStream var3 = FileUtils.uploadFile(var1).getInputStream();
-      List var4 = ExcelImportUtils.parseSheets(var3);
-      ScoreTableData var5 = this.a((XSSFSheet)var4.get(0));
-      var3.close();
-      ScoreTableBuilder var6 = new ScoreTableBuilder(var5);
-      ScorecardDefinition var7 = var6.buildTable();
-      this.a(var2, var7);
+   public void excel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      InputStream inputStream = FileUtils.uploadFile(req).getInputStream();
+      List sheets = ExcelImportUtils.parseSheets(inputStream);
+      ScoreTableData scoreTableData = this.parseScoreTableData((XSSFSheet)sheets.get(0));
+      inputStream.close();
+      ScoreTableBuilder scoreTableBuilder = new ScoreTableBuilder(scoreTableData);
+      ScorecardDefinition table = scoreTableBuilder.buildTable();
+      this.writeObjectToJson(resp, table);
    }
 
-   public void doExport(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      RuleFile var5 = FileManager.ins.get(var3);
-      var5.setContent(FileManager.ins.loadContent(var3));
-      Project var6 = ProjectManager.ins.get(var5.getProjectId());
-      ContextHolder.setGroupId(var6.getGroupId());
-      ContextHolder.setProjectId(var6.getId());
-      SimpleScorecardExcelBuilder var7 = new SimpleScorecardExcelBuilder();
-      ScorecardDefinition var8 = var7.buildTable(var5);
-      SimpleDateFormat var9 = new SimpleDateFormat("yyyyMMddHHmmss");
-      String var10 = var5.getName() + "-" + var9.format(new Date()) + ".xlsx";
-      var2.setContentType("application/octet-stream;charset=ISO8859-1");
-      var10 = new String(var10.getBytes("UTF-8"), "ISO8859-1");
-      var2.setHeader("Content-Disposition", "attachment;filename=\"" + var10 + "\"");
-      ServletOutputStream var11 = var2.getOutputStream();
-      var7.buildExcel(var8, var11);
-      var11.flush();
-      var11.close();
+   public void doExport(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      RuleFile ruleFile = FileManager.ins.get(longValue);
+      ruleFile.setContent(FileManager.ins.loadContent(longValue));
+      Project project = ProjectManager.ins.get(ruleFile.getProjectId());
+      ContextHolder.setGroupId(project.getGroupId());
+      ContextHolder.setProjectId(project.getId());
+      SimpleScorecardExcelBuilder simpleScorecardExcelBuilder = new SimpleScorecardExcelBuilder();
+      ScorecardDefinition table = simpleScorecardExcelBuilder.buildTable(ruleFile);
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+      String string = ruleFile.getName() + "-" + simpleDateFormat.format(new Date()) + ".xlsx";
+      resp.setContentType("application/octet-stream;charset=ISO8859-1");
+      string = new String(string.getBytes("UTF-8"), "ISO8859-1");
+      resp.setHeader("Content-Disposition", "attachment;filename=\"" + string + "\"");
+      ServletOutputStream outputStream = resp.getOutputStream();
+      simpleScorecardExcelBuilder.buildExcel(table, outputStream);
+      outputStream.flush();
+      outputStream.close();
    }
 
-   private ScoreTableData a(XSSFSheet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
-      XSSFSheet var3 = var1.getWorkbook().getSheetAt(var1.getWorkbook().getActiveSheetIndex());
-      int var4 = var3.getLastRowNum();
-      List var5 = this.b(var3);
-      Map var6 = ExcelImportUtils.parseProperties(var1.getWorkbook());
+   private ScoreTableData parseScoreTableData(XSSFSheet xSSFSheet) throws Exception {
+      ArrayList items = new ArrayList();
+      XSSFSheet sheetAt = xSSFSheet.getWorkbook().getSheetAt(xSSFSheet.getWorkbook().getActiveSheetIndex());
+      int lastRowNum = sheetAt.getLastRowNum();
+      List items2 = this.parseHeaderColumns(sheetAt);
+      Map properties = ExcelImportUtils.parseProperties(xSSFSheet.getWorkbook());
 
-      for(int var7 = 1; var7 <= var4; ++var7) {
-         XSSFRow var8 = var3.getRow(var7);
-         RowData var9 = new RowData();
-         var2.add(var9);
-         ArrayList var10 = new ArrayList();
-         var9.setCells(var10);
+      for(int index = 1; index <= lastRowNum; ++index) {
+         XSSFRow row = sheetAt.getRow(index);
+         RowData rowData = new RowData();
+         items.add(rowData);
+         ArrayList items3 = new ArrayList();
+         rowData.setCells(items3);
 
-         for(int var11 = 0; var11 < var5.size(); ++var11) {
-            XSSFCell var12 = var8.getCell(var11);
-            if (var12 != null) {
-               int var13 = this.a(var7, var11, var3);
-               if (var13 != 0) {
-                  TableHeader var14 = (TableHeader)var5.get(var11);
-                  CellData var15 = new CellData();
-                  if (var13 > 0) {
-                     var15.setSpan(var13);
+         for(int index2 = 0; index2 < items2.size(); ++index2) {
+            XSSFCell cell = row.getCell(index2);
+            if (cell != null) {
+               int number = this.getMergedRowSpan(index, index2, sheetAt);
+               if (number != 0) {
+                  TableHeader tableHeader = (TableHeader)items2.get(index2);
+                  CellData cellData = new CellData();
+                  if (number > 0) {
+                     cellData.setSpan(number);
                   }
 
-                  var15.setHeader(var14);
-                  CellType var16 = var12.getCellTypeEnum();
-                  switch (var16) {
+                  cellData.setHeader(tableHeader);
+                  CellType cellTypeEnum = cell.getCellTypeEnum();
+                  switch (cellTypeEnum) {
                      case STRING:
-                        var15.setContent(var12.getStringCellValue());
+                        cellData.setContent(cell.getStringCellValue());
                         break;
                      case BOOLEAN:
-                        var15.setContent(String.valueOf(var12.getBooleanCellValue()));
+                        cellData.setContent(String.valueOf(cell.getBooleanCellValue()));
                         break;
                      case NUMERIC:
-                        var15.setContent(String.valueOf(var12.getNumericCellValue()));
+                        cellData.setContent(String.valueOf(cell.getNumericCellValue()));
                      case _NONE:
                      case BLANK:
                      case ERROR:
                      case FORMULA:
                   }
 
-                  var15.setRow(var7 - 1);
-                  var15.setCol(var11);
-                  var10.add(var15);
+                  cellData.setRow(index - 1);
+                  cellData.setCol(index2);
+                  items3.add(cellData);
                }
             }
          }
       }
 
-      var3.getWorkbook().close();
-      ScoreTableData var17 = new ScoreTableData(var5, var2);
-      var17.setProperties(var6);
-      return var17;
+      sheetAt.getWorkbook().close();
+      ScoreTableData scoreTableData = new ScoreTableData(items2, items);
+      scoreTableData.setProperties(properties);
+      return scoreTableData;
    }
 
-   private int a(int var1, int var2, XSSFSheet var3) {
-      for(CellRangeAddress var6 : var3.getMergedRegions()) {
-         if (var6.getFirstColumn() == var2 && var6.getFirstRow() == var1) {
-            int var7 = var6.getLastRow() - var6.getFirstRow();
-            ++var7;
-            return var7;
+   private int getMergedRowSpan(int number, int number2, XSSFSheet xSSFSheet) {
+      for(CellRangeAddress cellRangeAddress : xSSFSheet.getMergedRegions()) {
+         if (cellRangeAddress.getFirstColumn() == number2 && cellRangeAddress.getFirstRow() == number) {
+            int number3 = cellRangeAddress.getLastRow() - cellRangeAddress.getFirstRow();
+            ++number3;
+            return number3;
          }
 
-         if (var2 >= var6.getFirstColumn() && var2 <= var6.getLastColumn() && var1 >= var6.getFirstRow() && var1 <= var6.getLastRow()) {
+         if (number2 >= cellRangeAddress.getFirstColumn() && number2 <= cellRangeAddress.getLastColumn() && number >= cellRangeAddress.getFirstRow() && number <= cellRangeAddress.getLastRow()) {
             return 0;
          }
       }
@@ -129,33 +129,33 @@ public class SimpleScorecardServletHandler extends ApiServletHandler {
       return -1;
    }
 
-   private List b(XSSFSheet var1) {
-      XSSFRow var2 = var1.getRow(0);
-      ArrayList var3 = new ArrayList();
-      short var4 = var2.getLastCellNum();
+   private List parseHeaderColumns(XSSFSheet xSSFSheet) {
+      XSSFRow row = xSSFSheet.getRow(0);
+      ArrayList items = new ArrayList();
+      short lastCellNum = row.getLastCellNum();
 
-      for(int var5 = 0; var5 < var4; ++var5) {
-         XSSFCell var6 = var2.getCell(var5);
-         String var7 = var6.getStringCellValue();
-         if (!StringUtils.isBlank(var7)) {
-            TableHeader var8 = new TableHeader();
-            var3.add(var8);
-            var8.setName(var7);
-            XSSFComment var9 = var6.getCellComment();
-            if (var9 != null) {
-               String var10 = var9.getString().toString().toLowerCase().trim();
-               if (!var10.equals("自定义") && !var10.equals("custom")) {
-                  if (var10.equals("权重") || var10.equals("weightsupport")) {
-                     var8.setWeightWupport(true);
+      for(int index = 0; index < lastCellNum; ++index) {
+         XSSFCell cell = row.getCell(index);
+         String stringCellValue = cell.getStringCellValue();
+         if (!StringUtils.isBlank(stringCellValue)) {
+            TableHeader tableHeader = new TableHeader();
+            items.add(tableHeader);
+            tableHeader.setName(stringCellValue);
+            XSSFComment cellComment = cell.getCellComment();
+            if (cellComment != null) {
+               String trimmedText = cellComment.getString().toString().toLowerCase().trim();
+               if (!trimmedText.equals("自定义") && !trimmedText.equals("custom")) {
+                  if (trimmedText.equals("权重") || trimmedText.equals("weightsupport")) {
+                     tableHeader.setWeightWupport(true);
                   }
                } else {
-                  var8.setCustom(true);
+                  tableHeader.setCustom(true);
                }
             }
          }
       }
 
-      return var3;
+      return items;
    }
 
    public String url() {

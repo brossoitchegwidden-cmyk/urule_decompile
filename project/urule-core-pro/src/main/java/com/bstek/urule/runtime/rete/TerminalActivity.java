@@ -6,22 +6,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class TerminalActivity extends AbstractActivity {
-   private Rule b;
+   private Rule rule;
 
-   public TerminalActivity(Rule var1) {
-      this.b = var1;
+   public TerminalActivity(Rule rule) {
+      this.rule = rule;
    }
 
    @Override
-   public Collection<FactTracker> enter(EvaluationContext var1, Object var2, FactTracker var3) {
-      ArrayList var4 = new ArrayList();
-      ActivationImpl var5 = new ActivationImpl(this.b);
-      var3.setActivation(var5);
-      var4.add(var3);
-      if (this.b.getDebug() != null && this.b.getDebug() && !"__*__".equals(var2)) {
-         var1.getLogger().logMatchRule(this.b, var3.getCriterias());
+   public Collection<FactTracker> enter(EvaluationContext context, Object obj, FactTracker tracker) {
+      ArrayList enterResult = new ArrayList();
+      ActivationImpl activationImpl = new ActivationImpl(this.rule);
+      tracker.setActivation(activationImpl);
+      enterResult.add(tracker);
+      if (this.rule.getDebug() != null && this.rule.getDebug() && !"__*__".equals(obj)) {
+         context.getLogger().logMatchRule(this.rule, tracker.getCriterias());
       }
 
-      return var4;
+      return enterResult;
    }
 }

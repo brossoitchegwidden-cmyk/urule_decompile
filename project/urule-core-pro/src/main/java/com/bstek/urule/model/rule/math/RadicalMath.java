@@ -11,10 +11,10 @@ public class RadicalMath implements MathSign {
    private Value value;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
-      BigDecimal var4 = Utils.toBigDecimal(var3);
-      return new BigDecimal(Math.sqrt(var4.doubleValue())).stripTrailingZeros();
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.value, context, factMap);
+      BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+      return new BigDecimal(Math.sqrt(decimalValue.doubleValue())).stripTrailingZeros();
    }
 
    @Override
@@ -26,13 +26,13 @@ public class RadicalMath implements MathSign {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Radical" : "平方根";
-      return "[" + var1 + "]√" + this.value.getId();
+      String text = LocaleHolder.isEnglish() ? "Radical" : "平方根";
+      return "[" + text + "]√" + this.value.getId();
    }
 }

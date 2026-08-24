@@ -6,30 +6,30 @@ import java.util.List;
 import org.dom4j.Element;
 
 public class ParameterLibraryParser implements Parser<List<Variable>> {
-   private VariableParser a;
+   private VariableParser variableParser;
 
-   public List<Variable> parse(Element var1) {
-      ArrayList var2 = new ArrayList();
+   public List<Variable> parse(Element element) {
+      ArrayList parseResult = new ArrayList();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            String var6 = var5.getName();
-            if (var6.equals("parameter")) {
-               var2.add(this.a.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (name.equals("parameter")) {
+               parseResult.add(this.variableParser.parse(element2));
             }
          }
       }
 
-      return var2;
+      return parseResult;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("parameter-library");
+   public boolean support(String name) {
+      return name.equals("parameter-library");
    }
 
-   public void setVariableParser(VariableParser var1) {
-      this.a = var1;
+   public void setVariableParser(VariableParser variableParser) {
+      this.variableParser = variableParser;
    }
 }

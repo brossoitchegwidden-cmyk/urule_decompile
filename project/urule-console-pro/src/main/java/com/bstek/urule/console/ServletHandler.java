@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 public interface ServletHandler {
    void init();
 
-   void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception;
+   void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception;
 
    String url();
 }

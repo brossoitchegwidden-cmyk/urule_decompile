@@ -20,71 +20,71 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 
 public class FlowServletHandler extends ApiServletHandler {
-   public void loadProjects(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      long var4 = Long.valueOf(var1.getParameter("projectId"));
-      List var6 = ProjectManager.ins.newQuery().groupId(var3).type(ProjectType.common.name()).list();
-      Project var7 = ProjectManager.ins.get(var4);
-      boolean var8 = false;
+   public void loadProjects(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      List items = ProjectManager.ins.newQuery().groupId(parameter).type(ProjectType.common.name()).list();
+      Project project = ProjectManager.ins.get(longValue);
+      boolean flag = false;
 
-      for(Project var10 : (Iterable<Project>)(Iterable<?>)(var6)) {
-         if (var10.getId() == var7.getId()) {
-            var8 = true;
+      for(Project project2 : (Iterable<Project>)(Iterable<?>)(items)) {
+         if (project2.getId() == project.getId()) {
+            flag = true;
             break;
          }
       }
 
-      if (!var8) {
-         var6.add(0, var7);
+      if (!flag) {
+         items.add(0, project);
       }
 
-      this.a(var2, var6);
+      this.writeObjectToJson(resp, items);
    }
 
-   public void loadPackets(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      List var5 = PacketManager.ins.newQuery().enable(true).projectId(var3).list();
-      this.a(var2, var5);
+   public void loadPackets(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      List items = PacketManager.ins.newQuery().enable(true).projectId(longValue).list();
+      this.writeObjectToJson(resp, items);
    }
 
-   public void parseJoint(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("content");
-      var3 = Utils.decodeContent(var3);
-      Element var4 = this.a(var3);
-      Lhs var5 = ServiceUtils.getLhsParser().parse(var4);
-      this.a(var2, var5);
+   public void parseJoint(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("content");
+      parameter = Utils.decodeContent(parameter);
+      Element element = this.parseRootElement(parameter);
+      Lhs lhs = ServiceUtils.getLhsParser().parse(element);
+      this.writeObjectToJson(resp, lhs);
    }
 
-   public void parseActions(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("content");
-      var3 = Utils.decodeContent(var3);
-      Element var4 = this.a(var3);
-      ArrayList var5 = new ArrayList();
+   public void parseActions(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("content");
+      parameter = Utils.decodeContent(parameter);
+      Element element = this.parseRootElement(parameter);
+      ArrayList items = new ArrayList();
 
-      for(Object var7 : var4.elements()) {
-         if (var7 != null && var7 instanceof Element) {
-            Element var8 = (Element)var7;
-            String var9 = var8.getName();
+      for(Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for(ActionParser var11 : (Iterable<ActionParser>)(Iterable<?>)(ServiceUtils.getActionParsers())) {
-               if (var11.support(var9)) {
-                  var5.add(var11.parse(var8));
+            for(ActionParser actionParser : (Iterable<ActionParser>)(Iterable<?>)(ServiceUtils.getActionParsers())) {
+               if (actionParser.support(name)) {
+                  items.add(actionParser.parse(element2));
                   break;
                }
             }
          }
       }
 
-      this.a(var2, var5);
+      this.writeObjectToJson(resp, items);
    }
 
-   private Element a(String var1) {
+   private Element parseRootElement(String text2) {
       try {
-         Document var2 = DocumentHelper.parseText(var1);
-         Element var3 = var2.getRootElement();
-         return var3;
-      } catch (DocumentException var4) {
-         throw new RuleException(var4);
+         Document text = DocumentHelper.parseText(text2);
+         Element rootElement = text.getRootElement();
+         return rootElement;
+      } catch (DocumentException documentException) {
+         throw new RuleException(documentException);
       }
    }
 

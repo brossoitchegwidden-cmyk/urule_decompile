@@ -67,132 +67,133 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.Element;
 import org.springframework.context.ApplicationContext;
 
+/** Loads editor resources and enriches their cross-file/action references. */
 public class LoadServletHandler extends ApiServletHandler {
-   private BuiltInActionLibraryBuilder e;
-   private List f = new ArrayList();
+   private BuiltInActionLibraryBuilder builtInActionLibraryBuilder;
+   private List<FunctionDescriptor> functionDescriptors = new ArrayList<>();
 
    public void init() {
       super.init();
-      ApplicationContext var1 = Utils.getApplicationContext();
-      this.e = (BuiltInActionLibraryBuilder)var1.getBean("urule.builtInActionLibraryBuilder");
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      this.builtInActionLibraryBuilder = (BuiltInActionLibraryBuilder)applicationContext.getBean("urule.builtInActionLibraryBuilder");
 
-      for(FunctionDescriptor var4 : var1.getBeansOfType(FunctionDescriptor.class).values()) {
-         if (!var4.isDisabled()) {
-            this.f.add((FunctionDescriptor)ProxyUtils.getTargetObject(var4));
+      for(FunctionDescriptor functionDescriptor : applicationContext.getBeansOfType(FunctionDescriptor.class).values()) {
+         if (!functionDescriptor.isDisabled()) {
+            this.functionDescriptors.add((FunctionDescriptor)ProxyUtils.getTargetObject(functionDescriptor));
          }
       }
 
    }
 
-   public void loadFunctions(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      this.a(var2, this.f);
+   public void loadFunctions(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      this.writeObjectToJson(resp, this.functionDescriptors);
    }
 
-   public void loadBaseLibraries(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      HashMap var3 = new HashMap();
+   public void loadBaseLibraries(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      HashMap valuesByKey = new HashMap();
       ParsePhaseHolder.defineParsePhase();
-      var3.put("functions", this.f);
-      ArrayList var4 = new ArrayList();
-      this.addBuiltinActions(var4);
-      var3.put("springBeans", var4);
-      FileManager var5 = FileManager.ins;
-      VersionFileManager var6 = VersionFileManager.ins;
-      String var7 = var1.getParameter("actionLibraries");
-      if (StringUtils.isNotBlank(var7)) {
-         var7 = var7.trim();
+      valuesByKey.put("functions", this.functionDescriptors);
+      ArrayList items = new ArrayList();
+      this.addBuiltinActions(items);
+      valuesByKey.put("springBeans", items);
+      FileManager fileManager = FileManager.ins;
+      VersionFileManager versionFileManager = VersionFileManager.ins;
+      String parameter = req.getParameter("actionLibraries");
+      if (StringUtils.isNotBlank(parameter)) {
+         parameter = parameter.trim();
       }
 
-      if (StringUtils.isNotBlank(var7)) {
-         String[] var8 = var7.split(";");
+      if (StringUtils.isNotBlank(parameter)) {
+         String[] parts = parameter.split(";");
 
-         for(String var12 : var8) {
-            String[] var13 = var12.split(":");
-            String var14 = var13[0];
-            String var15 = var13[1];
-            Object var16 = null;
-            RuleFile var17 = FileManager.ins.get(Long.valueOf(var14));
-            RuleFileHolder.resetRuleFile(var17.getPath());
-            String var22;
-            if (var15.contentEquals("false")) {
-               var22 = var5.loadContent(Long.valueOf(var14));
+         for(String text : parts) {
+            String[] parts2 = text.split(":");
+            String text2 = parts2[0];
+            String text3 = parts2[1];
+            Object objectValue = null;
+            RuleFile ruleFile = FileManager.ins.get(Long.valueOf(text2));
+            RuleFileHolder.resetRuleFile(ruleFile.getPath());
+            String text4;
+            if (text3.contentEquals("false")) {
+               text4 = fileManager.loadContent(Long.valueOf(text2));
             } else {
-               VersionFile var18 = var6.loadFile(Long.valueOf(var14), var15);
-               var22 = var6.loadFileContent(var18.getId());
+               VersionFile file = versionFileManager.loadFile(Long.valueOf(text2), text3);
+               text4 = versionFileManager.loadFileContent(file.getId());
             }
 
-            Element var23 = FileDeserializer.getInstance().parseXml(var22);
-            Deserializer var19 = FileDeserializer.getInstance().getDeserializer(var23);
-            Object var20 = var19.deserialize(var23);
-            this.a(var20);
+            Element xml = FileDeserializer.getInstance().parseXml(text4);
+            Deserializer deserializer = FileDeserializer.getInstance().getDeserializer(xml);
+            Object objectValue2 = deserializer.deserialize(xml);
+            this.resolveResourceReferences(objectValue2);
             RuleFileHolder.clean();
-            if (var19 instanceof ActionLibraryDeserializer) {
-               ActionLibrary var21 = (ActionLibrary)var20;
-               var4.add(var21);
+            if (deserializer instanceof ActionLibraryDeserializer) {
+               ActionLibrary actionLibrary = (ActionLibrary)objectValue2;
+               items.add(actionLibrary);
             }
          }
       }
 
       ParsePhaseHolder.cleanParsePhase();
-      this.a(var2, var3);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
-   public void loadFile(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      FileManager var3 = FileManager.ins;
-      VersionFileManager var4 = VersionFileManager.ins;
-      String var5 = var1.getParameter("files");
-      String var6 = var1.getParameter("singleFile");
+   public void loadFile(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      FileManager fileManager = FileManager.ins;
+      VersionFileManager versionFileManager = VersionFileManager.ins;
+      String parameter = req.getParameter("files");
+      String parameter2 = req.getParameter("singleFile");
       ParsePhaseHolder.defineParsePhase();
-      ArrayList var7 = new ArrayList();
-      if (StringUtils.isBlank(var5)) {
-         this.addBuiltinActions(var7);
+      ArrayList items = new ArrayList();
+      if (StringUtils.isBlank(parameter)) {
+         this.addBuiltinActions(items);
       } else {
-         String[] var8 = var5.split(";");
+         String[] parts = parameter.split(";");
 
-         for(String var12 : var8) {
-            String[] var13 = var12.split(":");
-            String var14 = var13[0];
-            String var15 = var13[1];
-            Object var16 = null;
-            RuleFile var17 = FileManager.ins.get(Long.valueOf(var14));
-            RuleFileHolder.resetRuleFile(var17.getPath());
-            String var25;
-            if (var15.contentEquals("false")) {
-               var25 = var3.loadContent(Long.valueOf(var14));
+         for(String text : parts) {
+            String[] parts2 = text.split(":");
+            String text2 = parts2[0];
+            String text3 = parts2[1];
+            Object objectValue = null;
+            RuleFile ruleFile = FileManager.ins.get(Long.valueOf(text2));
+            RuleFileHolder.resetRuleFile(ruleFile.getPath());
+            String text4;
+            if (text3.contentEquals("false")) {
+               text4 = fileManager.loadContent(Long.valueOf(text2));
             } else {
-               VersionFile var18 = var4.loadFile(Long.valueOf(var14), var15);
-               var25 = var4.loadFileContent(var18.getId());
+               VersionFile file = versionFileManager.loadFile(Long.valueOf(text2), text3);
+               text4 = versionFileManager.loadFileContent(file.getId());
             }
 
-            Element var26 = FileDeserializer.getInstance().parseXml(var25);
-            Deserializer var19 = FileDeserializer.getInstance().getDeserializer(var26);
-            Object var20 = var19.deserialize(var26);
-            this.a(var20);
-            var7.add(var20);
+            Element xml = FileDeserializer.getInstance().parseXml(text4);
+            Deserializer deserializer = FileDeserializer.getInstance().getDeserializer(xml);
+            Object objectValue2 = deserializer.deserialize(xml);
+            this.resolveResourceReferences(objectValue2);
+            items.add(objectValue2);
             RuleFileHolder.clean();
-            if (var19 instanceof ActionLibraryDeserializer && StringUtils.isBlank(var6)) {
-               this.addBuiltinActions(var7);
+            if (deserializer instanceof ActionLibraryDeserializer && StringUtils.isBlank(parameter2)) {
+               this.addBuiltinActions(items);
             }
 
-            if (var19 instanceof RuleSetDeserializer) {
-               this.c(var7);
+            if (deserializer instanceof RuleSetDeserializer) {
+               this.clearInheritedDebugFlag(items);
             }
 
-            if (var19 instanceof ActionTemplateDeserializer) {
-               ActionTemplate var21 = (ActionTemplate)var20;
-               List var22 = var21.getTemplates();
-               if (var8 != null) {
-                  for(ActionTemplateUnit var24 : (Iterable<ActionTemplateUnit>)(Iterable<?>)(var22)) {
-                     var24.setPath(var12);
+            if (deserializer instanceof ActionTemplateDeserializer) {
+               ActionTemplate actionTemplate = (ActionTemplate)objectValue2;
+               List templates = actionTemplate.getTemplates();
+               if (parts != null) {
+                  for(ActionTemplateUnit actionTemplateUnit : (Iterable<ActionTemplateUnit>)(Iterable<?>)(templates)) {
+                     actionTemplateUnit.setPath(text);
                   }
                }
             }
 
-            if (var19 instanceof ConditionTemplateDeserializer) {
-               ConditionTemplate var27 = (ConditionTemplate)var20;
-               List var28 = var27.getTemplates();
-               if (var8 != null) {
-                  for(ConditionTemplateUnit var30 : (Iterable<ConditionTemplateUnit>)(Iterable<?>)(var28)) {
-                     var30.setPath(var12);
+            if (deserializer instanceof ConditionTemplateDeserializer) {
+               ConditionTemplate conditionTemplate = (ConditionTemplate)objectValue2;
+               List templates2 = conditionTemplate.getTemplates();
+               if (parts != null) {
+                  for(ConditionTemplateUnit conditionTemplateUnit : (Iterable<ConditionTemplateUnit>)(Iterable<?>)(templates2)) {
+                     conditionTemplateUnit.setPath(text);
                   }
                }
             }
@@ -200,205 +201,205 @@ public class LoadServletHandler extends ApiServletHandler {
       }
 
       ParsePhaseHolder.cleanParsePhase();
-      this.a(var2, var7);
+      this.writeObjectToJson(resp, items);
    }
 
-   private void a(Object var1) throws Exception {
-      if (var1 != null) {
-         if (var1 instanceof RuleSet) {
-            RuleSet var2 = (RuleSet)var1;
-            this.b(var2.getLibraries());
+   private void resolveResourceReferences(Object objectValue) throws Exception {
+      if (objectValue != null) {
+         if (objectValue instanceof RuleSet) {
+            RuleSet ruleSet = (RuleSet)objectValue;
+            this.resolveLibraryPaths(ruleSet.getLibraries());
 
-            for(Rule var4 : var2.getRules()) {
-               if (var4 instanceof LoopRule) {
-                  LoopRule var24 = (LoopRule)var4;
+            for(Rule rule : ruleSet.getRules()) {
+               if (rule instanceof LoopRule) {
+                  LoopRule loopRule = (LoopRule)rule;
 
-                  for(LoopRuleUnit var8 : var24.getUnits()) {
-                     Rhs var9 = var8.getRhs();
-                     if (var9 != null) {
-                        this.a(var9.getActions());
+                  for(LoopRuleUnit loopRuleUnit : loopRule.getUnits()) {
+                     Rhs rhs = loopRuleUnit.getRhs();
+                     if (rhs != null) {
+                        this.enrichActions(rhs.getActions());
                      }
 
-                     Other var10 = var8.getOther();
-                     if (var10 != null) {
-                        this.a(var10.getActions());
+                     Other other = loopRuleUnit.getOther();
+                     if (other != null) {
+                        this.enrichActions(other.getActions());
                      }
                   }
 
-                  this.a(var24.getLoopEnd().getActions());
+                  this.enrichActions(loopRule.getLoopEnd().getActions());
                } else {
-                  Rhs var5 = var4.getRhs();
-                  if (var5 != null) {
-                     this.a(var5.getActions());
+                  Rhs rhs2 = rule.getRhs();
+                  if (rhs2 != null) {
+                     this.enrichActions(rhs2.getActions());
                   }
 
-                  Other var6 = var4.getOther();
-                  if (var6 != null) {
-                     this.a(var6.getActions());
-                  }
-               }
-            }
-         } else if (var1 instanceof DecisionTable) {
-            DecisionTable var11 = (DecisionTable)var1;
-            this.b(var11.getLibraries());
-            Map var19 = var11.getCellMap();
-            this.a(var19);
-         } else if (var1 instanceof CrosstabDefinition) {
-            CrosstabDefinition var12 = (CrosstabDefinition)var1;
-            this.b(var12.getLibraries());
-         } else if (var1 instanceof DecisionTree) {
-            DecisionTree var13 = (DecisionTree)var1;
-            this.b(var13.getLibraries());
-            VariableTreeNode var20 = var13.getVariableTreeNode();
-            this.a((TreeNode)var20);
-         } else if (var1 instanceof ScorecardDefinition) {
-            ScorecardDefinition var14 = (ScorecardDefinition)var1;
-            this.b(var14.getLibraries());
-         } else if (var1 instanceof ComplexScorecardDefinition) {
-            ComplexScorecardDefinition var15 = (ComplexScorecardDefinition)var1;
-            this.b(var15.getLibraries());
-            Map var21 = var15.getCellMap();
-            this.a(var21);
-         } else if (var1 instanceof FlowDefinition) {
-            FlowDefinition var16 = (FlowDefinition)var1;
-            this.b(var16.getLibraries());
-
-            for(FlowNode var23 : var16.getNodes()) {
-               if (var23 instanceof RuleNode) {
-                  RuleNode var25 = (RuleNode)var23;
-
-                  for(BindingFile var28 : var25.getFiles()) {
-                     RuleFile var29 = FileManager.ins.get(var28.getId());
-                     var28.setPath(var29.getPath());
+                  Other other2 = rule.getOther();
+                  if (other2 != null) {
+                     this.enrichActions(other2.getActions());
                   }
                }
             }
-         } else if (var1 instanceof ActionTemplate) {
-            ActionTemplate var17 = (ActionTemplate)var1;
-            this.b(var17.getLibraries());
-         } else if (var1 instanceof ConditionTemplate) {
-            ConditionTemplate var18 = (ConditionTemplate)var1;
-            this.b(var18.getLibraries());
+         } else if (objectValue instanceof DecisionTable) {
+            DecisionTable decisionTable = (DecisionTable)objectValue;
+            this.resolveLibraryPaths(decisionTable.getLibraries());
+            Map cellMap = decisionTable.getCellMap();
+            this.enrichCellActions(cellMap);
+         } else if (objectValue instanceof CrosstabDefinition) {
+            CrosstabDefinition crosstabDefinition = (CrosstabDefinition)objectValue;
+            this.resolveLibraryPaths(crosstabDefinition.getLibraries());
+         } else if (objectValue instanceof DecisionTree) {
+            DecisionTree decisionTree = (DecisionTree)objectValue;
+            this.resolveLibraryPaths(decisionTree.getLibraries());
+            VariableTreeNode variableTreeNode = decisionTree.getVariableTreeNode();
+            this.enrichTreeActions(variableTreeNode);
+         } else if (objectValue instanceof ScorecardDefinition) {
+            ScorecardDefinition scorecardDefinition = (ScorecardDefinition)objectValue;
+            this.resolveLibraryPaths(scorecardDefinition.getLibraries());
+         } else if (objectValue instanceof ComplexScorecardDefinition) {
+            ComplexScorecardDefinition complexScorecardDefinition = (ComplexScorecardDefinition)objectValue;
+            this.resolveLibraryPaths(complexScorecardDefinition.getLibraries());
+            Map cellMap2 = complexScorecardDefinition.getCellMap();
+            this.enrichCellActions(cellMap2);
+         } else if (objectValue instanceof FlowDefinition) {
+            FlowDefinition flowDefinition = (FlowDefinition)objectValue;
+            this.resolveLibraryPaths(flowDefinition.getLibraries());
+
+            for(FlowNode flowNode : flowDefinition.getNodes()) {
+               if (flowNode instanceof RuleNode) {
+                  RuleNode ruleNode = (RuleNode)flowNode;
+
+                  for(BindingFile bindingFile : ruleNode.getFiles()) {
+                     RuleFile ruleFile = FileManager.ins.get(bindingFile.getId());
+                     bindingFile.setPath(ruleFile.getPath());
+                  }
+               }
+            }
+         } else if (objectValue instanceof ActionTemplate) {
+            ActionTemplate actionTemplate = (ActionTemplate)objectValue;
+            this.resolveLibraryPaths(actionTemplate.getLibraries());
+         } else if (objectValue instanceof ConditionTemplate) {
+            ConditionTemplate conditionTemplate = (ConditionTemplate)objectValue;
+            this.resolveLibraryPaths(conditionTemplate.getLibraries());
          }
 
       }
    }
 
-   private void a(Map var1) throws Exception {
-      if (var1 != null) {
-         for(Cell var3 : (Iterable<Cell>)(Iterable<?>)(var1.values())) {
-            Action var4 = var3.getAction();
-            this.a(var4);
+   private void enrichCellActions(Map valuesByKey) throws Exception {
+      if (valuesByKey != null) {
+         for(Cell cell : (Iterable<Cell>)(Iterable<?>)(valuesByKey.values())) {
+            Action action = cell.getAction();
+            this.enrichAction(action);
          }
       }
 
    }
 
-   private void a(TreeNode var1) throws Exception {
-      if (var1 instanceof VariableTreeNode) {
-         VariableTreeNode var2 = (VariableTreeNode)var1;
-         List var3 = var2.getConditionTreeNodes();
-         if (var3 != null) {
-            for(ConditionTreeNode var5 : (Iterable<ConditionTreeNode>)(Iterable<?>)(var3)) {
-               this.a((TreeNode)var5);
+   private void enrichTreeActions(TreeNode treeNode) throws Exception {
+      if (treeNode instanceof VariableTreeNode) {
+         VariableTreeNode variableTreeNode2 = (VariableTreeNode)treeNode;
+         List conditionTreeNodes = variableTreeNode2.getConditionTreeNodes();
+         if (conditionTreeNodes != null) {
+            for(ConditionTreeNode conditionTreeNode : (Iterable<ConditionTreeNode>)(Iterable<?>)(conditionTreeNodes)) {
+               this.enrichTreeActions(conditionTreeNode);
             }
          }
-      } else if (var1 instanceof ConditionTreeNode) {
-         ConditionTreeNode var8 = (ConditionTreeNode)var1;
-         List var10 = var8.getActionTreeNodes();
-         if (var10 != null) {
-            for(ActionTreeNode var14 : (Iterable<ActionTreeNode>)(Iterable<?>)(var10)) {
-               this.a((TreeNode)var14);
+      } else if (treeNode instanceof ConditionTreeNode) {
+         ConditionTreeNode conditionTreeNode2 = (ConditionTreeNode)treeNode;
+         List actionTreeNodes = conditionTreeNode2.getActionTreeNodes();
+         if (actionTreeNodes != null) {
+            for(ActionTreeNode actionTreeNode : (Iterable<ActionTreeNode>)(Iterable<?>)(actionTreeNodes)) {
+               this.enrichTreeActions(actionTreeNode);
             }
          }
 
-         List var13 = var8.getConditionTreeNodes();
-         if (var13 != null) {
-            for(ConditionTreeNode var6 : (Iterable<ConditionTreeNode>)(Iterable<?>)(var13)) {
-               this.a((TreeNode)var6);
+         List conditionTreeNodes2 = conditionTreeNode2.getConditionTreeNodes();
+         if (conditionTreeNodes2 != null) {
+            for(ConditionTreeNode conditionTreeNode3 : (Iterable<ConditionTreeNode>)(Iterable<?>)(conditionTreeNodes2)) {
+               this.enrichTreeActions(conditionTreeNode3);
             }
          }
 
-         List var16 = var8.getVariableTreeNodes();
-         if (var16 != null) {
-            for(VariableTreeNode var7 : (Iterable<VariableTreeNode>)(Iterable<?>)(var16)) {
-               this.a((TreeNode)var7);
+         List variableTreeNodes = conditionTreeNode2.getVariableTreeNodes();
+         if (variableTreeNodes != null) {
+            for(VariableTreeNode variableTreeNode : (Iterable<VariableTreeNode>)(Iterable<?>)(variableTreeNodes)) {
+               this.enrichTreeActions(variableTreeNode);
             }
          }
-      } else if (var1 instanceof ActionTreeNode) {
-         ActionTreeNode var9 = (ActionTreeNode)var1;
-         List var11 = var9.getActions();
-         this.a(var11);
+      } else if (treeNode instanceof ActionTreeNode) {
+         ActionTreeNode actionTreeNode2 = (ActionTreeNode)treeNode;
+         List actions = actionTreeNode2.getActions();
+         this.enrichActions(actions);
       }
 
    }
 
-   private void a(List var1) throws Exception {
-      if (var1 != null) {
-         for(Action var3 : (Iterable<Action>)(Iterable<?>)(var1)) {
-            this.a(var3);
+   private void enrichActions(List items) throws Exception {
+      if (items != null) {
+         for(Action action : (Iterable<Action>)(Iterable<?>)(items)) {
+            this.enrichAction(action);
          }
 
       }
    }
 
-   private void a(ExecuteCommonFunctionAction var1) {
-      FunctionDescriptor var2 = this.b(var1.getName());
-      CommonFunctionParameter var3 = var1.getParameter();
-      if (var3 != null) {
-         String var4 = var3.getName();
-         if (var2 != null && var2.getArgument() != null && StringUtils.isNotBlank(var2.getArgument().getEname())) {
-            var4 = var2.getArgument().getEname();
+   private void enrichCommonFunctionAction(ExecuteCommonFunctionAction executeCommonFunctionAction) {
+      FunctionDescriptor functionDescriptor = this.findFunctionDescriptor(executeCommonFunctionAction.getName());
+      CommonFunctionParameter parameter = executeCommonFunctionAction.getParameter();
+      if (parameter != null) {
+         String name = parameter.getName();
+         if (functionDescriptor != null && functionDescriptor.getArgument() != null && StringUtils.isNotBlank(functionDescriptor.getArgument().getEname())) {
+            name = functionDescriptor.getArgument().getEname();
          }
 
-         var3.setEname(var4);
+         parameter.setEname(name);
       }
 
    }
 
-   private void a(Action var1) throws Exception {
-      if (!(var1 instanceof ExecuteMethodAction)) {
-         if (var1 instanceof ExecuteCommonFunctionAction) {
-            this.a((ExecuteCommonFunctionAction)var1);
+   private void enrichAction(Action action) throws Exception {
+      if (!(action instanceof ExecuteMethodAction)) {
+         if (action instanceof ExecuteCommonFunctionAction) {
+            this.enrichCommonFunctionAction((ExecuteCommonFunctionAction)action);
          }
 
       } else {
-         ExecuteMethodAction var2 = (ExecuteMethodAction)var1;
-         if (var2.getInvokeKnowledgePackage() != null) {
-            InvokeKnowledgePackage var3 = var2.getInvokeKnowledgePackage();
-            Packet var4 = null;
-            if (StringUtils.isNotBlank(var3.getCode())) {
-               var4 = PacketManager.ins.load(var3.getCode());
+         ExecuteMethodAction executeMethodAction = (ExecuteMethodAction)action;
+         if (executeMethodAction.getInvokeKnowledgePackage() != null) {
+            InvokeKnowledgePackage invokeKnowledgePackage = executeMethodAction.getInvokeKnowledgePackage();
+            Packet packet = null;
+            if (StringUtils.isNotBlank(invokeKnowledgePackage.getCode())) {
+               packet = PacketManager.ins.load(invokeKnowledgePackage.getCode());
             }
 
-            if (var4 == null) {
-               var4 = PacketManager.ins.load(var3.getId());
+            if (packet == null) {
+               packet = PacketManager.ins.load(invokeKnowledgePackage.getId());
             }
 
-            if (var4 == null) {
-               throw new RuleException(String.format("无法找到ID【%s】，CODE【%s】对应的知识包!", var3.getId(), var3.getCode()));
+            if (packet == null) {
+               throw new RuleException(String.format("无法找到ID【%s】，CODE【%s】对应的知识包!", invokeKnowledgePackage.getId(), invokeKnowledgePackage.getCode()));
             }
 
-            var3.setName(var4.getName());
-            var3.setCode(var4.getCode());
-            Project var5 = ProjectManager.ins.get(var4.getProjectId());
-            var3.setProject(var5.getName());
-         } else if (var2.getInvokeFile() != null) {
-            InvokeFile var10 = var2.getInvokeFile();
-            RuleFile var12 = FileManager.ins.get(var10.getId());
-            var10.setPath(var12.getPath());
+            invokeKnowledgePackage.setName(packet.getName());
+            invokeKnowledgePackage.setCode(packet.getCode());
+            Project project = ProjectManager.ins.get(packet.getProjectId());
+            invokeKnowledgePackage.setProject(project.getName());
+         } else if (executeMethodAction.getInvokeFile() != null) {
+            InvokeFile invokeFile = executeMethodAction.getInvokeFile();
+            RuleFile ruleFile = FileManager.ins.get(invokeFile.getId());
+            invokeFile.setPath(ruleFile.getPath());
          }
 
-         SpringBean var11 = this.a(var2.getBeanId());
-         if (var11 != null) {
-            var2.setBeanELabel(var11.getEname());
+         SpringBean springBean = this.findSpringBean(executeMethodAction.getBeanId());
+         if (springBean != null) {
+            executeMethodAction.setBeanELabel(springBean.getEname());
 
-            for(Method var14 : var11.getMethods()) {
-               if (var2.getMethodName().equals(var14.getMethodName())) {
-                  for(Parameter var7 : var2.getParameters()) {
-                     for(com.bstek.urule.model.library.action.Parameter var9 : var14.getParameters()) {
-                        if (var9.getName().equals(var7.getName())) {
-                           var7.setEname(var9.getEname());
+            for(Method method : springBean.getMethods()) {
+               if (executeMethodAction.getMethodName().equals(method.getMethodName())) {
+                  for(Parameter parameter : executeMethodAction.getParameters()) {
+                     for(com.bstek.urule.model.library.action.Parameter parameter2 : method.getParameters()) {
+                        if (parameter2.getName().equals(parameter.getName())) {
+                           parameter.setEname(parameter2.getEname());
                         }
                      }
                   }
@@ -409,63 +410,62 @@ public class LoadServletHandler extends ApiServletHandler {
       }
    }
 
-   private void b(List var1) {
-      if (var1 != null) {
-         for(Library var3 : (Iterable<Library>)(Iterable<?>)(var1)) {
-            RuleFile var4 = FileManager.ins.get(var3.getId());
-            var3.setPath(var4.getPath());
+   private void resolveLibraryPaths(List items) {
+      if (items != null) {
+         for(Library library : (Iterable<Library>)(Iterable<?>)(items)) {
+            RuleFile ruleFile = FileManager.ins.get(library.getId());
+            library.setPath(ruleFile.getPath());
          }
 
       }
    }
 
-   public void addBuiltinActions(List var1) throws Exception {
-      List var2 = this.e.getBuiltInActions();
-      if (var2.size() > 0) {
-         ActionLibrary var3 = new ActionLibrary();
-         var3.setSpringBeans(var2);
-         var1.add(var3);
+   public void addBuiltinActions(List result) throws Exception {
+      List builtInActions = this.builtInActionLibraryBuilder.getBuiltInActions();
+      if (builtInActions.size() > 0) {
+         ActionLibrary actionLibrary = new ActionLibrary();
+         actionLibrary.setSpringBeans(builtInActions);
+         result.add(actionLibrary);
       }
 
    }
 
-   private SpringBean a(String var1) {
-      SpringBean var2 = null;
-      List var3 = this.e.getBuiltInActions();
-      if (var3.size() > 0) {
-         for(SpringBean var5 : (Iterable<SpringBean>)(Iterable<?>)(var3)) {
-            if (var1.equals(var5.getId())) {
-               var2 = var5;
+   private SpringBean findSpringBean(String beanId) {
+      SpringBean springBean = null;
+      List builtInActions = this.builtInActionLibraryBuilder.getBuiltInActions();
+      if (builtInActions.size() > 0) {
+         for(SpringBean springBean2 : (Iterable<SpringBean>)(Iterable<?>)(builtInActions)) {
+            if (beanId.equals(springBean2.getId())) {
+               springBean = springBean2;
                break;
             }
          }
       }
 
-      return var2;
+      return springBean;
    }
 
-   private FunctionDescriptor b(String var1) {
-      FunctionDescriptor var2 = null;
-      List var3 = this.f;
-      if (var3.size() > 0) {
-         for(FunctionDescriptor var5 : (Iterable<FunctionDescriptor>)(Iterable<?>)(var3)) {
-            if (var1.equals(var5.getName())) {
-               var2 = var5;
+   private FunctionDescriptor findFunctionDescriptor(String functionName) {
+      FunctionDescriptor functionDescriptor = null;
+      if (this.functionDescriptors.size() > 0) {
+         for(FunctionDescriptor descriptor : this.functionDescriptors) {
+            if (functionName.equals(descriptor.getName())) {
+               functionDescriptor = descriptor;
                break;
             }
          }
       }
 
-      return var2;
+      return functionDescriptor;
    }
 
-   private void c(List var1) {
-      if (var1.size() != 0) {
-         RuleSet var2 = (RuleSet)var1.get(0);
+   private void clearInheritedDebugFlag(List items) {
+      if (items.size() != 0) {
+         RuleSet ruleSet = (RuleSet)items.get(0);
 
-         for(Rule var4 : var2.getRules()) {
-            if (var4.isDebugFromGlobal()) {
-               var4.setDebug((Boolean)null);
+         for(Rule rule : ruleSet.getRules()) {
+            if (rule.isDebugFromGlobal()) {
+               rule.setDebug((Boolean)null);
             }
          }
 

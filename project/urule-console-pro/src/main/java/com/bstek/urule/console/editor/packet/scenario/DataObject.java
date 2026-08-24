@@ -3,26 +3,26 @@ package com.bstek.urule.console.editor.packet.scenario;
 import java.util.List;
 
 public class DataObject {
-   private String a;
-   private List b;
+   private String name;
+   private List fields;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public List getFields() {
-      return this.b;
+      return this.fields;
    }
 
-   public void setFields(List var1) {
-      this.b = var1;
+   public void setFields(List fields) {
+      this.fields = fields;
    }
 
    public String toString() {
-      return " [name=" + this.a + ", fields=" + this.b + "]";
+      return " [name=" + this.name + ", fields=" + this.fields + "]";
    }
 }

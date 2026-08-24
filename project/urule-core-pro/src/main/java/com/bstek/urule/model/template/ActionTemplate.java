@@ -8,27 +8,27 @@ public class ActionTemplate {
    private List<Library> libraries;
    private List<ActionTemplateUnit> templates;
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 
    public List<Library> getLibraries() {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
    public List<ActionTemplateUnit> getTemplates() {
       return this.templates;
    }
 
-   public void setTemplates(List<ActionTemplateUnit> var1) {
-      this.templates = var1;
+   public void setTemplates(List<ActionTemplateUnit> templates) {
+      this.templates = templates;
    }
 }

@@ -1,9 +1,9 @@
 package com.bstek.urule.console.editor.store;
 
 public interface ClipboardStore {
-   void set(String var1, String var2);
+   void set(String key, String value);
 
-   String get(String var1);
+   String get(String key);
 
-   void remove(String var1);
+   void remove(String key);
 }

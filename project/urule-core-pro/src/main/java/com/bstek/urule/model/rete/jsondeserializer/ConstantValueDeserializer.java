@@ -10,24 +10,24 @@ import org.apache.commons.lang.StringUtils;
 
 public class ConstantValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      ConstantValue var2 = new ConstantValue();
-      var2.setConstantCategory(JsonUtils.getJsonValue(var1, "constantCategory"));
-      var2.setConstantLabel(JsonUtils.getJsonValue(var1, "constantLabel"));
-      var2.setConstantName(JsonUtils.getJsonValue(var1, "constantName"));
-      var2.setUuid(JsonUtils.getJsonValue(var1, "uuid"));
-      var2.setCategoryUuid(JsonUtils.getJsonValue(var1, "categoryUuid"));
-      String var3 = JsonUtils.getJsonValue(var1, "datatype");
-      if (StringUtils.isNotBlank(var3)) {
-         var2.setDatatype(Datatype.valueOf(var3));
+   public Value deserialize(JsonNode jsonNode) {
+      ConstantValue constantValue = new ConstantValue();
+      constantValue.setConstantCategory(JsonUtils.getJsonValue(jsonNode, "constantCategory"));
+      constantValue.setConstantLabel(JsonUtils.getJsonValue(jsonNode, "constantLabel"));
+      constantValue.setConstantName(JsonUtils.getJsonValue(jsonNode, "constantName"));
+      constantValue.setUuid(JsonUtils.getJsonValue(jsonNode, "uuid"));
+      constantValue.setCategoryUuid(JsonUtils.getJsonValue(jsonNode, "categoryUuid"));
+      String jsonValue = JsonUtils.getJsonValue(jsonNode, "datatype");
+      if (StringUtils.isNotBlank(jsonValue)) {
+         constantValue.setDatatype(Datatype.valueOf(jsonValue));
       }
 
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      return var2;
+      constantValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      return constantValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.Constant);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.Constant);
    }
 }

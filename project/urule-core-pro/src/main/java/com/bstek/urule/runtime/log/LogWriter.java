@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface LogWriter {
-   void write(List<Log> var1) throws IOException;
+   void write(List<Log> logs) throws IOException;
 }

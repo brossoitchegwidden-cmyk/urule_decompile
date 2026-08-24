@@ -1,40 +1,40 @@
 package com.bstek.urule.runtime.monitor;
 
 public class MonitorObjectField {
-   private String a;
-   private String b;
-   private String c;
-   private MonitorObject d;
+   private String name;
+   private String label;
+   private String type;
+   private MonitorObject _value;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.b;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.b = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public String getType() {
-      return this.c;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.c = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public MonitorObject get_value() {
-      return this.d;
+      return this._value;
    }
 
-   public void set_value(MonitorObject var1) {
-      this.d = var1;
+   public void set_value(MonitorObject _value) {
+      this._value = _value;
    }
 }

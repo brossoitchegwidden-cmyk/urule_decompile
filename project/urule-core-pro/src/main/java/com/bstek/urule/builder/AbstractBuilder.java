@@ -15,39 +15,39 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public abstract class AbstractBuilder implements ApplicationContextAware {
-   private ResourceProvider c;
-   protected ApplicationContext a;
-   protected Collection<ResourceBuilder> b;
+   private ResourceProvider resourceProvider;
+   protected ApplicationContext applicationContext;
+   protected Collection<ResourceBuilder> resourceBuilders;
 
    public ResourceBase newResourceBase() {
-      return new ResourceBase(this.a());
+      return new ResourceBase(this.resolveResourceProvider());
    }
 
-   protected Element a(String var1) {
+   protected Element parseResource(String content) {
       try {
-         Document var2 = DocumentHelper.parseText(var1);
-         return var2.getRootElement();
-      } catch (DocumentException var4) {
-         throw new RuleException(var4);
+         Document text = DocumentHelper.parseText(content);
+         return text.getRootElement();
+      } catch (DocumentException documentException) {
+         throw new RuleException(documentException);
       }
    }
 
-   private ResourceProvider a() {
-      if (this.c == null) {
-         ServiceLoader var1 = ServiceLoader.load(ResourceProvider.class);
-         Iterator var2 = var1.iterator();
-         if (var2.hasNext()) {
-            ResourceProvider var3 = (ResourceProvider)var2.next();
-            this.c = var3;
+   private ResourceProvider resolveResourceProvider() {
+      if (this.resourceProvider == null) {
+         ServiceLoader serviceLoader = ServiceLoader.load(ResourceProvider.class);
+         Iterator iterator = serviceLoader.iterator();
+         if (iterator.hasNext()) {
+            ResourceProvider resourceProvider = (ResourceProvider)iterator.next();
+            this.resourceProvider = resourceProvider;
          }
       }
 
-      return this.c;
+      return this.resourceProvider;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.b = var1.getBeansOfType(ResourceBuilder.class).values();
-      this.a = var1;
-      var1.getBeansWithAnnotation(SuppressWarnings.class);
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.resourceBuilders = applicationContext.getBeansOfType(ResourceBuilder.class).values();
+      this.applicationContext = applicationContext;
+      applicationContext.getBeansWithAnnotation(SuppressWarnings.class);
    }
 }

@@ -11,8 +11,8 @@ public class ComplexArithmetic extends Arithmetic {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override

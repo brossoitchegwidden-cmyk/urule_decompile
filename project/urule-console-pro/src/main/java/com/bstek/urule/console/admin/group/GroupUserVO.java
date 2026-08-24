@@ -4,13 +4,13 @@ import com.bstek.urule.console.database.model.User;
 import java.util.List;
 
 public class GroupUserVO extends User {
-   private List a;
+   private List roles;
 
    public List getRoles() {
-      return this.a;
+      return this.roles;
    }
 
-   public void setRoles(List var1) {
-      this.a = var1;
+   public void setRoles(List roles) {
+      this.roles = roles;
    }
 }

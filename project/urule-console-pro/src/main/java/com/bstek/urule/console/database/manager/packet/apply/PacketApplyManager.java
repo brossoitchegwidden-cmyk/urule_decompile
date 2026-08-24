@@ -6,19 +6,19 @@ import com.bstek.urule.console.database.model.PacketApply;
 public interface PacketApplyManager {
    PacketApplyManager ins = new PacketApplyManagerImpl();
 
-   void add(PacketApply var1);
+   void add(PacketApply apply);
 
-   void delete(long var1);
+   void delete(long id);
 
-   void deleteByPacketId(long var1);
+   void deleteByPacketId(long id);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   PacketApply load(long var1);
+   PacketApply load(long id);
 
-   void update(long var1, ApplyStatus var3);
+   void update(long id, ApplyStatus status);
 
-   void updateDeployedPacketId(long var1, long var3);
+   void updateDeployedPacketId(long id, long deployedPacketId);
 
    PacketApplyQuery newQuery();
 }

@@ -4,32 +4,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionObject {
-   private long a = System.currentTimeMillis();
-   private static final long b = 1200000L;
-   private Map c = new HashMap();
+   private long lastAccessTime = System.currentTimeMillis();
+   private static final long EXPIRATION_MILLIS = 1200000L;
+   private Map attributes = new HashMap();
 
-   public void put(String var1, Object var2) {
-      this.a = System.currentTimeMillis();
-      if (this.c.containsKey(var1)) {
-         this.c.remove(var1);
+   public void put(String key, Object obj) {
+      this.lastAccessTime = System.currentTimeMillis();
+      if (this.attributes.containsKey(key)) {
+         this.attributes.remove(key);
       }
 
-      this.c.put(var1, var2);
+      this.attributes.put(key, obj);
    }
 
-   public Object get(String var1) {
-      this.a = System.currentTimeMillis();
-      return this.c.get(var1);
+   public Object get(String key) {
+      this.lastAccessTime = System.currentTimeMillis();
+      return this.attributes.get(key);
    }
 
-   public void remove(String var1) {
-      this.a = System.currentTimeMillis();
-      this.c.remove(var1);
+   public void remove(String key) {
+      this.lastAccessTime = System.currentTimeMillis();
+      this.attributes.remove(key);
    }
 
    public boolean isExpired() {
-      long var1 = System.currentTimeMillis();
-      long var3 = var1 - this.a;
-      return var3 >= 1200000L;
+      long longValue = System.currentTimeMillis();
+      long elapsedMillis = longValue - this.lastAccessTime;
+      return elapsedMillis >= EXPIRATION_MILLIS;
    }
 }

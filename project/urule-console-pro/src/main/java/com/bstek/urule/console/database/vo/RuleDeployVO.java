@@ -3,22 +3,22 @@ package com.bstek.urule.console.database.vo;
 import java.util.Date;
 
 public class RuleDeployVO {
-   private Date a;
-   private int b;
+   private Date createDate;
+   private int count;
 
    public Date getCreateDate() {
-      return this.a;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.a = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public int getCount() {
-      return this.b;
+      return this.count;
    }
 
-   public void setCount(int var1) {
-      this.b = var1;
+   public void setCount(int count) {
+      this.count = count;
    }
 }

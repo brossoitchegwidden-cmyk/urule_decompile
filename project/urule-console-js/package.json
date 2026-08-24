@@ -7,7 +7,7 @@
     "build": "webpack --config webpack.config.js",
     "build:min": "webpack --config webpack.config.min.js",
     "decompile": "node scripts/debundle.js",
-    "test": "echo \"no test specified\" && exit 0"
+    "test": "node test/utils.test.js"
   },
   "author": "Jacky.Gao (decompiled)",
   "license": "Bstek Commercial License",

@@ -4,49 +4,49 @@ import com.bstek.urule.model.library.Datatype;
 import com.bstek.urule.model.rule.Op;
 
 public class DataField {
-   private String a;
-   private String b;
-   private String c;
-   private Datatype d;
-   private Op e;
+   private String uuid;
+   private String name;
+   private String label;
+   private Datatype datatype;
+   private Op op;
 
    public String getUuid() {
-      return this.a;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.a = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.c;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.c = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public Op getOp() {
-      return this.e;
+      return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.e = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
    public Datatype getDatatype() {
-      return this.d;
+      return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.d = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 }

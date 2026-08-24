@@ -11,85 +11,85 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResolverQueryImpl implements ResolverQuery {
-   private Long a;
-   private Long b;
-   private List c = new ArrayList();
+   private Long id;
+   private Long batchId;
+   private List queryParameters = new ArrayList();
 
-   public ResolverQuery id(Long var1) {
-      this.a = var1;
+   public ResolverQuery id(Long id) {
+      this.id = id;
       return this;
    }
 
-   public ResolverQuery batchId(Long var1) {
-      this.b = var1;
+   public ResolverQuery batchId(Long batchId) {
+      this.batchId = batchId;
       return this;
    }
 
-   private StringBuilder a() {
-      this.c.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.c.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.batchId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" BATCH_ID_=?");
-         this.c.add(this.b);
+         stringBuilder.append(" BATCH_ID_=?");
+         this.queryParameters.add(this.batchId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var13;
+      ArrayList listResult;
       try {
-         String var2 = "SELECT NAME_, TRAN_SCOPE_, DESC_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, BATCH_ID_, PROJECT_ID_, DATASOURCE_ID_ FROM URULE_BATCH_DATA_RESOLVER ";
-         StringBuilder var3 = this.a();
-         if (var3.length() > 0) {
-            var2 = var2 + " where" + var3.toString();
+         String text = "SELECT NAME_, TRAN_SCOPE_, DESC_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, BATCH_ID_, PROJECT_ID_, DATASOURCE_ID_ FROM URULE_BATCH_DATA_RESOLVER ";
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         PreparedStatement var4 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.c, var4);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            BatchDataResolver var7 = new BatchDataResolver();
-            var7.setName(var6.getString(1));
-            var7.setTranScope(TranScope.valueOf(var6.getString(2)));
-            var7.setDesc(var6.getString(3));
-            var7.setCreateUser(var6.getString(4));
-            var7.setCreateDate(var6.getTimestamp(5));
-            var7.setUpdateUser(var6.getString(6));
-            var7.setUpdateDate(var6.getTimestamp(7));
-            var7.setId(var6.getLong(8));
-            var7.setBatchId(var6.getLong(9));
-            var7.setProjectId(var6.getLong(10));
-            var7.setDatasourceId(var6.getLong(11));
-            var5.add(var7);
+         while(resultSet.next()) {
+            BatchDataResolver batchDataResolver = new BatchDataResolver();
+            batchDataResolver.setName(resultSet.getString(1));
+            batchDataResolver.setTranScope(TranScope.valueOf(resultSet.getString(2)));
+            batchDataResolver.setDesc(resultSet.getString(3));
+            batchDataResolver.setCreateUser(resultSet.getString(4));
+            batchDataResolver.setCreateDate(resultSet.getTimestamp(5));
+            batchDataResolver.setUpdateUser(resultSet.getString(6));
+            batchDataResolver.setUpdateDate(resultSet.getTimestamp(7));
+            batchDataResolver.setId(resultSet.getLong(8));
+            batchDataResolver.setBatchId(resultSet.getLong(9));
+            batchDataResolver.setProjectId(resultSet.getLong(10));
+            batchDataResolver.setDatasourceId(resultSet.getLong(11));
+            items.add(batchDataResolver);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return listResult;
    }
 }

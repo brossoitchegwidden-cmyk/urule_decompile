@@ -5,29 +5,29 @@ import java.util.Date;
 import java.util.List;
 
 public interface OperationLogQuery {
-   OperationLogQuery userId(String var1);
+   OperationLogQuery userId(String userId);
 
-   OperationLogQuery userIdLike(String var1);
+   OperationLogQuery userIdLike(String userId);
 
-   OperationLogQuery groupId(String var1);
+   OperationLogQuery groupId(String groupId);
 
-   OperationLogQuery username(String var1);
+   OperationLogQuery username(String username);
 
-   OperationLogQuery projectId(Long var1);
+   OperationLogQuery projectId(Long projectId);
 
-   OperationLogQuery category(String var1);
+   OperationLogQuery category(String category);
 
-   OperationLogQuery categoryLike(String var1);
+   OperationLogQuery categoryLike(String category);
 
-   OperationLogQuery categoryIn(List var1);
+   OperationLogQuery categoryIn(List categorys);
 
-   OperationLogQuery actionIn(List var1);
+   OperationLogQuery actionIn(List actions);
 
-   OperationLogQuery dateBegin(Date var1);
+   OperationLogQuery dateBegin(Date date);
 
-   OperationLogQuery dateEnd(Date var1);
+   OperationLogQuery dateEnd(Date date);
 
-   Page paging(int var1, int var2);
+   Page paging(int pageIndex, int pageSize);
 
    List list();
 }

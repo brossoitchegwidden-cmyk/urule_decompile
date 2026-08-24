@@ -15,11 +15,11 @@ public class RuleParserParser$ParenCellConditionsContext extends RuleParserParse
       return (RuleParserParser$RightParenContext)this.getRuleContext(RuleParserParser$RightParenContext.class, 0);
    }
 
-   public RuleParserParser$ParenCellConditionsContext(RuleParserParser$DecisionTableCellConditionContext var1) {
-      this.copyFrom(var1);
+   public RuleParserParser$ParenCellConditionsContext(RuleParserParser$DecisionTableCellConditionContext ruleParserParser$DecisionTableCellConditionContext) {
+      this.copyFrom(ruleParserParser$DecisionTableCellConditionContext);
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitParenCellConditions(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitParenCellConditions(this) : parseTreeVisitor.visitChildren(this));
    }
 }

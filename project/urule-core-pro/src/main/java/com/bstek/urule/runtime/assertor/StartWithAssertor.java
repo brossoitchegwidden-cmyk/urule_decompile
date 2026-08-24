@@ -5,13 +5,13 @@ import com.bstek.urule.model.rule.Op;
 
 public class StartWithAssertor implements Assertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      if (var1 == null || var2 == null) {
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      if (left == null || right == null) {
          return false;
-      } else if (var1 instanceof String && var2 instanceof String) {
-         String var4 = (String)var1;
-         String var5 = (String)var2;
-         return var4.startsWith(var5);
+      } else if (left instanceof String && right instanceof String) {
+         String left2 = (String)left;
+         String right2 = (String)right;
+         return left2.startsWith(right2);
       } else {
          return false;
       }

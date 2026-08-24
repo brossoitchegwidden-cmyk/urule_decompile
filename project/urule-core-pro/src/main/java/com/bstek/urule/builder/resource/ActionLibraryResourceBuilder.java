@@ -5,19 +5,19 @@ import com.bstek.urule.parse.deserializer.ActionLibraryDeserializer;
 import org.dom4j.Element;
 
 public class ActionLibraryResourceBuilder implements ResourceBuilder<ActionLibrary> {
-   private ActionLibraryDeserializer a;
+   private ActionLibraryDeserializer actionLibraryDeserializer;
 
-   public ActionLibrary build(Element var1, String var2) {
-      return this.a.deserialize(var1);
+   public ActionLibrary build(Element root, String file) {
+      return this.actionLibraryDeserializer.deserialize(root);
    }
 
-   public void setActionLibraryDeserializer(ActionLibraryDeserializer var1) {
-      this.a = var1;
+   public void setActionLibraryDeserializer(ActionLibraryDeserializer actionLibraryDeserializer) {
+      this.actionLibraryDeserializer = actionLibraryDeserializer;
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1);
+   public boolean support(Element root) {
+      return this.actionLibraryDeserializer.support(root);
    }
 
    @Override

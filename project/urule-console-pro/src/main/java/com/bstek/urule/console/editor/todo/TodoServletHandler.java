@@ -38,261 +38,261 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class TodoServletHandler extends ApiServletHandler {
-   PacketPublishListener e = null;
+   PacketPublishListener packetPublishListener = null;
 
    public void init() {
       super.init();
-      if (this.e == null) {
+      if (this.packetPublishListener == null) {
          try {
-            this.e = (PacketPublishListener)Utils.getApplicationContext().getBean("urule.packetPublishListener");
-         } catch (NoSuchBeanDefinitionException var2) {
+            this.packetPublishListener = (PacketPublishListener)Utils.getApplicationContext().getBean("urule.packetPublishListener");
+         } catch (NoSuchBeanDefinitionException noSuchBeanDefinitionException) {
          }
       }
 
    }
 
-   public void load(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      int var3 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var4 = Integer.valueOf(var1.getParameter("pageSize"));
-      PacketApplyQuery var5 = PacketApplyManager.ins.newQuery();
-      var5.projectId(ContextHolder.getProjectId());
-      var5.titleLike(var1.getParameter("title"));
-      var5.descLike(var1.getParameter("desc"));
-      var5.createUserLike(var1.getParameter("createUser"));
-      String var6 = var1.getParameter("currentType");
-      if (var6.contentEquals("pending")) {
-         var5.approver(SecurityUtils.getLoginUsername(var1));
-         var5.status(ApplyStatus.pending);
-      } else if (var6.contentEquals("my")) {
-         var5.createUser(SecurityUtils.getLoginUsername(var1));
-      } else if (var6.contentEquals("processed")) {
-         var5.approver(SecurityUtils.getLoginUsername(var1));
-         var5.notStatus(ApplyStatus.pending);
+   public void load(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      PacketApplyQuery packetApplyQuery = PacketApplyManager.ins.newQuery();
+      packetApplyQuery.projectId(ContextHolder.getProjectId());
+      packetApplyQuery.titleLike(req.getParameter("title"));
+      packetApplyQuery.descLike(req.getParameter("desc"));
+      packetApplyQuery.createUserLike(req.getParameter("createUser"));
+      String parameter = req.getParameter("currentType");
+      if (parameter.contentEquals("pending")) {
+         packetApplyQuery.approver(SecurityUtils.getLoginUsername(req));
+         packetApplyQuery.status(ApplyStatus.pending);
+      } else if (parameter.contentEquals("my")) {
+         packetApplyQuery.createUser(SecurityUtils.getLoginUsername(req));
+      } else if (parameter.contentEquals("processed")) {
+         packetApplyQuery.approver(SecurityUtils.getLoginUsername(req));
+         packetApplyQuery.notStatus(ApplyStatus.pending);
       }
 
-      String var7 = var1.getParameter("approver");
-      if (StringUtils.isNotBlank(var7)) {
-         var5.approver(var7);
+      String parameter2 = req.getParameter("approver");
+      if (StringUtils.isNotBlank(parameter2)) {
+         packetApplyQuery.approver(parameter2);
       }
 
-      String var8 = var1.getParameter("type");
-      if (StringUtils.isNotBlank(var8)) {
-         var5.type(ApplyType.valueOf(var8));
+      String parameter3 = req.getParameter("type");
+      if (StringUtils.isNotBlank(parameter3)) {
+         packetApplyQuery.type(ApplyType.valueOf(parameter3));
       }
 
-      String var9 = var1.getParameter("status");
-      if (StringUtils.isNotBlank(var9)) {
-         ApplyStatus var10 = ApplyStatus.valueOf(var9);
-         var5.status(var10);
+      String parameter4 = req.getParameter("status");
+      if (StringUtils.isNotBlank(parameter4)) {
+         ApplyStatus applyStatus = ApplyStatus.valueOf(parameter4);
+         packetApplyQuery.status(applyStatus);
       }
 
-      Page var11 = var5.paging(var3, var4);
-      this.a(var2, var11);
+      Page page = packetApplyQuery.paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
-   public void detail(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      ApplyType var3 = ApplyType.valueOf(var1.getParameter("type"));
-      long var4 = Long.valueOf(var1.getParameter("packetId"));
-      long var6 = -1L;
-      if (var3.equals(ApplyType.deploy)) {
-         var6 = Long.valueOf(var1.getParameter("deployedPacketId"));
+   public void detail(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      ApplyType applyType = ApplyType.valueOf(req.getParameter("type"));
+      long longValue = Long.valueOf(req.getParameter("packetId"));
+      long longValue2 = -1L;
+      if (applyType.equals(ApplyType.deploy)) {
+         longValue2 = Long.valueOf(req.getParameter("deployedPacketId"));
       }
 
-      HashMap var8 = new HashMap();
-      Packet var9 = PacketManager.ins.load(var4);
-      var8.put("name", var9.getName());
-      var8.put("desc", var9.getDesc());
-      if (var6 > -1L) {
-         PacketDeploy var10 = PacketDeployManager.ins.load(var6);
-         var8.put("files", var10.getFiles());
+      HashMap valuesByKey = new HashMap();
+      Packet packet = PacketManager.ins.load(longValue);
+      valuesByKey.put("name", packet.getName());
+      valuesByKey.put("desc", packet.getDesc());
+      if (longValue2 > -1L) {
+         PacketDeploy packetDeploy = PacketDeployManager.ins.load(longValue2);
+         valuesByKey.put("files", packetDeploy.getFiles());
       } else {
-         var8.put("files", var9.getFiles());
+         valuesByKey.put("files", packet.getFiles());
       }
 
-      this.a(var2, var8);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
-   public void submit(final HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      final long var3 = Long.valueOf(var1.getParameter("applyId"));
-      final ApplyStatus var5 = ApplyStatus.valueOf(var1.getParameter("result"));
-      final String var6 = var1.getParameter("desc");
-      String var7 = var1.getParameter("groupId");
-      final PacketApplyDetail var8 = new PacketApplyDetail();
-      var8.setApplyId(var3);
-      var8.setProjectId(ContextHolder.getProjectId());
-      var8.setDesc(var6);
-      var8.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      final ApplyType var9 = ApplyType.valueOf(var1.getParameter("applyType"));
-      final PacketApply var10 = PacketApplyManager.ins.load(var3);
-      final Packet var11 = PacketManager.ins.load(var10.getPacketId());
-      this.a(new TransactionalInvoke() {
+   public void submit(final HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      final long longValue = Long.valueOf(req.getParameter("applyId"));
+      final ApplyStatus applyStatus = ApplyStatus.valueOf(req.getParameter("result"));
+      final String parameter = req.getParameter("desc");
+      String parameter2 = req.getParameter("groupId");
+      final PacketApplyDetail packetApplyDetail = new PacketApplyDetail();
+      packetApplyDetail.setApplyId(longValue);
+      packetApplyDetail.setProjectId(ContextHolder.getProjectId());
+      packetApplyDetail.setDesc(parameter);
+      packetApplyDetail.setCreateUser(SecurityUtils.getLoginUsername(req));
+      final ApplyType applyType = ApplyType.valueOf(req.getParameter("applyType"));
+      final PacketApply packetApply = PacketApplyManager.ins.load(longValue);
+      final Packet packet = PacketManager.ins.load(packetApply.getPacketId());
+      this.doInTransactional(new TransactionalInvoke() {
          public void doTransactional() {
-            PacketApplyDetailManager.ins.add(var8);
-            PacketApplyManager.ins.update(var3, var5);
+            PacketApplyDetailManager.ins.add(packetApplyDetail);
+            PacketApplyManager.ins.update(longValue, applyStatus);
             String var1x = null;
-            if (var5.equals(ApplyStatus.pass)) {
-               long var2 = Long.valueOf(var1.getParameter("packetId"));
-               if (var9.equals(ApplyType.enable)) {
+            if (applyStatus.equals(ApplyStatus.pass)) {
+               long longValue = Long.valueOf(req.getParameter("packetId"));
+               if (applyType.equals(ApplyType.enable)) {
                   var1x = "Enable packet %s[%s] Approved!";
-                  if (TodoServletHandler.this.e != null) {
-                     TodoServletHandler.this.e.beforeEnable(var11, var6);
+                  if (TodoServletHandler.this.packetPublishListener != null) {
+                     TodoServletHandler.this.packetPublishListener.beforeEnable(packet, parameter);
                   }
 
-                  PacketManager.ins.update(var2, true);
-                  if (TodoServletHandler.this.e != null) {
-                     TodoServletHandler.this.e.afterEnable(var11, var6);
+                  PacketManager.ins.update(longValue, true);
+                  if (TodoServletHandler.this.packetPublishListener != null) {
+                     TodoServletHandler.this.packetPublishListener.afterEnable(packet, parameter);
                   }
-               } else if (var9.equals(ApplyType.disable)) {
+               } else if (applyType.equals(ApplyType.disable)) {
                   var1x = "Desiable packet %s[%s] Approved!";
-                  if (TodoServletHandler.this.e != null) {
-                     TodoServletHandler.this.e.beforeDisable(var11, var6);
+                  if (TodoServletHandler.this.packetPublishListener != null) {
+                     TodoServletHandler.this.packetPublishListener.beforeDisable(packet, parameter);
                   }
 
-                  PacketManager.ins.update(var2, false);
-                  if (TodoServletHandler.this.e != null) {
-                     TodoServletHandler.this.e.afterDisable(var11, var6);
+                  PacketManager.ins.update(longValue, false);
+                  if (TodoServletHandler.this.packetPublishListener != null) {
+                     TodoServletHandler.this.packetPublishListener.afterDisable(packet, parameter);
                   }
-               } else if (var9.equals(ApplyType.deploy)) {
+               } else if (applyType.equals(ApplyType.deploy)) {
                   var1x = "Release packet %s[%s] Approved!";
-                  if (TodoServletHandler.this.e != null) {
-                     TodoServletHandler.this.e.beforePublish(var11, var6);
+                  if (TodoServletHandler.this.packetPublishListener != null) {
+                     TodoServletHandler.this.packetPublishListener.beforePublish(packet, parameter);
                   }
 
-                  List var4 = PacketDeployManager.ins.newQuery().enable(true).packetId(var2).list();
-                  if (var4.size() == 0) {
-                     PacketDeployManager.ins.updateEnable(var10.getDeployedPacketId(), true);
+                  List items = PacketDeployManager.ins.newQuery().enable(true).packetId(longValue).list();
+                  if (items.size() == 0) {
+                  PacketDeployManager.ins.updateEnable(packetApply.getDeployedPacketId(), true);
                   }
 
-                  PacketDeployManager.ins.updateStatus(var10.getDeployedPacketId(), var5);
-                  if (TodoServletHandler.this.e != null) {
-                     TodoServletHandler.this.e.afterPublish(var11, var6);
+                  PacketDeployManager.ins.updateStatus(packetApply.getDeployedPacketId(), applyStatus);
+                  if (TodoServletHandler.this.packetPublishListener != null) {
+                     TodoServletHandler.this.packetPublishListener.afterPublish(packet, parameter);
                   }
                }
 
                if (StringUtils.isNotBlank(var1x)) {
-                  String var5x = String.format(var1x, var11.getName(), var11.getCode());
-                  SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), var9.name(), var11.getId(), var5x);
+                  String var5x = String.format(var1x, packet.getName(), packet.getCode());
+                  SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), applyType.name(), packet.getId(), var5x);
                }
             } else {
-               PacketDeployManager.ins.updateStatus(var10.getDeployedPacketId(), var5);
+               PacketDeployManager.ins.updateStatus(packetApply.getDeployedPacketId(), applyStatus);
             }
 
          }
       });
-      HashMap var12 = new HashMap();
-      ArrayList var13 = new ArrayList();
-      boolean var14 = false;
-      boolean var15 = false;
-      if (var5.equals(ApplyStatus.pass)) {
-         long var16 = Long.valueOf(var1.getParameter("packetId"));
-         if (var9.equals(ApplyType.enable)) {
-            List var18 = PacketCache.ins.refreshPacket(var16);
-            List var19 = PacketCache.ins.enableClientsPacket(var7, var16);
-            if (var18.size() > 0) {
-               var15 = true;
+      HashMap valuesByKey = new HashMap();
+      ArrayList items = new ArrayList();
+      boolean flag = false;
+      boolean flag2 = false;
+      if (applyStatus.equals(ApplyStatus.pass)) {
+         long longValue2 = Long.valueOf(req.getParameter("packetId"));
+         if (applyType.equals(ApplyType.enable)) {
+            List items2 = PacketCache.ins.refreshPacket(longValue2);
+            List items3 = PacketCache.ins.enableClientsPacket(parameter2, longValue2);
+            if (items2.size() > 0) {
+               flag2 = true;
             }
 
-            if (var19.size() > 0) {
-               var14 = true;
+            if (items3.size() > 0) {
+               flag = true;
             }
 
-            var13.addAll(var18);
-            var13.addAll(var19);
-         } else if (var9.equals(ApplyType.disable)) {
-            List var22 = PacketCache.ins.refreshPacket(var16);
-            List var24 = PacketCache.ins.disableClientsPacket(var7, var16);
-            if (var22.size() > 0) {
-               var15 = true;
+            items.addAll(items2);
+            items.addAll(items3);
+         } else if (applyType.equals(ApplyType.disable)) {
+            List items4 = PacketCache.ins.refreshPacket(longValue2);
+            List items5 = PacketCache.ins.disableClientsPacket(parameter2, longValue2);
+            if (items4.size() > 0) {
+               flag2 = true;
             }
 
-            if (var24.size() > 0) {
-               var14 = true;
+            if (items5.size() > 0) {
+               flag = true;
             }
 
-            var13.addAll(var22);
-            var13.addAll(var24);
-         } else if (var9.equals(ApplyType.deploy)) {
-            List var23 = PacketDeployManager.ins.newQuery().packetId(var16).list();
-            if (var23.size() == 1) {
-               List var25 = PacketCache.ins.refreshPacket(var16);
-               if (var25.size() > 0) {
-                  var15 = true;
+            items.addAll(items4);
+            items.addAll(items5);
+         } else if (applyType.equals(ApplyType.deploy)) {
+            List items6 = PacketDeployManager.ins.newQuery().packetId(longValue2).list();
+            if (items6.size() == 1) {
+               List items7 = PacketCache.ins.refreshPacket(longValue2);
+               if (items7.size() > 0) {
+                  flag2 = true;
                }
 
-               var13.addAll(var25);
+               items.addAll(items7);
             }
          }
       }
 
-      if (var13.size() > 0) {
-         var12.put("result", var13);
-         String var20 = "";
-         if (var15) {
-            var20 = "集群服务器";
+      if (items.size() > 0) {
+         valuesByKey.put("result", items);
+         String text = "";
+         if (flag2) {
+            text = "集群服务器";
          }
 
-         if (var14) {
-            if (var20.length() > 0) {
-               var20 = var20 + "及";
+         if (flag) {
+            if (text.length() > 0) {
+               text = text + "及";
             }
 
-            var20 = var20 + "客户端";
+            text = text + "客户端";
          }
 
-         var20 = var20 + "同步结果";
-         var12.put("title", var20);
+         text = text + "同步结果";
+         valuesByKey.put("title", text);
       }
 
-      this.a(var2, var12);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    @Transactional
-   public void reapply(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("applyId"));
-      String var5 = var1.getParameter("desc");
-      PacketApplyDetail var6 = new PacketApplyDetail();
-      var6.setApplyId(var3);
-      var6.setProjectId(ContextHolder.getProjectId());
-      var6.setDesc(var5);
-      var6.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      PacketApplyDetailManager.ins.add(var6);
-      PacketApplyManager.ins.update(var3, ApplyStatus.pending);
-      ApplyType var7 = ApplyType.valueOf(var1.getParameter("type"));
-      if (var7.equals(ApplyType.deploy)) {
-         long var8 = Long.valueOf(var1.getParameter("deployedPacketId"));
-         PacketDeploy var10 = PacketDeployManager.ins.load(var8);
-         long var11 = Long.valueOf(var1.getParameter("packetId"));
-         KnowledgePackage var13 = PacketBuilder.ins.buildKnowledgePackage(var11);
-         String var14 = Utils.knowledgePackageToString(var13);
-         PacketDeploy var15 = new PacketDeploy();
-         var15.setContent(var14);
-         var15.setDigest(MD5Utils.stringToMD5(var14));
-         var15.setStatus(ApplyStatus.pending);
-         var15.setCreateUser(SecurityUtils.getLoginUsername(var1));
-         var15.setApplyId(var3);
-         var15.setVersion(var10.getVersion());
-         var15.setDesc(var10.getDesc());
-         var15.setPacketId(var11);
-         var15.setProjectId(ContextHolder.getProjectId());
-         PacketDeployManager.ins.add(var15);
-         Packet var16 = PacketManager.ins.load(var11);
+   public void reapply(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("applyId"));
+      String parameter = req.getParameter("desc");
+      PacketApplyDetail packetApplyDetail = new PacketApplyDetail();
+      packetApplyDetail.setApplyId(longValue);
+      packetApplyDetail.setProjectId(ContextHolder.getProjectId());
+      packetApplyDetail.setDesc(parameter);
+      packetApplyDetail.setCreateUser(SecurityUtils.getLoginUsername(req));
+      PacketApplyDetailManager.ins.add(packetApplyDetail);
+      PacketApplyManager.ins.update(longValue, ApplyStatus.pending);
+      ApplyType applyType = ApplyType.valueOf(req.getParameter("type"));
+      if (applyType.equals(ApplyType.deploy)) {
+         long longValue2 = Long.valueOf(req.getParameter("deployedPacketId"));
+         PacketDeploy packetDeploy = PacketDeployManager.ins.load(longValue2);
+         long longValue3 = Long.valueOf(req.getParameter("packetId"));
+         KnowledgePackage knowledgePackage = PacketBuilder.ins.buildKnowledgePackage(longValue3);
+         String text = Utils.knowledgePackageToString(knowledgePackage);
+         PacketDeploy packetDeploy2 = new PacketDeploy();
+         packetDeploy2.setContent(text);
+         packetDeploy2.setDigest(MD5Utils.stringToMD5(text));
+         packetDeploy2.setStatus(ApplyStatus.pending);
+         packetDeploy2.setCreateUser(SecurityUtils.getLoginUsername(req));
+         packetDeploy2.setApplyId(longValue);
+         packetDeploy2.setVersion(packetDeploy.getVersion());
+         packetDeploy2.setDesc(packetDeploy.getDesc());
+         packetDeploy2.setPacketId(longValue3);
+         packetDeploy2.setProjectId(ContextHolder.getProjectId());
+         PacketDeployManager.ins.add(packetDeploy2);
+         Packet packet = PacketManager.ins.load(longValue3);
 
-         for(PacketFile var18 : (Iterable<PacketFile>)(Iterable<?>)(var16.getFiles())) {
-            RuleFile var19 = FileManager.ins.get(var18.getFileId());
-            PacketDeployFile var20 = new PacketDeployFile();
-            var20.setFileId(var18.getFileId());
-            var20.setProjectId(ContextHolder.getProjectId());
-            var20.setDigest(var19.getDigest());
-            var20.setPath(var18.getPath());
-            var20.setVersion(var18.getVersion());
-            var20.setPacketDeployId(var15.getId());
-            var20.setContent(FileManager.ins.loadContent(var18.getFileId()));
-            var20.setCreateUser(SecurityUtils.getLoginUsername(var1));
-            PacketDeployFileManager.ins.add(var20);
+         for(PacketFile packetFile : (Iterable<PacketFile>)(Iterable<?>)(packet.getFiles())) {
+            RuleFile ruleFile = FileManager.ins.get(packetFile.getFileId());
+            PacketDeployFile packetDeployFile = new PacketDeployFile();
+            packetDeployFile.setFileId(packetFile.getFileId());
+            packetDeployFile.setProjectId(ContextHolder.getProjectId());
+            packetDeployFile.setDigest(ruleFile.getDigest());
+            packetDeployFile.setPath(packetFile.getPath());
+            packetDeployFile.setVersion(packetFile.getVersion());
+            packetDeployFile.setPacketDeployId(packetDeploy2.getId());
+            packetDeployFile.setContent(FileManager.ins.loadContent(packetFile.getFileId()));
+            packetDeployFile.setCreateUser(SecurityUtils.getLoginUsername(req));
+            PacketDeployFileManager.ins.add(packetDeployFile);
          }
 
-         PacketDeployManager.ins.delete(var8);
-         PacketApplyManager.ins.updateDeployedPacketId(var3, var15.getId());
+         PacketDeployManager.ins.delete(longValue2);
+         PacketApplyManager.ins.updateDeployedPacketId(longValue, packetDeploy2.getId());
       }
 
    }

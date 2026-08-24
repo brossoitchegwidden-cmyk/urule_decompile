@@ -14,303 +14,303 @@ import java.util.Date;
 import java.util.List;
 
 public class OperationLogQueryImpl implements OperationLogQuery {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private Long e;
-   private String f;
-   private String g;
-   private List h;
-   private List i;
-   private Date j;
-   private Date k;
-   private List l = new ArrayList();
+   private String exactUserId;
+   private String userIdLike;
+   private String username;
+   private String groupId;
+   private Long projectId;
+   private String exactCategory;
+   private String categoryLike;
+   private List categorys;
+   private List actions;
+   private Date startDate;
+   private Date endDate;
+   private List queryParameters = new ArrayList();
 
    protected OperationLogQueryImpl() {
    }
 
-   public Page paging(int var1, int var2) {
-      String var3 = "select ID_,USER_ID_,USER_NAME_,GROUP_ID_, GROUP_NAME_, PROJECT_ID_, PROJECT_NAME_, CATEGORY_, ACTION_, ITEM_ID_, CONTENT_, CREATE_DATE_ from URULE_LOG_OPERATION";
-      Connection var4 = JdbcUtils.getConnection();
+   public Page paging(int pageIndex, int pageSize) {
+      String pageSql = "select ID_,USER_ID_,USER_NAME_,GROUP_ID_, GROUP_NAME_, PROJECT_ID_, PROJECT_NAME_, CATEGORY_, ACTION_, ITEM_ID_, CONTENT_, CREATE_DATE_ from URULE_LOG_OPERATION";
+      Connection connection = JdbcUtils.getConnection();
 
-      Page var10;
+      Page page;
       try {
-         StringBuilder var5 = this.a(var4);
-         if (var5.length() > 0) {
-            var3 = var3 + " where" + var5.toString();
+         StringBuilder stringBuilder = this.buildWhereClause(connection);
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var3 = var3 + " order by CREATE_DATE_ desc";
-         Page var6 = new Page(var1, var2);
-         var3 = JdbcUtils.getPageSql(var3, var6.getStartRow(), var2);
-         PreparedStatement var7 = var4.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.l, var7);
-         ResultSet var8 = var7.executeQuery();
-         List var9 = this.a(var8);
-         var6.setData(var9);
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var3 = "select count(*) from URULE_LOG_OPERATION";
-         if (var5.length() > 0) {
-            var3 = var3 + " where" + var5.toString();
+         pageSql = pageSql + " order by CREATE_DATE_ desc";
+         Page page2 = new Page(pageIndex, pageSize);
+         pageSql = JdbcUtils.getPageSql(pageSql, page2.getStartRow(), pageSize);
+         PreparedStatement preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readOperationLogs(resultSet);
+         page2.setData(items);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         pageSql = "select count(*) from URULE_LOG_OPERATION";
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var7 = var4.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.l, var7);
-         var8 = var7.executeQuery();
-         if (var8.next()) {
-            var6.setTotalRows(var8.getLong(1));
+         preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page2.setTotalRows(resultSet.getLong(1));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var10 = var6;
-      } catch (Exception var14) {
-         throw new RuleException(var14);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         page = page2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var10;
+      return page;
    }
 
    public List list() {
-      String var1 = "select ID_,USER_ID_,USER_NAME_,GROUP_ID_, GROUP_NAME_, PROJECT_ID_, PROJECT_NAME_, CATEGORY_, ACTION_, ITEM_ID_, CONTENT_, CREATE_DATE_ from URULE_LOG_OPERATION";
-      Connection var2 = JdbcUtils.getConnection();
+      String text = "select ID_,USER_ID_,USER_NAME_,GROUP_ID_, GROUP_NAME_, PROJECT_ID_, PROJECT_NAME_, CATEGORY_, ACTION_, ITEM_ID_, CONTENT_, CREATE_DATE_ from URULE_LOG_OPERATION";
+      Connection connection = JdbcUtils.getConnection();
 
-      List var7;
+      List listResult;
       try {
-         StringBuilder var3 = this.a(var2);
-         if (var3.length() > 0) {
-            var1 = var1 + " where" + var3.toString();
+         StringBuilder stringBuilder = this.buildWhereClause(connection);
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         var1 = var1 + " order by CREATE_DATE_ desc";
-         PreparedStatement var4 = var2.prepareStatement(var1);
-         JdbcUtils.fillPreparedStatementParameters(this.l, var4);
-         ResultSet var5 = var4.executeQuery();
-         List var6 = this.a(var5);
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         text = text + " order by CREATE_DATE_ desc";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readOperationLogs(resultSet);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listResult;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readOperationLogs(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         OperationLog var3 = new OperationLog();
-         var3.setId(var1.getLong(1));
-         var3.setUserId(var1.getString(2));
-         var3.setUsername(var1.getString(3));
-         var3.setGroupId(var1.getString(4));
-         var3.setGroupName(var1.getString(5));
-         var3.setProjectId(var1.getLong(6));
-         var3.setProjectName(var1.getString(7));
-         var3.setCategory(var1.getString(8));
-         var3.setAction(var1.getString(9));
-         var3.setItemId(var1.getString(10));
-         var3.setContent(var1.getString(11));
-         var3.setCreateDate(var1.getTimestamp(12));
-         var2.add(var3);
+      while(resultSet.next()) {
+         OperationLog operationLog = new OperationLog();
+         operationLog.setId(resultSet.getLong(1));
+         operationLog.setUserId(resultSet.getString(2));
+         operationLog.setUsername(resultSet.getString(3));
+         operationLog.setGroupId(resultSet.getString(4));
+         operationLog.setGroupName(resultSet.getString(5));
+         operationLog.setProjectId(resultSet.getLong(6));
+         operationLog.setProjectName(resultSet.getString(7));
+         operationLog.setCategory(resultSet.getString(8));
+         operationLog.setAction(resultSet.getString(9));
+         operationLog.setItemId(resultSet.getString(10));
+         operationLog.setContent(resultSet.getString(11));
+         operationLog.setCreateDate(resultSet.getTimestamp(12));
+         items.add(operationLog);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a(Connection var1) throws SQLException {
-      this.l.clear();
-      StringBuilder var2 = new StringBuilder();
-      if (StringUtils.isNotBlank(this.a)) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+   private StringBuilder buildWhereClause(Connection connection) throws SQLException {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (StringUtils.isNotBlank(this.exactUserId)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" USER_ID_ = ?");
-         this.l.add(this.a);
+         stringBuilder.append(" USER_ID_ = ?");
+         this.queryParameters.add(this.exactUserId);
       }
 
-      if (StringUtils.isNotBlank(this.b)) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (StringUtils.isNotBlank(this.userIdLike)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" USER_ID_ like ?");
-         this.l.add("%" + this.b + "%");
+         stringBuilder.append(" USER_ID_ like ?");
+         this.queryParameters.add("%" + this.userIdLike + "%");
       }
 
-      if (StringUtils.isNotBlank(this.c)) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (StringUtils.isNotBlank(this.username)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" USER_NAME_ like ?");
-         this.l.add("%" + this.c + "%");
+         stringBuilder.append(" USER_NAME_ like ?");
+         this.queryParameters.add("%" + this.username + "%");
       }
 
-      if (this.d != null) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (this.groupId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" GROUP_ID_ = ?");
-         this.l.add(this.d);
+         stringBuilder.append(" GROUP_ID_ = ?");
+         this.queryParameters.add(this.groupId);
       }
 
-      if (this.e != null) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" PROJECT_ID_ = ?");
-         this.l.add(this.e);
+         stringBuilder.append(" PROJECT_ID_ = ?");
+         this.queryParameters.add(this.projectId);
       } else {
-         if (var2.length() > 0) {
-            var2.append(" and");
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" PROJECT_ID_ is null");
+         stringBuilder.append(" PROJECT_ID_ is null");
       }
 
-      if (StringUtils.isNotBlank(this.f)) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (StringUtils.isNotBlank(this.exactCategory)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" CATEGORY_ = ?");
-         this.l.add(this.f);
+         stringBuilder.append(" CATEGORY_ = ?");
+         this.queryParameters.add(this.exactCategory);
       }
 
-      if (StringUtils.isNotBlank(this.g)) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (StringUtils.isNotBlank(this.categoryLike)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" CATEGORY_ like ?");
-         this.l.add("%" + this.g + "%");
+         stringBuilder.append(" CATEGORY_ like ?");
+         this.queryParameters.add("%" + this.categoryLike + "%");
       }
 
-      if (this.h != null) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (this.categorys != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" CATEGORY_ in (");
+         stringBuilder.append(" CATEGORY_ in (");
 
-         for(int var3 = 0; var3 < this.h.size(); ++var3) {
-            String var4 = (String)this.h.get(var3);
-            var2.append("?");
-            if (var3 + 1 < this.h.size()) {
-               var2.append(",");
+         for(int index = 0; index < this.categorys.size(); ++index) {
+            String text = (String)this.categorys.get(index);
+            stringBuilder.append("?");
+            if (index + 1 < this.categorys.size()) {
+               stringBuilder.append(",");
             }
 
-            this.l.add(var4);
+            this.queryParameters.add(text);
          }
 
-         var2.append(")");
+         stringBuilder.append(")");
       }
 
-      if (this.i != null) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (this.actions != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" ACTION_ in (");
+         stringBuilder.append(" ACTION_ in (");
 
-         for(int var5 = 0; var5 < this.i.size(); ++var5) {
-            String var6 = (String)this.i.get(var5);
-            var2.append("?");
-            if (var5 + 1 < this.i.size()) {
-               var2.append(",");
+         for(int index2 = 0; index2 < this.actions.size(); ++index2) {
+            String text2 = (String)this.actions.get(index2);
+            stringBuilder.append("?");
+            if (index2 + 1 < this.actions.size()) {
+               stringBuilder.append(",");
             }
 
-            this.l.add(var6);
+            this.queryParameters.add(text2);
          }
 
-         var2.append(")");
+         stringBuilder.append(")");
       }
 
-      if (this.j != null) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (this.startDate != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" CREATE_DATE_ > ?");
-         this.l.add(this.j);
+         stringBuilder.append(" CREATE_DATE_ > ?");
+         this.queryParameters.add(this.startDate);
       }
 
-      if (this.k != null) {
-         if (var2.length() > 0) {
-            var2.append(" and");
+      if (this.endDate != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var2.append(" CREATE_DATE_ < ?");
-         this.l.add(this.k);
+         stringBuilder.append(" CREATE_DATE_ < ?");
+         this.queryParameters.add(this.endDate);
       }
 
-      return var2;
+      return stringBuilder;
    }
 
-   public OperationLogQuery userId(String var1) {
-      this.a = var1;
+   public OperationLogQuery userId(String userId) {
+      this.exactUserId = userId;
       return this;
    }
 
-   public OperationLogQuery groupId(String var1) {
-      this.d = var1;
+   public OperationLogQuery groupId(String groupId) {
+      this.groupId = groupId;
       return this;
    }
 
-   public OperationLogQuery username(String var1) {
-      this.c = var1;
+   public OperationLogQuery username(String username) {
+      this.username = username;
       return this;
    }
 
-   public OperationLogQuery projectId(Long var1) {
-      this.e = var1;
+   public OperationLogQuery projectId(Long projectId) {
+      this.projectId = projectId;
       return this;
    }
 
-   public OperationLogQuery category(String var1) {
-      this.f = var1;
+   public OperationLogQuery category(String category) {
+      this.exactCategory = category;
       return this;
    }
 
-   public OperationLogQuery categoryIn(List var1) {
-      this.h = var1;
+   public OperationLogQuery categoryIn(List categorys) {
+      this.categorys = categorys;
       return this;
    }
 
-   public OperationLogQuery actionIn(List var1) {
-      this.i = var1;
+   public OperationLogQuery actionIn(List actions) {
+      this.actions = actions;
       return this;
    }
 
-   public OperationLogQuery dateBegin(Date var1) {
-      this.j = var1;
+   public OperationLogQuery dateBegin(Date date) {
+      this.startDate = date;
       return this;
    }
 
-   public OperationLogQuery dateEnd(Date var1) {
-      this.k = var1;
+   public OperationLogQuery dateEnd(Date date) {
+      this.endDate = date;
       return this;
    }
 
-   public OperationLogQuery userIdLike(String var1) {
-      this.b = var1;
+   public OperationLogQuery userIdLike(String userId) {
+      this.userIdLike = userId;
       return this;
    }
 
-   public OperationLogQuery categoryLike(String var1) {
-      this.g = var1;
+   public OperationLogQuery categoryLike(String category) {
+      this.categoryLike = category;
       return this;
    }
 }

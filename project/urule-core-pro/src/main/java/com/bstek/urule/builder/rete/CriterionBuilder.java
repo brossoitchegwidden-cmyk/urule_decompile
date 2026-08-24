@@ -17,118 +17,118 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class CriterionBuilder {
-   public abstract List<BaseReteNode> buildCriterion(BaseCriterion var1, BuildContext var2);
+   public abstract List<BaseReteNode> buildCriterion(BaseCriterion baseCriterion, BuildContext context);
 
-   public abstract boolean support(Criterion var1);
+   public abstract boolean support(Criterion criterion);
 
-   protected List<BaseReteNode> a(Criteria var1, List<BaseReteNode> var2, BuildContext var3) {
-      ArrayList var4 = new ArrayList();
-      if (Utils.isDebug() && var3.currentRule() != null) {
-         var1.setFile(var3.currentRule().getFile());
+   protected List<BaseReteNode> buildCriteria(Criteria criteria, List<BaseReteNode> prevNodes, BuildContext context) {
+      ArrayList criteria2 = new ArrayList();
+      if (Utils.isDebug() && context.currentRule() != null) {
+         criteria.setFile(context.currentRule().getFile());
       }
 
-      List var5 = var3.getObjectType(var1);
-      if (var2 != null && var2.size() > 0) {
-         for (BaseReteNode var7 : var2) {
-            boolean var8 = true;
-            List var9 = null;
-            if (var7 instanceof MetNode) {
+      List objectType = context.getObjectType(criteria);
+      if (prevNodes != null && prevNodes.size() > 0) {
+         for (BaseReteNode baseReteNode : prevNodes) {
+            boolean flag = true;
+            List items = null;
+            if (baseReteNode instanceof MetNode) {
                new ArrayList();
-               MetNode var10 = (MetNode)var7;
-               var9 = var3.getObjectTypeByCriterions(var10.getCriterions());
+               MetNode metNode = (MetNode)baseReteNode;
+               items = context.getObjectTypeByCriterions(metNode.getCriterions());
             } else {
-               var9 = var3.getObjectType(((ConditionNode)var7).getCriteria());
+               items = context.getObjectType(((ConditionNode)baseReteNode).getCriteria());
             }
 
-            if (var9.size() == var5.size()) {
-               for (String var11 : (Iterable<String>)(Iterable<?>)(var9)) {
-                  if (!var5.contains(var11)) {
-                     var8 = false;
+            if (items.size() == objectType.size()) {
+               for (String text : (Iterable<String>)(Iterable<?>)(items)) {
+                  if (!objectType.contains(text)) {
+                     flag = false;
                      break;
                   }
                }
             } else {
-               var8 = false;
+               flag = false;
             }
 
-            ReteNode var15 = null;
-            if (var8) {
-               List var18 = var7.getChildrenNodes();
-               var15 = this.a(var1, var18);
-               if (var15 == null) {
-                  var15 = new CriteriaNode(var1, var3.nextId(), var3.currentRuleIsDebug());
-                  var7.addLine(var15);
+            ReteNode reteNode = null;
+            if (flag) {
+               List childrenNodes = baseReteNode.getChildrenNodes();
+               reteNode = this.resolveCriteriaNode(criteria, childrenNodes);
+               if (reteNode == null) {
+                  reteNode = new CriteriaNode(criteria, context.nextId(), context.currentRuleIsDebug());
+                  baseReteNode.addLine(reteNode);
                }
 
-               var4.add(var15);
+               criteria2.add(reteNode);
             } else {
-               CriteriaNode var17 = this.a(var1, var3, var5);
-               var4.add(var17);
+               CriteriaNode criteriaNode = this.resolveCriteriaNode(criteria, context, objectType);
+               criteria2.add(criteriaNode);
             }
          }
       } else {
-         CriteriaNode var6 = this.a(var1, var3, var5);
-         var4.add(var6);
+         CriteriaNode criteriaNode2 = this.resolveCriteriaNode(criteria, context, objectType);
+         criteria2.add(criteriaNode2);
       }
 
-      return var4;
+      return criteria2;
    }
 
-   private CriteriaNode a(BaseCriteria var1, BuildContext var2, List<String> var3) {
-      CriteriaNode var4 = null;
-      ObjectTypeNode var5 = null;
+   private CriteriaNode resolveCriteriaNode(BaseCriteria baseCriteria, BuildContext buildContext, List<String> strings) {
+      CriteriaNode criteriaNode = null;
+      ObjectTypeNode objectTypeNode = null;
 
-      for (String var7 : var3) {
-         if (var7.equals("*")) {
-            var7 = HashMap.class.getName();
+      for (String text : strings) {
+         if (text.equals("*")) {
+            text = HashMap.class.getName();
          }
 
-         var5 = var2.buildObjectTypeNode(var7);
-         if (var4 == null) {
-            List var8 = var5.getChildrenNodes();
-            var4 = this.a(var1, var8);
+         objectTypeNode = buildContext.buildObjectTypeNode(text);
+         if (criteriaNode == null) {
+            List childrenNodes = objectTypeNode.getChildrenNodes();
+            criteriaNode = this.resolveCriteriaNode(baseCriteria, childrenNodes);
          } else {
-            List var13 = var5.getChildrenNodes();
-            if (!var13.contains(var4)) {
-               var5.addLine(var4);
+            List childrenNodes2 = objectTypeNode.getChildrenNodes();
+            if (!childrenNodes2.contains(criteriaNode)) {
+               objectTypeNode.addLine(criteriaNode);
             }
          }
       }
 
-      if (var4 == null) {
-         for (String var12 : var3) {
-            if (var12.equals("*")) {
-               var12 = HashMap.class.getName();
+      if (criteriaNode == null) {
+         for (String name : strings) {
+            if (name.equals("*")) {
+               name = HashMap.class.getName();
             }
 
-            var5 = var2.buildObjectTypeNode(var12);
-            if (var4 == null) {
-               var4 = new CriteriaNode((Criteria)var1, var2.nextId(), var2.currentRuleIsDebug());
-               var5.addLine(var4);
+            objectTypeNode = buildContext.buildObjectTypeNode(name);
+            if (criteriaNode == null) {
+               criteriaNode = new CriteriaNode((Criteria)baseCriteria, buildContext.nextId(), buildContext.currentRuleIsDebug());
+               objectTypeNode.addLine(criteriaNode);
             } else {
-               var5.addLine(var4);
+               objectTypeNode.addLine(criteriaNode);
             }
          }
       }
 
-      return var4;
+      return criteriaNode;
    }
 
-   private CriteriaNode a(BaseCriteria var1, List<ReteNode> var2) {
-      String var3 = var1.getId();
-      CriteriaNode var4 = null;
+   private CriteriaNode resolveCriteriaNode(BaseCriteria baseCriteria, List<ReteNode> reteNodes) {
+      String id = baseCriteria.getId();
+      CriteriaNode criteriaNode = null;
 
-      for (Node var6 : var2) {
-         if (var6 instanceof ConditionNode && (!(var1 instanceof Criteria) || var6 instanceof CriteriaNode)) {
-            ConditionNode var7 = (ConditionNode)var6;
-            String var8 = var7.getCriteriaInfo();
-            if (var8.equals(var3)) {
-               var4 = (CriteriaNode)var7;
+      for (Node node : reteNodes) {
+         if (node instanceof ConditionNode && (!(baseCriteria instanceof Criteria) || node instanceof CriteriaNode)) {
+            ConditionNode conditionNode = (ConditionNode)node;
+            String criteriaInfo = conditionNode.getCriteriaInfo();
+            if (criteriaInfo.equals(id)) {
+               criteriaNode = (CriteriaNode)conditionNode;
                break;
             }
          }
       }
 
-      return var4;
+      return criteriaNode;
    }
 }

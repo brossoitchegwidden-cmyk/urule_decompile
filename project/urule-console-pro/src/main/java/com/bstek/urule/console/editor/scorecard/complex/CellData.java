@@ -1,58 +1,58 @@
 package com.bstek.urule.console.editor.scorecard.complex;
 
 public class CellData {
-   private int a;
-   private int b;
-   private int c;
-   private String d;
-   private TableHeader e;
-   private String f;
+   private int span;
+   private int row;
+   private int col;
+   private String property;
+   private TableHeader header;
+   private String content;
 
    public int getSpan() {
-      return this.a;
+      return this.span;
    }
 
-   public void setSpan(int var1) {
-      this.a = var1;
+   public void setSpan(int span) {
+      this.span = span;
    }
 
    public int getRow() {
-      return this.b;
+      return this.row;
    }
 
-   public void setRow(int var1) {
-      this.b = var1;
+   public void setRow(int row) {
+      this.row = row;
    }
 
    public int getCol() {
-      return this.c;
+      return this.col;
    }
 
-   public void setCol(int var1) {
-      this.c = var1;
+   public void setCol(int col) {
+      this.col = col;
    }
 
    public String getProperty() {
-      return this.d;
+      return this.property;
    }
 
-   public void setProperty(String var1) {
-      this.d = var1;
+   public void setProperty(String property) {
+      this.property = property;
    }
 
    public TableHeader getHeader() {
-      return this.e;
+      return this.header;
    }
 
-   public void setHeader(TableHeader var1) {
-      this.e = var1;
+   public void setHeader(TableHeader header) {
+      this.header = header;
    }
 
    public String getContent() {
-      return this.f;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.f = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 }

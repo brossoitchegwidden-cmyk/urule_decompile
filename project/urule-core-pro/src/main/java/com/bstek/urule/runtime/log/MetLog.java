@@ -1,47 +1,47 @@
 package com.bstek.urule.runtime.log;
 
 public class MetLog extends DataLog {
-   private int b;
-   private boolean c;
-   private int d;
+   private int met;
+   private boolean only;
+   private int matchedCount;
 
-   public MetLog(int var1, int var2, boolean var3) {
-      this.b = var1;
-      this.c = var3;
-      this.d = var2;
-      StringBuffer var4 = new StringBuffer("--");
-      if (var3) {
-         var4.append("只有");
+   public MetLog(int met, int matchedCount, boolean only) {
+      this.met = met;
+      this.only = only;
+      this.matchedCount = matchedCount;
+      StringBuffer stringBuffer = new StringBuffer("--");
+      if (only) {
+         stringBuffer.append("只有");
       } else {
-         var4.append("至少");
+         stringBuffer.append("至少");
       }
 
-      var4.append(var1 + "个条件成立，");
-      var4.append("实际成立条件" + var2 + "个，");
-      if (var3) {
-         if (var1 == var2) {
-            var4.append("满足");
+      stringBuffer.append(met + "个条件成立，");
+      stringBuffer.append("实际成立条件" + matchedCount + "个，");
+      if (only) {
+         if (met == matchedCount) {
+            stringBuffer.append("满足");
          } else {
-            var4.append("不满足");
+            stringBuffer.append("不满足");
          }
-      } else if (var2 >= var1) {
-         var4.append("满足");
+      } else if (matchedCount >= met) {
+         stringBuffer.append("满足");
       } else {
-         var4.append("不满足");
+         stringBuffer.append("不满足");
       }
 
-      this.a = var4.toString();
+      this.msg = stringBuffer.toString();
    }
 
    public int getMet() {
-      return this.b;
+      return this.met;
    }
 
    public boolean isOnly() {
-      return this.c;
+      return this.only;
    }
 
    public int getMatchedCount() {
-      return this.d;
+      return this.matchedCount;
    }
 }

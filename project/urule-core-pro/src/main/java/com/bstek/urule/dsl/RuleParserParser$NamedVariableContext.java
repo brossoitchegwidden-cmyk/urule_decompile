@@ -12,15 +12,15 @@ public class RuleParserParser$NamedVariableContext extends ParserRuleContext {
       return (RuleParserParser$PropertyContext)this.getRuleContext(RuleParserParser$PropertyContext.class, 0);
    }
 
-   public RuleParserParser$NamedVariableContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$NamedVariableContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 63;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitNamedVariable(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitNamedVariable(this) : parseTreeVisitor.visitChildren(this));
    }
 }

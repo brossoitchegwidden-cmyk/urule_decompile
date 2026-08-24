@@ -7,11 +7,14 @@ import java.sql.SQLException;
 public interface LoginLogManager {
    LoginLogManager ins = new LoginLogManagerImpl();
 
-   void add(LoginLog var1);
+   /**新增日志*/
+   void add(LoginLog log);
 
-   void addBatch(PreparedStatement var1, LoginLog var2) throws SQLException;
+   /**新增日志*/
+   void addBatch(PreparedStatement stmt, LoginLog log) throws SQLException;
 
-   void removeByUser(String var1);
+   /**删除用户对应的日志*/
+   void removeByUser(String userId);
 
    LoginLogQuery newQuery();
 }

@@ -10,71 +10,71 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class DataSourceHandlerManager {
-   static final Log a = LogFactory.getLog(DataSourceHandlerManager.class);
-   static Map b = new ConcurrentHashMap();
-   static Map c = new HashMap();
-   static Map d = new ConcurrentHashMap();
+   static final Log logger = LogFactory.getLog(DataSourceHandlerManager.class);
+   static Map dataSourceCache = new ConcurrentHashMap();
+   static Map builtInHandlers = new HashMap();
+   static Map customHandlerCache = new ConcurrentHashMap();
 
-   public static DataSource getDataSource(com.bstek.urule.console.database.model.datasource.DataSource var0) throws Exception {
-      if (b.containsKey(var0.getId())) {
-         return (DataSource)b.get(var0.getId());
+   public static DataSource getDataSource(com.bstek.urule.console.database.model.datasource.DataSource repo) throws Exception {
+      if (dataSourceCache.containsKey(repo.getId())) {
+         return (DataSource)dataSourceCache.get(repo.getId());
       } else {
-         DataSource var1 = null;
-         if (var0.getType() == DataSourceType.jdbc) {
-            var1 = ((BatchDataSourceHandler)c.get(DataSourceType.jdbc)).getDataSource(var0);
-         } else if (var0.getType() == DataSourceType.jndi) {
-            var1 = ((BatchDataSourceHandler)c.get(DataSourceType.jndi)).getDataSource(var0);
-         } else if (var0.getType() == DataSourceType.custom) {
-            String var2 = var0.getDataSourceBean();
-            BatchDataSourceHandler var3 = (BatchDataSourceHandler)d.get(var2);
-            if (var3 == null) {
+         DataSource dataSource = null;
+         if (repo.getType() == DataSourceType.jdbc) {
+            dataSource = ((BatchDataSourceHandler)builtInHandlers.get(DataSourceType.jdbc)).getDataSource(repo);
+         } else if (repo.getType() == DataSourceType.jndi) {
+            dataSource = ((BatchDataSourceHandler)builtInHandlers.get(DataSourceType.jndi)).getDataSource(repo);
+         } else if (repo.getType() == DataSourceType.custom) {
+            String dataSourceBean = repo.getDataSourceBean();
+            BatchDataSourceHandler batchDataSourceHandler = (BatchDataSourceHandler)customHandlerCache.get(dataSourceBean);
+            if (batchDataSourceHandler == null) {
                try {
-                  var3 = (BatchDataSourceHandler)Utils.getApplicationContext().getBean(var2);
-               } catch (Exception var5) {
-                  a.error(var5);
-                  var3 = (BatchDataSourceHandler)Class.forName(var2).newInstance();
+                  batchDataSourceHandler = (BatchDataSourceHandler)Utils.getApplicationContext().getBean(dataSourceBean);
+               } catch (Exception exception) {
+                  DataSourceHandlerManager.logger.error(exception);
+                  batchDataSourceHandler = (BatchDataSourceHandler)Class.forName(dataSourceBean).newInstance();
                }
 
-               d.put(var2, var3);
+               customHandlerCache.put(dataSourceBean, batchDataSourceHandler);
             }
 
-            var1 = var3.getDataSource(var0);
+            dataSource = batchDataSourceHandler.getDataSource(repo);
          }
 
-         b.put(var0.getId(), var1);
-         return var1;
+         dataSourceCache.put(repo.getId(), dataSource);
+         return dataSource;
       }
    }
 
-   public static DataSource newDataSource(com.bstek.urule.console.database.model.datasource.DataSource var0) throws Exception {
-      DataSource var1 = null;
-      if (var0.getType() == DataSourceType.jdbc) {
-         var1 = (new JdbcDataSourceHandler()).getDataSource(var0);
-      } else if (var0.getType() == DataSourceType.jndi) {
-         var1 = (new JndiDataSourceHandler()).getDataSource(var0);
-      } else if (var0.getType() == DataSourceType.custom) {
-         String var2 = var0.getDataSourceBean();
-         BatchDataSourceHandler var3 = null;
+   public static DataSource newDataSource(com.bstek.urule.console.database.model.datasource.DataSource repo) throws Exception {
+      DataSource dataSource = null;
+      if (repo.getType() == DataSourceType.jdbc) {
+         dataSource = (new JdbcDataSourceHandler()).getDataSource(repo);
+      } else if (repo.getType() == DataSourceType.jndi) {
+         dataSource = (new JndiDataSourceHandler()).getDataSource(repo);
+      } else if (repo.getType() == DataSourceType.custom) {
+         String dataSourceBean = repo.getDataSourceBean();
+         BatchDataSourceHandler batchDataSourceHandler = null;
 
          try {
-            var3 = (BatchDataSourceHandler)Utils.getApplicationContext().getBean(var2);
-         } catch (Exception var5) {
-            a.error(var5);
-            var3 = (BatchDataSourceHandler)Class.forName(var2).newInstance();
+            batchDataSourceHandler = (BatchDataSourceHandler)Utils.getApplicationContext().getBean(dataSourceBean);
+         } catch (Exception exception) {
+            DataSourceHandlerManager.logger.error(exception);
+            batchDataSourceHandler = (BatchDataSourceHandler)Class.forName(dataSourceBean).newInstance();
          }
 
-         var1 = var3.getDataSource(var0);
+         dataSource = batchDataSourceHandler.getDataSource(repo);
       }
 
-      return var1;
+      return dataSource;
    }
 
-   public static void removeDataSource(Long var0) {
-      b.remove(var0);
+   public static void removeDataSource(Long id) {
+      dataSourceCache.remove(id);
    }
 
    static {
-      c.put(DataSourceType.jdbc, new JdbcDataSourceHandler());
-      c.put(DataSourceType.jndi, new JndiDataSourceHandler());
+      builtInHandlers.put(DataSourceType.jdbc, new JdbcDataSourceHandler());
+      builtInHandlers.put(DataSourceType.jndi, new JndiDataSourceHandler());
    }
 }

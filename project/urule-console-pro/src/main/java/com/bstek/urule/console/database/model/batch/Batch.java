@@ -10,301 +10,301 @@ import java.util.Map;
    ignoreUnknown = true
 )
 public class Batch {
-   private Long a;
-   private Long b;
-   private String c;
-   private boolean d;
-   private int e;
-   private boolean f = true;
-   private String g;
-   private BatchStatus h;
-   private String i;
-   private boolean j = true;
-   private Integer k = 10;
-   private Integer l = 100;
-   private Long m;
-   private Long n;
-   private Long o;
-   private String p;
-   private String q;
-   private boolean r;
-   private boolean s;
-   private String t;
-   private String u;
-   private String v;
-   private String w;
-   private String x;
-   private String y;
-   private Date z;
-   private Date A;
-   private List B;
-   private List C;
-   private Map D;
-   private List E;
-   private BatchDataProvider F;
-   private BatchDataResolver G;
+   private Long id;
+   private Long projectId;
+   private String name;
+   private boolean enable;
+   private int skipLimit;
+   private boolean async = true;
+   private String callbackUrl;
+   private BatchStatus status;
+   private String listener;
+   private boolean threadMulti = true;
+   private Integer threadSize = 10;
+   private Integer threadDataSize = 100;
+   private Long providerId;
+   private Long resolverId;
+   private Long packetId;
+   private String packetName;
+   private String packetInputData;
+   private boolean restEnable;
+   private boolean restSecurityEnable;
+   private String restSecurityUser;
+   private String restSecurityPassword;
+   private String inputData;
+   private String desc;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private List params;
+   private List packetParams;
+   private Map complexPacketParams;
+   private List outParameterNameList;
+   private BatchDataProvider dataProvider;
+   private BatchDataResolver dataResolver;
 
    public BatchStatus getStatus() {
-      return this.h;
+      return this.status;
    }
 
-   public void setStatus(BatchStatus var1) {
-      this.h = var1;
+   public void setStatus(BatchStatus status) {
+      this.status = status;
    }
 
    public String getListener() {
-      return this.i;
+      return this.listener;
    }
 
-   public void setListener(String var1) {
-      this.i = var1;
+   public void setListener(String listener) {
+      this.listener = listener;
    }
 
    public boolean isAsync() {
-      return this.f;
+      return this.async;
    }
 
-   public void setAsync(boolean var1) {
-      this.f = var1;
+   public void setAsync(boolean async) {
+      this.async = async;
    }
 
    public boolean isThreadMulti() {
-      return this.j;
+      return this.threadMulti;
    }
 
-   public void setThreadMulti(boolean var1) {
-      this.j = var1;
+   public void setThreadMulti(boolean threadMulti) {
+      this.threadMulti = threadMulti;
    }
 
    public Integer getThreadSize() {
-      return this.k;
+      return this.threadSize;
    }
 
-   public void setThreadSize(Integer var1) {
-      this.k = var1;
+   public void setThreadSize(Integer threadSize) {
+      this.threadSize = threadSize;
    }
 
    public Integer getThreadDataSize() {
-      return this.l;
+      return this.threadDataSize;
    }
 
-   public void setThreadDataSize(Integer var1) {
-      this.l = var1;
+   public void setThreadDataSize(Integer threadDataSize) {
+      this.threadDataSize = threadDataSize;
    }
 
    public List getParams() {
-      return this.B;
+      return this.params;
    }
 
-   public void setParams(List var1) {
-      this.B = var1;
+   public void setParams(List params) {
+      this.params = params;
    }
 
    public List getPacketParams() {
-      return this.C;
+      return this.packetParams;
    }
 
-   public void setPacketParams(List var1) {
-      this.C = var1;
+   public void setPacketParams(List packetParams) {
+      this.packetParams = packetParams;
    }
 
    public BatchDataProvider getDataProvider() {
-      return this.F;
+      return this.dataProvider;
    }
 
-   public void setDataProvider(BatchDataProvider var1) {
-      this.F = var1;
+   public void setDataProvider(BatchDataProvider dataProvider) {
+      this.dataProvider = dataProvider;
    }
 
    public BatchDataResolver getDataResolver() {
-      return this.G;
+      return this.dataResolver;
    }
 
-   public void setDataResolver(BatchDataResolver var1) {
-      this.G = var1;
+   public void setDataResolver(BatchDataResolver dataResolver) {
+      this.dataResolver = dataResolver;
    }
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public Long getProviderId() {
-      return this.m;
+      return this.providerId;
    }
 
-   public void setProviderId(Long var1) {
-      this.m = var1;
+   public void setProviderId(Long providerId) {
+      this.providerId = providerId;
    }
 
    public Long getResolverId() {
-      return this.n;
+      return this.resolverId;
    }
 
-   public void setResolverId(Long var1) {
-      this.n = var1;
+   public void setResolverId(Long resolverId) {
+      this.resolverId = resolverId;
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Long getProjectId() {
-      return this.b;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.b = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDesc() {
-      return this.w;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.w = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public Long getPacketId() {
-      return this.o;
+      return this.packetId;
    }
 
-   public void setPacketId(Long var1) {
-      this.o = var1;
+   public void setPacketId(Long packetId) {
+      this.packetId = packetId;
    }
 
    public String getPacketInputData() {
-      return this.q;
+      return this.packetInputData;
    }
 
-   public void setPacketInputData(String var1) {
-      this.q = var1;
+   public void setPacketInputData(String packetInputData) {
+      this.packetInputData = packetInputData;
    }
 
    public boolean isRestEnable() {
-      return this.r;
+      return this.restEnable;
    }
 
-   public void setRestEnable(boolean var1) {
-      this.r = var1;
+   public void setRestEnable(boolean restEnable) {
+      this.restEnable = restEnable;
    }
 
    public boolean isRestSecurityEnable() {
-      return this.s;
+      return this.restSecurityEnable;
    }
 
-   public void setRestSecurityEnable(boolean var1) {
-      this.s = var1;
+   public void setRestSecurityEnable(boolean restSecurityEnable) {
+      this.restSecurityEnable = restSecurityEnable;
    }
 
    public String getRestSecurityUser() {
-      return this.t;
+      return this.restSecurityUser;
    }
 
-   public void setRestSecurityUser(String var1) {
-      this.t = var1;
+   public void setRestSecurityUser(String restSecurityUser) {
+      this.restSecurityUser = restSecurityUser;
    }
 
    public String getRestSecurityPassword() {
-      return this.u;
+      return this.restSecurityPassword;
    }
 
-   public void setRestSecurityPassword(String var1) {
-      this.u = var1;
+   public void setRestSecurityPassword(String restSecurityPassword) {
+      this.restSecurityPassword = restSecurityPassword;
    }
 
    public String getInputData() {
-      return this.v;
+      return this.inputData;
    }
 
-   public void setInputData(String var1) {
-      this.v = var1;
+   public void setInputData(String inputData) {
+      this.inputData = inputData;
    }
 
    public String getCreateUser() {
-      return this.x;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.x = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.y;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.y = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.z;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.z = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.A;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.A = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getCallbackUrl() {
-      return this.g;
+      return this.callbackUrl;
    }
 
-   public void setCallbackUrl(String var1) {
-      this.g = var1;
+   public void setCallbackUrl(String callbackUrl) {
+      this.callbackUrl = callbackUrl;
    }
 
    public boolean isEnable() {
-      return this.d;
+      return this.enable;
    }
 
-   public void setEnable(boolean var1) {
-      this.d = var1;
+   public void setEnable(boolean enable) {
+      this.enable = enable;
    }
 
    public Map getComplexPacketParams() {
-      return this.D;
+      return this.complexPacketParams;
    }
 
-   public void setComplexPacketParams(Map var1) {
-      this.D = var1;
+   public void setComplexPacketParams(Map complexPacketParams) {
+      this.complexPacketParams = complexPacketParams;
    }
 
    public List getOutParameterNameList() {
-      return this.E;
+      return this.outParameterNameList;
    }
 
-   public void setOutParameterNameList(List var1) {
-      this.E = var1;
+   public void setOutParameterNameList(List outParameterNameList) {
+      this.outParameterNameList = outParameterNameList;
    }
 
    public int getSkipLimit() {
-      return this.e;
+      return this.skipLimit;
    }
 
-   public void setSkipLimit(int var1) {
-      this.e = var1;
+   public void setSkipLimit(int skipLimit) {
+      this.skipLimit = skipLimit;
    }
 
    public String getPacketName() {
-      return this.p;
+      return this.packetName;
    }
 
-   public void setPacketName(String var1) {
-      this.p = var1;
+   public void setPacketName(String packetName) {
+      this.packetName = packetName;
    }
 }

@@ -11,81 +11,74 @@ import com.bstek.urule.console.type.GroupRoleEnum;
 import java.util.ArrayList;
 import java.util.List;
 
+/**团队角色服务类*/
 public class GroupRoleServiceImpl implements GroupRoleService {
-   public List loadRoles(String var1) throws Exception {
-      return GroupRoleManager.ins.loadRoles(var1);
+   public List loadRoles(String groupId) throws Exception {
+      return GroupRoleManager.ins.loadRoles(groupId);
    }
+   public List loadUserRoles(String groupId, String account) throws Exception {
+      List roles = GroupRoleManager.ins.loadRoles(groupId);
+      List userRoles = GroupRoleManager.ins.loadUserRoles(groupId, account);
+      ArrayList userRoles2 = new ArrayList();
 
-   public List loadUserRoles(String var1, String var2) throws Exception {
-      List var3 = GroupRoleManager.ins.loadRoles(var1);
-      List var4 = GroupRoleManager.ins.loadUserRoles(var1, var2);
-      ArrayList var5 = new ArrayList();
+      for(Role role : (Iterable<Role>)(Iterable<?>)(roles)) {
+         GroupRoleVO groupRoleVO = new GroupRoleVO();
+         groupRoleVO.setId(role.getId());
+         groupRoleVO.setName(role.getName());
+         groupRoleVO.setType(role.getType());
 
-      for(Role var7 : (Iterable<Role>)(Iterable<?>)(var3)) {
-         GroupRoleVO var8 = new GroupRoleVO();
-         var8.setId(var7.getId());
-         var8.setName(var7.getName());
-         var8.setType(var7.getType());
-
-         for(Role var10 : (Iterable<Role>)(Iterable<?>)(var4)) {
-            if (var10.getId() == var7.getId()) {
-               var8.setSelected(true);
+         for(Role role2 : (Iterable<Role>)(Iterable<?>)(userRoles)) {
+            if (role2.getId() == role.getId()) {
+               groupRoleVO.setSelected(true);
                break;
             }
          }
 
-         var5.add(var8);
+         userRoles2.add(groupRoleVO);
       }
 
-      return var5;
+      return userRoles2;
    }
-
-   public void add(GroupRole var1) throws Exception {
-      if (GroupRoleManager.ins.checkExist(var1.getGroupId(), var1.getName())) {
+   public void add(GroupRole role) throws Exception {
+      if (GroupRoleManager.ins.checkExist(role.getGroupId(), role.getName())) {
          throw new InfoException("Duplicate role name!");
       } else {
-         GroupRoleManager.ins.add(var1);
+         GroupRoleManager.ins.add(role);
       }
    }
-
-   public void update(GroupRole var1) throws Exception {
-      if (GroupRoleManager.ins.checkExist(var1.getGroupId(), var1.getName())) {
+   public void update(GroupRole role) throws Exception {
+      if (GroupRoleManager.ins.checkExist(role.getGroupId(), role.getName())) {
          throw new InfoException("Duplicate role name!");
       } else {
-         GroupRoleManager.ins.update(var1);
+         GroupRoleManager.ins.update(role);
       }
    }
-
-   public void remove(Long var1) throws Exception {
-      GroupRoleManager.ins.remove(var1);
+   public void remove(Long id) throws Exception {
+      GroupRoleManager.ins.remove(id);
    }
-
-   public void addUserRole(String var1, String var2, long var3) {
-      if (GroupRoleManager.ins.getUserRole(var2, var3) == null) {
-         GroupRoleManager.ins.addUserRole(var1, var2, var3);
+   public void addUserRole(String groupId, String userId, long roleId) {
+      if (GroupRoleManager.ins.getUserRole(userId, roleId) == null) {
+         GroupRoleManager.ins.addUserRole(groupId, userId, roleId);
       }
 
    }
-
-   public void removeUserRole(String var1, String var2, long var3) throws Exception {
-      GroupRole var5 = GroupRoleManager.ins.get(var3);
-      if (((Role)var5).getName().equals(GroupRoleEnum.Owner.name())) {
+   public void removeUserRole(String groupId, String userId, long roleId) throws Exception {
+      GroupRole groupRole = GroupRoleManager.ins.get(roleId);
+      if (((Role)groupRole).getName().equals(GroupRoleEnum.Owner.name())) {
          throw new InfoException("系统不支持该操作!");
       } else {
-         GroupRoleManager.ins.removeUserRole(var1, var2, var3);
+         GroupRoleManager.ins.removeUserRole(groupId, userId, roleId);
       }
    }
-
-   public GroupRole get(long var1) throws Exception {
-      return GroupRoleManager.ins.get(var1);
+   public GroupRole get(long roleId) throws Exception {
+      return GroupRoleManager.ins.get(roleId);
    }
+   public List users(String groupId, long roleId) throws Exception {
+      List roleUsers = GroupRoleManager.ins.loadRoleUsers(groupId, roleId);
+      ArrayList items = new ArrayList();
 
-   public List users(String var1, long var2) throws Exception {
-      List var4 = GroupRoleManager.ins.loadRoleUsers(var1, var2);
-      ArrayList var5 = new ArrayList();
-
-      for(User var7 : (Iterable<User>)(Iterable<?>)(var4)) {
-         var5.add(UserServiceManager.getUserService().get(var7.getId()));
+      for(User user : (Iterable<User>)(Iterable<?>)(roleUsers)) {
+         items.add(UserServiceManager.getUserService().get(user.getId()));
       }
 
       return null;

@@ -11,135 +11,135 @@ import java.util.Date;
 import java.util.List;
 
 public class ScenarioQueryImpl implements ScenarioQuery {
-   private Long a;
-   private Long b;
-   private Long c;
-   private String d;
-   private String e;
-   private List f = new ArrayList();
+   private Long id;
+   private Long packetId;
+   private Long projectId;
+   private String name;
+   private String desc;
+   private List queryParameters = new ArrayList();
 
    protected ScenarioQueryImpl() {
    }
 
    public List list() {
-      String var1 = "select ID_,PACKET_ID_,PROJECT_ID_,NAME_,DESC_,INPUT_DATA_,OUTPUT_DATA_,EXCEL_FILE_NAME_,CREATE_USER_,UPDATE_USER_,CREATE_DATE_,UPDATE_DATE_ from URULE_PACKET_SCENARIO";
-      StringBuilder var2 = this.a();
-      if (var2.length() > 0) {
-         var1 = var1 + " where" + var2.toString();
+      String text = "select ID_,PACKET_ID_,PROJECT_ID_,NAME_,DESC_,INPUT_DATA_,OUTPUT_DATA_,EXCEL_FILE_NAME_,CREATE_USER_,UPDATE_USER_,CREATE_DATE_,UPDATE_DATE_ from URULE_PACKET_SCENARIO";
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      var1 = var1 + " order by CREATE_DATE_ desc";
-      Connection var3 = JdbcUtils.getConnection();
+      text = text + " order by CREATE_DATE_ desc";
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var14;
+      ArrayList listResult;
       try {
-         PreparedStatement var4 = var3.prepareStatement(var1);
-         JdbcUtils.fillPreparedStatementParameters(this.f, var4);
-         ResultSet var5 = var4.executeQuery();
-         ArrayList var6 = new ArrayList();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ArrayList items = new ArrayList();
 
-         while(var5.next()) {
-            Scenario var7 = new Scenario();
-            var7.setId(var5.getLong(1));
-            var7.setPacketId(var5.getLong(2));
-            var7.setProjectId(var5.getLong(3));
-            var7.setName(var5.getString(4));
-            var7.setDesc(var5.getString(5));
-            var7.setInputData(var5.getString(6));
-            var7.setOutputData(var5.getString(7));
-            var7.setExcelFileName(var5.getString(8));
-            var7.setCreateUser(var5.getString(9));
-            var7.setUpdateUser(var5.getString(10));
-            var7.setCreateDate(new Date(var5.getTimestamp(11).getTime()));
-            var7.setUpdateDate(new Date(var5.getTimestamp(12).getTime()));
-            var6.add(var7);
+         while(resultSet.next()) {
+            Scenario scenario = new Scenario();
+            scenario.setId(resultSet.getLong(1));
+            scenario.setPacketId(resultSet.getLong(2));
+            scenario.setProjectId(resultSet.getLong(3));
+            scenario.setName(resultSet.getString(4));
+            scenario.setDesc(resultSet.getString(5));
+            scenario.setInputData(resultSet.getString(6));
+            scenario.setOutputData(resultSet.getString(7));
+            scenario.setExcelFileName(resultSet.getString(8));
+            scenario.setCreateUser(resultSet.getString(9));
+            scenario.setUpdateUser(resultSet.getString(10));
+            scenario.setCreateDate(new Date(resultSet.getTimestamp(11).getTime()));
+            scenario.setUpdateDate(new Date(resultSet.getTimestamp(12).getTime()));
+            items.add(scenario);
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var14 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return listResult;
    }
 
-   private StringBuilder a() {
-      this.f.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.f.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.packetId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PACKET_ID_=?");
-         this.f.add(this.b);
+         stringBuilder.append(" PACKET_ID_=?");
+         this.queryParameters.add(this.packetId);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_=?");
-         this.f.add(this.c);
+         stringBuilder.append(" PROJECT_ID_=?");
+         this.queryParameters.add(this.projectId);
       }
 
-      if (this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.name != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ like ?");
-         this.f.add("%" + this.d + "%");
+         stringBuilder.append(" NAME_ like ?");
+         this.queryParameters.add("%" + this.name + "%");
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.desc != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" DESC_ like ?");
-         this.f.add("%" + this.e + "%");
+         stringBuilder.append(" DESC_ like ?");
+         this.queryParameters.add("%" + this.desc + "%");
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public ScenarioQuery id(long var1) {
-      this.a = var1;
+   public ScenarioQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public ScenarioQuery packetId(long var1) {
-      this.b = var1;
+   public ScenarioQuery packetId(long packetId) {
+      this.packetId = packetId;
       return this;
    }
 
-   public ScenarioQuery nameLike(String var1) {
-      this.d = var1;
+   public ScenarioQuery nameLike(String name) {
+      this.name = name;
       return this;
    }
 
-   public ScenarioQuery descLike(String var1) {
-      this.e = var1;
+   public ScenarioQuery descLike(String desc) {
+      this.desc = desc;
       return this;
    }
 
-   public ScenarioQuery projectId(long var1) {
-      this.c = var1;
+   public ScenarioQuery projectId(long projectId) {
+      this.projectId = projectId;
       return this;
    }
 }

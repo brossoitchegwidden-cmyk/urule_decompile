@@ -6,19 +6,19 @@ import com.bstek.urule.console.database.model.batch.BatchDataProvider;
 public interface SchemeService {
    SchemeService ins = new SchemeServiceImpl();
 
-   void add(Batch var1, String var2);
+   void add(Batch batchData, String account);
 
-   void update(Batch var1, String var2);
+   void update(Batch batchData, String account);
 
-   void enable(Long var1, String var2);
+   void enable(Long id, String account);
 
-   void disable(Long var1, String var2);
+   void disable(Long id, String account);
 
-   void stop(Long var1, String var2);
+   void stop(Long id, String account);
 
-   Batch getBatchData(Long var1);
+   Batch getBatchData(Long id);
 
-   void remove(Long var1);
+   void remove(Long id);
 
-   BatchDataProvider getProviderData(Long var1);
+   BatchDataProvider getProviderData(Long providerId);
 }

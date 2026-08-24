@@ -4,5 +4,5 @@ import com.bstek.urule.model.flow.ins.FlowContext;
 import com.bstek.urule.model.flow.ins.ProcessInstance;
 
 public interface ExceptionHandler {
-   void handle(Exception var1, FlowContext var2, ProcessInstance var3);
+   void handle(Exception ex, FlowContext context, ProcessInstance instance);
 }

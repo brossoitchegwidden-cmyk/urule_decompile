@@ -8,10 +8,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class DownRoundMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      DownRoundMath var2 = new DownRoundMath();
-      var2.setValue(JsonUtils.parseValueNode(var1.get("value")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      DownRoundMath downRoundMath = new DownRoundMath();
+      downRoundMath.setValue(JsonUtils.parseValueNode(jsonNode.get("value")));
+      return downRoundMath;
    }
 
    @Override

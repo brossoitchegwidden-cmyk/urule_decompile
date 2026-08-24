@@ -3,19 +3,19 @@ package com.bstek.urule.console.editor.ruleset;
 import com.bstek.urule.action.Action;
 
 public class CopyAction {
-   private Action a;
-   private String b;
+   private Action action;
+   private String libs;
 
-   public CopyAction(Action var1, String var2) {
-      this.a = var1;
-      this.b = var2;
+   public CopyAction(Action action, String libs) {
+      this.action = action;
+      this.libs = libs;
    }
 
    public Action getAction() {
-      return this.a;
+      return this.action;
    }
 
    public String getLibs() {
-      return this.b;
+      return this.libs;
    }
 }

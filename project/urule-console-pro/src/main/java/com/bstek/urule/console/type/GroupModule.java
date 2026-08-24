@@ -14,13 +14,13 @@ public enum GroupModule {
    dynamicJar("客户端配置"),
    datasource("数据源配置");
 
-   String a;
+   String label;
 
-   private GroupModule(String var3) {
-      this.a = var3;
+   private GroupModule(String text) {
+      this.label = text;
    }
 
    public String getLabel() {
-      return this.a;
+      return this.label;
    }
 }

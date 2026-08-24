@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 public interface FlowContext extends Context {
-   Object getVariable(String var1);
+   Object getVariable(String key);
 
    Map<String, Object> getVariables();
 
-   void addVariable(String var1, Object var2);
+   void addVariable(String key, Object object);
 
-   void removeVariable(String var1);
+   void removeVariable(String key);
 
    List<FlowInstance> getFlowInstances();
 
-   void addFlowInstance(FlowInstance var1);
+   void addFlowInstance(FlowInstance instance);
 
    FlowExecutionResponse getResponse();
 }

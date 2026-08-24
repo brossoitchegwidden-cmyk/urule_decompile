@@ -4,7 +4,7 @@ import com.bstek.urule.model.library.Datatype;
 import com.bstek.urule.model.rule.Op;
 
 public interface Assertor {
-   boolean eval(Object var1, Object var2, Datatype var3);
+   boolean eval(Object left, Object right, Datatype datatype);
 
    Op supportOp();
 }

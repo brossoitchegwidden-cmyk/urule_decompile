@@ -15,60 +15,60 @@ public class PacketDeployFileManagerImpl implements PacketDeployFileManager {
    protected PacketDeployFileManagerImpl() {
    }
 
-   public PacketDeployFile load(long var1) {
-      List var3 = this.newQuery().id(var1).listWithContent();
-      return var3.size() > 0 ? (PacketDeployFile)var3.get(0) : null;
+   public PacketDeployFile load(long id) {
+      List items = this.newQuery().id(id).listWithContent();
+      return items.size() > 0 ? (PacketDeployFile)items.get(0) : null;
    }
 
-   public List loadFiles(long var1) {
-      return this.newQuery().packetDeployId(var1).list();
+   public List loadFiles(long packetDeployId) {
+      return this.newQuery().packetDeployId(packetDeployId).list();
    }
 
-   public List loadFilesWithContent(long var1) {
-      return this.newQuery().packetDeployId(var1).listWithContent();
+   public List loadFilesWithContent(long packetDeployId) {
+      return this.newQuery().packetDeployId(packetDeployId).listWithContent();
    }
 
-   public void deleteByDeployId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByDeployId(long deployId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var4 = "delete from URULE_DEPLOYED_PACKET_FILE where DEPLOYED_PACKET_ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setLong(1, var1);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         String text = "delete from URULE_DEPLOYED_PACKET_FILE where DEPLOYED_PACKET_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, deployId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void add(PacketDeployFile var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(PacketDeployFile packet) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var3 = "insert into URULE_DEPLOYED_PACKET_FILE(ID_,DEPLOYED_PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,CONTENT_,CREATE_USER_,CREATE_DATE_,DIGEST_) values(?,?,?,?,?,?,?,?,?,?)";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var1.setId(IDGenerator.getInstance().nextId(IDType.DEPLOYED_PACKET_FILE));
-         var4.setLong(1, var1.getId());
-         var4.setLong(2, var1.getPacketDeployId());
-         var4.setLong(3, var1.getFileId());
-         var4.setLong(4, var1.getProjectId());
-         var4.setString(5, var1.getPath());
-         var4.setString(6, var1.getVersion());
-         var4.setString(7, var1.getContent());
-         var4.setString(8, var1.getCreateUser());
-         var4.setTimestamp(9, new Timestamp((new Date()).getTime()));
-         var4.setString(10, var1.getDigest());
-         var1.setCreateDate(new Date());
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         String text = "insert into URULE_DEPLOYED_PACKET_FILE(ID_,DEPLOYED_PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,CONTENT_,CREATE_USER_,CREATE_DATE_,DIGEST_) values(?,?,?,?,?,?,?,?,?,?)";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         packet.setId(IDGenerator.getInstance().nextId(IDType.DEPLOYED_PACKET_FILE));
+         preparedStatement.setLong(1, packet.getId());
+         preparedStatement.setLong(2, packet.getPacketDeployId());
+         preparedStatement.setLong(3, packet.getFileId());
+         preparedStatement.setLong(4, packet.getProjectId());
+         preparedStatement.setString(5, packet.getPath());
+         preparedStatement.setString(6, packet.getVersion());
+         preparedStatement.setString(7, packet.getContent());
+         preparedStatement.setString(8, packet.getCreateUser());
+         preparedStatement.setTimestamp(9, new Timestamp((new Date()).getTime()));
+         preparedStatement.setString(10, packet.getDigest());
+         packet.setCreateDate(new Date());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -77,19 +77,19 @@ public class PacketDeployFileManagerImpl implements PacketDeployFileManager {
       return new PacketDeployFileQueryImpl();
    }
 
-   public void deleteByProjectId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByProjectId(long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var4 = "delete from URULE_DEPLOYED_PACKET_FILE where PROJECT_ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setLong(1, var1);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         String text = "delete from URULE_DEPLOYED_PACKET_FILE where PROJECT_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

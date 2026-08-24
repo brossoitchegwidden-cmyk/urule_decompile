@@ -5,9 +5,12 @@ import com.bstek.urule.console.config.exception.SetupException;
 import com.bstek.urule.console.config.setup.SetupInfo;
 
 public interface ConfigManager {
+   /**加载配置信息*/
    void load() throws ConfigLoadException;
 
-   void init(SetupInfo var1) throws SetupException;
+   /**初始化配置文件信息，并保存配置文件*/
+   void init(SetupInfo setupInfo) throws SetupException;
 
-   String getProperty(String var1);
+   /**获取属性配置值*/
+   String getProperty(String key);
 }

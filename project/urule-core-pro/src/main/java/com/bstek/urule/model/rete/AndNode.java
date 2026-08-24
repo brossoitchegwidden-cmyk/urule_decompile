@@ -11,8 +11,8 @@ public class AndNode extends JunctionNode {
       super(0);
    }
 
-   public AndNode(int var1) {
-      super(var1);
+   public AndNode(int id) {
+      super(id);
    }
 
    @Override
@@ -20,23 +20,23 @@ public class AndNode extends JunctionNode {
       return this.nodeType;
    }
 
-   public void setToLineCount(int var1) {
-      this.toLineCount = var1;
+   public void setToLineCount(int toLineCount) {
+      this.toLineCount = toLineCount;
    }
 
    @Override
-   public Activity newActivity(Map<Object, Object> var1) {
-      if (var1.containsKey(this)) {
-         return (AndActivity)var1.get(this);
+   public Activity newActivity(Map<Object, Object> context) {
+      if (context.containsKey(this)) {
+         return (AndActivity)context.get(this);
       }
 
-      AndActivity var2 = new AndActivity();
+      AndActivity andActivity = new AndActivity();
 
-      for (Line var4 : this.lines) {
-         var2.addPath(var4.newPath(var1));
+      for (Line line : this.lines) {
+         andActivity.addPath(line.newPath(context));
       }
 
-      var1.put(this, var2);
-      return var2;
+      context.put(this, andActivity);
+      return andActivity;
    }
 }

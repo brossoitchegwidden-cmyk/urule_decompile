@@ -9,24 +9,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class VariableValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      VariableValue var2 = new VariableValue();
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      String var3 = JsonUtils.getJsonValue(var1, "datatype");
-      if (var3 != null) {
-         var2.setDatatype(Datatype.valueOf(var3));
+   public Value deserialize(JsonNode jsonNode) {
+      VariableValue variableValue = new VariableValue();
+      variableValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      String jsonValue = JsonUtils.getJsonValue(jsonNode, "datatype");
+      if (jsonValue != null) {
+         variableValue.setDatatype(Datatype.valueOf(jsonValue));
       }
 
-      var2.setVariableCategory(JsonUtils.getJsonValue(var1, "variableCategory"));
-      var2.setVariableLabel(JsonUtils.getJsonValue(var1, "variableLabel"));
-      var2.setVariableName(JsonUtils.getJsonValue(var1, "variableName"));
-      var2.setUuid(JsonUtils.getJsonValue(var1, "uuid"));
-      var2.setCategoryUuid(JsonUtils.getJsonValue(var1, "categoryUuid"));
-      return var2;
+      variableValue.setVariableCategory(JsonUtils.getJsonValue(jsonNode, "variableCategory"));
+      variableValue.setVariableLabel(JsonUtils.getJsonValue(jsonNode, "variableLabel"));
+      variableValue.setVariableName(JsonUtils.getJsonValue(jsonNode, "variableName"));
+      variableValue.setUuid(JsonUtils.getJsonValue(jsonNode, "uuid"));
+      variableValue.setCategoryUuid(JsonUtils.getJsonValue(jsonNode, "categoryUuid"));
+      return variableValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.Variable);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.Variable);
    }
 }

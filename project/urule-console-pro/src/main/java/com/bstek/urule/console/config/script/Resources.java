@@ -11,126 +11,126 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 public class Resources {
-   private static ClassLoaderWrapper a = new ClassLoaderWrapper();
-   private static Charset b;
+   private static ClassLoaderWrapper defaultClassLoader = new ClassLoaderWrapper();
+   private static Charset charset;
 
    Resources() {
    }
 
    public static ClassLoader getDefaultClassLoader() {
-      return a.a;
+      return Resources.defaultClassLoader.defaultClassLoader;
    }
 
-   public static void setDefaultClassLoader(ClassLoader var0) {
-      a.a = var0;
+   public static void setDefaultClassLoader(ClassLoader defaultClassLoader) {
+      Resources.defaultClassLoader.defaultClassLoader = defaultClassLoader;
    }
 
-   public static URL getResourceURL(String var0) throws IOException {
-      return getResourceURL((ClassLoader)null, var0);
+   public static URL getResourceURL(String resource) throws IOException {
+      return getResourceURL((ClassLoader)null, resource);
    }
 
-   public static URL getResourceURL(ClassLoader var0, String var1) throws IOException {
-      URL var2 = a.getResourceAsURL(var1, var0);
-      if (var2 == null) {
-         throw new IOException("Could not find resource " + var1);
+   public static URL getResourceURL(ClassLoader loader, String resource) throws IOException {
+      URL resourceAsURL = Resources.defaultClassLoader.getResourceAsURL(resource, loader);
+      if (resourceAsURL == null) {
+         throw new IOException("Could not find resource " + resource);
       } else {
-         return var2;
+         return resourceAsURL;
       }
    }
 
-   public static InputStream getResourceAsStream(String var0) throws IOException {
-      return getResourceAsStream((ClassLoader)null, var0);
+   public static InputStream getResourceAsStream(String resource) throws IOException {
+      return getResourceAsStream((ClassLoader)null, resource);
    }
 
-   public static InputStream getResourceAsStream(ClassLoader var0, String var1) throws IOException {
-      InputStream var2 = a.getResourceAsStream(var1, var0);
-      if (var2 == null) {
-         throw new IOException("Could not find resource " + var1);
+   public static InputStream getResourceAsStream(ClassLoader loader, String resource) throws IOException {
+      InputStream resourceAsStream = Resources.defaultClassLoader.getResourceAsStream(resource, loader);
+      if (resourceAsStream == null) {
+         throw new IOException("Could not find resource " + resource);
       } else {
-         return var2;
+         return resourceAsStream;
       }
    }
 
-   public static Properties getResourceAsProperties(String var0) throws IOException {
-      Properties var1 = new Properties();
-      InputStream var2 = getResourceAsStream(var0);
-      var1.load(var2);
-      var2.close();
-      return var1;
+   public static Properties getResourceAsProperties(String resource) throws IOException {
+      Properties properties = new Properties();
+      InputStream resourceAsStream = getResourceAsStream(resource);
+      properties.load(resourceAsStream);
+      resourceAsStream.close();
+      return properties;
    }
 
-   public static Properties getResourceAsProperties(ClassLoader var0, String var1) throws IOException {
-      Properties var2 = new Properties();
-      InputStream var3 = getResourceAsStream(var0, var1);
-      var2.load(var3);
-      var3.close();
-      return var2;
+   public static Properties getResourceAsProperties(ClassLoader loader, String resource) throws IOException {
+      Properties properties = new Properties();
+      InputStream resourceAsStream = getResourceAsStream(loader, resource);
+      properties.load(resourceAsStream);
+      resourceAsStream.close();
+      return properties;
    }
 
-   public static Reader getResourceAsReader(String var0) throws IOException {
-      InputStreamReader var1;
-      if (b == null) {
-         var1 = new InputStreamReader(getResourceAsStream(var0));
+   public static Reader getResourceAsReader(String resource) throws IOException {
+      InputStreamReader inputStreamReader;
+      if (Resources.charset == null) {
+         inputStreamReader = new InputStreamReader(getResourceAsStream(resource));
       } else {
-         var1 = new InputStreamReader(getResourceAsStream(var0), b);
+         inputStreamReader = new InputStreamReader(getResourceAsStream(resource), Resources.charset);
       }
 
-      return var1;
+      return inputStreamReader;
    }
 
-   public static Reader getResourceAsReader(ClassLoader var0, String var1) throws IOException {
-      InputStreamReader var2;
-      if (b == null) {
-         var2 = new InputStreamReader(getResourceAsStream(var0, var1));
+   public static Reader getResourceAsReader(ClassLoader loader, String resource) throws IOException {
+      InputStreamReader inputStreamReader;
+      if (Resources.charset == null) {
+         inputStreamReader = new InputStreamReader(getResourceAsStream(loader, resource));
       } else {
-         var2 = new InputStreamReader(getResourceAsStream(var0, var1), b);
+         inputStreamReader = new InputStreamReader(getResourceAsStream(loader, resource), Resources.charset);
       }
 
-      return var2;
+      return inputStreamReader;
    }
 
-   public static File getResourceAsFile(String var0) throws IOException {
-      return new File(getResourceURL(var0).getFile());
+   public static File getResourceAsFile(String resource) throws IOException {
+      return new File(getResourceURL(resource).getFile());
    }
 
-   public static File getResourceAsFile(ClassLoader var0, String var1) throws IOException {
-      return new File(getResourceURL(var0, var1).getFile());
+   public static File getResourceAsFile(ClassLoader loader, String resource) throws IOException {
+      return new File(getResourceURL(loader, resource).getFile());
    }
 
-   public static InputStream getUrlAsStream(String var0) throws IOException {
-      URL var1 = new URL(var0);
-      URLConnection var2 = var1.openConnection();
-      return var2.getInputStream();
+   public static InputStream getUrlAsStream(String urlString) throws IOException {
+      URL uRL = new URL(urlString);
+      URLConnection uRLConnection = uRL.openConnection();
+      return uRLConnection.getInputStream();
    }
 
-   public static Reader getUrlAsReader(String var0) throws IOException {
-      InputStreamReader var1;
-      if (b == null) {
-         var1 = new InputStreamReader(getUrlAsStream(var0));
+   public static Reader getUrlAsReader(String urlString) throws IOException {
+      InputStreamReader inputStreamReader;
+      if (Resources.charset == null) {
+         inputStreamReader = new InputStreamReader(getUrlAsStream(urlString));
       } else {
-         var1 = new InputStreamReader(getUrlAsStream(var0), b);
+         inputStreamReader = new InputStreamReader(getUrlAsStream(urlString), Resources.charset);
       }
 
-      return var1;
+      return inputStreamReader;
    }
 
-   public static Properties getUrlAsProperties(String var0) throws IOException {
-      Properties var1 = new Properties();
-      InputStream var2 = getUrlAsStream(var0);
-      var1.load(var2);
-      var2.close();
-      return var1;
+   public static Properties getUrlAsProperties(String urlString) throws IOException {
+      Properties properties = new Properties();
+      InputStream urlAsStream = getUrlAsStream(urlString);
+      properties.load(urlAsStream);
+      urlAsStream.close();
+      return properties;
    }
 
-   public static Class classForName(String var0) throws ClassNotFoundException {
-      return a.classForName(var0);
+   public static Class classForName(String className) throws ClassNotFoundException {
+      return Resources.defaultClassLoader.classForName(className);
    }
 
    public static Charset getCharset() {
-      return b;
+      return Resources.charset;
    }
 
-   public static void setCharset(Charset var0) {
-      b = var0;
+   public static void setCharset(Charset charset) {
+      Resources.charset = charset;
    }
 }

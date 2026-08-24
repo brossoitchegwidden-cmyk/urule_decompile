@@ -9,22 +9,23 @@ import org.apache.commons.io.IOUtils;
 public abstract class JarCacheAdapter {
    public static String BEAN_ID = "urule.jarCacheAdapter";
 
-   public abstract List loadDynamicJars(String var1, UrlType var2) throws Exception;
+   /**重新加载jar，热部署jar时触发*/
+   public abstract List loadDynamicJars(String groupId, UrlType urlType) throws Exception;
 
-   protected String a(Throwable var1) {
-      StringBuilder var2 = new StringBuilder();
-      ByteArrayOutputStream var3 = new ByteArrayOutputStream();
-      PrintStream var4 = new PrintStream(var3);
-      var1.printStackTrace(var4);
-      String var5 = new String(var3.toByteArray());
-      IOUtils.closeQuietly(var4);
-      IOUtils.closeQuietly(var3);
-      var5 = var5.replaceAll("\n", "<br>");
-      if (var2.length() > 0) {
-         var2.append("<br>");
+   protected String buildExceptionStack(Throwable throwable) {
+      StringBuilder stringBuilder = new StringBuilder();
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      PrintStream printStream = new PrintStream(byteArrayOutputStream);
+      throwable.printStackTrace(printStream);
+      String string = new String(byteArrayOutputStream.toByteArray());
+      IOUtils.closeQuietly(printStream);
+      IOUtils.closeQuietly(byteArrayOutputStream);
+      string = string.replaceAll("\n", "<br>");
+      if (stringBuilder.length() > 0) {
+         stringBuilder.append("<br>");
       }
 
-      var2.append(var5);
-      return var2.toString();
+      stringBuilder.append(string);
+      return stringBuilder.toString();
    }
 }

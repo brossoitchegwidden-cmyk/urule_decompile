@@ -13,16 +13,16 @@ public class Method {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public List<Parameter> getParameters() {
@@ -33,19 +33,19 @@ public class Method {
       return this.methodName;
    }
 
-   public void setMethodName(String var1) {
-      this.methodName = var1;
+   public void setMethodName(String methodName) {
+      this.methodName = methodName;
    }
 
-   public void addParameter(Parameter var1) {
+   public void addParameter(Parameter parameter) {
       if (this.parameters == null) {
          this.parameters = new ArrayList<>();
       }
 
-      this.parameters.add(var1);
+      this.parameters.add(parameter);
    }
 
-   public void setParameters(List<Parameter> var1) {
-      this.parameters = var1;
+   public void setParameters(List<Parameter> parameters) {
+      this.parameters = parameters;
    }
 }

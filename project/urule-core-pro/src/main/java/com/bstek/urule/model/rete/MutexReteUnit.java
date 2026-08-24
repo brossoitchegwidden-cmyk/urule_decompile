@@ -6,29 +6,29 @@ import java.util.List;
 @JsonTypeName("mutex")
 public class MutexReteUnit extends ReteUnit {
    private String mutexGroupName;
-   private List<ReteUnit> list;
+   private List<ReteUnit> reteUnits;
 
    public MutexReteUnit() {
    }
 
-   public MutexReteUnit(String var1, List<ReteUnit> var2) {
-      this.mutexGroupName = var1;
-      this.list = var2;
+   public MutexReteUnit(String mutexGroupName, List<ReteUnit> list) {
+      this.mutexGroupName = mutexGroupName;
+      this.reteUnits = list;
    }
 
    public List<ReteUnit> getList() {
-      return this.list;
+      return this.reteUnits;
    }
 
-   public void setList(List<ReteUnit> var1) {
-      this.list = var1;
+   public void setList(List<ReteUnit> list) {
+      this.reteUnits = list;
    }
 
    public String getMutexGroupName() {
       return this.mutexGroupName;
    }
 
-   public void setMutexGroupName(String var1) {
-      this.mutexGroupName = var1;
+   public void setMutexGroupName(String mutexGroupName) {
+      this.mutexGroupName = mutexGroupName;
    }
 }

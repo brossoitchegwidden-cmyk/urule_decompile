@@ -3,25 +3,25 @@ package com.bstek.urule.console;
 import javax.servlet.http.HttpServletRequest;
 
 public class RequestHolder {
-   private static final ThreadLocal a = new ThreadLocal();
+   private static final ThreadLocal CURRENT_REQUEST = new ThreadLocal();
 
-   public static void setRequest(HttpServletRequest var0) {
-      a.set(var0);
+   public static void setRequest(HttpServletRequest request) {
+      CURRENT_REQUEST.set(request);
    }
 
    public static HttpServletRequest getRequest() {
-      return (HttpServletRequest)a.get();
+      return (HttpServletRequest)CURRENT_REQUEST.get();
    }
 
    public static void clean() {
-      a.remove();
+      CURRENT_REQUEST.remove();
    }
 
-   public void setSessionAttribute(String var1, Object var2) {
-      getRequest().getSession().setAttribute(var1, var2);
+   public void setSessionAttribute(String name, Object value) {
+      getRequest().getSession().setAttribute(name, value);
    }
 
-   public Object getSessionAttribute(String var1) {
-      return getRequest().getSession().getAttribute(var1);
+   public Object getSessionAttribute(String name) {
+      return getRequest().getSession().getAttribute(name);
    }
 }

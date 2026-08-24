@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class SingIValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
+   public Value deserialize(JsonNode jsonNode) {
       return new SignIValue();
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.SignI);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.SignI);
    }
 }

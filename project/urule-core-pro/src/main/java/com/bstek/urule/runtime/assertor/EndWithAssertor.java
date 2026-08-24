@@ -5,13 +5,13 @@ import com.bstek.urule.model.rule.Op;
 
 public class EndWithAssertor implements Assertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      if (var1 == null || var2 == null) {
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      if (left == null || right == null) {
          return false;
-      } else if (var1 instanceof String && var2 instanceof String) {
-         String var4 = var1.toString();
-         String var5 = var2.toString();
-         return var4.endsWith(var5);
+      } else if (left instanceof String && right instanceof String) {
+         String text = left.toString();
+         String text2 = right.toString();
+         return text.endsWith(text2);
       } else {
          return false;
       }

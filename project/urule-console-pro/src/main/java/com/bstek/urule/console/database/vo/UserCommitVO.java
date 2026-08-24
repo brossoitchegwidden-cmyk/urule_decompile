@@ -1,31 +1,31 @@
 package com.bstek.urule.console.database.vo;
 
 public class UserCommitVO {
-   private String a;
-   private String b;
-   private int c;
+   private String userId;
+   private String userName;
+   private int count;
 
    public String getUserId() {
-      return this.a;
+      return this.userId;
    }
 
-   public void setUserId(String var1) {
-      this.a = var1;
+   public void setUserId(String userId) {
+      this.userId = userId;
    }
 
    public String getUserName() {
-      return this.b;
+      return this.userName;
    }
 
-   public void setUserName(String var1) {
-      this.b = var1;
+   public void setUserName(String userName) {
+      this.userName = userName;
    }
 
    public int getCount() {
-      return this.c;
+      return this.count;
    }
 
-   public void setCount(int var1) {
-      this.c = var1;
+   public void setCount(int count) {
+      this.count = count;
    }
 }

@@ -5,46 +5,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CopyContextHolder {
-   private static final ThreadLocal a = new ThreadLocal();
-   private static final ThreadLocal b = new ThreadLocal();
+   private static final ThreadLocal idReplacementContext = new ThreadLocal();
+   private static final ThreadLocal copiedFileContext = new ThreadLocal();
 
    public static Map getIdMap() {
-      Object var0 = (Map)a.get();
-      if (var0 == null) {
-         var0 = new HashMap();
-         a.set(var0);
+      Object objectValue = (Map)CopyContextHolder.idReplacementContext.get();
+      if (objectValue == null) {
+         objectValue = new HashMap();
+         CopyContextHolder.idReplacementContext.set(objectValue);
       }
 
-      return (Map)var0;
+      return (Map)objectValue;
    }
 
    public static Map getFileMap() {
-      Object var0 = (Map)b.get();
-      if (var0 == null) {
-         var0 = new HashMap();
-         b.set(var0);
+      Object objectValue = (Map)CopyContextHolder.copiedFileContext.get();
+      if (objectValue == null) {
+         objectValue = new HashMap();
+         CopyContextHolder.copiedFileContext.set(objectValue);
       }
 
-      return (Map)var0;
+      return (Map)objectValue;
    }
 
-   public static void addId(long var0, long var2) {
-      Map var4 = getIdMap();
-      String var5 = "id=\"" + var0 + "\"";
-      String var6 = "id=\"" + var2 + "\"";
-      var4.put(var5, var6);
-      var5 = "file=\"" + var0 + "\"";
-      var6 = "file=\"" + var2 + "\"";
-      var4.put(var5, var6);
+   public static void addId(long id, long newId) {
+      Map idMap = getIdMap();
+      String text = "id=\"" + id + "\"";
+      String text2 = "id=\"" + newId + "\"";
+      idMap.put(text, text2);
+      text = "file=\"" + id + "\"";
+      text2 = "file=\"" + newId + "\"";
+      idMap.put(text, text2);
    }
 
-   public static void addFile(long var0, RuleFile var2) {
-      Map var3 = getFileMap();
-      var3.put(var0, var2);
+   public static void addFile(long id, RuleFile ruleFile) {
+      Map fileMap = getFileMap();
+      fileMap.put(id, ruleFile);
    }
 
    public static void clear() {
-      a.remove();
-      b.remove();
+      CopyContextHolder.idReplacementContext.remove();
+      CopyContextHolder.copiedFileContext.remove();
    }
 }

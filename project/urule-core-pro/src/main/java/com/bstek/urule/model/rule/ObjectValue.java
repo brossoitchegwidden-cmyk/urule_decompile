@@ -5,8 +5,8 @@ import com.bstek.urule.LocaleHolder;
 public class ObjectValue extends AbstractValue {
    private Object object;
 
-   public ObjectValue(Object var1) {
-      this.object = var1;
+   public ObjectValue(Object object) {
+      this.object = object;
    }
 
    @Override
@@ -20,13 +20,13 @@ public class ObjectValue extends AbstractValue {
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Object" : "对象";
-      return "[" + var1 + "]" + this.object.toString();
+      String text = LocaleHolder.isEnglish() ? "Object" : "对象";
+      return "[" + text + "]" + this.object.toString();
    }
 
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Object" : "对象";
-      return "[" + var1 + "]" + this.object.toString();
+      String text = LocaleHolder.isEnglish() ? "Object" : "对象";
+      return "[" + text + "]" + this.object.toString();
    }
 }

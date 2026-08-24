@@ -6,58 +6,58 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class Authority {
-   private long a;
-   private long b;
-   private String c;
-   private String d;
-   private String e;
-   private int f;
+   private long id;
+   private long roleId;
+   private String roleType;
+   private String resourceType;
+   private String resourceCode;
+   private int auth;
 
    public long getRoleId() {
-      return this.b;
+      return this.roleId;
    }
 
-   public void setRoleId(long var1) {
-      this.b = var1;
+   public void setRoleId(long roleId) {
+      this.roleId = roleId;
    }
 
    public String getRoleType() {
-      return this.c;
+      return this.roleType;
    }
 
-   public void setRoleType(String var1) {
-      this.c = var1;
+   public void setRoleType(String roleType) {
+      this.roleType = roleType;
    }
 
    public String getResourceType() {
-      return this.d;
+      return this.resourceType;
    }
 
-   public void setResourceType(String var1) {
-      this.d = var1;
+   public void setResourceType(String resourceType) {
+      this.resourceType = resourceType;
    }
 
    public String getResourceCode() {
-      return this.e;
+      return this.resourceCode;
    }
 
-   public void setResourceCode(String var1) {
-      this.e = var1;
+   public void setResourceCode(String resourceCode) {
+      this.resourceCode = resourceCode;
    }
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public int getAuth() {
-      return this.f;
+      return this.auth;
    }
 
-   public void setAuth(int var1) {
-      this.f = var1;
+   public void setAuth(int auth) {
+      this.auth = auth;
    }
 }

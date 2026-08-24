@@ -17,479 +17,479 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class BasicBatchService extends AbstractBatchTranService {
-   private static Log a = LogFactory.getLog(BasicBatchService.class);
+   private static Log logger = LogFactory.getLog(BasicBatchService.class);
 
-   public void execute(BatchContext var1) {
-      Batch var2 = var1.getBatch();
-      BatchResult var3 = var1.getResult();
-      boolean var4 = this.a(var1);
-      if (var4) {
+   public void execute(BatchContext batchContext) {
+      Batch batch = batchContext.getBatch();
+      BatchResult batchResult = batchContext.getResult();
+      boolean flag = this.beforeExecute(batchContext);
+      if (flag) {
          try {
-            if (var2.getDataProvider().isSupportsPaging()) {
-               this.executeByPage(var1);
+            if (batch.getDataProvider().isSupportsPaging()) {
+               this.executeByPage(batchContext);
             } else {
-               this.executeTotal(var1);
+               this.executeTotal(batchContext);
             }
-         } catch (Exception var9) {
-            a.error(var9);
-            var3.setStatus(BatchStatus.failed);
-            var3.setException(var9);
+         } catch (Exception exception) {
+            BasicBatchService.logger.error(exception);
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception);
          } finally {
-            this.closeConnection(var1.getReadConnection());
+            this.closeConnection(batchContext.getReadConnection());
          }
 
       }
    }
 
-   public void executeByPage(BatchContext var1) {
-      BatchResult var2 = var1.getResult();
-      Connection var3 = var1.getReadConnection();
-      Batch var4 = var1.getBatch();
-      BatchDataResolver var5 = var4.getDataResolver();
-      ArrayList var6 = new ArrayList();
-      if (var5.getTranScope() == TranScope.batch && var5.getDialect().supportTransaction()) {
-         Object var91 = null;
-         Object var94 = null;
-         Map var95 = this.a(var5);
-         var2.setItemResults(var95);
-         Connection var97 = null;
+   public void executeByPage(BatchContext batchContext) {
+      BatchResult batchResult = batchContext.getResult();
+      Connection readConnection = batchContext.getReadConnection();
+      Batch batch = batchContext.getBatch();
+      BatchDataResolver dataResolver = batch.getDataResolver();
+      ArrayList items = new ArrayList();
+      if (dataResolver.getTranScope() == TranScope.batch && dataResolver.getDialect().supportTransaction()) {
+         Object objectValue = null;
+         Object objectValue2 = null;
+         Map valuesByKey = this.prepareItemResult(dataResolver);
+         batchResult.setItemResults(valuesByKey);
+         Connection connection = null;
 
          try {
-            var97 = this.getWriteDataSource(var4).getConnection();
-            var97.setAutoCommit(false);
-            Map var92 = this.a(var97, var5);
-            int var99 = 0;
-            BatchStatus var104 = BatchStatus.started;
-            int var110 = 0;
+            connection = this.getWriteDataSource(batch).getConnection();
+            connection.setAutoCommit(false);
+            Map valuesByKey2 = this.prepareStmt(connection, dataResolver);
+            int number = 0;
+            BatchStatus batchStatus = BatchStatus.started;
+            int number2 = 0;
 
             while(true) {
-               if (var110 < var1.getPageCount()) {
-                  if (this.getBatchStatus(var4.getId()) != BatchStatus.stop) {
-                     a.debug("execute batch 【" + var4.getName() + "】loadData pageIndex:" + var110 + "...");
+               if (number2 < batchContext.getPageCount()) {
+                  if (this.getBatchStatus(batch.getId()) != BatchStatus.stop) {
+                     BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】loadData pageIndex:" + number2 + "...");
 
                      try {
-                        List var116 = this.loadDatas(var3, var1, var110);
-                        var99 += var116.size();
+                        List datas = this.loadDatas(readConnection, batchContext, number2);
+                        number += datas.size();
 
-                        for(GeneralEntity var122 : (Iterable<GeneralEntity>)(Iterable<?>)(var116)) {
-                           this.a(var1, var97, var92, var122, var95);
+                        for(GeneralEntity generalEntity : (Iterable<GeneralEntity>)(Iterable<?>)(datas)) {
+                           this.processRecord(batchContext, connection, valuesByKey2, generalEntity, valuesByKey);
                         }
 
-                        this.b(var92);
-                     } catch (Exception var87) {
-                        a.error(var87);
-                        var6.add(var87);
-                        if (var4.getSkipLimit() <= 0) {
-                           throw var87;
+                        this.executePreparedStatementBatches(valuesByKey2);
+                     } catch (Exception exception) {
+                        BasicBatchService.logger.error(exception);
+                        items.add(exception);
+                        if (batch.getSkipLimit() <= 0) {
+                           throw exception;
                         }
 
-                        if (var4.getSkipLimit() < var6.size()) {
-                           throw var87;
+                        if (batch.getSkipLimit() < items.size()) {
+                           throw exception;
                         }
                      }
 
-                     ++var110;
+                     ++number2;
                      continue;
                   }
 
-                  var104 = BatchStatus.stop;
+                  batchStatus = BatchStatus.stop;
                }
 
-               if (var104 != BatchStatus.stop) {
-                  var2.setFilterCount(var2.getReadCount() - var99);
-                  a.debug("commit batch 【" + var4.getName() + "】.....");
-                  var97.commit();
-                  a.debug("commit batch 【" + var4.getName() + "】 success");
-                  this.a(var92);
+               if (batchStatus != BatchStatus.stop) {
+                  batchResult.setFilterCount(batchResult.getReadCount() - number);
+                  BasicBatchService.logger.debug("commit batch 【" + batch.getName() + "】.....");
+                  connection.commit();
+                  BasicBatchService.logger.debug("commit batch 【" + batch.getName() + "】 success");
+                  this.closePreparedStatements(valuesByKey2);
 
-                  for(BatchItemResult var115 : (Iterable<BatchItemResult>)(Iterable<?>)(var95.values())) {
-                     var115.setWriteCount(var115.getReadCount() - var115.getFilterCount());
+                  for(BatchItemResult batchItemResult : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey.values())) {
+                     batchItemResult.setWriteCount(batchItemResult.getReadCount() - batchItemResult.getFilterCount());
                   }
 
-                  var2.setStatus(BatchStatus.completed);
-                  var2.setMsg(BatchStatus.completed.name());
+                  batchResult.setStatus(BatchStatus.completed);
+                  batchResult.setMsg(BatchStatus.completed.name());
                } else {
-                  this.rollbackConnection(var97);
-                  var2.setStatus(BatchStatus.stop);
+                  this.rollbackConnection(connection);
+                  batchResult.setStatus(BatchStatus.stop);
                }
                break;
             }
-         } catch (Exception var88) {
-            a.error(var88);
-            this.a((Map)var91);
-            this.rollbackConnection(var97);
+         } catch (Exception exception2) {
+            BasicBatchService.logger.error(exception2);
+            this.closePreparedStatements((Map)objectValue);
+            this.rollbackConnection(connection);
 
-            for(BatchItemResult var109 : (Iterable<BatchItemResult>)(Iterable<?>)(var95.values())) {
-               var109.setWriteCount(0);
+            for(BatchItemResult batchItemResult2 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey.values())) {
+               batchItemResult2.setWriteCount(0);
             }
 
-            var2.setStatus(BatchStatus.failed);
-            var2.setException(var88);
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception2);
          } finally {
-            var2.setExceptions(var6);
-            this.closeConnection(var97);
+            batchResult.setExceptions(items);
+            this.closeConnection(connection);
          }
-      } else if (var5.getTranScope() == TranScope.page && var5.getDialect().supportTransaction()) {
-         HashMap var90 = new HashMap();
-         int var93 = 0;
-         Connection var96 = null;
+      } else if (dataResolver.getTranScope() == TranScope.page && dataResolver.getDialect().supportTransaction()) {
+         HashMap valuesByKey3 = new HashMap();
+         int number3 = 0;
+         Connection connection2 = null;
 
          try {
-            var96 = this.getWriteDataSource(var4).getConnection();
-            var96.setAutoCommit(false);
-            BatchStatus var98 = var4.getStatus();
+            connection2 = this.getWriteDataSource(batch).getConnection();
+            connection2.setAutoCommit(false);
+            BatchStatus status = batch.getStatus();
 
-            for(int var101 = 0; var101 < var1.getPageCount(); ++var101) {
-               Object var106 = null;
-               Map var113 = this.a(var5);
-               var90.put(var101, var113);
-               Map var107 = this.a(var96, var5);
+            for(int index = 0; index < batchContext.getPageCount(); ++index) {
+               Object objectValue3 = null;
+               Map valuesByKey4 = this.prepareItemResult(dataResolver);
+               valuesByKey3.put(index, valuesByKey4);
+               Map valuesByKey5 = this.prepareStmt(connection2, dataResolver);
 
                try {
-                  if (this.getBatchStatus(var4.getId()) == BatchStatus.stop) {
-                     var98 = BatchStatus.stop;
+                  if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+                     status = BatchStatus.stop;
                      break;
                   }
 
-                  a.debug("execute batch 【" + var4.getName() + "】loadData pageIndex:" + var101 + "...");
-                  List var117 = this.loadDatas(var3, var1, var101);
-                  var93 += var117.size();
+                  BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】loadData pageIndex:" + index + "...");
+                  List datas2 = this.loadDatas(readConnection, batchContext, index);
+                  number3 += datas2.size();
 
-                  for(GeneralEntity var124 : (Iterable<GeneralEntity>)(Iterable<?>)(var117)) {
-                     this.a(var1, var96, var107, var124, var113);
+                  for(GeneralEntity generalEntity2 : (Iterable<GeneralEntity>)(Iterable<?>)(datas2)) {
+                     this.processRecord(batchContext, connection2, valuesByKey5, generalEntity2, valuesByKey4);
                   }
 
-                  this.b(var107);
-                  var96.commit();
+                  this.executePreparedStatementBatches(valuesByKey5);
+                  connection2.commit();
 
-                  for(BatchItemResult var125 : (Iterable<BatchItemResult>)(Iterable<?>)(var113.values())) {
-                     var125.setWriteCount(var125.getReadCount() - var125.getFilterCount());
+                  for(BatchItemResult batchItemResult3 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey4.values())) {
+                     batchItemResult3.setWriteCount(batchItemResult3.getReadCount() - batchItemResult3.getFilterCount());
                   }
-               } catch (Exception var83) {
-                  a.error(var83);
-                  var6.add(var83);
-                  this.rollbackConnection(var96);
+               } catch (Exception exception3) {
+                  BasicBatchService.logger.error(exception3);
+                  items.add(exception3);
+                  this.rollbackConnection(connection2);
 
-                  for(BatchItemResult var123 : (Iterable<BatchItemResult>)(Iterable<?>)(var113.values())) {
-                     var123.setWriteCount(0);
-                  }
-
-                  if (var4.getSkipLimit() <= 0) {
-                     throw var83;
+                  for(BatchItemResult batchItemResult4 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey4.values())) {
+                     batchItemResult4.setWriteCount(0);
                   }
 
-                  if (var4.getSkipLimit() < var6.size()) {
-                     throw var83;
+                  if (batch.getSkipLimit() <= 0) {
+                     throw exception3;
+                  }
+
+                  if (batch.getSkipLimit() < items.size()) {
+                     throw exception3;
                   }
                } finally {
-                  this.a(var107);
+                  this.closePreparedStatements(valuesByKey5);
                }
             }
 
-            if (var98 != BatchStatus.stop) {
-               var2.setFilterCount(var2.getReadCount() - var93);
-               this.a(var4, var2, var90);
-               boolean var102 = false;
+            if (status != BatchStatus.stop) {
+               batchResult.setFilterCount(batchResult.getReadCount() - number3);
+               this.mergeItemResults(batch, batchResult, valuesByKey3);
+               boolean flag = false;
 
-               for(BatchItemResult var114 : (Iterable<BatchItemResult>)(Iterable<?>)(var2.getItemResults().values())) {
-                  if (var114.getWriteCount() > 0) {
-                     var102 = true;
+               for(BatchItemResult batchItemResult5 : (Iterable<BatchItemResult>)(Iterable<?>)(batchResult.getItemResults().values())) {
+                  if (batchItemResult5.getWriteCount() > 0) {
+                     flag = true;
                      break;
                   }
                }
 
-               if (var102) {
-                  var2.setStatus(BatchStatus.completed);
-                  var2.setMsg(BatchStatus.completed.name());
+               if (flag) {
+                  batchResult.setStatus(BatchStatus.completed);
+                  batchResult.setMsg(BatchStatus.completed.name());
                } else {
-                  var2.setStatus(BatchStatus.failed);
+                  batchResult.setStatus(BatchStatus.failed);
                }
             } else {
-               var2.setStatus(BatchStatus.stop);
+               batchResult.setStatus(BatchStatus.stop);
             }
-         } catch (Exception var85) {
-            a.error(var85);
-            var2.setStatus(BatchStatus.failed);
-            var2.setException(var85);
+         } catch (Exception exception4) {
+            BasicBatchService.logger.error(exception4);
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception4);
          } finally {
-            var2.setExceptions(var6);
-            this.closeConnection(var96);
+            batchResult.setExceptions(items);
+            this.closeConnection(connection2);
          }
       } else {
-         ArrayList var7 = new ArrayList();
-         Connection var8 = null;
+         ArrayList items2 = new ArrayList();
+         Connection connection3 = null;
 
          try {
-            int var9 = 0;
-            var8 = this.getWriteDataSource(var4).getConnection();
-            BatchStatus var10 = var4.getStatus();
+            int number4 = 0;
+            connection3 = this.getWriteDataSource(batch).getConnection();
+            BatchStatus status2 = batch.getStatus();
 
-            for(int var11 = 0; var11 < var1.getPageCount(); ++var11) {
-               if (this.getBatchStatus(var4.getId()) == BatchStatus.stop) {
-                  var10 = BatchStatus.stop;
+            for(int index2 = 0; index2 < batchContext.getPageCount(); ++index2) {
+               if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+                  status2 = BatchStatus.stop;
                   break;
                }
 
-               a.debug("execute batch 【" + var4.getName() + "】pageIndex:" + var11);
-               BatchResult var12 = new BatchResult();
-               var7.add(var12);
-               a.debug("execute batch 【" + var4.getName() + "】loadData pageIndex:" + var11 + "...");
-               List var13 = this.loadDatas(var3, var1, var11);
-               var9 += var13.size();
-               HashMap var14 = new HashMap();
+               BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】pageIndex:" + index2);
+               BatchResult batchResult2 = new BatchResult();
+               items2.add(batchResult2);
+               BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】loadData pageIndex:" + index2 + "...");
+               List datas3 = this.loadDatas(readConnection, batchContext, index2);
+               number4 += datas3.size();
+               HashMap valuesByKey6 = new HashMap();
 
-               for(int var15 = 0; var15 < var13.size(); ++var15) {
-                  GeneralEntity var16 = (GeneralEntity)var13.get(var15);
-                  Map var17 = null;
-                  Object var18 = null;
-                  Map var126 = this.a(var5);
-                  var14.put(var15, var126);
+               for(int index3 = 0; index3 < datas3.size(); ++index3) {
+                  GeneralEntity generalEntity3 = (GeneralEntity)datas3.get(index3);
+                  Map valuesByKey7 = null;
+                  Object objectValue4 = null;
+                  Map valuesByKey8 = this.prepareItemResult(dataResolver);
+                  valuesByKey6.put(index3, valuesByKey8);
 
                   try {
-                     if (var5.getDialect().supportTransaction()) {
-                        var8.setAutoCommit(false);
+                     if (dataResolver.getDialect().supportTransaction()) {
+                        connection3.setAutoCommit(false);
                      }
 
-                     var17 = this.a(var8, var5);
-                     this.a(var1, var8, var17, var16, var126);
-                     if (var5.getDialect().supportTransaction()) {
-                        this.b(var17);
-                        var8.commit();
+                     valuesByKey7 = this.prepareStmt(connection3, dataResolver);
+                     this.processRecord(batchContext, connection3, valuesByKey7, generalEntity3, valuesByKey8);
+                     if (dataResolver.getDialect().supportTransaction()) {
+                        this.executePreparedStatementBatches(valuesByKey7);
+                        connection3.commit();
                      }
 
-                     for(BatchItemResult var127 : (Iterable<BatchItemResult>)(Iterable<?>)(var126.values())) {
-                        var127.setWriteCount(var127.getReadCount() - var127.getFilterCount());
+                     for(BatchItemResult batchItemResult6 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey8.values())) {
+                        batchItemResult6.setWriteCount(batchItemResult6.getReadCount() - batchItemResult6.getFilterCount());
                      }
-                  } catch (Exception var79) {
-                     a.error(var79);
-                     if (var5.getDialect().supportTransaction()) {
-                        this.rollbackConnection(var8);
-                     }
-
-                     for(BatchItemResult var21 : (Iterable<BatchItemResult>)(Iterable<?>)(var126.values())) {
-                        var21.setWriteCount(0);
+                  } catch (Exception exception5) {
+                     BasicBatchService.logger.error(exception5);
+                     if (dataResolver.getDialect().supportTransaction()) {
+                        this.rollbackConnection(connection3);
                      }
 
-                     var2.setException(var79);
-                     var6.add(var79);
-                     if (var4.getSkipLimit() <= 0) {
-                        throw var79;
+                     for(BatchItemResult batchItemResult7 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey8.values())) {
+                        batchItemResult7.setWriteCount(0);
                      }
 
-                     if (var4.getSkipLimit() < var6.size()) {
-                        throw var79;
+                     batchResult.setException(exception5);
+                     items.add(exception5);
+                     if (batch.getSkipLimit() <= 0) {
+                        throw exception5;
+                     }
+
+                     if (batch.getSkipLimit() < items.size()) {
+                        throw exception5;
                      }
                   } finally {
-                     this.a(var17);
+                     this.closePreparedStatements(valuesByKey7);
                   }
                }
 
-               this.a(var4, var12, var14);
+               this.mergeItemResults(batch, batchResult2, valuesByKey6);
             }
 
-            if (var10 != BatchStatus.stop) {
-               var2.setFilterCount(var2.getReadCount() - var9);
-               this.a(var4, var2, var7);
-               boolean var100 = false;
+            if (status2 != BatchStatus.stop) {
+               batchResult.setFilterCount(batchResult.getReadCount() - number4);
+               this.mergeBatchResults(batch, batchResult, items2);
+               boolean flag2 = false;
 
-               for(BatchItemResult var112 : (Iterable<BatchItemResult>)(Iterable<?>)(var2.getItemResults().values())) {
-                  if (var112.getWriteCount() > 0) {
-                     var100 = true;
+               for(BatchItemResult batchItemResult8 : (Iterable<BatchItemResult>)(Iterable<?>)(batchResult.getItemResults().values())) {
+                  if (batchItemResult8.getWriteCount() > 0) {
+                     flag2 = true;
                      break;
                   }
                }
 
-               if (var100) {
-                  var2.setStatus(BatchStatus.completed);
-                  var2.setMsg(BatchStatus.completed.name());
+               if (flag2) {
+                  batchResult.setStatus(BatchStatus.completed);
+                  batchResult.setMsg(BatchStatus.completed.name());
                } else {
-                  var2.setStatus(BatchStatus.failed);
+                  batchResult.setStatus(BatchStatus.failed);
                }
             } else {
-               var2.setStatus(BatchStatus.stop);
+               batchResult.setStatus(BatchStatus.stop);
             }
-         } catch (Exception var81) {
-            a.error(var81);
-            var2.setStatus(BatchStatus.failed);
-            var2.setException(var81);
+         } catch (Exception exception6) {
+            BasicBatchService.logger.error(exception6);
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception6);
          } finally {
-            var2.setExceptions(var6);
-            this.closeConnection(var8);
+            batchResult.setExceptions(items);
+            this.closeConnection(connection3);
          }
       }
 
    }
 
-   public void executeTotal(BatchContext var1) {
-      BatchResult var2 = var1.getResult();
-      Batch var3 = var1.getBatch();
-      BatchDataResolver var4 = var3.getDataResolver();
-      Map var5 = null;
-      Object var6 = null;
-      List var53 = null;
+   public void executeTotal(BatchContext batchContext) {
+      BatchResult batchResult = batchContext.getResult();
+      Batch batch = batchContext.getBatch();
+      BatchDataResolver dataResolver = batch.getDataResolver();
+      Map valuesByKey = null;
+      Object objectValue = null;
+      List datas = null;
 
       try {
-         a.debug("execute batch 【" + var3.getName() + "】loadData ...");
-         var53 = this.loadDatas(var1.getReadConnection(), var1, -1);
-         var2.setFilterCount(var2.getReadCount() - var53.size());
-         a.debug("execute batch 【" + var3.getName() + "】data size:" + var53.size());
-      } catch (Exception var44) {
-         var2.setStatus(BatchStatus.failed);
-         var2.setException(var44);
+         BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】loadData ...");
+         datas = this.loadDatas(batchContext.getReadConnection(), batchContext, -1);
+         batchResult.setFilterCount(batchResult.getReadCount() - datas.size());
+         BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】data size:" + datas.size());
+      } catch (Exception exception) {
+         batchResult.setStatus(BatchStatus.failed);
+         batchResult.setException(exception);
          return;
       }
 
-      ArrayList var8 = new ArrayList();
-      if ((var4.getTranScope() == TranScope.batch || var4.getTranScope() == TranScope.page) && var4.getDialect().supportTransaction()) {
-         Connection var54 = null;
+      ArrayList items = new ArrayList();
+      if ((dataResolver.getTranScope() == TranScope.batch || dataResolver.getTranScope() == TranScope.page) && dataResolver.getDialect().supportTransaction()) {
+         Connection connection = null;
 
          try {
-            var54 = this.getWriteDataSource(var3).getConnection();
-            var54.setAutoCommit(false);
-            var5 = this.a(var54, var4);
-            Map var52 = this.a(var4);
-            BatchStatus var55 = var3.getStatus();
+            connection = this.getWriteDataSource(batch).getConnection();
+            connection.setAutoCommit(false);
+            valuesByKey = this.prepareStmt(connection, dataResolver);
+            Map valuesByKey2 = this.prepareItemResult(dataResolver);
+            BatchStatus status = batch.getStatus();
 
-            for(int var56 = 0; var56 < var53.size(); ++var56) {
+            for(int index = 0; index < datas.size(); ++index) {
                try {
-                  GeneralEntity var59 = (GeneralEntity)var53.get(var56);
-                  if (var56 % 10000 == 0) {
-                     if (a.isDebugEnabled()) {
-                        a.debug("execute batch 【" + var3.getName() + "】record index: " + var56 + "...");
+                  GeneralEntity generalEntity = (GeneralEntity)datas.get(index);
+                  if (index % 10000 == 0) {
+                     if (BasicBatchService.logger.isDebugEnabled()) {
+                        BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】record index: " + index + "...");
                      }
 
-                     if (this.getBatchStatus(var3.getId()) == BatchStatus.stop) {
-                        var55 = BatchStatus.stop;
+                     if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+                        status = BatchStatus.stop;
                         break;
                      }
                   }
 
-                  this.a(var1, var54, var5, var59, var52);
-               } catch (Exception var49) {
-                  a.error(var49);
-                  var8.add(var49);
-                  if (var3.getSkipLimit() <= 0) {
-                     throw var49;
+                  this.processRecord(batchContext, connection, valuesByKey, generalEntity, valuesByKey2);
+               } catch (Exception exception2) {
+                  BasicBatchService.logger.error(exception2);
+                  items.add(exception2);
+                  if (batch.getSkipLimit() <= 0) {
+                     throw exception2;
                   }
 
-                  if (var3.getSkipLimit() < var8.size()) {
-                     throw var49;
+                  if (batch.getSkipLimit() < items.size()) {
+                     throw exception2;
                   }
                }
             }
 
-            if (var55 != BatchStatus.stop) {
-               this.b(var5);
-               var54.commit();
+            if (status != BatchStatus.stop) {
+               this.executePreparedStatementBatches(valuesByKey);
+               connection.commit();
 
-               for(BatchItemResult var60 : (Iterable<BatchItemResult>)(Iterable<?>)(var52.values())) {
-                  var60.setWriteCount(var60.getReadCount() - var60.getFilterCount());
+               for(BatchItemResult batchItemResult : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey2.values())) {
+                  batchItemResult.setWriteCount(batchItemResult.getReadCount() - batchItemResult.getFilterCount());
                }
 
-               var2.setItemResults(var52);
+               batchResult.setItemResults(valuesByKey2);
             } else {
-               this.rollbackConnection(var54);
-               var2.setStatus(BatchStatus.stop);
+               this.rollbackConnection(connection);
+               batchResult.setStatus(BatchStatus.stop);
             }
-         } catch (Exception var50) {
-            var2.setStatus(BatchStatus.failed);
-            var2.setException(var50);
+         } catch (Exception exception3) {
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception3);
          } finally {
-            this.a(var5);
-            var2.setExceptions(var8);
-            this.closeConnection(var54);
+            this.closePreparedStatements(valuesByKey);
+            batchResult.setExceptions(items);
+            this.closeConnection(connection);
          }
       } else {
-         HashMap var9 = new HashMap();
-         Connection var10 = null;
+         HashMap valuesByKey3 = new HashMap();
+         Connection connection2 = null;
 
          try {
-            var10 = this.getWriteDataSource(var3).getConnection();
-            if (var4.getDialect().supportTransaction()) {
-               var10.setAutoCommit(false);
+            connection2 = this.getWriteDataSource(batch).getConnection();
+            if (dataResolver.getDialect().supportTransaction()) {
+               connection2.setAutoCommit(false);
             }
 
-            BatchStatus var11 = var3.getStatus();
+            BatchStatus status2 = batch.getStatus();
 
-            for(int var12 = 0; var12 < var53.size(); ++var12) {
-               GeneralEntity var13 = (GeneralEntity)var53.get(var12);
-               Map var14 = this.a(var4);
-               var9.put(var12, var14);
-               if (var12 % 10000 == 0) {
-                  if (a.isDebugEnabled()) {
-                     a.debug("execute batch 【" + var3.getName() + "】record index: " + var12 + "...");
+            for(int index2 = 0; index2 < datas.size(); ++index2) {
+               GeneralEntity generalEntity2 = (GeneralEntity)datas.get(index2);
+               Map valuesByKey4 = this.prepareItemResult(dataResolver);
+               valuesByKey3.put(index2, valuesByKey4);
+               if (index2 % 10000 == 0) {
+                  if (BasicBatchService.logger.isDebugEnabled()) {
+                     BasicBatchService.logger.debug("execute batch 【" + batch.getName() + "】record index: " + index2 + "...");
                   }
 
-                  if (this.getBatchStatus(var3.getId()) == BatchStatus.stop) {
-                     var11 = BatchStatus.stop;
+                  if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+                     status2 = BatchStatus.stop;
                      break;
                   }
                }
 
                try {
-                  var5 = this.a(var10, var4);
-                  this.a(var1, var10, var5, var13, var14);
-                  if (var4.getDialect().supportTransaction()) {
-                     this.b(var5);
-                     var10.commit();
+                  valuesByKey = this.prepareStmt(connection2, dataResolver);
+                  this.processRecord(batchContext, connection2, valuesByKey, generalEntity2, valuesByKey4);
+                  if (dataResolver.getDialect().supportTransaction()) {
+                     this.executePreparedStatementBatches(valuesByKey);
+                     connection2.commit();
                   }
 
-                  this.a(var5);
+                  this.closePreparedStatements(valuesByKey);
 
-                  for(BatchItemResult var63 : (Iterable<BatchItemResult>)(Iterable<?>)(var14.values())) {
-                     var63.setWriteCount(var63.getReadCount() - var63.getFilterCount());
+                  for(BatchItemResult batchItemResult2 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey4.values())) {
+                     batchItemResult2.setWriteCount(batchItemResult2.getReadCount() - batchItemResult2.getFilterCount());
                   }
-               } catch (Exception var45) {
-                  a.error(var45);
-                  if (var4.getDialect().supportTransaction()) {
-                     this.rollbackConnection(var10);
-                  }
-
-                  for(BatchItemResult var17 : (Iterable<BatchItemResult>)(Iterable<?>)(var14.values())) {
-                     var17.setWriteCount(0);
+               } catch (Exception exception4) {
+                  BasicBatchService.logger.error(exception4);
+                  if (dataResolver.getDialect().supportTransaction()) {
+                     this.rollbackConnection(connection2);
                   }
 
-                  var8.add(var45);
-                  if (var3.getSkipLimit() <= 0) {
-                     throw var45;
+                  for(BatchItemResult batchItemResult3 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey4.values())) {
+                     batchItemResult3.setWriteCount(0);
                   }
 
-                  if (var3.getSkipLimit() < var8.size()) {
-                     throw var45;
+                  items.add(exception4);
+                  if (batch.getSkipLimit() <= 0) {
+                     throw exception4;
+                  }
+
+                  if (batch.getSkipLimit() < items.size()) {
+                     throw exception4;
                   }
                } finally {
-                  this.a(var5);
+                  this.closePreparedStatements(valuesByKey);
                }
             }
 
-            this.closeConnection(var10);
-            if (var11 != BatchStatus.stop) {
-               this.a(var3, var2, var9);
-               boolean var58 = false;
+            this.closeConnection(connection2);
+            if (status2 != BatchStatus.stop) {
+               this.mergeItemResults(batch, batchResult, valuesByKey3);
+               boolean flag = false;
 
-               for(BatchItemResult var62 : (Iterable<BatchItemResult>)(Iterable<?>)(var2.getItemResults().values())) {
-                  if (var62.getWriteCount() > 0) {
-                     var58 = true;
+               for(BatchItemResult batchItemResult4 : (Iterable<BatchItemResult>)(Iterable<?>)(batchResult.getItemResults().values())) {
+                  if (batchItemResult4.getWriteCount() > 0) {
+                     flag = true;
                      break;
                   }
                }
 
-               if (var58) {
-                  var2.setStatus(BatchStatus.completed);
-                  var2.setMsg(BatchStatus.completed.name());
+               if (flag) {
+                  batchResult.setStatus(BatchStatus.completed);
+                  batchResult.setMsg(BatchStatus.completed.name());
                } else {
-                  var2.setStatus(BatchStatus.failed);
-                  var2.setMsg(BatchStatus.failed.name());
+                  batchResult.setStatus(BatchStatus.failed);
+                  batchResult.setMsg(BatchStatus.failed.name());
                }
             } else {
-               var2.setStatus(BatchStatus.stop);
+               batchResult.setStatus(BatchStatus.stop);
             }
-         } catch (Exception var47) {
-            var2.setStatus(BatchStatus.failed);
-            var2.setException(var47);
+         } catch (Exception exception5) {
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception5);
          } finally {
-            var2.setExceptions(var8);
-            this.closeConnection(var10);
+            batchResult.setExceptions(items);
+            this.closeConnection(connection2);
          }
       }
 

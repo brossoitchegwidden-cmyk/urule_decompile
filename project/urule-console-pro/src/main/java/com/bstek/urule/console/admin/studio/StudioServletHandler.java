@@ -21,109 +21,111 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class StudioServletHandler extends ApiServletHandler {
-   public void menu(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = ContextHolder.getProjectId();
-      User var4 = SecurityUtils.getLoginUser(var1);
-      List var5 = FileService.ins.menus(var3);
-      ArrayList var6 = new ArrayList();
-      Project var7 = ProjectManager.ins.get(var3);
-      if (var7 != null) {
-         for(RuleFile var9 : (Iterable<RuleFile>)(Iterable<?>)(var5)) {
-            RuleFileType var10 = RuleFileType.getRuleFileType(var9.getType());
-            if (var10 == RuleFileType.General) {
-               if (var7.getViewModel() == ProjectViewModel.general) {
-                  var6.add(var9);
+   /**加载顶级菜单*/
+   public void menu(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long projectId = ContextHolder.getProjectId();
+      User loginUser = SecurityUtils.getLoginUser(req);
+      List items = FileService.ins.menus(projectId);
+      ArrayList items2 = new ArrayList();
+      Project project = ProjectManager.ins.get(projectId);
+      if (project != null) {
+         for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+            RuleFileType ruleFileType = RuleFileType.getRuleFileType(ruleFile.getType());
+            if (ruleFileType == RuleFileType.General) {
+               if (project.getViewModel() == ProjectViewModel.general) {
+                  items2.add(ruleFile);
                }
-            } else if (var10 != null && var7.getViewModel() != ProjectViewModel.general) {
-               boolean var11 = AuthenticationManager.decide(var4, RoleCategory.project, var10.getModel(), "view");
-               if (var11) {
-                  var6.add(var9);
+            } else if (ruleFileType != null && project.getViewModel() != ProjectViewModel.general) {
+               boolean flag = AuthenticationManager.decide(loginUser, RoleCategory.project, ruleFileType.getModel(), "view");
+               if (flag) {
+                  items2.add(ruleFile);
                }
             }
          }
       }
 
-      this.a(var2, var6);
+      this.writeObjectToJson(resp, items2);
    }
 
-   public void tree(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = ContextHolder.getProjectId();
-      User var4 = SecurityUtils.getLoginUser(var1);
-      String var5 = var1.getParameter("type");
-      RuleFileType var6 = RuleFileType.getRuleFileType(var5);
-      Object var7 = new ArrayList();
-      if (var6 != null) {
-         if (var6 == RuleFileType.General) {
-            Map var8 = this.a(var4, var3);
-            var7 = FileService.ins.tree(var3, var6);
-            this.a((List)var7, var8);
+   /**加载规则文件*/
+   public void tree(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long projectId = ContextHolder.getProjectId();
+      User loginUser = SecurityUtils.getLoginUser(req);
+      String parameter = req.getParameter("type");
+      RuleFileType ruleFileType = RuleFileType.getRuleFileType(parameter);
+      Object objectValue = new ArrayList();
+      if (ruleFileType != null) {
+         if (ruleFileType == RuleFileType.General) {
+            Map valuesByKey = this.buildViewPermissions(loginUser, projectId);
+            objectValue = FileService.ins.tree(projectId, ruleFileType);
+            this.filterUnauthorizedFiles((List)objectValue, valuesByKey);
          } else {
-            boolean var9 = AuthenticationManager.decide(var4, RoleCategory.project, var6.getModel(), "view");
-            if (var9) {
-               var7 = FileService.ins.tree(var3, var6);
+            boolean flag = AuthenticationManager.decide(loginUser, RoleCategory.project, ruleFileType.getModel(), "view");
+            if (flag) {
+               objectValue = FileService.ins.tree(projectId, ruleFileType);
             }
          }
       }
 
-      this.a(var2, var7);
+      this.writeObjectToJson(resp, objectValue);
    }
 
-   private Map a(User var1, long var2) {
-      HashMap var4 = new HashMap();
-      String var5 = "view";
+   private Map buildViewPermissions(User user, long longValue) {
+      HashMap valuesByKey = new HashMap();
+      String text = "view";
 
-      for(RuleFile var8 : (Iterable<RuleFile>)(Iterable<?>)(FileService.ins.menus(var2))) {
-         RuleFileType var9 = RuleFileType.getRuleFileType(var8.getType());
-         if (RuleFileType.General != var9 && var9 != null) {
-            boolean var10 = AuthenticationManager.decide(var1, RoleCategory.project, var9.getModel(), var5);
-            var4.put(var9.name(), var10);
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(FileService.ins.menus(longValue))) {
+         RuleFileType ruleFileType = RuleFileType.getRuleFileType(ruleFile.getType());
+         if (RuleFileType.General != ruleFileType && ruleFileType != null) {
+            boolean flag = AuthenticationManager.decide(user, RoleCategory.project, ruleFileType.getModel(), text);
+            valuesByKey.put(ruleFileType.name(), flag);
          }
       }
 
-      var4.put(RuleFileType.CrossDecisionTable.name(), var4.get(RuleFileType.DecisionTable.name()));
-      var4.put(RuleFileType.ComplexScorecard.name(), var4.get(RuleFileType.Scorecard.name()));
-      return var4;
+      valuesByKey.put(RuleFileType.CrossDecisionTable.name(), valuesByKey.get(RuleFileType.DecisionTable.name()));
+      valuesByKey.put(RuleFileType.ComplexScorecard.name(), valuesByKey.get(RuleFileType.Scorecard.name()));
+      return valuesByKey;
    }
 
-   private void a(List var1, Map var2) {
-      ArrayList var3 = new ArrayList();
+   private void filterUnauthorizedFiles(List items, Map valuesByKey) {
+      ArrayList items2 = new ArrayList();
 
-      for(RuleFile var5 : (Iterable<RuleFile>)(Iterable<?>)(var1)) {
-         if (RuleFileType.General.name().equals(var5.getType()) && var5.isDirectory()) {
-            this.a(var5.getChildren(), var2);
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+         if (RuleFileType.General.name().equals(ruleFile.getType()) && ruleFile.isDirectory()) {
+            this.filterUnauthorizedFiles(ruleFile.getChildren(), valuesByKey);
          } else {
-            boolean var6 = true;
-            RuleFileType var7 = RuleFileType.getRuleFileType(var5.getType());
-            if (var2.containsKey(var7.name())) {
-               var6 = (Boolean)var2.get(var7.name());
+            boolean flag = true;
+            RuleFileType ruleFileType = RuleFileType.getRuleFileType(ruleFile.getType());
+            if (valuesByKey.containsKey(ruleFileType.name())) {
+               flag = (Boolean)valuesByKey.get(ruleFileType.name());
             }
 
-            if (!var6) {
-               var3.add(var5);
-            } else if (var5.isDirectory()) {
-               this.a(var5.getChildren(), var2);
+            if (!flag) {
+               items2.add(ruleFile);
+            } else if (ruleFile.isDirectory()) {
+               this.filterUnauthorizedFiles(ruleFile.getChildren(), valuesByKey);
             }
          }
       }
 
-      for(RuleFile var9 : (Iterable<RuleFile>)(Iterable<?>)(var3)) {
-         var1.remove(var9);
+      for(RuleFile ruleFile2 : (Iterable<RuleFile>)(Iterable<?>)(items2)) {
+         items.remove(ruleFile2);
       }
 
    }
 
-   public void validate(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      HashMap var3 = new HashMap();
-      var3.put("reg", DynamicSpringConfigLoaderImpl.getAuthInfo() != null);
+   public void validate(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("reg", DynamicSpringConfigLoaderImpl.getAuthInfo() != null);
       if (DynamicSpringConfigLoaderImpl.getAuthInfo() == null) {
-         var3.put("expired", DynamicSpringConfigLoaderImpl.getTrialExpired());
+         valuesByKey.put("expired", DynamicSpringConfigLoaderImpl.getTrialExpired());
       } else {
-         var3.put("expired", DynamicSpringConfigLoaderImpl.getLimit());
-         var3.put("authInfo", DynamicSpringConfigLoaderImpl.getAuthInfo());
-         var3.put("limitedDate", DynamicSpringConfigLoaderImpl.getLimitDate());
+         valuesByKey.put("expired", DynamicSpringConfigLoaderImpl.getLimit());
+         valuesByKey.put("authInfo", DynamicSpringConfigLoaderImpl.getAuthInfo());
+         valuesByKey.put("limitedDate", DynamicSpringConfigLoaderImpl.getLimitDate());
       }
 
-      this.a(var2, var3);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    public String url() {

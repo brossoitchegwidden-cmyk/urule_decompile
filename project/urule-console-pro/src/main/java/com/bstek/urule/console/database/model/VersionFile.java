@@ -3,76 +3,76 @@ package com.bstek.urule.console.database.model;
 import java.util.Date;
 
 public class VersionFile extends FileInfo {
-   private long a;
-   private long b;
-   private long c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private Date h;
+   private long id;
+   private long fileId;
+   private long projectId;
+   private String digest;
+   private String version;
+   private String note;
+   private String createUser;
+   private Date createDate;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getFileId() {
-      return this.b;
+      return this.fileId;
    }
 
-   public void setFileId(long var1) {
-      this.b = var1;
+   public void setFileId(long fileId) {
+      this.fileId = fileId;
    }
 
    public long getProjectId() {
-      return this.c;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.c = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDigest() {
-      return this.d;
+      return this.digest;
    }
 
-   public void setDigest(String var1) {
-      this.d = var1;
+   public void setDigest(String digest) {
+      this.digest = digest;
    }
 
    public String getVersion() {
-      return this.e;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.e = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getNote() {
-      return this.f;
+      return this.note;
    }
 
-   public void setNote(String var1) {
-      this.f = var1;
+   public void setNote(String note) {
+      this.note = note;
    }
 
    public String getCreateUser() {
-      return this.g;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.g = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.h;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.h = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 }

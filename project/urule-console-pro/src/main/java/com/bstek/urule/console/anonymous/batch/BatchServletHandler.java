@@ -26,107 +26,108 @@ import org.apache.commons.logging.LogFactory;
 
 public class BatchServletHandler extends AnonymousServletHandler {
    public static final String URL = "/batch";
-   private static final String a = "desc";
-   private static final String e = "mock";
+   private static final String DESC = "desc";
+   private static final String MOCK = "mock";
    public static final Log logger = LogFactory.getLog(BatchServletHandler.class);
 
-   private void a(BatchResult var1, String var2) {
-      var1.setStatus(BatchStatus.failed);
-      var1.setMsg(var2);
+   private void markFailed(BatchResult batchResult, String text) {
+      batchResult.setStatus(BatchStatus.failed);
+      batchResult.setMsg(text);
    }
 
-   public void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getQueryString();
-      if ("callback".equals(var3)) {
-         ObjectMapper var16 = this.a();
-         BatchResult var17 = (BatchResult)var16.readValue(var1.getInputStream(), BatchResult.class);
-         System.out.println(var17);
+   /**执行方案*/
+   public void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String queryString = req.getQueryString();
+      if ("callback".equals(queryString)) {
+         ObjectMapper objectMapper = this.createObjectMapper();
+         BatchResult batchResult = (BatchResult)objectMapper.readValue(req.getInputStream(), BatchResult.class);
+         logger.debug("Received batch callback: " + batchResult);
       } else {
-         String var4 = var1.getContextPath() + "/urule";
-         String var5 = var1.getRequestURI();
-         String var6 = var5.substring(var4.length());
-         int var7 = var6.lastIndexOf("/");
-         String var8 = var6.substring(var7 + 1, var6.length()).trim();
-         BatchResult var9 = new BatchResult();
-         var9.setIp(IPUtils.getIpAddress(var1));
-         var9.setUserAgent(RequestHolder.getRequest().getHeader("User-Agent"));
-         if (StringUtils.isBlank(var8)) {
-            this.a(var9, "请指定要调用的批处理ID");
-            this.a(var2, var9);
+         String text = req.getContextPath() + "/urule";
+         String requestURI = req.getRequestURI();
+         String substring = requestURI.substring(text.length());
+         int number = substring.lastIndexOf("/");
+         String trimmedText = substring.substring(number + 1, substring.length()).trim();
+         BatchResult batchResult2 = new BatchResult();
+         batchResult2.setIp(IPUtils.getIpAddress(req));
+         batchResult2.setUserAgent(RequestHolder.getRequest().getHeader("User-Agent"));
+         if (StringUtils.isBlank(trimmedText)) {
+            this.markFailed(batchResult2, "请指定要调用的批处理ID");
+            this.writeObjectToJson(resp, batchResult2);
          } else {
-            for(int var10 = var8.length() - 1; var10 >= 0; --var10) {
-               char var11 = var8.charAt(var10);
-               if (!Character.isDigit(var11)) {
-                  this.a(var9, "调用的批处理ID必须是一个整数");
-                  this.a(var2, var9);
+            for(int index = trimmedText.length() - 1; index >= 0; --index) {
+               char text2 = trimmedText.charAt(index);
+               if (!Character.isDigit(text2)) {
+                  this.markFailed(batchResult2, "调用的批处理ID必须是一个整数");
+                  this.writeObjectToJson(resp, batchResult2);
                   return;
                }
             }
 
-            Batch var19 = null;
+            Batch batch = null;
 
             try {
                logger.debug("Initialize URule Batch ...");
-               var19 = SchemeService.ins.getBatchData(Long.parseLong(var8));
-            } catch (Exception var15) {
-               this.a(var9, "批处理【" + var8 + "】提取失败,可能是不存在或配置异常");
+               batch = SchemeService.ins.getBatchData(Long.parseLong(trimmedText));
+            } catch (Exception exception) {
+               this.markFailed(batchResult2, "批处理【" + trimmedText + "】提取失败,可能是不存在或配置异常");
                return;
             }
 
-            if ("desc".equals(var3)) {
-               String var20 = var1.getRequestURL().toString();
-               var20 = Utils.decodeURL(var20);
-               HashMap var12 = new HashMap();
-               var12.put("url", var20);
-               var12.put("authentication", var19.isRestSecurityEnable());
-               var12.put("input", var19.getParams());
-               var12.put("output", this.b());
-               this.a(var2, var12);
+            if ("desc".equals(queryString)) {
+               String text3 = req.getRequestURL().toString();
+               text3 = Utils.decodeURL(text3);
+               HashMap valuesByKey = new HashMap();
+               valuesByKey.put("url", text3);
+               valuesByKey.put("authentication", batch.isRestSecurityEnable());
+               valuesByKey.put("input", batch.getParams());
+               valuesByKey.put("output", this.buildValuesByKey());
+               this.writeObjectToJson(resp, valuesByKey);
             } else {
-               if ("mock".equals(var3)) {
-                  this.a(var19, var1, var2);
+               if ("mock".equals(queryString)) {
+                  this.writeMockRequest(batch, req, resp);
                   return;
                }
 
-               boolean var22 = this.a(var1, var2, var8, var9, var19);
-               if (!var22) {
+               boolean flag = this.validateInvocation(req, resp, trimmedText, batchResult2, batch);
+               if (!flag) {
                   return;
                }
 
-               Object var23 = new HashMap();
-               ServletInputStream var13 = var1.getInputStream();
-               if (var13 != null) {
-                  String var14 = IOUtils.toString(var13, "utf-8");
-                  if (StringUtils.isNotBlank(var14)) {
-                     var14 = var14.trim();
-                     var23 = (Map)this.a().readValue(var14, HashMap.class);
+               Object objectValue = new HashMap();
+               ServletInputStream inputStream = req.getInputStream();
+               if (inputStream != null) {
+                  String trimmedText2 = IOUtils.toString(inputStream, "utf-8");
+                  if (StringUtils.isNotBlank(trimmedText2)) {
+                     trimmedText2 = trimmedText2.trim();
+                     objectValue = (Map)this.createObjectMapper().readValue(trimmedText2, HashMap.class);
                   }
                }
 
-               BatchServiceManager.execute(var19, (Map)var23, (String)null, var9);
-               this.a(var2, var9);
+               BatchServiceManager.execute(batch, (Map)objectValue, (String)null, batchResult2);
+               this.writeObjectToJson(resp, batchResult2);
             }
 
          }
       }
    }
 
-   private boolean a(HttpServletRequest var1, HttpServletResponse var2, String var3, BatchResult var4, Batch var5) throws ServletException, IOException {
-      if (!var5.isRestEnable()) {
-         this.a(var4, "批处理【" + var3 + "】未暴露Rest服务");
-         this.a(var2, var4);
+   private boolean validateInvocation(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String text, BatchResult batchResult, Batch batch) throws ServletException, IOException {
+      if (!batch.isRestEnable()) {
+         this.markFailed(batchResult, "批处理【" + text + "】未暴露Rest服务");
+         this.writeObjectToJson(httpServletResponse, batchResult);
          return false;
-      } else if (BatchStatus.started == var5.getStatus()) {
-         this.a(var4, "批处理【" + var3 + "】正在运行,无法重复调用");
-         this.a(var2, var4);
+      } else if (BatchStatus.started == batch.getStatus()) {
+         this.markFailed(batchResult, "批处理【" + text + "】正在运行,无法重复调用");
+         this.writeObjectToJson(httpServletResponse, batchResult);
          return false;
       } else {
-         if (var5.isRestSecurityEnable()) {
-            String var6 = var1.getHeader("Username");
-            String var7 = var1.getHeader("Password");
-            if (!var5.getRestSecurityUser().equals(var6) || !var5.getRestSecurityPassword().equals(var7)) {
-               this.a(var4, "批处理【" + var3 + "】需要用户名密码验证，请正确提供用户名密码信息");
-               this.a(var2, var4);
+         if (batch.isRestSecurityEnable()) {
+            String header = httpServletRequest.getHeader("Username");
+            String header2 = httpServletRequest.getHeader("Password");
+            if (!batch.getRestSecurityUser().equals(header) || !batch.getRestSecurityPassword().equals(header2)) {
+               this.markFailed(batchResult, "批处理【" + text + "】需要用户名密码验证，请正确提供用户名密码信息");
+               this.writeObjectToJson(httpServletResponse, batchResult);
                return false;
             }
          }
@@ -135,138 +136,138 @@ public class BatchServletHandler extends AnonymousServletHandler {
       }
    }
 
-   private void a(Batch var1, HttpServletRequest var2, HttpServletResponse var3) throws Exception {
-      HashMap var4 = new HashMap();
-      var4.put("security", var1.isRestSecurityEnable());
-      var4.put("username", var1.getRestSecurityUser());
-      var4.put("password", var1.getRestSecurityPassword());
-      String var5 = var2.getRequestURL().toString();
-      var5 = Utils.decodeURL(var5);
-      var4.put("url", var5);
-      ObjectMapper var6 = new ObjectMapper();
-      HashMap var7 = new HashMap();
+   private void writeMockRequest(Batch batch, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("security", batch.isRestSecurityEnable());
+      valuesByKey.put("username", batch.getRestSecurityUser());
+      valuesByKey.put("password", batch.getRestSecurityPassword());
+      String text = httpServletRequest.getRequestURL().toString();
+      text = Utils.decodeURL(text);
+      valuesByKey.put("url", text);
+      ObjectMapper objectMapper = new ObjectMapper();
+      HashMap valuesByKey2 = new HashMap();
 
-      for(DataParam var9 : (Iterable<DataParam>)(Iterable<?>)(var1.getParams())) {
-         String var10 = var9.getName();
-         String var11 = var9.getDataType();
-         if (var11 == null) {
-            var7.put(var10, "");
-         } else if (var11.equals("String")) {
-            var7.put(var10, "");
-         } else if (var11.equals("Integer")) {
-            var7.put(var10, 0);
-         } else if (var11.equals("Char")) {
-            var7.put(var10, 0);
-         } else if (var11.equals("Double")) {
-            var7.put(var10, 0);
-         } else if (var11.equals("Long")) {
-            var7.put(var10, 0);
-         } else if (var11.equals("Float")) {
-            var7.put(var10, 0);
-         } else if (var11.equals("BigDecimal")) {
-            var7.put(var10, 0);
-         } else if (var11.equals("Boolean")) {
-            var7.put(var10, false);
-         } else if (var11.equals("Date")) {
-            var7.put(var10, "2020-01-01 12:12:12");
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batch.getParams())) {
+         String name = dataParam.getName();
+         String dataType = dataParam.getDataType();
+         if (dataType == null) {
+            valuesByKey2.put(name, "");
+         } else if (dataType.equals("String")) {
+            valuesByKey2.put(name, "");
+         } else if (dataType.equals("Integer")) {
+            valuesByKey2.put(name, 0);
+         } else if (dataType.equals("Char")) {
+            valuesByKey2.put(name, 0);
+         } else if (dataType.equals("Double")) {
+            valuesByKey2.put(name, 0);
+         } else if (dataType.equals("Long")) {
+            valuesByKey2.put(name, 0);
+         } else if (dataType.equals("Float")) {
+            valuesByKey2.put(name, 0);
+         } else if (dataType.equals("BigDecimal")) {
+            valuesByKey2.put(name, 0);
+         } else if (dataType.equals("Boolean")) {
+            valuesByKey2.put(name, false);
+         } else if (dataType.equals("Date")) {
+            valuesByKey2.put(name, "2020-01-01 12:12:12");
          } else {
-            var7.put(var10, "");
+            valuesByKey2.put(name, "");
          }
       }
 
-      String var13 = var6.writeValueAsString(var7);
-      var4.put("input", var13);
-      this.a(var3, var4);
+      String text2 = objectMapper.writeValueAsString(valuesByKey2);
+      valuesByKey.put("input", text2);
+      this.writeObjectToJson(httpServletResponse, valuesByKey);
    }
 
-   private Map b() {
-      HashMap var1 = new HashMap();
-      var1.put("clazz", BatchResult.class.getName());
-      ArrayList var2 = new ArrayList();
-      HashMap var3 = new HashMap();
-      var3.put("name", "batchId");
-      var3.put("label", "批处理ID");
-      var3.put("dataType", "Long");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "batchName");
-      var3.put("label", "批处理名称");
-      var3.put("dataType", "String");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "startTime");
-      var3.put("label", "开始时间");
-      var3.put("dataType", "DateTime");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "endTime");
-      var3.put("label", "结束时间");
-      var3.put("dataType", "DateTime");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "ip");
-      var3.put("label", "IP");
-      var3.put("dataType", "String");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "readCount");
-      var3.put("label", "读取的记录总数");
-      var3.put("dataType", "Integer");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "filterCount");
-      var3.put("label", "过滤记录数");
-      var3.put("dataType", "Integer");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "status");
-      var3.put("label", "状态");
-      var3.put("dataType", "String");
-      var2.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "msg");
-      var3.put("label", "信息");
-      var3.put("dataType", "String");
-      var2.add(var3);
-      ArrayList var4 = new ArrayList();
-      HashMap var5 = new HashMap();
-      var5.put("name", "itemResults");
-      var5.put("label", "保存项明细");
-      var5.put("dataType", "String");
-      var3 = new HashMap();
-      var3.put("name", "name");
-      var3.put("label", "保存项名称");
-      var3.put("dataType", "String");
-      var4.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "readCount");
-      var3.put("label", "读取的记录总数");
-      var3.put("dataType", "Integer");
-      var4.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "filterCount");
-      var3.put("label", "过滤记录数");
-      var3.put("dataType", "Integer");
-      var4.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "writeCount");
-      var3.put("label", "写入记录总数");
-      var3.put("dataType", "Integer");
-      var4.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "tableName");
-      var3.put("label", "物理表");
-      var3.put("dataType", "String");
-      var4.add(var3);
-      var3 = new HashMap();
-      var3.put("name", "updateMode");
-      var3.put("label", "更新类型");
-      var3.put("dataType", "String");
-      var4.add(var3);
-      var5.put("fields", var4);
-      var2.add(var5);
-      var1.put("fields", var2);
-      return var1;
+   private Map buildValuesByKey() {
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("clazz", BatchResult.class.getName());
+      ArrayList items = new ArrayList();
+      HashMap valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "batchId");
+      valuesByKey2.put("label", "批处理ID");
+      valuesByKey2.put("dataType", "Long");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "batchName");
+      valuesByKey2.put("label", "批处理名称");
+      valuesByKey2.put("dataType", "String");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "startTime");
+      valuesByKey2.put("label", "开始时间");
+      valuesByKey2.put("dataType", "DateTime");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "endTime");
+      valuesByKey2.put("label", "结束时间");
+      valuesByKey2.put("dataType", "DateTime");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "ip");
+      valuesByKey2.put("label", "IP");
+      valuesByKey2.put("dataType", "String");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "readCount");
+      valuesByKey2.put("label", "读取的记录总数");
+      valuesByKey2.put("dataType", "Integer");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "filterCount");
+      valuesByKey2.put("label", "过滤记录数");
+      valuesByKey2.put("dataType", "Integer");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "status");
+      valuesByKey2.put("label", "状态");
+      valuesByKey2.put("dataType", "String");
+      items.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "msg");
+      valuesByKey2.put("label", "信息");
+      valuesByKey2.put("dataType", "String");
+      items.add(valuesByKey2);
+      ArrayList items2 = new ArrayList();
+      HashMap valuesByKey3 = new HashMap();
+      valuesByKey3.put("name", "itemResults");
+      valuesByKey3.put("label", "保存项明细");
+      valuesByKey3.put("dataType", "String");
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "name");
+      valuesByKey2.put("label", "保存项名称");
+      valuesByKey2.put("dataType", "String");
+      items2.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "readCount");
+      valuesByKey2.put("label", "读取的记录总数");
+      valuesByKey2.put("dataType", "Integer");
+      items2.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "filterCount");
+      valuesByKey2.put("label", "过滤记录数");
+      valuesByKey2.put("dataType", "Integer");
+      items2.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "writeCount");
+      valuesByKey2.put("label", "写入记录总数");
+      valuesByKey2.put("dataType", "Integer");
+      items2.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "tableName");
+      valuesByKey2.put("label", "物理表");
+      valuesByKey2.put("dataType", "String");
+      items2.add(valuesByKey2);
+      valuesByKey2 = new HashMap();
+      valuesByKey2.put("name", "updateMode");
+      valuesByKey2.put("label", "更新类型");
+      valuesByKey2.put("dataType", "String");
+      items2.add(valuesByKey2);
+      valuesByKey3.put("fields", items2);
+      items.add(valuesByKey3);
+      valuesByKey.put("fields", items);
+      return valuesByKey;
    }
 
    public String url() {

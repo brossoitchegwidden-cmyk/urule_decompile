@@ -3,8 +3,8 @@ package com.bstek.urule.dsl;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RuleParserParser$DecisionTableCellConditionContext extends ParserRuleContext {
-   public RuleParserParser$DecisionTableCellConditionContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$DecisionTableCellConditionContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
@@ -14,7 +14,7 @@ public class RuleParserParser$DecisionTableCellConditionContext extends ParserRu
    public RuleParserParser$DecisionTableCellConditionContext() {
    }
 
-   public void copyFrom(RuleParserParser$DecisionTableCellConditionContext var1) {
-      super.copyFrom(var1);
+   public void copyFrom(RuleParserParser$DecisionTableCellConditionContext ruleParserParser$DecisionTableCellConditionContext) {
+      super.copyFrom(ruleParserParser$DecisionTableCellConditionContext);
    }
 }

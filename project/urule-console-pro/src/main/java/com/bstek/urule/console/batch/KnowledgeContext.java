@@ -4,27 +4,27 @@ import com.bstek.urule.runtime.KnowledgeSession;
 import java.util.Map;
 
 public class KnowledgeContext {
-   private Map a;
-   private KnowledgeSession b;
+   private Map params;
+   private KnowledgeSession session;
 
-   public KnowledgeContext(KnowledgeSession var1, Map var2) {
-      this.b = var1;
-      this.a = var2;
+   public KnowledgeContext(KnowledgeSession session, Map params) {
+      this.session = session;
+      this.params = params;
    }
 
    public Map getParams() {
-      return this.a;
+      return this.params;
    }
 
-   public void setParams(Map var1) {
-      this.a = var1;
+   public void setParams(Map params) {
+      this.params = params;
    }
 
    public KnowledgeSession getSession() {
-      return this.b;
+      return this.session;
    }
 
-   public void setSession(KnowledgeSession var1) {
-      this.b = var1;
+   public void setSession(KnowledgeSession session) {
+      this.session = session;
    }
 }

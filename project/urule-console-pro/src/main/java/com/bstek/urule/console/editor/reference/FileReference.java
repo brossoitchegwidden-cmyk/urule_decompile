@@ -5,76 +5,76 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileReference {
-   private long a;
-   private long b;
-   private String c;
-   private String d;
-   private String e;
-   private boolean f = true;
-   private ResourceType g;
-   private List h;
+   private long id;
+   private long projectId;
+   private String name;
+   private String version;
+   private String pathInfo;
+   private boolean expand = true;
+   private ResourceType type;
+   private List children;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getProjectId() {
-      return this.b;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.b = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getVersion() {
-      return this.d;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.d = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getPathInfo() {
-      return this.e;
+      return this.pathInfo;
    }
 
-   public void setPathInfo(String var1) {
-      this.e = var1;
+   public void setPathInfo(String pathInfo) {
+      this.pathInfo = pathInfo;
    }
 
    public boolean isExpand() {
-      return this.f;
+      return this.expand;
    }
 
-   public void setExpand(boolean var1) {
-      this.f = var1;
+   public void setExpand(boolean expand) {
+      this.expand = expand;
    }
 
    public ResourceType getType() {
-      return this.g;
+      return this.type;
    }
 
-   public void setType(ResourceType var1) {
-      this.g = var1;
+   public void setType(ResourceType type) {
+      this.type = type;
    }
 
    public List getChildren() {
-      return (List)(this.h == null ? new ArrayList() : this.h);
+      return (List)(this.children == null ? new ArrayList() : this.children);
    }
 
-   public void setChildren(List var1) {
-      this.h = var1;
+   public void setChildren(List children) {
+      this.children = children;
    }
 }

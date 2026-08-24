@@ -8,111 +8,100 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractWorkingMemory implements WorkingMemory {
-   protected LogManager a;
-   protected FactManager b;
-   protected RuleExecution c;
-   protected KnowledgeSession d;
-   protected Map<String, Object> e = new HashMap<>();
-   protected Map<String, Object> f = new HashMap<>();
-   protected Map<String, KnowledgeSession> g = new HashMap<>();
+   protected LogManager logManager;
+   protected FactManager factManager;
+   protected RuleExecution ruleExecution;
+   protected KnowledgeSession knowledgeSession;
+   protected Map<String, Object> predefineValueMap = new HashMap<>();
+   protected Map<String, Object> sessionValueMap = new HashMap<>();
+   protected Map<String, KnowledgeSession> knowledgeSessionMap = new HashMap<>();
 
-   public Object getPredefineValue(String var1) {
-      return this.e.get(var1);
+   public Object getPredefineValue(String predefineUuid) {
+      return this.predefineValueMap.get(predefineUuid);
    }
 
-   public void setPredefineValue(String var1, Object var2) {
-      this.e.put(var1, var2);
+   public void setPredefineValue(String predefineUuid, Object value) {
+      this.predefineValueMap.put(predefineUuid, value);
    }
 
    public Map<String, Object> getPredefineValueMap() {
-      return this.e;
+      return this.predefineValueMap;
    }
 
    @Override
    public Map<String, Object> getParameters() {
-      return this.b.getParameters();
+      return this.factManager.getParameters();
    }
-
    @Override
-   public boolean insert(Object var1) {
-      return this.b.insert(var1);
+   public boolean insert(Object fact) {
+      return this.factManager.insert(fact);
    }
-
    @Override
-   public boolean update(Object var1) {
-      this.c.reevaluationRete(var1);
+   public boolean update(Object obj) {
+      this.ruleExecution.reevaluationRete(obj);
       return true;
    }
-
    @Override
-   public Object getParameter(String var1) {
-      return this.b.getParameters().get(var1);
+   public Object getParameter(String key) {
+      return this.factManager.getParameters().get(key);
    }
 
    @Override
    public Map<String, Object> getAllFactsMap() {
-      return this.b.getFactMap();
+      return this.factManager.getFactMap();
    }
 
    @Override
    public List<Object> getFactList() {
-      return this.b.getFactList();
+      return this.factManager.getFactList();
    }
-
    @Override
-   public KnowledgeSession getKnowledgeSession(String var1) {
-      return this.g.get(var1);
+   public KnowledgeSession getKnowledgeSession(String id) {
+      return this.knowledgeSessionMap.get(id);
    }
-
    @Override
-   public void putKnowledgeSession(String var1, KnowledgeSession var2) {
-      if (this.g.containsKey(var1)) {
-         this.g.put(var1, var2);
+   public void putKnowledgeSession(String id, KnowledgeSession session) {
+      if (this.knowledgeSessionMap.containsKey(id)) {
+         this.knowledgeSessionMap.put(id, session);
       }
    }
-
    @Override
-   public Object getSessionValue(String var1) {
-      return this.f.get(var1);
+   public Object getSessionValue(String key) {
+      return this.sessionValueMap.get(key);
    }
-
    @Override
-   public void setSessionValue(String var1, Object var2) {
-      this.f.put(var1, var2);
+   public void setSessionValue(String key, Object value) {
+      this.sessionValueMap.put(key, value);
    }
 
    @Override
    public Map<String, Object> getSessionValueMap() {
-      return this.f;
+      return this.sessionValueMap;
    }
-
    @Override
-   public void activeRule(String var1, String var2) {
-      this.c.getAgenda().activeMutexGroupRule(var1, var2);
+   public void activeRule(String mutexGroupName, String ruleName) {
+      this.ruleExecution.getAgenda().activeMutexGroupRule(mutexGroupName, ruleName);
    }
-
    @Override
-   public void activePendedGroup(String var1) {
-      this.c.getAgenda().activePendedGroup(var1);
+   public void activePendedGroup(String groupName) {
+      this.ruleExecution.getAgenda().activePendedGroup(groupName);
    }
-
    @Override
-   public void activePendedGroupAndExecute(String var1) {
-      this.c.getAgenda().activePendedGroupAndExecute(var1);
+   public void activePendedGroupAndExecute(String groupName) {
+      this.ruleExecution.getAgenda().activePendedGroupAndExecute(groupName);
    }
-
    @Override
    public Context getContext() {
-      return this.c.getAgenda().getContext();
+      return this.ruleExecution.getAgenda().getContext();
    }
 
    @Override
    public FactManager getFactManager() {
-      return this.b;
+      return this.factManager;
    }
 
    @Override
    public LogManager getLogManager() {
-      return this.a;
+      return this.logManager;
    }
 }

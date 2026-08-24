@@ -7,220 +7,223 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Stack;
 
+/**
+ * Builds and evaluates a value expression from operands and arithmetic operators.
+ */
 public class ValueBuilder {
-   private Stack<Object> a = new Stack<>();
+   private Stack<Object> stack = new Stack<>();
 
    public ValueWrapper build() {
-      ValueWrapper var1 = (ValueWrapper)this.a.firstElement();
-      this.a.removeElementAt(0);
+      ValueWrapper valueWrapper = (ValueWrapper)this.stack.firstElement();
+      this.stack.removeElementAt(0);
 
-      while (!this.a.isEmpty()) {
-         ArithmeticType var2 = (ArithmeticType)this.a.firstElement();
-         this.a.removeElementAt(0);
-         if (this.a.isEmpty()) {
+      while (!this.stack.isEmpty()) {
+         ArithmeticType arithmeticType = (ArithmeticType)this.stack.firstElement();
+         this.stack.removeElementAt(0);
+         if (this.stack.isEmpty()) {
             throw new RuleException("表达式不合法！");
          }
 
-         ValueWrapper var3 = (ValueWrapper)this.a.firstElement();
-         this.a.removeElementAt(0);
-         var1 = this.a(var1, var3, var2);
+         ValueWrapper rightValue = (ValueWrapper)this.stack.firstElement();
+         this.stack.removeElementAt(0);
+         valueWrapper = this.compute(valueWrapper, rightValue, arithmeticType);
       }
 
-      return var1;
+      return valueWrapper;
    }
 
-   private ValueWrapper a(ValueWrapper var1, ValueWrapper var2, ArithmeticType var3) {
-      BigDecimal var4 = var1.getBigDecimalValue();
-      BigDecimal var5 = var2.getBigDecimalValue();
-      if (!var3.equals(ArithmeticType.Add) || var4 != null && var5 != null) {
-         if (!var3.equals(ArithmeticType.Eq) || var4 != null && var5 != null) {
-            if (!var3.equals(ArithmeticType.NotEq) || var4 != null && var5 != null) {
-               if (var4 == null) {
-                  String var21 = var1.getValueId();
-                  if (var21 != null) {
-                     throw new RuleException("表达式 [" + var21 + "]的值[" + var1.getOriginalValue() + "] 不能转换为数字!");
+   private ValueWrapper compute(ValueWrapper leftValue, ValueWrapper rightValue, ArithmeticType arithmeticType) {
+      BigDecimal leftDecimal = leftValue.getBigDecimalValue();
+      BigDecimal rightDecimal = rightValue.getBigDecimalValue();
+      if (!arithmeticType.equals(ArithmeticType.Add) || leftDecimal != null && rightDecimal != null) {
+         if (!arithmeticType.equals(ArithmeticType.Eq) || leftDecimal != null && rightDecimal != null) {
+            if (!arithmeticType.equals(ArithmeticType.NotEq) || leftDecimal != null && rightDecimal != null) {
+               if (leftDecimal == null) {
+                  String valueId = leftValue.getValueId();
+                  if (valueId != null) {
+                     throw new RuleException("表达式 [" + valueId + "]的值[" + leftValue.getOriginalValue() + "] 不能转换为数字!");
                   } else {
-                     throw new RuleException("表达式 [" + var1.getOriginalValue() + "] 不能转换为数字!");
+                     throw new RuleException("表达式 [" + leftValue.getOriginalValue() + "] 不能转换为数字!");
                   }
-               } else if (var5 == null) {
-                  String var20 = var2.getValueId();
-                  if (var20 != null) {
-                     throw new RuleException("表达式 [" + var20 + "]的值[" + var2.getOriginalValue() + "] 不能转换为数字!");
+               } else if (rightDecimal == null) {
+                  String valueId = rightValue.getValueId();
+                  if (valueId != null) {
+                     throw new RuleException("表达式 [" + valueId + "]的值[" + rightValue.getOriginalValue() + "] 不能转换为数字!");
                   } else {
-                     throw new RuleException("表达式 [" + var2.getOriginalValue() + "] 不能转换为数字!");
+                     throw new RuleException("表达式 [" + rightValue.getOriginalValue() + "] 不能转换为数字!");
                   }
                } else {
-                  switch (var3) {
+                  switch (arithmeticType) {
                      case Add:
-                        BigDecimal var19 = var4.add(var5);
-                        return new ValueWrapper(var19, var19, null);
+                        BigDecimal result = leftDecimal.add(rightDecimal);
+                        return new ValueWrapper(result, result, null);
                      case Div:
-                        BigDecimal var7 = var4.divide(var5, 32, RoundingMode.HALF_UP);
-                        return new ValueWrapper(var7, var7, null);
+                        result = leftDecimal.divide(rightDecimal, 32, RoundingMode.HALF_UP);
+                        return new ValueWrapper(result, result, null);
                      case Mod:
-                        BigDecimal var8 = var4.divideAndRemainder(var5)[1];
-                        return new ValueWrapper(var8, var8, null);
+                        result = leftDecimal.divideAndRemainder(rightDecimal)[1];
+                        return new ValueWrapper(result, result, null);
                      case Mul:
-                        BigDecimal var9 = var4.multiply(var5);
-                        return new ValueWrapper(var9, var9, null);
+                        result = leftDecimal.multiply(rightDecimal);
+                        return new ValueWrapper(result, result, null);
                      case Sub:
-                        BigDecimal var10 = var4.subtract(var5);
-                        return new ValueWrapper(var10, var10, null);
+                        result = leftDecimal.subtract(rightDecimal);
+                        return new ValueWrapper(result, result, null);
                      case Eq:
-                        boolean var11 = this.e(var4, var5);
-                        return new ValueWrapper(var11, null);
+                        boolean matches = this.equalsValue(leftDecimal, rightDecimal);
+                        return new ValueWrapper(matches, null);
                      case NotEq:
-                        boolean var12 = this.e(var4, var5);
-                        return new ValueWrapper(!var12, null);
+                        matches = this.equalsValue(leftDecimal, rightDecimal);
+                        return new ValueWrapper(!matches, null);
                      case Gt:
-                        boolean var13 = this.b(var4, var5);
-                        return new ValueWrapper(var13, null);
+                        matches = this.greaterThan(leftDecimal, rightDecimal);
+                        return new ValueWrapper(matches, null);
                      case Gte:
-                        boolean var14 = this.a(var4, var5);
-                        return new ValueWrapper(var14, null);
+                        matches = this.greaterThanOrEqual(leftDecimal, rightDecimal);
+                        return new ValueWrapper(matches, null);
                      case Lt:
-                        boolean var15 = this.d(var4, var5);
-                        return new ValueWrapper(var15, null);
+                        matches = this.lessThan(leftDecimal, rightDecimal);
+                        return new ValueWrapper(matches, null);
                      case Lte:
-                        boolean var16 = this.c(var4, var5);
-                        return new ValueWrapper(var16, null);
+                        matches = this.lessThanOrEqual(leftDecimal, rightDecimal);
+                        return new ValueWrapper(matches, null);
                      default:
-                        throw new RuleException("Unknow operator " + var3);
+                        throw new RuleException("Unknow operator " + arithmeticType);
                   }
                }
             } else {
-               boolean var18 = var1.originalValueToString().equals(var2.originalValueToString());
-               return new ValueWrapper(!var18, null);
+               boolean matches = leftValue.originalValueToString().equals(rightValue.originalValueToString());
+               return new ValueWrapper(!matches, null);
             }
          } else {
-            boolean var17 = var1.originalValueToString().equals(var2.originalValueToString());
-            return new ValueWrapper(var17, null);
+            boolean matches = leftValue.originalValueToString().equals(rightValue.originalValueToString());
+            return new ValueWrapper(matches, null);
          }
       } else {
-         String var6 = var1.originalValueToString() + var2.originalValueToString();
-         return new ValueWrapper(var6, null);
+         String text = leftValue.originalValueToString() + rightValue.originalValueToString();
+         return new ValueWrapper(text, null);
       }
    }
 
-   private boolean a(Object var1, Object var2) {
-      if (var1 == null && var2 == null) {
+   private boolean greaterThanOrEqual(Object leftValue, Object rightValue) {
+      if (leftValue == null && rightValue == null) {
          return true;
       }
 
-      if (var1 == null && var2 != null) {
+      if (leftValue == null && rightValue != null) {
          return false;
       }
 
-      if (var1 != null && var2 == null) {
+      if (leftValue != null && rightValue == null) {
          return false;
       }
 
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return var3.compareTo(var4) > -1;
+      BigDecimal leftDecimal = Utils.toBigDecimal(leftValue);
+      BigDecimal rightDecimal = Utils.toBigDecimal(rightValue);
+      return leftDecimal.compareTo(rightDecimal) > -1;
    }
 
-   private boolean b(Object var1, Object var2) {
-      if (var1 == null && var2 == null) {
+   private boolean greaterThan(Object leftValue, Object rightValue) {
+      if (leftValue == null && rightValue == null) {
          return true;
       }
 
-      if (var1 == null && var2 != null) {
+      if (leftValue == null && rightValue != null) {
          return false;
       }
 
-      if (var1 != null && var2 == null) {
+      if (leftValue != null && rightValue == null) {
          return false;
       }
 
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return var3.compareTo(var4) == 1;
+      BigDecimal leftDecimal = Utils.toBigDecimal(leftValue);
+      BigDecimal rightDecimal = Utils.toBigDecimal(rightValue);
+      return leftDecimal.compareTo(rightDecimal) == 1;
    }
 
-   private boolean c(Object var1, Object var2) {
-      if (var1 == null && var2 == null) {
+   private boolean lessThanOrEqual(Object leftValue, Object rightValue) {
+      if (leftValue == null && rightValue == null) {
          return true;
       }
 
-      if (var1 == null && var2 != null) {
+      if (leftValue == null && rightValue != null) {
          return false;
       }
 
-      if (var1 != null && var2 == null) {
+      if (leftValue != null && rightValue == null) {
          return false;
       }
 
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return var3.compareTo(var4) < 1;
+      BigDecimal leftDecimal = Utils.toBigDecimal(leftValue);
+      BigDecimal rightDecimal = Utils.toBigDecimal(rightValue);
+      return leftDecimal.compareTo(rightDecimal) < 1;
    }
 
-   private boolean d(Object var1, Object var2) {
-      if (var1 == null && var2 == null) {
+   private boolean lessThan(Object leftValue, Object rightValue) {
+      if (leftValue == null && rightValue == null) {
          return true;
       }
 
-      if (var1 == null && var2 != null) {
+      if (leftValue == null && rightValue != null) {
          return false;
       }
 
-      if (var1 != null && var2 == null) {
+      if (leftValue != null && rightValue == null) {
          return false;
       }
 
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return var3.compareTo(var4) == -1;
+      BigDecimal leftDecimal = Utils.toBigDecimal(leftValue);
+      BigDecimal rightDecimal = Utils.toBigDecimal(rightValue);
+      return leftDecimal.compareTo(rightDecimal) == -1;
    }
 
-   private boolean e(Object var1, Object var2) {
-      if (var1 == null && var2 == null) {
+   private boolean equalsValue(Object leftValue, Object rightValue) {
+      if (leftValue == null && rightValue == null) {
          return true;
       }
 
-      if (var1 == null && var2 != null) {
+      if (leftValue == null && rightValue != null) {
          return false;
       }
 
-      if (var1 != null && var2 == null) {
+      if (leftValue != null && rightValue == null) {
          return false;
       }
 
       try {
-         BigDecimal var3 = Utils.toBigDecimal(var1);
-         BigDecimal var4 = Utils.toBigDecimal(var2);
-         return var3.compareTo(var4) == 0;
-      } catch (Exception var5) {
-         return var1.toString().equals(var2.toString());
+         BigDecimal leftDecimal = Utils.toBigDecimal(leftValue);
+         BigDecimal rightDecimal = Utils.toBigDecimal(rightValue);
+         return leftDecimal.compareTo(rightDecimal) == 0;
+      } catch (Exception exception) {
+         return leftValue.toString().equals(rightValue.toString());
       }
    }
 
-   public void addValue(Object var1) {
-      if (!this.a.isEmpty()) {
-         Object var2 = this.a.peek();
-         if (var2 instanceof ValueWrapper) {
-            if (var1 instanceof ValueWrapper) {
+   public void addValue(Object obj) {
+      if (!this.stack.isEmpty()) {
+         Object objectValue = this.stack.peek();
+         if (objectValue instanceof ValueWrapper) {
+            if (obj instanceof ValueWrapper) {
                throw new RuleException("表达式不合法！");
             }
          } else {
-            if (var1 instanceof ArithmeticType) {
+            if (obj instanceof ArithmeticType) {
                throw new RuleException("表达式不合法！");
             }
 
-            ArithmeticType var3 = (ArithmeticType)var2;
-            if (!var3.equals(ArithmeticType.Add) && !var3.equals(ArithmeticType.Sub)) {
-               this.a.pop();
-               ValueWrapper var4 = (ValueWrapper)this.a.pop();
-               ValueWrapper var5 = (ValueWrapper)var1;
-               var1 = this.a(var4, var5, var3);
-            } else if (this.a.size() > 2) {
+            ArithmeticType arithmeticType = (ArithmeticType)objectValue;
+            if (!arithmeticType.equals(ArithmeticType.Add) && !arithmeticType.equals(ArithmeticType.Sub)) {
+               this.stack.pop();
+               ValueWrapper valueWrapper = (ValueWrapper)this.stack.pop();
+               ValueWrapper rightValue = (ValueWrapper)obj;
+               obj = this.compute(valueWrapper, rightValue, arithmeticType);
+            } else if (this.stack.size() > 2) {
             }
          }
-      } else if (var1 instanceof ArithmeticType) {
+      } else if (obj instanceof ArithmeticType) {
          throw new RuleException("表达式不合法！");
       }
 
-      this.a.push(var1);
+      this.stack.push(obj);
    }
 }

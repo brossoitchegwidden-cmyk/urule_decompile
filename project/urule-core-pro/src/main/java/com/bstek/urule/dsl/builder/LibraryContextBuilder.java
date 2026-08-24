@@ -7,27 +7,27 @@ import com.bstek.urule.model.rule.LibraryType;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class LibraryContextBuilder extends AbstractContextBuilder {
-   public Library build(ParserRuleContext var1) {
-      RuleParserParser$ResourceContext var2 = (RuleParserParser$ResourceContext)var1;
-      if (var2.importActionLibrary() != null) {
-         String var6 = BuildUtils.getSTRINGContent(var2.importActionLibrary().STRING());
-         return new Library(-1L, var6, null, LibraryType.Action);
-      } else if (var2.importConstantLibrary() != null) {
-         String var5 = BuildUtils.getSTRINGContent(var2.importConstantLibrary().STRING());
-         return new Library(-1L, var5, null, LibraryType.Constant);
-      } else if (var2.importVariableLibrary() != null) {
-         String var4 = BuildUtils.getSTRINGContent(var2.importVariableLibrary().STRING());
-         return new Library(-1L, var4, null, LibraryType.Variable);
-      } else if (var2.importParameterLibrary() != null) {
-         String var3 = BuildUtils.getSTRINGContent(var2.importParameterLibrary().STRING());
-         return new Library(-1L, var3, null, LibraryType.Parameter);
+   public Library build(ParserRuleContext context) {
+      RuleParserParser$ResourceContext ruleParserParser$ResourceContext = (RuleParserParser$ResourceContext)context;
+      if (ruleParserParser$ResourceContext.importActionLibrary() != null) {
+         String sTRINGContent = BuildUtils.getSTRINGContent(ruleParserParser$ResourceContext.importActionLibrary().STRING());
+         return new Library(-1L, sTRINGContent, null, LibraryType.Action);
+      } else if (ruleParserParser$ResourceContext.importConstantLibrary() != null) {
+         String sTRINGContent2 = BuildUtils.getSTRINGContent(ruleParserParser$ResourceContext.importConstantLibrary().STRING());
+         return new Library(-1L, sTRINGContent2, null, LibraryType.Constant);
+      } else if (ruleParserParser$ResourceContext.importVariableLibrary() != null) {
+         String sTRINGContent3 = BuildUtils.getSTRINGContent(ruleParserParser$ResourceContext.importVariableLibrary().STRING());
+         return new Library(-1L, sTRINGContent3, null, LibraryType.Variable);
+      } else if (ruleParserParser$ResourceContext.importParameterLibrary() != null) {
+         String sTRINGContent4 = BuildUtils.getSTRINGContent(ruleParserParser$ResourceContext.importParameterLibrary().STRING());
+         return new Library(-1L, sTRINGContent4, null, LibraryType.Parameter);
       } else {
-         throw new RuleException("Unsupport context " + var2.getClass().getName() + "");
+         throw new RuleException("Unsupport context " + ruleParserParser$ResourceContext.getClass().getName() + "");
       }
    }
 
    @Override
-   public boolean support(ParserRuleContext var1) {
-      return var1 instanceof RuleParserParser$ResourceContext;
+   public boolean support(ParserRuleContext context) {
+      return context instanceof RuleParserParser$ResourceContext;
    }
 }

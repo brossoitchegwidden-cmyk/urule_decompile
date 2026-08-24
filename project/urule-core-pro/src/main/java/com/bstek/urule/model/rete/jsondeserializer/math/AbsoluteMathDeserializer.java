@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class AbsoluteMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      AbsoluteMath var2 = new AbsoluteMath();
-      JsonNode var3 = var1.get("value");
-      var2.setValue(JsonUtils.parseValueNode(var3));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      AbsoluteMath absoluteMath = new AbsoluteMath();
+      JsonNode jsonNode2 = jsonNode.get("value");
+      absoluteMath.setValue(JsonUtils.parseValueNode(jsonNode2));
+      return absoluteMath;
    }
 
    @Override

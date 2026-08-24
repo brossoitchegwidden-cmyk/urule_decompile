@@ -12,88 +12,88 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ReteNodeJsonDeserializer extends AbstractJsonDeserializer<List<ReteNode>> {
-   public List<ReteNode> deserialize(JsonParser var1, DeserializationContext var2) throws IOException, JsonProcessingException {
-      ObjectCodec var3 = var1.getCodec();
-      JsonNode var4 = (JsonNode)var3.readTree(var1);
-      ArrayList var5 = new ArrayList();
-      Iterator var6 = var4.elements();
+   public List<ReteNode> deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+      ObjectCodec codec = jsonParser.getCodec();
+      JsonNode tree = (JsonNode)codec.readTree(jsonParser);
+      ArrayList deserializeResult = new ArrayList();
+      Iterator iterator = tree.elements();
 
-      while (var6.hasNext()) {
-         JsonNode var7 = (JsonNode)var6.next();
-         int var8 = var7.get("id").intValue();
-         JsonNode var9 = var7.get("nodeType");
-         if (var9 != null) {
-            String var10 = var9.textValue();
-            NodeType var11 = NodeType.valueOf(var10);
-            ReteNode var12 = NodeType.newReteNodeInstance(var11);
-            if (var12 instanceof ObjectTypeNode) {
-               ObjectTypeNode var13 = (ObjectTypeNode)var12;
-               var13.setObjectTypeClass(var7.get("objectTypeClass").textValue());
-               var13.setId(var8);
-            } else if (var12 instanceof AndNode) {
-               AndNode var16 = (AndNode)var12;
-               var16.setId(var8);
-               var16.setToLineCount(var7.get("toLineCount").intValue());
-               var16.setLines(this.parseLines(var7));
-            } else if (var12 instanceof MetNode) {
-               MetNode var17 = (MetNode)var12;
-               var17.setId(var8);
-               var17.setLines(this.parseLines(var7));
-               JsonNode var14 = var7.get("criterions");
-               if (var14 != null) {
-                  var17.setCriterions(JsonUtils.parseCriterions(var14));
+      while (iterator.hasNext()) {
+         JsonNode jsonNode = (JsonNode)iterator.next();
+         int number = jsonNode.get("id").intValue();
+         JsonNode nodeType2 = jsonNode.get("nodeType");
+         if (nodeType2 != null) {
+            String text = nodeType2.textValue();
+            NodeType nodeType = NodeType.valueOf(text);
+            ReteNode reteNode = NodeType.newReteNodeInstance(nodeType);
+            if (reteNode instanceof ObjectTypeNode) {
+               ObjectTypeNode objectTypeNode = (ObjectTypeNode)reteNode;
+               objectTypeNode.setObjectTypeClass(jsonNode.get("objectTypeClass").textValue());
+               objectTypeNode.setId(number);
+            } else if (reteNode instanceof AndNode) {
+               AndNode andNode = (AndNode)reteNode;
+               andNode.setId(number);
+               andNode.setToLineCount(jsonNode.get("toLineCount").intValue());
+               andNode.setLines(this.parseLines(jsonNode));
+            } else if (reteNode instanceof MetNode) {
+               MetNode metNode = (MetNode)reteNode;
+               metNode.setId(number);
+               metNode.setLines(this.parseLines(jsonNode));
+               JsonNode criterions = jsonNode.get("criterions");
+               if (criterions != null) {
+                  metNode.setCriterions(JsonUtils.parseCriterions(criterions));
                }
 
-               JsonNode var15 = var7.get("debug");
-               if (var15 != null) {
-                  var17.setDebug(var15.asBoolean());
+               JsonNode debug = jsonNode.get("debug");
+               if (debug != null) {
+                  metNode.setDebug(debug.asBoolean());
                }
 
-               var17.setMet(Integer.parseInt(JsonUtils.getJsonValue(var7, "met")));
-               var17.setOnly(Boolean.parseBoolean(JsonUtils.getJsonValue(var7, "only")));
-            } else if (var12 instanceof OrNode) {
-               OrNode var18 = (OrNode)var12;
-               var18.setId(var8);
-               var18.setLines(this.parseLines(var7));
-            } else if (var12 instanceof CriteriaNode) {
-               CriteriaNode var19 = (CriteriaNode)var12;
-               var19.setId(var8);
-               JsonNode var21 = var7.get("debug");
-               if (var21 != null) {
-                  var19.setDebug(var21.asBoolean());
+               metNode.setMet(Integer.parseInt(JsonUtils.getJsonValue(jsonNode, "met")));
+               metNode.setOnly(Boolean.parseBoolean(JsonUtils.getJsonValue(jsonNode, "only")));
+            } else if (reteNode instanceof OrNode) {
+               OrNode orNode = (OrNode)reteNode;
+               orNode.setId(number);
+               orNode.setLines(this.parseLines(jsonNode));
+            } else if (reteNode instanceof CriteriaNode) {
+               CriteriaNode criteriaNode = (CriteriaNode)reteNode;
+               criteriaNode.setId(number);
+               JsonNode debug2 = jsonNode.get("debug");
+               if (debug2 != null) {
+                  criteriaNode.setDebug(debug2.asBoolean());
                }
 
-               JsonNode var22 = var7.get("criteria");
-               var19.setCriteria(JsonUtils.parseCriteria(var22));
-               var19.setLines(this.parseLines(var7));
-            } else if (var12 instanceof TerminalNode) {
-               TerminalNode var20 = (TerminalNode)var12;
-               var20.setId(var8);
-               var20.setRule(this.parseRule(var1, var7));
+               JsonNode criteria = jsonNode.get("criteria");
+               criteriaNode.setCriteria(JsonUtils.parseCriteria(criteria));
+               criteriaNode.setLines(this.parseLines(jsonNode));
+            } else if (reteNode instanceof TerminalNode) {
+               TerminalNode terminalNode = (TerminalNode)reteNode;
+               terminalNode.setId(number);
+               terminalNode.setRule(this.parseRule(jsonParser, jsonNode));
             }
 
-            var5.add(var12);
+            deserializeResult.add(reteNode);
          }
       }
 
-      return var5;
+      return deserializeResult;
    }
 
-   private List<Line> parseLines(JsonNode var1) {
-      JsonNode var2 = var1.get("lines");
-      if (var2 == null) {
+   private List<Line> parseLines(JsonNode jsonNode) {
+      JsonNode lines = jsonNode.get("lines");
+      if (lines == null) {
          return null;
       }
 
-      ArrayList var3 = new ArrayList();
+      ArrayList lines2 = new ArrayList();
 
-      for (JsonNode var5 : var2) {
-         Line var6 = new Line();
-         var6.setFromNodeId(var5.get("fromNodeId").intValue());
-         var6.setToNodeId(var5.get("toNodeId").intValue());
-         var3.add(var6);
+      for (JsonNode jsonNode2 : lines) {
+         Line line = new Line();
+         line.setFromNodeId(jsonNode2.get("fromNodeId").intValue());
+         line.setToNodeId(jsonNode2.get("toNodeId").intValue());
+         lines2.add(line);
       }
 
-      return var3;
+      return lines2;
    }
 }

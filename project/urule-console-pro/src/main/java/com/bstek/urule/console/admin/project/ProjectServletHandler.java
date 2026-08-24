@@ -70,27 +70,27 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.util.Base64Utils;
 
 public class ProjectServletHandler extends ApiServletHandler {
-   public void doExport(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("projectId"));
-      Project var5 = ProjectManager.ins.get(var3);
-      User var6 = SecurityUtils.getLoginUser(var1);
-      boolean var7 = AuthenticationManager.decide(var6, RoleCategory.group, GroupModule.projects.toString(), "export");
-      if (!var7) {
-         var7 = AuthenticationManager.decide(var6, RoleCategory.project, ProjectModule.project.toString(), "export");
+   public void doExport(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      Project project = ProjectManager.ins.get(longValue);
+      User loginUser = SecurityUtils.getLoginUser(req);
+      boolean flag = AuthenticationManager.decide(loginUser, RoleCategory.group, GroupModule.projects.toString(), "export");
+      if (!flag) {
+         flag = AuthenticationManager.decide(loginUser, RoleCategory.project, ProjectModule.project.toString(), "export");
       }
 
-      if (!var7) {
-         throw new PermissionDeniedException("Permission denied for project [" + var3 + "]");
+      if (!flag) {
+         throw new PermissionDeniedException("Permission denied for project [" + longValue + "]");
       } else {
-         SimpleDateFormat var8 = new SimpleDateFormat("yyyyMMddHHmmss");
-         String var9 = var5.getName() + "-" + var8.format(new Date()) + ".urule.bak";
-         var2.setContentType("application/octet-stream;charset=ISO8859-1");
-         var9 = new String(var9.getBytes("UTF-8"), "ISO8859-1");
-         var2.setHeader("Content-Disposition", "attachment;filename=\"" + var9 + "\"");
-         ServletOutputStream var10 = var2.getOutputStream();
-         ProjectExport.ins.doExport(var10, var5);
-         var10.flush();
-         var10.close();
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+         String string = project.getName() + "-" + simpleDateFormat.format(new Date()) + ".urule.bak";
+         resp.setContentType("application/octet-stream;charset=ISO8859-1");
+         string = new String(string.getBytes("UTF-8"), "ISO8859-1");
+         resp.setHeader("Content-Disposition", "attachment;filename=\"" + string + "\"");
+         ServletOutputStream outputStream = resp.getOutputStream();
+         ProjectExport.ins.doExport(outputStream, project);
+         outputStream.flush();
+         outputStream.close();
       }
    }
 
@@ -100,138 +100,142 @@ public class ProjectServletHandler extends ApiServletHandler {
       model = "projects",
       code = "import"
    )
-   public void doImport(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      Group var4 = GroupManager.ins.get(var3);
-      UploadFile var5 = FileUtils.uploadFile(var1);
-      InputStream var6 = var5.getInputStream();
-      ConfigInfo var7 = new ConfigInfo();
-      var7.setReplace(Boolean.parseBoolean(var1.getParameter("replace")));
-      var7.setNewPacketCode(Boolean.parseBoolean(var1.getParameter("newPacketCode")));
-      var7.setForceLock(Boolean.parseBoolean(var1.getParameter("forceLock")));
-      (new ProjectImport()).doImport(var6, var4, var7);
-      IOUtils.closeQuietly(var6);
+   public void doImport(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      Group group = GroupManager.ins.get(parameter);
+      UploadFile uploadFile = FileUtils.uploadFile(req);
+      InputStream inputStream = uploadFile.getInputStream();
+      ConfigInfo configInfo = new ConfigInfo();
+      configInfo.setReplace(Boolean.parseBoolean(req.getParameter("replace")));
+      configInfo.setNewPacketCode(Boolean.parseBoolean(req.getParameter("newPacketCode")));
+      configInfo.setForceLock(Boolean.parseBoolean(req.getParameter("forceLock")));
+      (new ProjectImport()).doImport(inputStream, group, configInfo);
+      IOUtils.closeQuietly(inputStream);
    }
 
-   public void list(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      String var4 = var1.getParameter("keyword");
-      String var5 = var1.getParameter("type");
-      String var6 = var1.getParameter("sortByName");
-      String var7 = var1.getParameter("sortByAsc");
-      ProjectQuery var8 = ProjectManager.ins.newQuery();
-      String var9 = SecurityUtils.getLoginUsername(var1);
-      var8.userId(var9);
-      if (StringUtils.isNotBlank(var4)) {
-         var8.nameLike(var4);
+   /**加载项目列表*/
+   public void list(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      String parameter = req.getParameter("keyword");
+      String parameter2 = req.getParameter("type");
+      String parameter3 = req.getParameter("sortByName");
+      String parameter4 = req.getParameter("sortByAsc");
+      ProjectQuery projectQuery = ProjectManager.ins.newQuery();
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      projectQuery.userId(loginUsername);
+      if (StringUtils.isNotBlank(parameter)) {
+         projectQuery.nameLike(parameter);
       }
 
-      if (StringUtils.isNotBlank(var5)) {
-         var8.type(var5);
+      if (StringUtils.isNotBlank(parameter2)) {
+         projectQuery.type(parameter2);
       }
 
-      if (StringUtils.isNotBlank(var3)) {
-         var8.groupId(var3);
+      if (StringUtils.isNotBlank(groupId)) {
+         projectQuery.groupId(groupId);
       }
 
-      if (StringUtils.isNotBlank(var6) && StringUtils.isNotBlank(var7)) {
-         if ("NAME_".equals(var6)) {
-            var8.orderbyName(var7);
+      if (StringUtils.isNotBlank(parameter3) && StringUtils.isNotBlank(parameter4)) {
+         if ("NAME_".equals(parameter3)) {
+            projectQuery.orderbyName(parameter4);
          }
 
-         if ("CREATE_DATE_".equals(var6)) {
-            var8.orderbyCreateDate(var7);
+         if ("CREATE_DATE_".equals(parameter3)) {
+            projectQuery.orderbyCreateDate(parameter4);
          }
       }
 
-      this.a((HttpServletResponse)var2, (Object)var8.list());
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)projectQuery.list());
    }
 
-   public void get(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = ContextHolder.getProjectId();
-      Project var4 = ProjectManager.ins.get(var3);
-      this.a((HttpServletResponse)var2, (Object)var4);
+   /**获取项目对象*/
+   public void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long projectId = ContextHolder.getProjectId();
+      Project project = ProjectManager.ins.get(projectId);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)project);
    }
 
+   /**新增项目*/
    @URuleAuthorization(
       authType = "group",
       model = "projects",
       code = "add"
    )
    @Transactional
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Project var3 = (Project)this.a().readValue(var1.getParameter("project"), Project.class);
-      if (var3.getGroupId().equals(ContextHolder.getGroupId())) {
-         var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-         ProjectService.ins.add(var3);
-         SystemLogUtils.addGroupOperationLog(GroupModule.projects.name(), "add", var3.getId(), String.format("Create project %s[%s]", var3.getName(), var3.getId()));
-         User var4 = SecurityUtils.getLoginUser(var1);
-         ProjectVO var5 = new ProjectVO();
-         BeanUtils.copyProperties(var5, var3);
-         ContextHolder.setProjectId(var3.getId());
-         boolean var6 = AuthenticationManager.decide(var4, RoleCategory.group, GroupModule.projects.toString(), "remove");
-         if (!var6) {
-            var6 = AuthenticationManager.decide(var4, RoleCategory.project, ProjectModule.project.toString(), "remove");
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Project project = (Project)this.createObjectMapper().readValue(req.getParameter("project"), Project.class);
+      if (project.getGroupId().equals(ContextHolder.getGroupId())) {
+         project.setCreateUser(SecurityUtils.getLoginUsername(req));
+         ProjectService.ins.add(project);
+         SystemLogUtils.addGroupOperationLog(GroupModule.projects.name(), "add", project.getId(), String.format("Create project %s[%s]", project.getName(), project.getId()));
+         User loginUser = SecurityUtils.getLoginUser(req);
+         ProjectVO projectVO = new ProjectVO();
+         BeanUtils.copyProperties(projectVO, project);
+         ContextHolder.setProjectId(project.getId());
+         boolean flag = AuthenticationManager.decide(loginUser, RoleCategory.group, GroupModule.projects.toString(), "remove");
+         if (!flag) {
+            flag = AuthenticationManager.decide(loginUser, RoleCategory.project, ProjectModule.project.toString(), "remove");
          }
 
-         var5.setRemoveAble(var6);
-         var6 = AuthenticationManager.decide(var4, RoleCategory.group, GroupModule.projects.toString(), "export");
-         if (!var6) {
-            var6 = AuthenticationManager.decide(var4, RoleCategory.project, ProjectModule.project.toString(), "export");
+         projectVO.setRemoveAble(flag);
+         flag = AuthenticationManager.decide(loginUser, RoleCategory.group, GroupModule.projects.toString(), "export");
+         if (!flag) {
+            flag = AuthenticationManager.decide(loginUser, RoleCategory.project, ProjectModule.project.toString(), "export");
          }
 
-         var5.setExportAble(var6);
-         this.a((HttpServletResponse)var2, (Object)var5);
+         projectVO.setExportAble(flag);
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)projectVO);
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void reload(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      List var3 = ((PacketCacheImpl)PacketCache.ins).recacheAllPackets(var1.getParameter("groupId"));
-      this.a((HttpServletResponse)var2, (Object)var3);
+   /**用于在数据库迁移后重新加载需要缓存的数据*/
+   public void reload(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      List items = ((PacketCacheImpl)PacketCache.ins).recacheAllPackets(req.getParameter("groupId"));
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)items);
    }
 
-   private void a(long var1, boolean var3) {
-      if (!var3) {
-         DirectoryManager.ins.changeGeneral(var1);
+   private void migrateToGeneralView(long longValue, boolean flag) {
+      if (!flag) {
+         DirectoryManager.ins.changeGeneral(longValue);
       } else {
-         HashMap var4 = new HashMap();
-         List var5 = FileService.ins.tree(var1, 0L);
-         String var6 = "";
-         this.a(var5, var6, var4);
-         this.a(var4, var1, RuleFileType.Library);
-         this.a(var4, var1, RuleFileType.RuleSet);
-         this.a(var4, var1, RuleFileType.DecisionTable);
-         this.a(var4, var1, RuleFileType.DecisionTree);
-         this.a(var4, var1, RuleFileType.Scorecard);
-         this.a(var4, var1, RuleFileType.Flow);
-         this.a(var4, var1, RuleFileType.ActionTemplate);
-         this.a(var4, var1, RuleFileType.ConditionTemplate);
-         DirectoryManager.ins.changeGeneral(var1);
+         HashMap valuesByKey = new HashMap();
+         List items = FileService.ins.tree(longValue, 0L);
+         String text = "";
+         this.indexGeneralDirectories(items, text, valuesByKey);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.Library);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.RuleSet);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.DecisionTable);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.DecisionTree);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.Scorecard);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.Flow);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.ActionTemplate);
+         this.mergeTypedDirectories(valuesByKey, longValue, RuleFileType.ConditionTemplate);
+         DirectoryManager.ins.changeGeneral(longValue);
       }
 
    }
 
-   private void a(List var1, String var2, Map var3) {
-      for(RuleFile var5 : (Iterable<RuleFile>)(Iterable<?>)(var1)) {
-         if (var5.isDirectory()) {
-            String var6 = "";
-            String var7 = Base64Utils.encodeToString(var5.getName().trim().getBytes());
-            if (StringUtils.isBlank(var2)) {
-               var6 = var7;
+   private void indexGeneralDirectories(List items, String text, Map valuesByKey) {
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+         if (ruleFile.isDirectory()) {
+            String text2 = "";
+            String text3 = Base64Utils.encodeToString(ruleFile.getName().trim().getBytes());
+            if (StringUtils.isBlank(text)) {
+               text2 = text3;
             } else {
-               var6 = var2 + "." + var7;
+               text2 = text + "." + text3;
             }
 
-            if (!StringUtils.isBlank(var6)) {
-               var5.setPath(var6);
-               if (!var3.containsKey(var6)) {
-                  var3.put(var6, var5);
+            if (!StringUtils.isBlank(text2)) {
+               ruleFile.setPath(text2);
+               if (!valuesByKey.containsKey(text2)) {
+                  valuesByKey.put(text2, ruleFile);
                }
 
-               if (var5.getChildren() != null && var5.getChildren().size() > 0) {
-                  this.a(var5.getChildren(), var6, var3);
+               if (ruleFile.getChildren() != null && ruleFile.getChildren().size() > 0) {
+                  this.indexGeneralDirectories(ruleFile.getChildren(), text2, valuesByKey);
                }
             }
          }
@@ -239,249 +243,257 @@ public class ProjectServletHandler extends ApiServletHandler {
 
    }
 
-   private void a(List var1, String var2) {
-      for(RuleFile var4 : (Iterable<RuleFile>)(Iterable<?>)(var1)) {
-         String var5 = var2;
-         if (var4.isDirectory()) {
-            String var6 = Base64Utils.encodeToString(var4.getName().trim().getBytes());
-            if (StringUtils.isBlank(var2)) {
-               var5 = var6;
+   private void assignEncodedPaths(List items, String text) {
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+         String text2 = text;
+         if (ruleFile.isDirectory()) {
+            String text3 = Base64Utils.encodeToString(ruleFile.getName().trim().getBytes());
+            if (StringUtils.isBlank(text)) {
+               text2 = text3;
             } else {
-               var5 = var2 + "." + var6;
+               text2 = text + "." + text3;
             }
          }
 
-         var4.setPath(var5);
-         if (var4.getChildren() != null && var4.getChildren().size() > 0) {
-            this.a(var4.getChildren(), var5);
+         ruleFile.setPath(text2);
+         if (ruleFile.getChildren() != null && ruleFile.getChildren().size() > 0) {
+            this.assignEncodedPaths(ruleFile.getChildren(), text2);
          }
       }
 
    }
 
-   private void a(Map var1, long var2, RuleFileType var4) {
-      List var5 = FileService.ins.tree(var2, var4);
-      String var6 = "";
-      this.a(var5, var6);
-      this.a(var1, var5);
+   private void mergeTypedDirectories(Map valuesByKey, long longValue, RuleFileType ruleFileType) {
+      List items = FileService.ins.tree(longValue, ruleFileType);
+      String text = "";
+      this.assignEncodedPaths(items, text);
+      this.mergeDirectoryTree(valuesByKey, items);
    }
 
-   private void a(Map var1, List var2) {
-      for(RuleFile var4 : (Iterable<RuleFile>)(Iterable<?>)(var2)) {
-         if (!var4.isDirectory()) {
-            String var10 = var4.getPath();
-            if (StringUtils.isNotBlank(var10)) {
-               RuleFile var12 = (RuleFile)var1.get(var10);
-               FileManager.ins.changeParent(var4.getId(), var12.getId());
+   private void mergeDirectoryTree(Map valuesByKey, List items) {
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+         if (!ruleFile.isDirectory()) {
+            String path = ruleFile.getPath();
+            if (StringUtils.isNotBlank(path)) {
+               RuleFile ruleFile2 = (RuleFile)valuesByKey.get(path);
+               FileManager.ins.changeParent(ruleFile.getId(), ruleFile2.getId());
             }
          } else {
-            if (var1.containsKey(var4.getPath())) {
-               RuleFile var5 = (RuleFile)var1.get(var4.getPath());
-               if (var5.getId() != var4.getId()) {
-                  DirectoryManager.ins.remove(var4.getId());
-                  if (var4.getChildren() != null && var4.getChildren().size() > 0) {
-                     for(RuleFile var7 : (Iterable<RuleFile>)(Iterable<?>)(var4.getChildren())) {
-                        if (var7.isDirectory()) {
-                           DirectoryManager.ins.changeParent(var7.getId(), var5.getId());
+            if (valuesByKey.containsKey(ruleFile.getPath())) {
+               RuleFile ruleFile3 = (RuleFile)valuesByKey.get(ruleFile.getPath());
+               if (ruleFile3.getId() != ruleFile.getId()) {
+                  DirectoryManager.ins.remove(ruleFile.getId());
+                  if (ruleFile.getChildren() != null && ruleFile.getChildren().size() > 0) {
+                     for(RuleFile ruleFile4 : (Iterable<RuleFile>)(Iterable<?>)(ruleFile.getChildren())) {
+                        if (ruleFile4.isDirectory()) {
+                           DirectoryManager.ins.changeParent(ruleFile4.getId(), ruleFile3.getId());
                         } else {
-                           FileManager.ins.changeParent(var7.getId(), var5.getId());
+                           FileManager.ins.changeParent(ruleFile4.getId(), ruleFile3.getId());
                         }
                      }
                   }
                }
             } else {
-               String var8 = var4.getPath();
-               var1.put(var4.getPath(), var4);
-               var8 = var8.substring(0, var8.lastIndexOf("."));
-               RuleFile var11 = (RuleFile)var1.get(var8);
-               DirectoryManager.ins.changeParent(var4.getId(), var11.getId());
+               String substring = ruleFile.getPath();
+               valuesByKey.put(ruleFile.getPath(), ruleFile);
+               substring = substring.substring(0, substring.lastIndexOf("."));
+               RuleFile ruleFile5 = (RuleFile)valuesByKey.get(substring);
+               DirectoryManager.ins.changeParent(ruleFile.getId(), ruleFile5.getId());
             }
 
-            if (var4.getChildren() != null && var4.getChildren().size() > 0) {
-               this.a(var1, var4.getChildren());
+            if (ruleFile.getChildren() != null && ruleFile.getChildren().size() > 0) {
+               this.mergeDirectoryTree(valuesByKey, ruleFile.getChildren());
             }
          }
       }
 
    }
 
-   public void hasTypeFolder(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      boolean var3 = DirectoryManager.ins.hasTypeFolder(ContextHolder.getProjectId());
-      this.a((HttpServletResponse)var2, (Object)var3);
+   public void hasTypeFolder(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      boolean flag = DirectoryManager.ins.hasTypeFolder(ContextHolder.getProjectId());
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)flag);
    }
 
+   /**更新项目*/
    @URuleAuthorization(
       authType = "group",
       model = "projects",
       code = "update"
    )
    @Transactional
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Project var3 = (Project)this.a().readValue(var1.getParameter("project"), Project.class);
-      if (var3.getGroupId().equals(ContextHolder.getGroupId())) {
-         Project var4 = ProjectManager.ins.get(var3.getId());
-         if (!var4.getType().equals(var3.getType())) {
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Project project = (Project)this.createObjectMapper().readValue(req.getParameter("project"), Project.class);
+      if (project.getGroupId().equals(ContextHolder.getGroupId())) {
+         Project project2 = ProjectManager.ins.get(project.getId());
+         if (!project2.getType().equals(project.getType())) {
             throw new ParameterInvaidException();
          } else {
-            var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-            var3.setUpdateDate(new Date());
-            String var5 = var4.getName();
-            String var6 = var3.getName();
-            if (!var5.equals(var6)) {
-               List var7 = ProjectManager.ins.newQuery().groupId(var3.getGroupId()).name(var6).list();
-               if (var7.size() > 0) {
-                  boolean var8 = false;
+            project.setUpdateUser(SecurityUtils.getLoginUsername(req));
+            project.setUpdateDate(new Date());
+            String name = project2.getName();
+            String name2 = project.getName();
+            if (!name.equals(name2)) {
+               List items = ProjectManager.ins.newQuery().groupId(project.getGroupId()).name(name2).list();
+               if (items.size() > 0) {
+                  boolean flag = false;
 
-                  for(Project var10 : (Iterable<Project>)(Iterable<?>)(var7)) {
-                     if (var3.getId() != var10.getId()) {
-                        var8 = true;
+                  for(Project project3 : (Iterable<Project>)(Iterable<?>)(items)) {
+                     if (project.getId() != project3.getId()) {
+                        flag = true;
                      }
                   }
 
-                  if (var8) {
+                  if (flag) {
                      throw new InfoException("项目名称重复.<br/>Duplicate project name.");
                   }
                }
             }
 
-            ProjectService.ins.update(var3);
-            if (var4.getViewModel() != var3.getViewModel() && var3.getViewModel() == ProjectViewModel.general) {
-               boolean var11 = Boolean.parseBoolean(var1.getParameter("mergeSameNameDir"));
-               this.a(var3.getId(), var11);
+            ProjectService.ins.update(project);
+            if (project2.getViewModel() != project.getViewModel() && project.getViewModel() == ProjectViewModel.general) {
+               boolean flag2 = Boolean.parseBoolean(req.getParameter("mergeSameNameDir"));
+               this.migrateToGeneralView(project.getId(), flag2);
             }
 
-            SystemLogUtils.addGroupOperationLog(GroupModule.projects.name(), "update", var3.getId(), String.format("Update project %s[%s]", var3.getName(), var3.getId()));
-            this.a((HttpServletResponse)var2, (Object)var3);
+            SystemLogUtils.addGroupOperationLog(GroupModule.projects.name(), "update", project.getId(), String.format("Update project %s[%s]", project.getName(), project.getId()));
+            this.writeObjectToJson((HttpServletResponse)resp, (Object)project);
          }
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void remove(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      final Long var3 = ContextHolder.getProjectId();
-      Project var4 = ProjectManager.ins.get(var3);
-      User var5 = SecurityUtils.getLoginUser(var1);
-      boolean var6 = AuthenticationManager.decide(var5, RoleCategory.group, GroupModule.projects.toString(), "remove");
-      if (!var6) {
-         var6 = AuthenticationManager.decide(var5, RoleCategory.project, ProjectModule.project.toString(), "remove");
+   /**删除项目*/
+   public void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      final Long projectId = ContextHolder.getProjectId();
+      Project project = ProjectManager.ins.get(projectId);
+      User loginUser = SecurityUtils.getLoginUser(req);
+      boolean flag = AuthenticationManager.decide(loginUser, RoleCategory.group, GroupModule.projects.toString(), "remove");
+      if (!flag) {
+         flag = AuthenticationManager.decide(loginUser, RoleCategory.project, ProjectModule.project.toString(), "remove");
       }
 
-      if (!var6) {
-         throw new PermissionDeniedException("Permission denied for project [" + var3 + "]");
-      } else if (var4.getGroupId().equals(ContextHolder.getGroupId())) {
-         this.a(new TransactionalInvoke() {
+      if (!flag) {
+         throw new PermissionDeniedException("Permission denied for project [" + projectId + "]");
+      } else if (project.getGroupId().equals(ContextHolder.getGroupId())) {
+         this.doInTransactional(new TransactionalInvoke() {
             public void doTransactional() {
-               Project var1 = ProjectManager.ins.get(var3);
-               if (var1 != null) {
-                  ProjectService.ins.remove(var3);
-                  SystemLogUtils.addGroupOperationLog(GroupModule.projects.name(), "remove", var3, String.format("Remove project %s[%s]", var1.getName(), var3));
+               Project project = ProjectManager.ins.get(projectId);
+               if (project != null) {
+                  ProjectService.ins.remove(projectId);
+                  SystemLogUtils.addGroupOperationLog(GroupModule.projects.name(), "remove", projectId, String.format("Remove project %s[%s]", project.getName(), projectId));
                }
 
             }
          });
-         List var7 = PacketCache.ins.removeProject(var4.getId(), var4.getGroupId());
-         this.a((HttpServletResponse)var2, (Object)var7);
+         List items = PacketCache.ins.removeProject(project.getId(), project.getGroupId());
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)items);
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void roles(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      this.a((HttpServletResponse)var2, (Object)ProjectRoleService.ins.loadRoles(var3));
+   /**获取项目的角色列表*/
+   public void roles(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)ProjectRoleService.ins.loadRoles(projectId));
    }
 
+   /**为用户添加项目角色*/
    @URuleAuthorization(
       authType = "project",
       model = "members",
       code = "userrole"
    )
-   public void addUserRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      long var4 = Long.parseLong(var1.getParameter("roleId"));
-      ProjectRole var6 = ProjectRoleManager.ins.get(var4);
-      if (var6.getProjectId() == ContextHolder.getProjectId()) {
-         ProjectRoleService.ins.addUserRole(var6.getProjectId(), var3, var4);
-         SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "addUserRole", var6.getId(), String.format("Add user %s for role %s[%s]", var3, var6.getName(), var4));
+   public void addUserRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      ProjectRole projectRole = ProjectRoleManager.ins.get(longValue);
+      if (projectRole.getProjectId() == ContextHolder.getProjectId()) {
+         ProjectRoleService.ins.addUserRole(projectRole.getProjectId(), parameter, longValue);
+         SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "addUserRole", projectRole.getId(), String.format("Add user %s for role %s[%s]", parameter, projectRole.getName(), longValue));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**删除用户的项目角色*/
    @URuleAuthorization(
       authType = "project",
       model = "members",
       code = "userrole"
    )
-   public void removeUserRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      long var4 = Long.parseLong(var1.getParameter("roleId"));
-      ProjectRole var6 = ProjectRoleManager.ins.get(var4);
-      if (var6.getProjectId() == ContextHolder.getProjectId()) {
-         SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "removeUserRole", var6.getId(), String.format("Remove user %s for role %s[%s]", var3, var6.getName(), var6.getId()));
-         ProjectRoleService.ins.removeUserRole(var3, var4);
+   public void removeUserRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      ProjectRole projectRole = ProjectRoleManager.ins.get(longValue);
+      if (projectRole.getProjectId() == ContextHolder.getProjectId()) {
+         SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "removeUserRole", projectRole.getId(), String.format("Remove user %s for role %s[%s]", parameter, projectRole.getName(), projectRole.getId()));
+         ProjectRoleService.ins.removeUserRole(parameter, longValue);
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void users(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = ContextHolder.getProjectId();
-      String var4 = var1.getParameter("roleId");
-      String var5 = var1.getParameter("keyword");
-      int var6 = Integer.parseInt(var1.getParameter("pageIndex"));
-      int var7 = Integer.parseInt(var1.getParameter("pageSize"));
-      UserQuery var8 = ProjectManager.ins.createUserQuery();
-      var8.idnameLike(var5);
-      if (!StringUtils.isBlank(var4) && !"-1".equals(var4)) {
-         Page var10 = var8.roleUsers(var6, var7, var3, Long.parseLong(var4));
-         this.a(var3, var10);
-         this.a((HttpServletResponse)var2, (Object)var10);
+   /**获取项目下的用户列表*/
+   public void users(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long projectId = ContextHolder.getProjectId();
+      String parameter = req.getParameter("roleId");
+      String parameter2 = req.getParameter("keyword");
+      int number = Integer.parseInt(req.getParameter("pageIndex"));
+      int number2 = Integer.parseInt(req.getParameter("pageSize"));
+      UserQuery userQuery = ProjectManager.ins.createUserQuery();
+      userQuery.idnameLike(parameter2);
+      if (!StringUtils.isBlank(parameter) && !"-1".equals(parameter)) {
+         Page page = userQuery.roleUsers(number, number2, projectId, Long.parseLong(parameter));
+         this.enrichUsersWithRoles(projectId, page);
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)page);
       } else {
-         Page var9 = var8.users(var6, var7, var3);
-         this.a(var3, var9);
-         this.a((HttpServletResponse)var2, (Object)var9);
+         Page page2 = userQuery.users(number, number2, projectId);
+         this.enrichUsersWithRoles(projectId, page2);
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)page2);
       }
 
    }
 
-   private void a(long var1, Page var3) throws Exception {
-      ArrayList var4 = new ArrayList();
+   private void enrichUsersWithRoles(long longValue, Page page) throws Exception {
+      ArrayList items = new ArrayList();
 
-      for(com.bstek.urule.console.database.model.User var7 : (Iterable<com.bstek.urule.console.database.model.User>)(Iterable<?>)(var3.getData())) {
-         GroupUserVO var8 = new GroupUserVO();
-         var8.setId(var7.getId());
-         var8.setName(var7.getName());
-         var8.setCreateDate(var7.getCreateDate());
-         var8.setRoles(ProjectRoleManager.ins.loadUserRoles(var1, var7.getId()));
-         var4.add(var8);
+      for(com.bstek.urule.console.database.model.User user : (Iterable<com.bstek.urule.console.database.model.User>)(Iterable<?>)(page.getData())) {
+         GroupUserVO groupUserVO = new GroupUserVO();
+         groupUserVO.setId(user.getId());
+         groupUserVO.setName(user.getName());
+         groupUserVO.setCreateDate(user.getCreateDate());
+         groupUserVO.setRoles(ProjectRoleManager.ins.loadUserRoles(longValue, user.getId()));
+         items.add(groupUserVO);
       }
 
-      var3.setData(var4);
+      page.setData(items);
    }
 
-   public void userRoles(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("account");
-      List var4 = ProjectRoleService.ins.loadUserRoles(ContextHolder.getProjectId(), var3);
-      this.a((HttpServletResponse)var2, (Object)var4);
+   /**获取用户在项目中的角色列表*/
+   public void userRoles(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("account");
+      List userRoles = ProjectRoleService.ins.loadUserRoles(ContextHolder.getProjectId(), parameter);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)userRoles);
    }
 
+   /**项目成员维护*/
    @URuleAuthorization(
       authType = "project",
       model = "members",
       code = "add"
    )
-   public void addUser(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      if (StringUtils.isNotBlank(var3)) {
-         Project var4 = ProjectManager.ins.get(ContextHolder.getProjectId());
-         if (var4 != null) {
-            for(String var8 : var3.split(",")) {
-               if (StringUtils.isNotBlank(var8)) {
-                  ProjectService.ins.addProjectuser(ContextHolder.getProjectId(), var8);
-                  com.bstek.urule.console.database.model.User var9 = UserServiceManager.getUserService().get(var8);
-                  SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "add", var9.getId(), String.format("Add member %s", var8));
+   public void addUser(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      if (StringUtils.isNotBlank(parameter)) {
+         Project project = ProjectManager.ins.get(ContextHolder.getProjectId());
+         if (project != null) {
+            for(String text : parameter.split(",")) {
+               if (StringUtils.isNotBlank(text)) {
+                  ProjectService.ins.addProjectuser(ContextHolder.getProjectId(), text);
+                  com.bstek.urule.console.database.model.User user = UserServiceManager.getUserService().get(text);
+                  SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "add", user.getId(), String.format("Add member %s", text));
                }
             }
          }
@@ -494,37 +506,38 @@ public class ProjectServletHandler extends ApiServletHandler {
       model = "members",
       code = "remove"
    )
-   public void removeUser(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      if (StringUtils.isNotBlank(var3)) {
-         com.bstek.urule.console.database.model.User var4 = UserServiceManager.getUserService().get(var3);
-         Project var5 = ProjectManager.ins.get(ContextHolder.getProjectId());
-         if (var5 != null) {
-            ProjectManager.ins.removeProjectUser(ContextHolder.getProjectId(), var3);
-            SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "remove", var4.getId(), String.format("Remove member %s", var3));
+   public void removeUser(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      if (StringUtils.isNotBlank(parameter)) {
+         com.bstek.urule.console.database.model.User user = UserServiceManager.getUserService().get(parameter);
+         Project project = ProjectManager.ins.get(ContextHolder.getProjectId());
+         if (project != null) {
+            ProjectManager.ins.removeProjectUser(ContextHolder.getProjectId(), parameter);
+            SystemLogUtils.addProjectOperationLog(ProjectModule.members.name(), "remove", user.getId(), String.format("Remove member %s", parameter));
          }
       }
 
    }
 
+   /**为项目添加角色*/
    @URuleAuthorization(
       authType = "project",
       model = "permissions",
       code = "manager"
    )
-   public void addRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("roleName");
+   public void addRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("roleName");
       if (ContextHolder.getProjectId() != null) {
-         Project var4 = ProjectManager.ins.get(ContextHolder.getProjectId());
-         if (var4 != null) {
-            ProjectRole var5 = new ProjectRole();
-            var5.setName(var3);
-            var5.setProjectId(ContextHolder.getProjectId());
-            var5.setType("custom");
-            var5.setCreateUser(SecurityUtils.getLoginUsername(var1));
-            ProjectRoleService.ins.add(var5);
-            this.a((HttpServletResponse)var2, (Object)var5);
-            SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", var5.getId(), String.format("Add role %s[%s]", var3, var5.getId()));
+         Project project = ProjectManager.ins.get(ContextHolder.getProjectId());
+         if (project != null) {
+            ProjectRole projectRole = new ProjectRole();
+            projectRole.setName(parameter);
+            projectRole.setProjectId(ContextHolder.getProjectId());
+            projectRole.setType("custom");
+            projectRole.setCreateUser(SecurityUtils.getLoginUsername(req));
+            ProjectRoleService.ins.add(projectRole);
+            this.writeObjectToJson((HttpServletResponse)resp, (Object)projectRole);
+            SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", projectRole.getId(), String.format("Add role %s[%s]", parameter, projectRole.getId()));
          }
 
       } else {
@@ -532,23 +545,24 @@ public class ProjectServletHandler extends ApiServletHandler {
       }
    }
 
+   /**项目角色修改名称*/
    @URuleAuthorization(
       authType = "project",
       model = "permissions",
       code = "manager"
    )
-   public void renameRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      String var5 = var1.getParameter("roleName");
-      ProjectRole var6 = ProjectRoleManager.ins.get(var3);
-      if (ContextHolder.getProjectId() == var6.getProjectId()) {
-         Project var7 = ProjectManager.ins.get(ContextHolder.getProjectId());
-         if (var7 != null) {
-            String var8 = var6.getName();
-            var6.setName(var5);
-            var6.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-            ProjectRoleService.ins.update(var6);
-            SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", var6.getId(), String.format("Change the name of role %s to %s", var5, var8));
+   public void renameRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      String parameter = req.getParameter("roleName");
+      ProjectRole projectRole = ProjectRoleManager.ins.get(longValue);
+      if (ContextHolder.getProjectId() == projectRole.getProjectId()) {
+         Project project = ProjectManager.ins.get(ContextHolder.getProjectId());
+         if (project != null) {
+            String name = projectRole.getName();
+            projectRole.setName(parameter);
+            projectRole.setUpdateUser(SecurityUtils.getLoginUsername(req));
+            ProjectRoleService.ins.update(projectRole);
+            SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", projectRole.getId(), String.format("Change the name of role %s to %s", parameter, name));
          }
 
       } else {
@@ -556,19 +570,20 @@ public class ProjectServletHandler extends ApiServletHandler {
       }
    }
 
+   /**删除项目角色*/
    @URuleAuthorization(
       authType = "project",
       model = "permissions",
       code = "manager"
    )
-   public void removeRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      ProjectRole var5 = ProjectRoleManager.ins.get(var3);
-      if (var5 != null && ContextHolder.getProjectId() == var5.getProjectId()) {
-         Project var6 = ProjectManager.ins.get(ContextHolder.getProjectId());
-         if (var6 != null) {
-            ProjectRoleService.ins.remove(var3);
-            SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", var5.getId(), String.format("Remove role %s[%s]", var5.getName(), var3, var6.getName(), var6.getId()));
+   public void removeRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      ProjectRole projectRole = ProjectRoleManager.ins.get(longValue);
+      if (projectRole != null && ContextHolder.getProjectId() == projectRole.getProjectId()) {
+         Project project = ProjectManager.ins.get(ContextHolder.getProjectId());
+         if (project != null) {
+            ProjectRoleService.ins.remove(longValue);
+            SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", projectRole.getId(), String.format("Remove role %s[%s]", projectRole.getName(), longValue, project.getName(), project.getId()));
          }
 
       } else {
@@ -576,228 +591,237 @@ public class ProjectServletHandler extends ApiServletHandler {
       }
    }
 
+   /**更新审批用户信息*/
    @Transactional
    @URuleAuthorization(
       authType = "project",
       model = "setting",
       code = "approveUser"
    )
-   public void updateApproveUser(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = ContextHolder.getProjectId();
-      String var4 = var1.getParameter("disableApproveUser");
-      String var5 = var1.getParameter("enableApproveUser");
-      String var6 = var1.getParameter("deployApproveUser");
-      if (StringUtils.isNotEmpty(var4)) {
-         ProjectManager.ins.updateApproveUser(var3, ApplyType.enable, var5);
-         SystemLogUtils.addProjectOperationLog(ProjectModule.setting.name(), "approveUser", var5, String.format("Set packet to enable approvers %s", var5));
+   public void updateApproveUser(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long projectId = ContextHolder.getProjectId();
+      String parameter = req.getParameter("disableApproveUser");
+      String parameter2 = req.getParameter("enableApproveUser");
+      String parameter3 = req.getParameter("deployApproveUser");
+      if (StringUtils.isNotEmpty(parameter)) {
+         ProjectManager.ins.updateApproveUser(projectId, ApplyType.enable, parameter2);
+         SystemLogUtils.addProjectOperationLog(ProjectModule.setting.name(), "approveUser", parameter2, String.format("Set packet to enable approvers %s", parameter2));
       }
 
-      if (StringUtils.isNotEmpty(var4)) {
-         ProjectManager.ins.updateApproveUser(var3, ApplyType.disable, var4);
-         SystemLogUtils.addProjectOperationLog(ProjectModule.setting.name(), "approveUser", var4, String.format("Set packet to disable approvers %s", var5));
+      if (StringUtils.isNotEmpty(parameter)) {
+         ProjectManager.ins.updateApproveUser(projectId, ApplyType.disable, parameter);
+         SystemLogUtils.addProjectOperationLog(ProjectModule.setting.name(), "approveUser", parameter, String.format("Set packet to disable approvers %s", parameter2));
       }
 
-      if (StringUtils.isNotEmpty(var6)) {
-         ProjectManager.ins.updateApproveUser(var3, ApplyType.deploy, var6);
-         SystemLogUtils.addProjectOperationLog(ProjectModule.setting.name(), "approveUser", var6, String.format("Set packet publishing Approver %s", var5));
+      if (StringUtils.isNotEmpty(parameter3)) {
+         ProjectManager.ins.updateApproveUser(projectId, ApplyType.deploy, parameter3);
+         SystemLogUtils.addProjectOperationLog(ProjectModule.setting.name(), "approveUser", parameter3, String.format("Set packet publishing Approver %s", parameter2));
       }
 
    }
 
-   public void countRule(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Integer var3 = FileManager.ins.newCountQuery().projectId(ContextHolder.getProjectId()).getRuleCount();
-      Integer var4 = PacketManager.ins.getCount(ContextHolder.getProjectId());
-      HashMap var5 = new HashMap();
-      var5.put("ruleCount", var3);
-      var5.put("packetCount", var4);
-      this.a((HttpServletResponse)var2, (Object)var5);
+   /**统计规则数据*/
+   public void countRule(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Integer ruleCount = FileManager.ins.newCountQuery().projectId(ContextHolder.getProjectId()).getRuleCount();
+      Integer count = PacketManager.ins.getCount(ContextHolder.getProjectId());
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("ruleCount", ruleCount);
+      valuesByKey.put("packetCount", count);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)valuesByKey);
    }
 
-   public void countUserCommits(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      Calendar var5 = Calendar.getInstance();
-      var5.add(5, -14);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var6 = var5.getTime();
-      var5 = Calendar.getInstance();
-      var5.add(5, 1);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var7 = var5.getTime();
-      List var8 = ProjectService.ins.getUserCommits(var3, var6, var7);
-      this.a((HttpServletResponse)var2, (Object)var8);
+   /**统计近期用户规则文件提交情况*/
+   public void countUserCommits(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -14);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      List userCommits = ProjectService.ins.getUserCommits(projectId, time, time2);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)userCommits);
    }
 
-   public void countRuleCommits(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      Calendar var5 = Calendar.getInstance();
-      var5.add(5, -7);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var6 = var5.getTime();
-      var5 = Calendar.getInstance();
-      var5.add(5, 1);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var7 = var5.getTime();
-      List var8 = ProjectService.ins.getRuleCommits(var3, var6, var7);
-      this.a((HttpServletResponse)var2, (Object)var8);
+   /**统计近期用户规则文件提交情况*/
+   public void countRuleCommits(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -7);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      List ruleCommits = ProjectService.ins.getRuleCommits(projectId, time, time2);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)ruleCommits);
    }
 
-   public void countRuleExecCount(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      Calendar var5 = Calendar.getInstance();
-      var5.add(5, -7);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var6 = var5.getTime();
-      var5 = Calendar.getInstance();
-      var5.add(5, 1);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var7 = var5.getTime();
-      List var8 = ProjectService.ins.getRuleExecCount(var3, var6, var7);
-      this.a((HttpServletResponse)var2, (Object)var8);
+   /**统计近期用户规则文件执行情况*/
+   public void countRuleExecCount(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -7);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      List ruleExecCount = ProjectService.ins.getRuleExecCount(projectId, time, time2);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)ruleExecCount);
    }
 
-   public void countRuleExecTime(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      Calendar var5 = Calendar.getInstance();
-      var5.add(5, -7);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var6 = var5.getTime();
-      var5 = Calendar.getInstance();
-      var5.add(5, 1);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var7 = var5.getTime();
-      List var8 = ProjectService.ins.getRuleExecTime(var3, var6, var7);
-      this.a((HttpServletResponse)var2, (Object)var8);
+   /**统计近期用户规则文件执行情况*/
+   public void countRuleExecTime(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -7);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      List ruleExecTime = ProjectService.ins.getRuleExecTime(projectId, time, time2);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)ruleExecTime);
    }
 
-   public void countRuleDeploys(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      Calendar var5 = Calendar.getInstance();
-      var5.add(5, -7);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var6 = var5.getTime();
-      var5 = Calendar.getInstance();
-      var5.add(5, 1);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var7 = var5.getTime();
-      PacketApplyQuery var8 = PacketApplyManager.ins.newQuery();
-      List var9 = var8.projectId(var3).startDate(var6).endDate(var7).type(ApplyType.deploy).status(ApplyStatus.pass).list();
-      HashMap var10 = new HashMap();
+   /**统计近期用户知识包发布情况*/
+   public void countRuleDeploys(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -7);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      PacketApplyQuery packetApplyQuery = PacketApplyManager.ins.newQuery();
+      List items = packetApplyQuery.projectId(projectId).startDate(time).endDate(time2).type(ApplyType.deploy).status(ApplyStatus.pass).list();
+      HashMap valuesByKey = new HashMap();
 
-      for(PacketApply var12 : (Iterable<PacketApply>)(Iterable<?>)(var9)) {
-         RuleDeployVO var13 = new RuleDeployVO();
-         Calendar var14 = Calendar.getInstance();
-         var14.setTime(var12.getCreateDate());
-         var14.set(11, 0);
-         var14.set(12, 0);
-         var14.set(13, 0);
-         var14.set(14, 0);
-         if (!var10.containsKey(var14.getTime())) {
-            var10.put(var14.getTime(), var13);
+      for(PacketApply packetApply : (Iterable<PacketApply>)(Iterable<?>)(items)) {
+         RuleDeployVO ruleDeployVO = new RuleDeployVO();
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(packetApply.getCreateDate());
+         calendar2.set(11, 0);
+         calendar2.set(12, 0);
+         calendar2.set(13, 0);
+         calendar2.set(14, 0);
+         if (!valuesByKey.containsKey(calendar2.getTime())) {
+            valuesByKey.put(calendar2.getTime(), ruleDeployVO);
          } else {
-            var13 = (RuleDeployVO)var10.get(var14.getTime());
+            ruleDeployVO = (RuleDeployVO)valuesByKey.get(calendar2.getTime());
          }
 
-         var13.setCreateDate(var14.getTime());
-         var13.setCount(var13.getCount() + 1);
+         ruleDeployVO.setCreateDate(calendar2.getTime());
+         ruleDeployVO.setCount(ruleDeployVO.getCount() + 1);
       }
 
-      ArrayList var16 = new ArrayList(var10.values());
-      Collections.sort(var16, new Comparator<RuleDeployVO>() {
-         public int compare(RuleDeployVO var1, RuleDeployVO var2) {
-            return (int)(var1.getCreateDate().getTime() - var2.getCreateDate().getTime());
+      ArrayList items2 = new ArrayList(valuesByKey.values());
+      Collections.sort(items2, new Comparator<RuleDeployVO>() {
+         public int compare(RuleDeployVO ruleDeployVO, RuleDeployVO ruleDeployVO2) {
+            return (int)(ruleDeployVO.getCreateDate().getTime() - ruleDeployVO2.getCreateDate().getTime());
          }
       });
-      this.a((HttpServletResponse)var2, (Object)var16);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)items2);
    }
 
-   public void listPacketDeploys(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      List var4 = ReportGroupQuery.listPacketDeploys(var3);
-      if (var4.size() > 5) {
-         this.a((HttpServletResponse)var2, (Object)var4.subList(0, 5));
+   public void listPacketDeploys(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      List items = ReportGroupQuery.listPacketDeploys(groupId);
+      if (items.size() > 5) {
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)items.subList(0, 5));
       } else {
-         this.a((HttpServletResponse)var2, (Object)var4);
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)items);
       }
 
    }
 
-   public void countUserRuleFiles(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      List var5 = ReportProjectQuery.countUserRuleFiles(var3);
-      this.a((HttpServletResponse)var2, (Object)var5);
+   /**统计用户规则文件数量*/
+   public void countUserRuleFiles(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      List items = ReportProjectQuery.countUserRuleFiles(projectId);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)items);
    }
 
-   public void countUserLogin(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      Calendar var5 = Calendar.getInstance();
-      var5.add(5, -7);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var6 = var5.getTime();
-      var5 = Calendar.getInstance();
-      var5.add(5, 1);
-      var5.set(10, 0);
-      var5.set(12, 0);
-      var5.set(13, 0);
-      var5.set(14, 0);
-      Date var7 = var5.getTime();
-      List var8 = ReportProjectQuery.countUserLogin(var3, var6, var7);
-      this.a((HttpServletResponse)var2, (Object)var8);
+   /**用户登录统计*/
+   public void countUserLogin(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -7);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      List items = ReportProjectQuery.countUserLogin(projectId, time, time2);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)items);
    }
 
-   public void listRecentFiles(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      List var5 = ReportProjectQuery.listLastModifyFiles(var3);
-      if (var5.size() > 5) {
-         this.a((HttpServletResponse)var2, (Object)var5.subList(0, 5));
+   public void listRecentFiles(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      List items = ReportProjectQuery.listLastModifyFiles(projectId);
+      if (items.size() > 5) {
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)items.subList(0, 5));
       } else {
-         this.a((HttpServletResponse)var2, (Object)var5);
+         this.writeObjectToJson((HttpServletResponse)resp, (Object)items);
       }
 
    }
 
-   public void getSummary(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      int var5 = ReportProjectQuery.countPacket(var3);
-      int var6 = ReportProjectQuery.countFile(var3);
-      int var7 = ReportProjectQuery.countBatch(var3);
-      HashMap var8 = new HashMap();
-      var8.put("packetCount", var5);
-      var8.put("fileCount", var6);
-      var8.put("batchCount", var7);
-      this.a((HttpServletResponse)var2, (Object)var8);
+   public void getSummary(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      int number = ReportProjectQuery.countPacket(projectId);
+      int number2 = ReportProjectQuery.countFile(projectId);
+      int number3 = ReportProjectQuery.countBatch(projectId);
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("packetCount", number);
+      valuesByKey.put("fileCount", number2);
+      valuesByKey.put("batchCount", number3);
+      this.writeObjectToJson((HttpServletResponse)resp, (Object)valuesByKey);
    }
 
    public String url() {

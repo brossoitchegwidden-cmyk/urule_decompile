@@ -11,23 +11,23 @@ public class AbsoluteMath implements MathSign {
    private Value value;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
-      if (var3 instanceof Integer) {
-         int var9 = (Integer)var3;
-         return Math.abs(var9);
-      } else if (var3 instanceof Double) {
-         double var8 = (Double)var3;
-         return Math.abs(var8);
-      } else if (var3 instanceof Float) {
-         float var7 = (Float)var3;
-         return Math.abs(var7);
-      } else if (var3 instanceof Long) {
-         long var6 = (Long)var3;
-         return Math.abs(var6);
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.value, context, factMap);
+      if (objectValue instanceof Integer) {
+         int objectValue2 = (Integer)objectValue;
+         return Math.abs(objectValue2);
+      } else if (objectValue instanceof Double) {
+         double objectValue3 = (Double)objectValue;
+         return Math.abs(objectValue3);
+      } else if (objectValue instanceof Float) {
+         float objectValue4 = (Float)objectValue;
+         return Math.abs(objectValue4);
+      } else if (objectValue instanceof Long) {
+         long objectValue5 = (Long)objectValue;
+         return Math.abs(objectValue5);
       } else {
-         BigDecimal var4 = Utils.toBigDecimal(var3);
-         return new BigDecimal(Math.abs(var4.doubleValue())).stripTrailingZeros();
+         BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+         return new BigDecimal(Math.abs(decimalValue.doubleValue())).stripTrailingZeros();
       }
    }
 
@@ -40,13 +40,13 @@ public class AbsoluteMath implements MathSign {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Absolute" : "求绝对值";
-      return "[" + var1 + "]|" + this.value.getId() + "|";
+      String text = LocaleHolder.isEnglish() ? "Absolute" : "求绝对值";
+      return "[" + text + "]|" + this.value.getId() + "|";
    }
 }

@@ -16,9 +16,9 @@ public class MetNode extends JunctionNode {
       super(0);
    }
 
-   public MetNode(int var1, boolean var2) {
-      super(var1);
-      this.debug = var2;
+   public MetNode(int id, boolean debug) {
+      super(id);
+      this.debug = debug;
    }
 
    @Override
@@ -27,23 +27,23 @@ public class MetNode extends JunctionNode {
    }
 
    @Override
-   public Activity newActivity(Map<Object, Object> var1) {
-      if (var1.containsKey(this)) {
-         return (MetActivity)var1.get(this);
+   public Activity newActivity(Map<Object, Object> context) {
+      if (context.containsKey(this)) {
+         return (MetActivity)context.get(this);
       }
 
-      MetActivity var2 = new MetActivity(this.met, this.criterions, this.debug, this.only);
+      MetActivity metActivity = new MetActivity(this.met, this.criterions, this.debug, this.only);
 
-      for (Line var4 : this.lines) {
-         var2.addPath(var4.newPath(var1));
+      for (Line line : this.lines) {
+         metActivity.addPath(line.newPath(context));
       }
 
-      var1.put(this, var2);
-      return var2;
+      context.put(this, metActivity);
+      return metActivity;
    }
 
-   public void setMet(int var1) {
-      this.met = var1;
+   public void setMet(int met) {
+      this.met = met;
    }
 
    public int getMet() {
@@ -54,12 +54,12 @@ public class MetNode extends JunctionNode {
       return this.only;
    }
 
-   public void setOnly(boolean var1) {
-      this.only = var1;
+   public void setOnly(boolean only) {
+      this.only = only;
    }
 
-   public void setCriterions(List<Criterion> var1) {
-      this.criterions = var1;
+   public void setCriterions(List<Criterion> criterions) {
+      this.criterions = criterions;
    }
 
    public List<Criterion> getCriterions() {
@@ -70,7 +70,7 @@ public class MetNode extends JunctionNode {
       return this.debug;
    }
 
-   public void setDebug(boolean var1) {
-      this.debug = var1;
+   public void setDebug(boolean debug) {
+      this.debug = debug;
    }
 }

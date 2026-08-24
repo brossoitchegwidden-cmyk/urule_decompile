@@ -3,22 +3,22 @@ package com.bstek.urule.runtime.rete;
 import java.util.UUID;
 
 public class Path {
-   private Activity a;
-   private String b = UUID.randomUUID().toString();
+   private Activity to;
+   private String id = UUID.randomUUID().toString();
 
-   public Path(Activity var1) {
-      this.a = var1;
-      if (var1 instanceof JoinActivity) {
-         JoinActivity var2 = (JoinActivity)var1;
-         var2.addFromPath(this);
+   public Path(Activity to) {
+      this.to = to;
+      if (to instanceof JoinActivity) {
+         JoinActivity joinActivity = (JoinActivity)to;
+         joinActivity.addFromPath(this);
       }
    }
 
    public Activity getTo() {
-      return this.a;
+      return this.to;
    }
 
    public String getId() {
-      return this.b;
+      return this.id;
    }
 }

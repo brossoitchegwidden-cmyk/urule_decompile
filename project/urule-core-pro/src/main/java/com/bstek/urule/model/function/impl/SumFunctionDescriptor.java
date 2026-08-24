@@ -16,49 +16,45 @@ public class SumFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
-
    @Override
    public String getLabel() {
       return "求和";
    }
-
    @Override
    public String getName() {
       return "Sum";
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      Collection var4 = null;
-      if (var1 instanceof Collection) {
-         var4 = (Collection)var1;
-         BigDecimal var5 = null;
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      Collection items = null;
+      if (object instanceof Collection) {
+         items = (Collection)object;
+         BigDecimal decimalValue = null;
 
-         for (Object var7 : var4) {
-            Object var8 = Utils.getObjectProperty(var7, var2);
-            BigDecimal var9 = Utils.toBigDecimal(var8);
-            if (var5 == null) {
-               var5 = var9;
+         for (Object objectValue : items) {
+            Object objectProperty = Utils.getObjectProperty(objectValue, property);
+            BigDecimal decimalValue2 = Utils.toBigDecimal(objectProperty);
+            if (decimalValue == null) {
+               decimalValue = decimalValue2;
             } else {
-               var5 = var5.add(var9);
+               decimalValue = decimalValue.add(decimalValue2);
             }
          }
 
-         return var5 == null ? 0.0 : var5.doubleValue();
+         return decimalValue == null ? 0.0 : decimalValue.doubleValue();
       } else {
          throw new RuleException("Function[sum] parameter must be java.util.Collection type.");
       }
    }
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("集合对象");
-      var1.setEname("Collection");
-      var1.setNeedProperty(true);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("集合对象");
+      argument.setEname("Collection");
+      argument.setNeedProperty(true);
+      return argument;
    }
 }

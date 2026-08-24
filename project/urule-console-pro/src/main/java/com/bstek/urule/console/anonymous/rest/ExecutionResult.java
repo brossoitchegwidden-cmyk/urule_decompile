@@ -4,22 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExecutionResult {
-   private long a = 0L;
-   private List b = new ArrayList();
+   private long duration = 0L;
+   private List output = new ArrayList();
 
    public long getDuration() {
-      return this.a;
+      return this.duration;
    }
 
-   public void addDuration(long var1) {
-      this.a = var1;
+   public void addDuration(long duration) {
+      this.duration = duration;
    }
 
    public List getOutput() {
-      return this.b;
+      return this.output;
    }
 
-   public void addOutput(List var1) {
-      this.b.add(var1);
+   public void addOutput(List data) {
+      this.output.add(data);
    }
 }

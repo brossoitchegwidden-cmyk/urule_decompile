@@ -10,115 +10,115 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DynamicJarQueryImpl implements DynamicJarQuery {
-   private Long a;
-   private String b;
-   private String c;
-   private String d;
-   private List e = new ArrayList();
+   private Long id;
+   private String groupId;
+   private String name;
+   private String desc;
+   private List queryParameters = new ArrayList();
 
    protected DynamicJarQueryImpl() {
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
-      String var2 = "select ID_,NAME_,DESC_,CREATE_USER_,UPDATE_USER_,CREATE_DATE_,UPDATE_DATE_,GROUP_ID_ from URULE_DYNAMIC_JAR";
-      StringBuilder var3 = this.a();
-      if (var3.length() > 0) {
-         var2 = var2 + " where" + var3.toString();
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select ID_,NAME_,DESC_,CREATE_USER_,UPDATE_USER_,CREATE_DATE_,UPDATE_DATE_,GROUP_ID_ from URULE_DYNAMIC_JAR";
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      var2 = var2 + " order by CREATE_DATE_ desc";
+      text = text + " order by CREATE_DATE_ desc";
 
-      ArrayList var14;
+      ArrayList listResult;
       try {
-         PreparedStatement var4 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.e, var4);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            DynamicJar var7 = new DynamicJar();
-            var7.setId(var6.getLong(1));
-            var7.setName(var6.getString(2));
-            var7.setDesc(var6.getString(3));
-            var7.setCreateUser(var6.getString(4));
-            var7.setUpdateUser(var6.getString(5));
-            var7.setCreateDate(var6.getTimestamp(6));
-            var7.setUpdateDate(var6.getTimestamp(7));
-            var7.setGroupId(var6.getString(8));
-            var5.add(var7);
+         while(resultSet.next()) {
+            DynamicJar dynamicJar = new DynamicJar();
+            dynamicJar.setId(resultSet.getLong(1));
+            dynamicJar.setName(resultSet.getString(2));
+            dynamicJar.setDesc(resultSet.getString(3));
+            dynamicJar.setCreateUser(resultSet.getString(4));
+            dynamicJar.setUpdateUser(resultSet.getString(5));
+            dynamicJar.setCreateDate(resultSet.getTimestamp(6));
+            dynamicJar.setUpdateDate(resultSet.getTimestamp(7));
+            dynamicJar.setGroupId(resultSet.getString(8));
+            items.add(dynamicJar);
          }
 
-         JdbcUtils.closeStatement(var4);
-         var14 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return listResult;
    }
 
-   private StringBuilder a() {
-      this.e.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.name != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ like ?");
-         this.e.add("%" + this.c + "%");
+         stringBuilder.append(" NAME_ like ?");
+         this.queryParameters.add("%" + this.name + "%");
       }
 
-      if (this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.desc != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" DESC_ like ?");
-         this.e.add("%" + this.d + "%");
+         stringBuilder.append(" DESC_ like ?");
+         this.queryParameters.add("%" + this.desc + "%");
       }
 
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.e.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.groupId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" GROUP_ID_=?");
-         this.e.add(this.b);
+         stringBuilder.append(" GROUP_ID_=?");
+         this.queryParameters.add(this.groupId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public DynamicJarQuery id(long var1) {
-      this.a = var1;
+   public DynamicJarQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public DynamicJarQuery groupId(String var1) {
-      this.b = var1;
+   public DynamicJarQuery groupId(String groupId) {
+      this.groupId = groupId;
       return this;
    }
 
-   public DynamicJarQuery nameLike(String var1) {
-      this.c = var1;
+   public DynamicJarQuery nameLike(String name) {
+      this.name = name;
       return this;
    }
 
-   public DynamicJarQuery descLike(String var1) {
-      this.d = var1;
+   public DynamicJarQuery descLike(String desc) {
+      this.desc = desc;
       return this;
    }
 }

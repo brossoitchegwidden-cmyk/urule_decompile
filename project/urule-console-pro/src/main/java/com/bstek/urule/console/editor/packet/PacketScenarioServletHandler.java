@@ -56,115 +56,96 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 
 public class PacketScenarioServletHandler extends ApiServletHandler {
-   private ScenarioTestExecuting e = new ScenarioTestExecuting();
+   private ScenarioTestExecuting scenarioTestExecuting = new ScenarioTestExecuting();
 
-   public void doTest(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      TestScenario var3 = this.c(var1);
-      String var4 = var1.getParameter("packageName");
-      String var5 = var1.getParameter("enableLog");
-      boolean var6 = false;
-      if (StringUtils.isNotBlank(var5)) {
-         var6 = Boolean.valueOf(var5);
+   public void doTest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      TestScenario testScenario = this.resolveTestScenario(req);
+      String parameter = req.getParameter("packageName");
+      String parameter2 = req.getParameter("enableLog");
+      boolean flag = false;
+      if (StringUtils.isNotBlank(parameter2)) {
+         flag = Boolean.valueOf(parameter2);
       }
 
-      var4 = Utils.decodeURL(var4);
-      List var7 = null;
-      KnowledgePackage var8 = this.f(var1);
-      if (var8 != null) {
-         var7 = var8.getVariableCategories();
+      parameter = Utils.decodeURL(parameter);
+      List variableCategories = null;
+      KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(req);
+      if (knowledgePackage != null) {
+         variableCategories = knowledgePackage.getVariableCategories();
       } else {
-         KnowledgeBase var9 = this.e(var1);
-         var8 = var9.getKnowledgePackage();
-         var7 = var9.getResourceLibrary().getVariableCategories();
+         KnowledgeBase knowledgeBase = this.resolveKnowledgeBase(req);
+         knowledgePackage = knowledgeBase.getKnowledgePackage();
+         variableCategories = knowledgeBase.getResourceLibrary().getVariableCategories();
       }
 
-      Map var13 = JsonBuilder.getInstance().buildVariableCategoriesMap(var7);
-      ResultWrapper var10 = this.e.doTest(var3, var8, var13, var6);
-      var10.setPackageName(var4);
-      var10.setScenarioName(var3.getName());
-      this.a(var2, var10);
+      Map variableCategoriesMap = JsonBuilder.getInstance().buildVariableCategoriesMap(variableCategories);
+      ResultWrapper resultWrapper = this.scenarioTestExecuting.doTest(testScenario, knowledgePackage, variableCategoriesMap, flag);
+      resultWrapper.setPackageName(parameter);
+      resultWrapper.setScenarioName(testScenario.getName());
+      this.writeObjectToJson(resp, resultWrapper);
    }
 
-   private TestScenario c(HttpServletRequest var1) throws Exception {
-      long var2 = Long.valueOf(var1.getParameter("id"));
-      Scenario var4 = ScenarioManager.ins.load(var2);
-      TestScenario var5 = new TestScenario();
-      var5.setName(var4.getName());
-      var5.setId(var4.getId());
-      var5.setCreateUser(var4.getCreateUser());
-      var5.setCreateDate(var4.getCreateDate());
-      var5.setDesc(var4.getDesc());
-      ObjectMapper var6 = JsonMapper.builder().build();
-      List var7 = (List)var6.readValue(var4.getInputData(), ArrayList.class);
-      List var8 = (List)var6.readValue(var4.getOutputData(), ArrayList.class);
-      ArrayList var9 = new ArrayList();
-      ArrayList var10 = new ArrayList();
-      var5.setInputData(var9);
-      var5.setOutputData(var10);
+   private TestScenario resolveTestScenario(HttpServletRequest httpServletRequest) throws Exception {
+      long longValue = Long.valueOf(httpServletRequest.getParameter("id"));
+      Scenario scenario = ScenarioManager.ins.load(longValue);
+      TestScenario testScenario = new TestScenario();
+      testScenario.setName(scenario.getName());
+      testScenario.setId(scenario.getId());
+      testScenario.setCreateUser(scenario.getCreateUser());
+      testScenario.setCreateDate(scenario.getCreateDate());
+      testScenario.setDesc(scenario.getDesc());
+      ObjectMapper objectMapper = JsonMapper.builder().build();
+      List items = (List)objectMapper.readValue(scenario.getInputData(), ArrayList.class);
+      List items2 = (List)objectMapper.readValue(scenario.getOutputData(), ArrayList.class);
+      ArrayList items3 = new ArrayList();
+      ArrayList items4 = new ArrayList();
+      testScenario.setInputData(items3);
+      testScenario.setOutputData(items4);
 
-      for(Map var12 : (Iterable<Map>)(Iterable<?>)(var7)) {
-         SimulateData var13 = new SimulateData();
-         var13.setUuid((String)var12.get("categoryUuid"));
-         var13.setName((String)var12.get("name"));
-         ArrayList var14 = new ArrayList();
-         var13.setFields(var14);
-         var9.add(var13);
+      for(Map valuesByKey : (Iterable<Map>)(Iterable<?>)(items)) {
+         SimulateData simulateData = new SimulateData();
+         simulateData.setUuid((String)valuesByKey.get("categoryUuid"));
+         simulateData.setName((String)valuesByKey.get("name"));
+         ArrayList items5 = new ArrayList();
+         simulateData.setFields(items5);
+         items3.add(simulateData);
 
-         for(Map var16 : (Iterable<Map>)(Iterable<?>)((List)var12.get("fields"))) {
-            DataField var17 = new DataField();
-            var17.setUuid((String)var16.get("uuid"));
-            var17.setName((String)var16.get("name"));
-            var17.setLabel((String)var16.get("label"));
-            var17.setDatatype(Datatype.valueOf((String)var16.get("datatype")));
-            var14.add(var17);
+         for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)((List)valuesByKey.get("fields"))) {
+            DataField dataField = new DataField();
+            dataField.setUuid((String)valuesByKey2.get("uuid"));
+            dataField.setName((String)valuesByKey2.get("name"));
+            dataField.setLabel((String)valuesByKey2.get("label"));
+            dataField.setDatatype(Datatype.valueOf((String)valuesByKey2.get("datatype")));
+            items5.add(dataField);
          }
       }
 
-      for(Map var19 : (Iterable<Map>)(Iterable<?>)(var8)) {
-         SimulateData var20 = new SimulateData();
-         var20.setUuid((String)var19.get("categoryUuid"));
-         var20.setName((String)var19.get("name"));
-         ArrayList var21 = new ArrayList();
-         var20.setFields(var21);
-         var10.add(var20);
+      for(Map valuesByKey3 : (Iterable<Map>)(Iterable<?>)(items2)) {
+         SimulateData simulateData2 = new SimulateData();
+         simulateData2.setUuid((String)valuesByKey3.get("categoryUuid"));
+         simulateData2.setName((String)valuesByKey3.get("name"));
+         ArrayList items6 = new ArrayList();
+         simulateData2.setFields(items6);
+         items4.add(simulateData2);
 
-         for(Map var23 : (Iterable<Map>)(Iterable<?>)((List)var19.get("fields"))) {
-            DataField var24 = new DataField();
-            var24.setUuid((String)var23.get("uuid"));
-            var24.setName((String)var23.get("name"));
-            var24.setLabel((String)var23.get("label"));
-            var24.setDatatype(Datatype.valueOf((String)var23.get("datatype")));
-            var24.setOp(Op.valueOf((String)var23.get("op")));
-            var21.add(var24);
+         for(Map valuesByKey4 : (Iterable<Map>)(Iterable<?>)((List)valuesByKey3.get("fields"))) {
+            DataField dataField2 = new DataField();
+            dataField2.setUuid((String)valuesByKey4.get("uuid"));
+            dataField2.setName((String)valuesByKey4.get("name"));
+            dataField2.setLabel((String)valuesByKey4.get("label"));
+            dataField2.setDatatype(Datatype.valueOf((String)valuesByKey4.get("datatype")));
+            dataField2.setOp(Op.valueOf((String)valuesByKey4.get("op")));
+            items6.add(dataField2);
          }
       }
 
-      return var5;
+      return testScenario;
    }
 
-   public void load(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = Long.valueOf(var1.getParameter("packetId"));
-      List var4 = ScenarioManager.ins.newQuery().packetId(var3).list();
-      this.a(var2, var4);
-   }
-
-   @URuleAuthorization(
-      authType = "project",
-      code = "manager",
-      model = "rule_knowledge"
-   )
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Scenario var3 = new Scenario();
-      var3.setName(var1.getParameter("name"));
-      var3.setDesc(var1.getParameter("desc"));
-      var3.setProjectId(ContextHolder.getProjectId());
-      var3.setInputData(var1.getParameter("inputData"));
-      var3.setOutputData(var1.getParameter("outputData"));
-      var3.setPacketId(Long.valueOf(var1.getParameter("packetId")));
-      var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      Scenario var4 = ScenarioManager.ins.add(var3);
-      this.a(var2, var4);
+   public void load(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long longValue = Long.valueOf(req.getParameter("packetId"));
+      List items = ScenarioManager.ins.newQuery().packetId(longValue).list();
+      this.writeObjectToJson(resp, items);
    }
 
    @URuleAuthorization(
@@ -172,15 +153,18 @@ public class PacketScenarioServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      Scenario var5 = ScenarioManager.ins.load(var3);
-      var5.setName(var1.getParameter("name"));
-      var5.setDesc(var1.getParameter("desc"));
-      var5.setInputData(var1.getParameter("inputData"));
-      var5.setOutputData(var1.getParameter("outputData"));
-      var5.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      ScenarioManager.ins.update(var5);
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Scenario scenario = new Scenario();
+      scenario.setName(req.getParameter("name"));
+      scenario.setDesc(req.getParameter("desc"));
+      scenario.setProjectId(ContextHolder.getProjectId());
+      scenario.setInputData(req.getParameter("inputData"));
+      scenario.setOutputData(req.getParameter("outputData"));
+      scenario.setPacketId(Long.valueOf(req.getParameter("packetId")));
+      scenario.setCreateUser(SecurityUtils.getLoginUsername(req));
+      scenario.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      Scenario scenario2 = ScenarioManager.ins.add(scenario);
+      this.writeObjectToJson(resp, scenario2);
    }
 
    @URuleAuthorization(
@@ -188,8 +172,15 @@ public class PacketScenarioServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      ScenarioManager.ins.delete(Long.valueOf(var1.getParameter("id")));
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      Scenario scenario = ScenarioManager.ins.load(longValue);
+      scenario.setName(req.getParameter("name"));
+      scenario.setDesc(req.getParameter("desc"));
+      scenario.setInputData(req.getParameter("inputData"));
+      scenario.setOutputData(req.getParameter("outputData"));
+      scenario.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      ScenarioManager.ins.update(scenario);
    }
 
    @URuleAuthorization(
@@ -197,17 +188,8 @@ public class PacketScenarioServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void uploadExcel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = Long.valueOf(var1.getParameter("id"));
-      UploadFile var4 = FileUtils.uploadFile(var1);
-      InputStream var5 = var4.getInputStream();
-      byte[] var6 = IOUtils.toByteArray(var5);
-      var5.close();
-      String var7 = SecurityUtils.getLoginUsername(var1);
-      ScenarioManager.ins.uploadExcel(var3, var7, var6);
-      Scenario var8 = ScenarioManager.ins.load(var3);
-      var8.setExcelFileName(var4.getName());
-      ScenarioManager.ins.update(var8);
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      ScenarioManager.ins.delete(Long.valueOf(req.getParameter("id")));
    }
 
    @URuleAuthorization(
@@ -215,285 +197,303 @@ public class PacketScenarioServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void downloadExcel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = Long.valueOf(var1.getParameter("id"));
-      Scenario var4 = ScenarioManager.ins.load(var3);
-      byte[] var5 = ScenarioManager.ins.loadExcelFile(var3);
-      ByteArrayInputStream var6 = new ByteArrayInputStream(var5);
-      FileUtils.downloadFile(var4.getExcelFileName(), var6, var2);
-      var6.close();
+   public void uploadExcel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long longValue = Long.valueOf(req.getParameter("id"));
+      UploadFile uploadFile = FileUtils.uploadFile(req);
+      InputStream inputStream = uploadFile.getInputStream();
+      byte[] bytes = IOUtils.toByteArray(inputStream);
+      inputStream.close();
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      ScenarioManager.ins.uploadExcel(longValue, loginUsername, bytes);
+      Scenario scenario = ScenarioManager.ins.load(longValue);
+      scenario.setExcelFileName(uploadFile.getName());
+      ScenarioManager.ins.update(scenario);
    }
 
-   public void loadLibs(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      KnowledgePackage var3 = this.f(var1);
-      if (var3 != null) {
-         this.a(var2, var3.getVariableCategories());
+   @URuleAuthorization(
+      authType = "project",
+      code = "manager",
+      model = "rule_knowledge"
+   )
+   public void downloadExcel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long longValue = Long.valueOf(req.getParameter("id"));
+      Scenario scenario = ScenarioManager.ins.load(longValue);
+      byte[] excelFile = ScenarioManager.ins.loadExcelFile(longValue);
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(excelFile);
+      FileUtils.downloadFile(scenario.getExcelFileName(), byteArrayInputStream, resp);
+      byteArrayInputStream.close();
+   }
+
+   public void loadLibs(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(req);
+      if (knowledgePackage != null) {
+         this.writeObjectToJson(resp, knowledgePackage.getVariableCategories());
       } else {
-         List var4 = this.d(var1);
-         this.a(var2, var4);
+         List items = this.resolveVariableCategories(req);
+         this.writeObjectToJson(resp, items);
       }
    }
 
-   private List d(HttpServletRequest var1) throws IOException {
-      KnowledgePackage var2 = this.f(var1);
-      if (var2 != null) {
-         return var2.getVariableCategories();
+   private List resolveVariableCategories(HttpServletRequest httpServletRequest) throws IOException {
+      KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(httpServletRequest);
+      if (knowledgePackage != null) {
+         return knowledgePackage.getVariableCategories();
       } else {
-         KnowledgeBase var3 = this.e(var1);
-         List var4 = var3.getResourceLibrary().getVariableCategories();
-         return var4;
+         KnowledgeBase knowledgeBase = this.resolveKnowledgeBase(httpServletRequest);
+         List variableCategories = knowledgeBase.getResourceLibrary().getVariableCategories();
+         return variableCategories;
       }
    }
 
-   private KnowledgeBase e(HttpServletRequest var1) throws IOException {
-      String var2 = var1.getParameter("files");
-      var2 = Utils.decodeURL(var2);
-      KnowledgeBuilder var3 = ServiceUtils.getKnowledgeBuilder();
-      ResourceBase var4 = var3.newResourceBase();
-      String[] var5 = var2.split(";");
+   private KnowledgeBase resolveKnowledgeBase(HttpServletRequest httpServletRequest) throws IOException {
+      String parameter = httpServletRequest.getParameter("files");
+      parameter = Utils.decodeURL(parameter);
+      KnowledgeBuilder knowledgeBuilder = ServiceUtils.getKnowledgeBuilder();
+      ResourceBase resourceBase = knowledgeBuilder.newResourceBase();
+      String[] parts = parameter.split(";");
 
-      for(String var9 : var5) {
-         var4.addResource(var9);
+      for(String text : parts) {
+         resourceBase.addResource(text);
       }
 
-      KnowledgeBase var11 = var3.buildKnowledgeBase(var4);
-      return var11;
+      KnowledgeBase knowledgeBase = knowledgeBuilder.buildKnowledgeBase(resourceBase);
+      return knowledgeBase;
    }
 
-   public void generateTemplateExcel(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getParameter("input");
-      String var4 = var1.getParameter("output");
-      var3 = URLDecoder.decode(var3, "utf-8");
-      var4 = URLDecoder.decode(var4, "utf-8");
-      ObjectMapper var5 = new ObjectMapper();
-      List var6 = (List)var5.readValue(var3, ArrayList.class);
-      List var7 = (List)var5.readValue(var4, ArrayList.class);
-      SXSSFWorkbook var8 = new SXSSFWorkbook();
-      this.a(var6, var8);
-      this.b(var7, var8);
-      var2.setContentType("application/x-xls");
-      var2.setHeader("Content-Disposition", "attachment; filename=urule-scenario-test-template.xlsx");
-      ServletOutputStream var9 = var2.getOutputStream();
-      var8.write(var9);
-      ((OutputStream)var9).flush();
-      ((OutputStream)var9).close();
-      var8.close();
+   public void generateTemplateExcel(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String parameter = req.getParameter("input");
+      String parameter2 = req.getParameter("output");
+      parameter = URLDecoder.decode(parameter, "utf-8");
+      parameter2 = URLDecoder.decode(parameter2, "utf-8");
+      ObjectMapper objectMapper = new ObjectMapper();
+      List items = (List)objectMapper.readValue(parameter, ArrayList.class);
+      List items2 = (List)objectMapper.readValue(parameter2, ArrayList.class);
+      SXSSFWorkbook sXSSFWorkbook = new SXSSFWorkbook();
+      this.buildInputSheet(items, sXSSFWorkbook);
+      this.buildOutputSheet(items2, sXSSFWorkbook);
+      resp.setContentType("application/x-xls");
+      resp.setHeader("Content-Disposition", "attachment; filename=urule-scenario-test-template.xlsx");
+      ServletOutputStream outputStream = resp.getOutputStream();
+      sXSSFWorkbook.write(outputStream);
+      ((OutputStream)outputStream).flush();
+      ((OutputStream)outputStream).close();
+      sXSSFWorkbook.close();
    }
 
-   private void a(List var1, SXSSFWorkbook var2) {
-      XSSFCellStyle var3 = (XSSFCellStyle)var2.createCellStyle();
-      var3.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var3.setFillForegroundColor(new XSSFColor(new Color(147, 228, 15)));
-      this.a(var3);
-      XSSFCellStyle var4 = (XSSFCellStyle)var2.createCellStyle();
-      var4.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var4.setFillForegroundColor(new XSSFColor(new Color(111, 208, 215)));
-      this.a(var4);
-      SXSSFSheet var5 = var2.createSheet("场景");
-      Row var6 = var5.createRow(0);
-      var6.createCell(0);
-      var6.createCell(1);
-      int var7 = 2;
-      int var8 = 0;
+   private void buildInputSheet(List items, SXSSFWorkbook sXSSFWorkbook) {
+      XSSFCellStyle cellStyle = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle.setFillForegroundColor(new XSSFColor(new Color(147, 228, 15)));
+      this.applyCellBorders(cellStyle);
+      XSSFCellStyle xSSFCellStyle = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      xSSFCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      xSSFCellStyle.setFillForegroundColor(new XSSFColor(new Color(111, 208, 215)));
+      this.applyCellBorders(xSSFCellStyle);
+      SXSSFSheet sheet = sXSSFWorkbook.createSheet("场景");
+      Row row = sheet.createRow(0);
+      row.createCell(0);
+      row.createCell(1);
+      int number = 2;
+      int number2 = 0;
 
-      for(Map var10 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         XSSFCellStyle var11 = var3;
-         if (var8 % 2 == 0) {
-            var11 = var4;
+      for(Map valuesByKey : (Iterable<Map>)(Iterable<?>)(items)) {
+         XSSFCellStyle xSSFCellStyle2 = cellStyle;
+         if (number2 % 2 == 0) {
+            xSSFCellStyle2 = xSSFCellStyle;
          }
 
-         ++var8;
-         Cell var12 = var6.createCell(var7);
-         var12.setCellStyle(var11);
-         String var13 = (String)var10.get("name");
-         var12.setCellValue(var13);
-         List var14 = (List)var10.get("fields");
-         if (var14.size() > 1) {
-            for(int var15 = 0; var15 < var14.size() - 1; ++var15) {
-               int var16 = var15 + var7 + 1;
-               var6.createCell(var16).setCellStyle(var11);
+         ++number2;
+         Cell cell = row.createCell(number);
+         cell.setCellStyle(xSSFCellStyle2);
+         String name = (String)valuesByKey.get("name");
+         cell.setCellValue(name);
+         List fields = (List)valuesByKey.get("fields");
+         if (fields.size() > 1) {
+            for(int index = 0; index < fields.size() - 1; ++index) {
+               int number3 = index + number + 1;
+               row.createCell(number3).setCellStyle(xSSFCellStyle2);
             }
 
-            CellRangeAddress var33 = new CellRangeAddress(0, 0, var7, var7 + var14.size() - 1);
-            var5.addMergedRegion(var33);
+            CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, number, number + fields.size() - 1);
+            sheet.addMergedRegion(cellRangeAddress);
          }
 
-         var7 += var14.size();
+         number += fields.size();
       }
 
-      XSSFCellStyle var26 = (XSSFCellStyle)var2.createCellStyle();
-      XSSFColor var27 = new XSSFColor(new Color(197, 218, 115));
-      var26.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var26.setFillForegroundColor(var27);
-      this.a(var26);
-      Row var28 = var5.createRow(1);
-      Cell var29 = var28.createCell(0);
-      var29.setCellStyle(var26);
-      var29.setCellValue("方案标识");
-      Cell var30 = var28.createCell(1);
-      var30.setCellStyle(var26);
-      var30.setCellValue("描述");
-      var5.setColumnWidth(1, 3000);
-      var7 = 2;
-      var8 = 0;
+      XSSFCellStyle xSSFCellStyle3 = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      XSSFColor xSSFColor = new XSSFColor(new Color(197, 218, 115));
+      xSSFCellStyle3.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      xSSFCellStyle3.setFillForegroundColor(xSSFColor);
+      this.applyCellBorders(xSSFCellStyle3);
+      Row row2 = sheet.createRow(1);
+      Cell cell2 = row2.createCell(0);
+      cell2.setCellStyle(xSSFCellStyle3);
+      cell2.setCellValue("方案标识");
+      Cell cell3 = row2.createCell(1);
+      cell3.setCellStyle(xSSFCellStyle3);
+      cell3.setCellValue("描述");
+      sheet.setColumnWidth(1, 3000);
+      number = 2;
+      number2 = 0;
 
-      for(Map var34 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         XSSFCellStyle var36 = var3;
-         if (var8 % 2 == 0) {
-            var36 = var4;
+      for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)(items)) {
+         XSSFCellStyle xSSFCellStyle4 = cellStyle;
+         if (number2 % 2 == 0) {
+            xSSFCellStyle4 = xSSFCellStyle;
          }
 
-         ++var8;
+         ++number2;
 
-         for(Map var19 : (Iterable<Map>)(Iterable<?>)((List)var34.get("fields"))) {
-            Cell var20 = var28.createCell(var7);
-            var20.setCellStyle(var36);
-            var5.setColumnWidth(var7, 3300);
-            String var21 = (String)var19.get("label");
-            var20.setCellValue(var21);
-            ++var7;
+         for(Map valuesByKey3 : (Iterable<Map>)(Iterable<?>)((List)valuesByKey2.get("fields"))) {
+            Cell cell4 = row2.createCell(number);
+            cell4.setCellStyle(xSSFCellStyle4);
+            sheet.setColumnWidth(number, 3300);
+            String label = (String)valuesByKey3.get("label");
+            cell4.setCellValue(label);
+            ++number;
          }
       }
 
-      Row var32 = var5.createRow(2);
-      XSSFCellStyle var35 = (XSSFCellStyle)var2.createCellStyle();
-      this.a(var35);
-      Cell var37 = var32.createCell(0);
-      var37.setCellStyle(var35);
-      this.a(var35);
-      var37.setCellValue("1");
-      Cell var38 = var32.createCell(1);
-      var38.setCellStyle(var35);
-      var38.setCellValue("描述内容");
-      var7 = 2;
+      Row row3 = sheet.createRow(2);
+      XSSFCellStyle xSSFCellStyle5 = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      this.applyCellBorders(xSSFCellStyle5);
+      Cell cell5 = row3.createCell(0);
+      cell5.setCellStyle(xSSFCellStyle5);
+      this.applyCellBorders(xSSFCellStyle5);
+      cell5.setCellValue("1");
+      Cell cell6 = row3.createCell(1);
+      cell6.setCellStyle(xSSFCellStyle5);
+      cell6.setCellValue("描述内容");
+      number = 2;
 
-      for(Map var40 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         List var41 = (List)var40.get("fields");
+      for(Map valuesByKey4 : (Iterable<Map>)(Iterable<?>)(items)) {
+         List fields2 = (List)valuesByKey4.get("fields");
 
-         for(int var42 = 0; var42 < var41.size(); ++var42) {
-            Cell var22 = var32.createCell(var7);
-            var22.setCellStyle(var35);
-            ++var7;
+         for(int index2 = 0; index2 < fields2.size(); ++index2) {
+            Cell cell7 = row3.createCell(number);
+            cell7.setCellStyle(xSSFCellStyle5);
+            ++number;
          }
       }
 
    }
 
-   private void b(List var1, SXSSFWorkbook var2) {
-      XSSFCellStyle var3 = (XSSFCellStyle)var2.createCellStyle();
-      var3.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var3.setFillForegroundColor(new XSSFColor(new Color(255, 235, 69)));
-      this.a(var3);
-      XSSFCellStyle var4 = (XSSFCellStyle)var2.createCellStyle();
-      var4.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var4.setFillForegroundColor(new XSSFColor(new Color(248, 255, 217)));
-      this.a(var4);
-      SXSSFSheet var5 = var2.createSheet("预期结果");
-      Row var6 = var5.createRow(0);
-      var6.createCell(0);
-      int var7 = 1;
-      int var8 = 0;
+   private void buildOutputSheet(List items, SXSSFWorkbook sXSSFWorkbook) {
+      XSSFCellStyle cellStyle = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle.setFillForegroundColor(new XSSFColor(new Color(255, 235, 69)));
+      this.applyCellBorders(cellStyle);
+      XSSFCellStyle xSSFCellStyle = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      xSSFCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      xSSFCellStyle.setFillForegroundColor(new XSSFColor(new Color(248, 255, 217)));
+      this.applyCellBorders(xSSFCellStyle);
+      SXSSFSheet sheet = sXSSFWorkbook.createSheet("预期结果");
+      Row row = sheet.createRow(0);
+      row.createCell(0);
+      int number = 1;
+      int number2 = 0;
 
-      for(Map var10 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         XSSFCellStyle var11 = var3;
-         if (var8 % 2 == 0) {
-            var11 = var4;
+      for(Map valuesByKey : (Iterable<Map>)(Iterable<?>)(items)) {
+         XSSFCellStyle xSSFCellStyle2 = cellStyle;
+         if (number2 % 2 == 0) {
+            xSSFCellStyle2 = xSSFCellStyle;
          }
 
-         ++var8;
-         Cell var12 = var6.createCell(var7);
-         var12.setCellStyle(var11);
-         String var13 = (String)var10.get("name");
-         var12.setCellValue(var13);
-         List var14 = (List)var10.get("fields");
-         if (var14.size() > 1) {
-            for(int var15 = 0; var15 < var14.size() - 1; ++var15) {
-               int var16 = var15 + var7 + 1;
-               var6.createCell(var16).setCellStyle(var11);
+         ++number2;
+         Cell cell = row.createCell(number);
+         cell.setCellStyle(xSSFCellStyle2);
+         String name = (String)valuesByKey.get("name");
+         cell.setCellValue(name);
+         List fields = (List)valuesByKey.get("fields");
+         if (fields.size() > 1) {
+            for(int index = 0; index < fields.size() - 1; ++index) {
+               int number3 = index + number + 1;
+               row.createCell(number3).setCellStyle(xSSFCellStyle2);
             }
 
-            CellRangeAddress var35 = new CellRangeAddress(0, 0, var7, var7 + var14.size() - 1);
-            var5.addMergedRegion(var35);
+            CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, number, number + fields.size() - 1);
+            sheet.addMergedRegion(cellRangeAddress);
          }
 
-         var7 += var14.size();
+         number += fields.size();
       }
 
-      XSSFCellStyle var27 = (XSSFCellStyle)var2.createCellStyle();
-      XSSFColor var28 = new XSSFColor(new Color(197, 218, 115));
-      var27.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var27.setFillForegroundColor(var28);
-      this.a(var27);
-      Row var29 = var5.createRow(1);
-      Cell var30 = var29.createCell(0);
-      var30.setCellStyle(var27);
-      var30.setCellValue("方案标识");
-      var7 = 1;
-      var8 = 0;
+      XSSFCellStyle xSSFCellStyle3 = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      XSSFColor xSSFColor = new XSSFColor(new Color(197, 218, 115));
+      xSSFCellStyle3.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      xSSFCellStyle3.setFillForegroundColor(xSSFColor);
+      this.applyCellBorders(xSSFCellStyle3);
+      Row row2 = sheet.createRow(1);
+      Cell cell2 = row2.createCell(0);
+      cell2.setCellStyle(xSSFCellStyle3);
+      cell2.setCellValue("方案标识");
+      number = 1;
+      number2 = 0;
 
-      for(Map var33 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         XSSFCellStyle var36 = var3;
-         if (var8 % 2 == 0) {
-            var36 = var4;
+      for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)(items)) {
+         XSSFCellStyle xSSFCellStyle4 = cellStyle;
+         if (number2 % 2 == 0) {
+            xSSFCellStyle4 = xSSFCellStyle;
          }
 
-         ++var8;
+         ++number2;
 
-         for(Map var18 : (Iterable<Map>)(Iterable<?>)((List)var33.get("fields"))) {
-            Cell var19 = var29.createCell(var7);
-            var19.setCellStyle(var36);
-            var5.setColumnWidth(var7, 4000);
-            String var20 = (String)var18.get("label");
-            String var21 = (String)var18.get("op");
-            Op var22 = Op.valueOf(var21);
-            String var23 = "\"" + var20 + "\"" + var22.toString();
-            var19.setCellValue(var23);
-            ++var7;
+         for(Map valuesByKey3 : (Iterable<Map>)(Iterable<?>)((List)valuesByKey2.get("fields"))) {
+            Cell cell3 = row2.createCell(number);
+            cell3.setCellStyle(xSSFCellStyle4);
+            sheet.setColumnWidth(number, 4000);
+            String label = (String)valuesByKey3.get("label");
+            String op2 = (String)valuesByKey3.get("op");
+            Op op = Op.valueOf(op2);
+            String text = "\"" + label + "\"" + op.toString();
+            cell3.setCellValue(text);
+            ++number;
          }
       }
 
-      Row var32 = var5.createRow(2);
-      XSSFCellStyle var34 = (XSSFCellStyle)var2.createCellStyle();
-      this.a(var34);
-      Cell var37 = var32.createCell(0);
-      var37.setCellStyle(var34);
-      var37.setCellValue("1");
-      var7 = 1;
+      Row row3 = sheet.createRow(2);
+      XSSFCellStyle xSSFCellStyle5 = (XSSFCellStyle)sXSSFWorkbook.createCellStyle();
+      this.applyCellBorders(xSSFCellStyle5);
+      Cell cell4 = row3.createCell(0);
+      cell4.setCellStyle(xSSFCellStyle5);
+      cell4.setCellValue("1");
+      number = 1;
 
-      for(Map var40 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         List var41 = (List)var40.get("fields");
+      for(Map valuesByKey4 : (Iterable<Map>)(Iterable<?>)(items)) {
+         List fields2 = (List)valuesByKey4.get("fields");
 
-         for(int var42 = 0; var42 < var41.size(); ++var42) {
-            Cell var43 = var32.createCell(var7);
-            var43.setCellStyle(var34);
-            ++var7;
+         for(int index2 = 0; index2 < fields2.size(); ++index2) {
+            Cell cell5 = row3.createCell(number);
+            cell5.setCellStyle(xSSFCellStyle5);
+            ++number;
          }
       }
 
    }
 
-   private void a(XSSFCellStyle var1) {
-      var1.setBorderLeft(BorderStyle.THIN);
-      var1.setBorderRight(BorderStyle.THIN);
-      var1.setBorderTop(BorderStyle.THIN);
-      var1.setBorderBottom(BorderStyle.THIN);
-      var1.setWrapText(true);
+   private void applyCellBorders(XSSFCellStyle xSSFCellStyle) {
+      xSSFCellStyle.setBorderLeft(BorderStyle.THIN);
+      xSSFCellStyle.setBorderRight(BorderStyle.THIN);
+      xSSFCellStyle.setBorderTop(BorderStyle.THIN);
+      xSSFCellStyle.setBorderBottom(BorderStyle.THIN);
+      xSSFCellStyle.setWrapText(true);
    }
 
-   private KnowledgePackage f(HttpServletRequest var1) {
-      String var2 = var1.getParameter("packetId");
-      if (StringUtils.isNotBlank(var2)) {
-         Packet var3 = PacketManager.ins.load(Long.valueOf(var2));
-         if (var3.getType().equals(PacketType.upload)) {
-            PacketPackage var4 = var3.getPacketPackage();
-            if (var4 != null && var4.getId() != 0L) {
-               String var5 = PacketPackageManager.ins.loadContent(var4.getId());
-               if (StringUtils.isBlank(var5)) {
+   private KnowledgePackage resolveKnowledgePackage(HttpServletRequest httpServletRequest) {
+      String parameter = httpServletRequest.getParameter("packetId");
+      if (StringUtils.isNotBlank(parameter)) {
+         Packet packet = PacketManager.ins.load(Long.valueOf(parameter));
+         if (packet.getType().equals(PacketType.upload)) {
+            PacketPackage packetPackage = packet.getPacketPackage();
+            if (packetPackage != null && packetPackage.getId() != 0L) {
+               String content = PacketPackageManager.ins.loadContent(packetPackage.getId());
+               if (StringUtils.isBlank(content)) {
                   throw new InfoException("请先上传知识包");
                }
 
-               KnowledgePackage var6 = Utils.stringToKnowledgePackage(var5);
-               return var6;
+               KnowledgePackage knowledgePackage = Utils.stringToKnowledgePackage(content);
+               return knowledgePackage;
             }
 
             throw new InfoException("请先上传知识包");

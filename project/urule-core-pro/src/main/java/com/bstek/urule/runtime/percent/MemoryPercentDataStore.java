@@ -7,41 +7,41 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryPercentDataStore implements PercentDataStore {
-   private Map<String, PercentUnit> a = new ConcurrentHashMap<>();
+   private Map<String, PercentUnit> percentUnitsByDecisionNode = new ConcurrentHashMap<>();
 
    @Override
-   public PercentUnit getDecisionNodePercent(ProcessDefinition var1, List<DecisionItem> var2, String var3) {
-      int var4 = this.a(var2);
-      String var5 = this.a(var1, var3);
-      if (this.a.containsKey(var5)) {
-         PercentUnit var6 = this.a.get(var5);
-         if (var6.getUnitId() == var4 && var6.getTotal() + 100L < Long.MAX_VALUE) {
-            return var6;
+   public PercentUnit getDecisionNodePercent(ProcessDefinition pd, List<DecisionItem> items, String decisionNodeName) {
+      int number = this.calculateDecisionUnitId(items);
+      String text = this.buildDecisionNodeKey(pd, decisionNodeName);
+      if (this.percentUnitsByDecisionNode.containsKey(text)) {
+         PercentUnit percentUnit = this.percentUnitsByDecisionNode.get(text);
+         if (percentUnit.getUnitId() == number && percentUnit.getTotal() + 100L < Long.MAX_VALUE) {
+            return percentUnit;
          }
 
-         this.a.remove(var5);
+         this.percentUnitsByDecisionNode.remove(text);
       }
 
-      PercentUnit var7 = new PercentUnit();
-      var7.setUnitId(var4);
-      var7.setDecisionNodeName(var3);
-      var7.setFlowId(var1.getId());
-      var7.setTotal(0L);
-      this.a.put(var5, var7);
-      return var7;
+      PercentUnit decisionNodePercent = new PercentUnit();
+      decisionNodePercent.setUnitId(number);
+      decisionNodePercent.setDecisionNodeName(decisionNodeName);
+      decisionNodePercent.setFlowId(pd.getId());
+      decisionNodePercent.setTotal(0L);
+      this.percentUnitsByDecisionNode.put(text, decisionNodePercent);
+      return decisionNodePercent;
    }
 
-   private String a(ProcessDefinition var1, String var2) {
-      return var1.getFile() == null ? "" : var1.getFile() + "." + var1.getId() + "." + var2;
+   private String buildDecisionNodeKey(ProcessDefinition processDefinition, String text) {
+      return processDefinition.getFile() == null ? "" : processDefinition.getFile() + "." + processDefinition.getId() + "." + text;
    }
 
-   private int a(List<DecisionItem> var1) {
-      StringBuilder var2 = new StringBuilder();
+   private int calculateDecisionUnitId(List<DecisionItem> decisionItems) {
+      StringBuilder stringBuilder = new StringBuilder();
 
-      for (DecisionItem var4 : var1) {
-         var2.append(var4.getTo() + var4.getPercent());
+      for (DecisionItem decisionItem : decisionItems) {
+         stringBuilder.append(decisionItem.getTo() + decisionItem.getPercent());
       }
 
-      return var2.toString().hashCode();
+      return stringBuilder.toString().hashCode();
    }
 }

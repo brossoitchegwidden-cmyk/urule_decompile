@@ -17,56 +17,56 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.Element;
 
 public class ReferenceServletHandler extends ApiServletHandler {
-   public void file(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      String var5 = var1.getParameter("type");
-      if (StringUtils.isNotBlank(var5) && var5.contentEquals(ResourceType.Packet.name())) {
-         FileReference var12 = KnowledgePacketBuilder.builder.build(var3);
-         this.a(var2, var12);
+   public void file(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      String parameter = req.getParameter("type");
+      if (StringUtils.isNotBlank(parameter) && parameter.contentEquals(ResourceType.Packet.name())) {
+         FileReference fileReference = KnowledgePacketBuilder.builder.build(longValue);
+         this.writeObjectToJson(resp, fileReference);
       } else {
-         String var6 = FileManager.ins.loadContent(var3);
-         RuleFile var7 = FileManager.ins.get(var3);
-         RuleFileHolder.resetRuleFile(var7.getPath());
-         Element var8 = FileDeserializer.getInstance().parseXml(var6);
-         Object var9 = FileDeserializer.getInstance().deserialize(var8);
+         String content = FileManager.ins.loadContent(longValue);
+         RuleFile ruleFile = FileManager.ins.get(longValue);
+         RuleFileHolder.resetRuleFile(ruleFile.getPath());
+         Element xml = FileDeserializer.getInstance().parseXml(content);
+         Object objectValue = FileDeserializer.getInstance().deserialize(xml);
          RuleFileHolder.clean();
-         Reference var10 = Reference.loadReference(var9);
-         if (var10 == null) {
+         Reference reference = Reference.loadReference(objectValue);
+         if (reference == null) {
             return;
          }
 
-         FileReference var11 = var10.build(var9);
-         var11.setId(var3);
-         var11.setName(var7.getName());
-         var11.setPathInfo(var7.getPath());
-         this.a(var2, var11);
+         FileReference fileReference2 = reference.build(objectValue);
+         fileReference2.setId(longValue);
+         fileReference2.setName(ruleFile.getName());
+         fileReference2.setPathInfo(ruleFile.getPath());
+         this.writeObjectToJson(resp, fileReference2);
       }
 
    }
 
-   public void uuid(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("projectId"));
-      long var5 = Long.valueOf(var1.getParameter("id"));
-      String var7 = var1.getParameter("uuid");
+   public void uuid(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      long longValue2 = Long.valueOf(req.getParameter("id"));
+      String parameter = req.getParameter("uuid");
 
       try {
-         List var8 = ReferenceService.ins.uuid(var3, var5, var7);
-         this.a(var2, var8);
-      } catch (DeserializeException var9) {
-         throw new ReferenceDeleteException(var9.getMessage());
+         List items = ReferenceService.ins.uuid(longValue, longValue2, parameter);
+         this.writeObjectToJson(resp, items);
+      } catch (DeserializeException deserializeException) {
+         throw new ReferenceDeleteException(deserializeException.getMessage());
       }
    }
 
-   public void packet(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("projectId"));
-      long var5 = Long.valueOf(var1.getParameter("id"));
-      String var7 = var1.getParameter("code");
+   public void packet(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      long longValue2 = Long.valueOf(req.getParameter("id"));
+      String parameter = req.getParameter("code");
 
       try {
-         List var8 = ReferenceService.ins.packet(var3, var5, var7);
-         this.a(var2, var8);
-      } catch (DeserializeException var9) {
-         throw new ReferenceDeleteException(var9.getMessage());
+         List items = ReferenceService.ins.packet(longValue, longValue2, parameter);
+         this.writeObjectToJson(resp, items);
+      } catch (DeserializeException deserializeException) {
+         throw new ReferenceDeleteException(deserializeException.getMessage());
       }
    }
 

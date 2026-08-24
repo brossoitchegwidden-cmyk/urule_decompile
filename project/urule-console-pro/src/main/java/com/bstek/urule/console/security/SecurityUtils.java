@@ -8,37 +8,37 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationContext;
 
 public class SecurityUtils {
-   private static SecurityProvider a;
-   private static boolean b = false;
+   private static SecurityProvider securityProvider;
+   private static boolean customProvider = false;
 
-   public static String getLoginUsername(HttpServletRequest var0) {
-      User var1 = getLoginUser(var0);
-      return var1 == null ? null : var1.getName();
+   public static String getLoginUsername(HttpServletRequest req) {
+      User loginUser = getLoginUser(req);
+      return loginUser == null ? null : loginUser.getName();
    }
 
-   public static User getLoginUser(HttpServletRequest var0) {
-      return a.getLoginUser(var0);
+   public static User getLoginUser(HttpServletRequest req) {
+      return SecurityUtils.securityProvider.getLoginUser(req);
    }
 
    public static SecurityProvider getSecurityProvider() {
-      return a;
+      return SecurityUtils.securityProvider;
    }
 
    public static boolean isCustomProvider() {
-      return b;
+      return SecurityUtils.customProvider;
    }
 
    static {
-      ApplicationContext var0 = Utils.getApplicationContext();
+      ApplicationContext applicationContext = Utils.getApplicationContext();
 
       try {
-         a = (SecurityProvider)var0.getBean("urule.securityProvider");
-         b = true;
-      } catch (Exception var2) {
+         SecurityUtils.securityProvider = (SecurityProvider)applicationContext.getBean("urule.securityProvider");
+         SecurityUtils.customProvider = true;
+      } catch (Exception ignored) {
       }
 
-      if (a == null) {
-         a = new DefaultSecurityProvider();
+      if (SecurityUtils.securityProvider == null) {
+         SecurityUtils.securityProvider = new DefaultSecurityProvider();
       }
 
    }

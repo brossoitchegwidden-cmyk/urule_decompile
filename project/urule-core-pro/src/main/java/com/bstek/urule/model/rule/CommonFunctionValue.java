@@ -15,8 +15,8 @@ public class CommonFunctionValue extends AbstractValue {
    @Override
    public String getId() {
       if (this.id == null) {
-         String var1 = LocaleHolder.isEnglish() ? "Function" : "函数";
-         this.id = "[" + var1 + "]" + this.label + "(" + this.parameter.getId() + ")";
+         String text = LocaleHolder.isEnglish() ? "Function" : "函数";
+         this.id = "[" + text + "]" + this.label + "(" + this.parameter.getId() + ")";
          if (this.arithmetic != null) {
             this.id = this.id + this.arithmetic.getId();
          }
@@ -27,13 +27,13 @@ public class CommonFunctionValue extends AbstractValue {
 
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Function" : "函数";
-      String var2 = "";
+      String text = LocaleHolder.isEnglish() ? "Function" : "函数";
+      String id = "";
       if (this.parameter != null) {
-         var2 = this.parameter.getId();
+         id = this.parameter.getId();
       }
 
-      return "[" + var1 + "]" + this.label + "(" + var2 + ")";
+      return "[" + text + "]" + this.label + "(" + id + ")";
    }
 
    @Override
@@ -45,27 +45,27 @@ public class CommonFunctionValue extends AbstractValue {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
       return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.label = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
-   public void setValueType(ValueType var1) {
-      this.valueType = var1;
+   public void setValueType(ValueType valueType) {
+      this.valueType = valueType;
    }
 
    public CommonFunctionParameter getParameter() {
       return this.parameter;
    }
 
-   public void setParameter(CommonFunctionParameter var1) {
-      this.parameter = var1;
+   public void setParameter(CommonFunctionParameter parameter) {
+      this.parameter = parameter;
    }
 }

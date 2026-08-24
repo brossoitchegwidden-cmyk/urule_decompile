@@ -5,9 +5,9 @@ import com.bstek.urule.console.database.model.datasource.DataSource;
 public interface DataSourceService {
    DataSourceService ins = new DataSourceServiceImpl();
 
-   void add(DataSource var1);
+   void add(DataSource dataSource);
 
-   void update(DataSource var1);
+   void update(DataSource dataSource);
 
-   void remove(Long var1);
+   void remove(Long id);
 }

@@ -8,26 +8,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class SystemServletHandler extends AnonymousServletHandler {
-   public void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      var2.setCharacterEncoding("UTF-8");
-      var2.setContentType("text/html;charset=UTF-8");
-      PrintWriter var3 = var2.getWriter();
-      StringBuilder var4 = new StringBuilder();
-      var4.append("Product Version：urule-pro-" + DynamicSpringConfigLoaderImpl.getProductVersion());
-      var4.append("<br><br>");
+   public void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      resp.setCharacterEncoding("UTF-8");
+      resp.setContentType("text/html;charset=UTF-8");
+      PrintWriter writer = resp.getWriter();
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("Product Version：urule-pro-" + DynamicSpringConfigLoaderImpl.getProductVersion());
+      stringBuilder.append("<br><br>");
       if (StringUtils.isNotBlank(DynamicSpringConfigLoaderImpl.getAuthInfo())) {
-         String var5 = DynamicSpringConfigLoaderImpl.getLimitDate();
-         var4.append("License ：Authorized to " + DynamicSpringConfigLoaderImpl.getAuthInfo() + "（授权给【" + DynamicSpringConfigLoaderImpl.getAuthInfo() + "】使用），Limited : " + var5 + "");
+         String limitDate = DynamicSpringConfigLoaderImpl.getLimitDate();
+         stringBuilder.append("License ：Authorized to " + DynamicSpringConfigLoaderImpl.getAuthInfo() + "（授权给【" + DynamicSpringConfigLoaderImpl.getAuthInfo() + "】使用），Limited : " + limitDate + "");
       } else {
-         var4.append("License ：You are using a trial version,please purchase the commercial license.（当前为试用版，请购买商业授权）");
+         stringBuilder.append("License ：You are using a trial version,please purchase the commercial license.（当前为试用版，请购买商业授权）");
       }
 
-      var4.append("<br><br>");
-      var4.append("Key:" + DynamicSpringConfigLoaderImpl.getLicenseKey());
-      var4.append("<br><br>");
-      var3.write(var4.toString());
-      var3.flush();
-      var3.close();
+      stringBuilder.append("<br><br>");
+      stringBuilder.append("Key:" + DynamicSpringConfigLoaderImpl.getLicenseKey());
+      stringBuilder.append("<br><br>");
+      writer.write(stringBuilder.toString());
+      writer.flush();
+      writer.close();
    }
 
    public String url() {

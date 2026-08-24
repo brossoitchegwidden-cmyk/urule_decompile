@@ -1,19 +1,19 @@
 package com.bstek.urule.debug;
 
 public class MessageItem {
-   private String a;
-   private String b;
+   private String msg;
+   private String htmlMsg;
 
-   public MessageItem(String var1, String var2) {
-      this.a = var1;
-      this.b = var2;
+   public MessageItem(String msg, String htmlMsg) {
+      this.msg = msg;
+      this.htmlMsg = htmlMsg;
    }
 
    public String toHtml() {
-      return this.b;
+      return this.htmlMsg;
    }
 
    public String getMsg() {
-      return this.a;
+      return this.msg;
    }
 }

@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class ScorecardDeserializer implements Deserializer<ScorecardDefinition> {
    public static final String BEAN_ID = "urule.scorecardDeserializer";
-   private ScorecardParser a;
+   private ScorecardParser scorecardParser;
 
-   public ScorecardDefinition deserialize(Element var1) {
-      return this.a.parse(var1);
+   public ScorecardDefinition deserialize(Element root) {
+      return this.scorecardParser.parse(root);
    }
 
-   public void setScorecardParser(ScorecardParser var1) {
-      this.a = var1;
+   public void setScorecardParser(ScorecardParser scorecardParser) {
+      this.scorecardParser = scorecardParser;
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.scorecardParser.support(root.getName());
    }
 }

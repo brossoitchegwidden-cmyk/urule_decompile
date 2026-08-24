@@ -5,17 +5,17 @@ import com.bstek.urule.console.database.model.PacketFile;
 public interface PacketFileManager {
    PacketFileManager ins = new PacketFileManagerImpl();
 
-   PacketFile load(long var1);
+   PacketFile load(long id);
 
-   void add(PacketFile var1);
+   void add(PacketFile file);
 
-   void delete(long var1);
+   void delete(long id);
 
-   void deleteByPacketId(long var1);
+   void deleteByPacketId(long packetId);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   void update(PacketFile var1);
+   void update(PacketFile file);
 
    PacketFileQuery newQuery();
 }

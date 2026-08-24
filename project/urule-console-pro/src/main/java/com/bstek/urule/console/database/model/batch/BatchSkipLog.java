@@ -3,77 +3,77 @@ package com.bstek.urule.console.database.model.batch;
 import com.bstek.urule.console.database.model.URuleLog;
 
 public class BatchSkipLog extends URuleLog {
-   private static final long a = -9032084549084743906L;
-   private Long b;
-   private Long c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private Long i;
+   private static final long serialVersionUID = -9032084549084743906L;
+   private Long batchId;
+   private Long logId;
+   private String type;
+   private String msg;
+   private String detail;
+   private String data;
+   private String groupId;
+   private Long projectId;
 
    public String getType() {
-      return this.d;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.d = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String getMsg() {
-      return this.e;
+      return this.msg;
    }
 
-   public void setMsg(String var1) {
-      this.e = var1;
+   public void setMsg(String msg) {
+      this.msg = msg;
    }
 
    public String getDetail() {
-      return this.f;
+      return this.detail;
    }
 
-   public void setDetail(String var1) {
-      this.f = var1;
+   public void setDetail(String detail) {
+      this.detail = detail;
    }
 
    public String getData() {
-      return this.g;
+      return this.data;
    }
 
-   public void setData(String var1) {
-      this.g = var1;
+   public void setData(String data) {
+      this.data = data;
    }
 
    public String getGroupId() {
-      return this.h;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.h = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public Long getProjectId() {
-      return this.i;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.i = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public Long getBatchId() {
-      return this.b;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.b = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public Long getLogId() {
-      return this.c;
+      return this.logId;
    }
 
-   public void setLogId(Long var1) {
-      this.c = var1;
+   public void setLogId(Long logId) {
+      this.logId = logId;
    }
 }

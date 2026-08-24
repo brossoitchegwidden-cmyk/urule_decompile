@@ -45,165 +45,172 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.beanutils.BeanUtils;
 
 public class GroupServletHandler extends ApiServletHandler {
-   public void list(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = SecurityUtils.getLoginUsername(var1);
-      this.a(var2, GroupManager.ins.createQuery().list(var3));
+   public void list(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      this.writeObjectToJson(resp, GroupManager.ins.createQuery().list(loginUsername));
    }
 
    @Transactional
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Group var3 = (Group)this.a().readValue(var1.getParameter("group"), Group.class);
-      if (var3.getId().length() < 3) {
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Group group = (Group)this.createObjectMapper().readValue(req.getParameter("group"), Group.class);
+      if (group.getId().length() < 3) {
          throw new InfoException("团队ID的至少3个字符<br>Team id must be at least three characters");
       } else {
-         var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-         GroupService.ins.add(var3);
-         List var4 = GroupManager.ins.createQuery().list(SecurityUtils.getLoginUsername(var1));
-         User var5 = SecurityUtils.getLoginUser(var1);
-         var5.setGroups(var4);
-         this.a(var2, var3);
+         group.setCreateUser(SecurityUtils.getLoginUsername(req));
+         GroupService.ins.add(group);
+         List items = GroupManager.ins.createQuery().list(SecurityUtils.getLoginUsername(req));
+         User loginUser = SecurityUtils.getLoginUser(req);
+         loginUser.setGroups(items);
+         this.writeObjectToJson(resp, group);
       }
    }
 
-   public void remove(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      final String var3 = var1.getParameter("groupId");
-      Group var4 = GroupManager.ins.get(var3);
-      if (!SecurityUtils.getLoginUsername(var1).equals(var4.getCreateUser())) {
-         throw new PermissionDeniedException("Permission denied for team [" + var3 + "]");
+   public void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      final String parameter = req.getParameter("groupId");
+      Group group = GroupManager.ins.get(parameter);
+      if (!SecurityUtils.getLoginUsername(req).equals(group.getCreateUser())) {
+         throw new PermissionDeniedException("Permission denied for team [" + parameter + "]");
       } else {
-         this.a(new TransactionalInvoke() {
+         this.doInTransactional(new TransactionalInvoke() {
             public void doTransactional() {
-               GroupService.ins.remove(var3);
+               GroupService.ins.remove(parameter);
             }
          });
-         List var5 = GroupManager.ins.createQuery().list(SecurityUtils.getLoginUsername(var1));
-         User var6 = SecurityUtils.getLoginUser(var1);
-         var6.setGroups(var5);
-         List var7 = ((PacketCacheImpl)PacketCache.ins).recacheAllPackets(var3);
-         this.a(var2, var7);
+         List items = GroupManager.ins.createQuery().list(SecurityUtils.getLoginUsername(req));
+         User loginUser = SecurityUtils.getLoginUser(req);
+         loginUser.setGroups(items);
+         List items2 = ((PacketCacheImpl)PacketCache.ins).recacheAllPackets(parameter);
+         this.writeObjectToJson(resp, items2);
       }
    }
 
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Group var3 = (Group)this.a().readValue(var1.getParameter("group"), Group.class);
-      if (var3.getId().equals(ContextHolder.getGroupId())) {
-         Group var4 = GroupManager.ins.get(var3.getId());
-         if (!SecurityUtils.getLoginUsername(var1).equals(var3.getCreateUser())) {
-            throw new PermissionDeniedException("Permission denied for team [" + var3.getId() + "]");
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Group group = (Group)this.createObjectMapper().readValue(req.getParameter("group"), Group.class);
+      if (group.getId().equals(ContextHolder.getGroupId())) {
+         Group group2 = GroupManager.ins.get(group.getId());
+         if (!SecurityUtils.getLoginUsername(req).equals(group.getCreateUser())) {
+            throw new PermissionDeniedException("Permission denied for team [" + group.getId() + "]");
          } else {
-            var4.setName(var3.getName());
-            var4.setDesc(var3.getDesc());
-            var4.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-            GroupManager.ins.update(var4);
-            this.a(var2, var4);
+            group2.setName(group.getName());
+            group2.setDesc(group.getDesc());
+            group2.setUpdateUser(SecurityUtils.getLoginUsername(req));
+            GroupManager.ins.update(group2);
+            this.writeObjectToJson(resp, group2);
          }
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void get(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      Group var4 = GroupManager.ins.get(var3);
-      this.a(var2, var4);
+   public void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      Group group = GroupManager.ins.get(parameter);
+      this.writeObjectToJson(resp, group);
    }
 
+   /**获取是否可以自由创建Group的系统配置*/
    @URuleAuthAnonymous
-   public void freeCreate(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      this.a(var2, GroupService.ins.isFreeCreate(SecurityUtils.getLoginUsername(var1)));
+   public void freeCreate(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      this.writeObjectToJson(resp, GroupService.ins.isFreeCreate(SecurityUtils.getLoginUsername(req)));
    }
 
-   public void roles(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      this.a(var2, GroupRoleService.ins.loadRoles(var3));
+   /**获取团队的角色列表*/
+   public void roles(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      this.writeObjectToJson(resp, GroupRoleService.ins.loadRoles(parameter));
    }
 
-   public void userRoles(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      String var4 = var1.getParameter("account");
-      this.a(var2, GroupRoleService.ins.loadUserRoles(var3, var4));
+   /**获取团队的角色列表*/
+   public void userRoles(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      String parameter2 = req.getParameter("account");
+      this.writeObjectToJson(resp, GroupRoleService.ins.loadUserRoles(parameter, parameter2));
    }
 
+   /**为团队添加角色*/
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "permissions"
    )
-   public void addRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("roleName");
+   public void addRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("roleName");
       if (StringUtils.isNotBlank(ContextHolder.getGroupId())) {
-         GroupRole var4 = new GroupRole();
-         var4.setName(var3);
-         var4.setGroupId(ContextHolder.getGroupId());
-         var4.setType("custom");
-         GroupRoleService.ins.add(var4);
-         this.a(var2, var4);
-         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", var4.getId(), String.format("Create role %s[%s]", var4.getName(), var4.getId()));
+         GroupRole groupRole = new GroupRole();
+         groupRole.setName(parameter);
+         groupRole.setGroupId(ContextHolder.getGroupId());
+         groupRole.setType("custom");
+         GroupRoleService.ins.add(groupRole);
+         this.writeObjectToJson(resp, groupRole);
+         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", groupRole.getId(), String.format("Create role %s[%s]", groupRole.getName(), groupRole.getId()));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**团队角色修改名称*/
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "permissions"
    )
-   public void renameRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      String var5 = var1.getParameter("roleName");
-      GroupRole var6 = GroupRoleService.ins.get(var3);
-      if (var6.getGroupId().equals(ContextHolder.getGroupId())) {
-         String var7 = var6.getName();
-         var6.setName(var5);
-         GroupRoleService.ins.update(var6);
-         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", var6.getId(), String.format("Role name [%s] updated to [%s]", var7, var5));
+   public void renameRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      String parameter = req.getParameter("roleName");
+      GroupRole groupRole = GroupRoleService.ins.get(longValue);
+      if (groupRole.getGroupId().equals(ContextHolder.getGroupId())) {
+         String name = groupRole.getName();
+         groupRole.setName(parameter);
+         GroupRoleService.ins.update(groupRole);
+         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", groupRole.getId(), String.format("Role name [%s] updated to [%s]", name, parameter));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**删除团队角色*/
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "permissions"
    )
-   public void removeRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      GroupRole var5 = GroupRoleManager.ins.get(var3);
-      if (var5.getGroupId().equals(ContextHolder.getGroupId())) {
-         GroupRoleService.ins.remove(var3);
-         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", var5.getId(), String.format("Remove role %s[%s]", var5.getName(), var5.getId()));
+   public void removeRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      GroupRole groupRole = GroupRoleManager.ins.get(longValue);
+      if (groupRole.getGroupId().equals(ContextHolder.getGroupId())) {
+         GroupRoleService.ins.remove(longValue);
+         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", groupRole.getId(), String.format("Remove role %s[%s]", groupRole.getName(), groupRole.getId()));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**添加团队用户*/
    @URuleAuthorization(
       authType = "group",
       model = "members",
       code = "add"
    )
    @Transactional
-   public void addUser(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      com.bstek.urule.console.database.model.User var3 = (com.bstek.urule.console.database.model.User)this.a().readValue(var1.getParameter("user"), com.bstek.urule.console.database.model.User.class);
-      String var4 = var3.getId();
-      if (StringUtils.isNotBlank(ContextHolder.getGroupId()) && StringUtils.isNotBlank(var4)) {
-         Group var5 = GroupManager.ins.get(ContextHolder.getGroupId());
-         if (var4.equals(var5.getCreateUser())) {
+   public void addUser(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      com.bstek.urule.console.database.model.User user = (com.bstek.urule.console.database.model.User)this.createObjectMapper().readValue(req.getParameter("user"), com.bstek.urule.console.database.model.User.class);
+      String id = user.getId();
+      if (StringUtils.isNotBlank(ContextHolder.getGroupId()) && StringUtils.isNotBlank(id)) {
+         Group group = GroupManager.ins.get(ContextHolder.getGroupId());
+         if (id.equals(group.getCreateUser())) {
             throw new IllegalOperationException("该账号是团队管理员,无法重复添加!");
          } else {
-            com.bstek.urule.console.database.model.User var6 = UserManager.ins.get(var4);
-            if (var6 != null) {
+            com.bstek.urule.console.database.model.User user2 = UserManager.ins.get(id);
+            if (user2 != null) {
                throw new IllegalOperationException("该账号以存在,无法重复添加!");
             } else {
-               var3.setEnable(true);
-               var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-               UserManager.ins.add(var3);
-               GroupService.ins.addGroupUser(ContextHolder.getGroupId(), var4);
-               GroupRole var7 = GroupRoleManager.ins.get(ContextHolder.getGroupId(), GroupRoleEnum.User.name());
-               GroupRoleService.ins.addUserRole(ContextHolder.getGroupId(), var4, var7.getId());
-               SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "add", var4, String.format("Add team member %s", var4));
+               user.setEnable(true);
+               user.setCreateUser(SecurityUtils.getLoginUsername(req));
+               UserManager.ins.add(user);
+               GroupService.ins.addGroupUser(ContextHolder.getGroupId(), id);
+               GroupRole groupRole = GroupRoleManager.ins.get(ContextHolder.getGroupId(), GroupRoleEnum.User.name());
+               GroupRoleService.ins.addUserRole(ContextHolder.getGroupId(), id, groupRole.getId());
+               SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "add", id, String.format("Add team member %s", id));
             }
          }
       } else {
@@ -211,31 +218,32 @@ public class GroupServletHandler extends ApiServletHandler {
       }
    }
 
+   /**添加团队用户*/
    @URuleAuthorization(
       authType = "group",
       model = "members",
       code = "add"
    )
    @Transactional
-   public void addUserByAccount(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      if (StringUtils.isNotBlank(var3) && StringUtils.isNotBlank(ContextHolder.getGroupId())) {
-         Group var4 = GroupManager.ins.get(ContextHolder.getGroupId());
-         if (var3.equals(var4.getCreateUser())) {
+   public void addUserByAccount(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      if (StringUtils.isNotBlank(parameter) && StringUtils.isNotBlank(ContextHolder.getGroupId())) {
+         Group group = GroupManager.ins.get(ContextHolder.getGroupId());
+         if (parameter.equals(group.getCreateUser())) {
             throw new RuleException("不能添加团队管理员账号!<br>Illegal Operation! The account is group owner.");
          } else {
-            com.bstek.urule.console.database.model.User var5 = UserManager.ins.get(var3);
-            if (var5 == null) {
+            com.bstek.urule.console.database.model.User user = UserManager.ins.get(parameter);
+            if (user == null) {
                throw new RuleException("用户账号不存在!<br>Account does not exist!");
             } else {
-               com.bstek.urule.console.database.model.User var6 = GroupManager.ins.getGroupUser(var3, var3);
-               if (var6 != null) {
+               com.bstek.urule.console.database.model.User groupUser = GroupManager.ins.getGroupUser(parameter, parameter);
+               if (groupUser != null) {
                   throw new RuleException("账号已经在当前团队中,无需重复加入!<br>The account is already in the team!");
                } else {
-                  GroupService.ins.addGroupUser(ContextHolder.getGroupId(), var3);
-                  GroupRole var7 = GroupRoleManager.ins.get(ContextHolder.getGroupId(), GroupRoleEnum.User.name());
-                  GroupRoleService.ins.addUserRole(ContextHolder.getGroupId(), var3, var7.getId());
-                  SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "add", var3, String.format("Add team member %s", var3));
+                  GroupService.ins.addGroupUser(ContextHolder.getGroupId(), parameter);
+                  GroupRole groupRole = GroupRoleManager.ins.get(ContextHolder.getGroupId(), GroupRoleEnum.User.name());
+                  GroupRoleService.ins.addUserRole(ContextHolder.getGroupId(), parameter, groupRole.getId());
+                  SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "add", parameter, String.format("Add team member %s", parameter));
                }
             }
          }
@@ -244,249 +252,258 @@ public class GroupServletHandler extends ApiServletHandler {
       }
    }
 
+   /**删除团队用户*/
    @URuleAuthorization(
       authType = "group",
       model = "members",
       code = "remove"
    )
    @Transactional
-   public void removeUser(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      if (StringUtils.isNotBlank(var3) && StringUtils.isNotBlank(ContextHolder.getGroupId())) {
-         Group var4 = GroupManager.ins.get(ContextHolder.getGroupId());
-         if (var3.equals(var4.getCreateUser())) {
+   public void removeUser(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      if (StringUtils.isNotBlank(parameter) && StringUtils.isNotBlank(ContextHolder.getGroupId())) {
+         Group group = GroupManager.ins.get(ContextHolder.getGroupId());
+         if (parameter.equals(group.getCreateUser())) {
             throw new IllegalOperationException("当前账号是团队所有者，无法删除！");
          } else {
-            GroupService.ins.removeGroupUser(ContextHolder.getGroupId(), var3);
-            SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "remove", var3, String.format("Remove team member %s", var3));
+            GroupService.ins.removeGroupUser(ContextHolder.getGroupId(), parameter);
+            SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "remove", parameter, String.format("Remove team member %s", parameter));
          }
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**退出团队*/
    @Transactional
-   public void removeUserSelf(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
+   public void removeUserSelf(HttpServletRequest req, HttpServletResponse resp) throws Exception {
       if (StringUtils.isNotBlank(ContextHolder.getGroupId())) {
-         String var3 = SecurityUtils.getLoginUsername(var1);
-         Group var4 = GroupManager.ins.get(ContextHolder.getGroupId());
-         if (var3.equals(var4.getCreateUser())) {
+         String loginUsername = SecurityUtils.getLoginUsername(req);
+         Group group = GroupManager.ins.get(ContextHolder.getGroupId());
+         if (loginUsername.equals(group.getCreateUser())) {
             throw new IllegalOperationException("您是当前团队拥有者，无法推出团队！");
          } else {
-            GroupService.ins.removeGroupUser(ContextHolder.getGroupId(), var3);
-            SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "remove", var3, String.format("User %s leaving of team by self", var3));
+            GroupService.ins.removeGroupUser(ContextHolder.getGroupId(), loginUsername);
+            SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "remove", loginUsername, String.format("User %s leaving of team by self", loginUsername));
          }
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**为团队用户添加角色*/
    @URuleAuthorization(
       authType = "group",
       code = "userrole",
       model = "members"
    )
-   public void addUserRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      long var4 = Long.parseLong(var1.getParameter("roleId"));
-      GroupRole var6 = GroupRoleService.ins.get(var4);
-      if (var6.getGroupId().equals(ContextHolder.getGroupId())) {
-         GroupRoleService.ins.addUserRole(var6.getGroupId(), var3, var4);
-         SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "userrole", var3, String.format("Add user %s of role %s", var3, var6.getName()));
+   public void addUserRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      GroupRole groupRole = GroupRoleService.ins.get(longValue);
+      if (groupRole.getGroupId().equals(ContextHolder.getGroupId())) {
+         GroupRoleService.ins.addUserRole(groupRole.getGroupId(), parameter, longValue);
+         SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "userrole", parameter, String.format("Add user %s of role %s", parameter, groupRole.getName()));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**删除团队用户的角色*/
    @URuleAuthorization(
       authType = "group",
       code = "userrole",
       model = "members"
    )
-   public void removeUserRole(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("userId");
-      long var4 = Long.parseLong(var1.getParameter("roleId"));
-      GroupRole var6 = GroupRoleService.ins.get(var4);
-      if (var6.getGroupId().equals(ContextHolder.getGroupId())) {
-         GroupRoleService.ins.removeUserRole(ContextHolder.getGroupId(), var3, var4);
-         SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "userrole", var3, String.format("Remove role [%s] of user [%s]", var3, var6.getName()));
+   public void removeUserRole(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("userId");
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      GroupRole groupRole = GroupRoleService.ins.get(longValue);
+      if (groupRole.getGroupId().equals(ContextHolder.getGroupId())) {
+         GroupRoleService.ins.removeUserRole(ContextHolder.getGroupId(), parameter, longValue);
+         SystemLogUtils.addGroupOperationLog(GroupModule.members.name(), "userrole", parameter, String.format("Remove role [%s] of user [%s]", parameter, groupRole.getName()));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void users(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      String var4 = var1.getParameter("roleId");
-      String var5 = var1.getParameter("keyword");
-      int var6 = Integer.parseInt(var1.getParameter("pageIndex"));
-      int var7 = Integer.parseInt(var1.getParameter("pageSize"));
-      UserQuery var8 = GroupManager.ins.createUserQuery();
-      if (StringUtils.isNotBlank(var5)) {
-         var8.idnameLike(var5);
+   /**获取团队下的用户列表*/
+   public void users(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      String parameter2 = req.getParameter("roleId");
+      String parameter3 = req.getParameter("keyword");
+      int number = Integer.parseInt(req.getParameter("pageIndex"));
+      int number2 = Integer.parseInt(req.getParameter("pageSize"));
+      UserQuery userQuery = GroupManager.ins.createUserQuery();
+      if (StringUtils.isNotBlank(parameter3)) {
+         userQuery.idnameLike(parameter3);
       }
 
-      if (!StringUtils.isBlank(var4) && !"-1".equals(var4)) {
-         Page var10 = var8.roleUsers(var6, var7, var3, Long.parseLong(var4));
-         this.a(var3, var10);
-         this.a(var2, var10);
+      if (!StringUtils.isBlank(parameter2) && !"-1".equals(parameter2)) {
+         Page page = userQuery.roleUsers(number, number2, parameter, Long.parseLong(parameter2));
+         this.enrichUsersWithRoles(parameter, page);
+         this.writeObjectToJson(resp, page);
       } else {
-         Page var9 = var8.users(var6, var7, var3);
-         this.a(var3, var9);
-         this.a(var2, var9);
+         Page page2 = userQuery.users(number, number2, parameter);
+         this.enrichUsersWithRoles(parameter, page2);
+         this.writeObjectToJson(resp, page2);
       }
 
    }
 
-   private void a(String var1, Page var2) throws Exception {
-      ArrayList var3 = new ArrayList();
+   private void enrichUsersWithRoles(String text, Page page) throws Exception {
+      ArrayList items = new ArrayList();
 
-      for(com.bstek.urule.console.database.model.User var6 : (Iterable<com.bstek.urule.console.database.model.User>)(Iterable<?>)(var2.getData())) {
-         GroupUserVO var7 = new GroupUserVO();
-         var7.setId(var6.getId());
-         var7.setName(var6.getName());
-         var7.setCreateDate(var6.getCreateDate());
-         var7.setRoles(GroupRoleManager.ins.loadUserRoles(var1, var6.getId()));
-         var3.add(var7);
+      for(com.bstek.urule.console.database.model.User user : (Iterable<com.bstek.urule.console.database.model.User>)(Iterable<?>)(page.getData())) {
+         GroupUserVO groupUserVO = new GroupUserVO();
+         groupUserVO.setId(user.getId());
+         groupUserVO.setName(user.getName());
+         groupUserVO.setCreateDate(user.getCreateDate());
+         groupUserVO.setRoles(GroupRoleManager.ins.loadUserRoles(text, user.getId()));
+         items.add(groupUserVO);
       }
 
-      var2.setData(var3);
+      page.setData(items);
    }
 
-   public void roleUsers(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("roleId");
-      String var4 = var1.getParameter("groupId");
-      this.a(var2, GroupRoleManager.ins.loadRoleUsers(var4, Long.parseLong(var3)));
+   /**获取角色的用户列表*/
+   public void roleUsers(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("roleId");
+      String parameter2 = req.getParameter("groupId");
+      this.writeObjectToJson(resp, GroupRoleManager.ins.loadRoleUsers(parameter2, Long.parseLong(parameter)));
    }
 
-   public void projects(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      this.a(var1, var2, true);
+   /**加载项目列表*/
+   public void projects(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      this.writeProjectList(req, resp, true);
    }
 
-   private void a(HttpServletRequest var1, HttpServletResponse var2, boolean var3) throws Exception {
-      String var4 = ContextHolder.getGroupId();
-      String var5 = var1.getParameter("keyword");
-      String var6 = var1.getParameter("type");
-      String var7 = var1.getParameter("sortByName");
-      String var8 = var1.getParameter("sortByAsc");
-      ProjectQuery var9 = ProjectManager.ins.newQuery();
-      String var10 = SecurityUtils.getLoginUsername(var1);
-      if (var3) {
-         var9.userId(var10);
+   private void writeProjectList(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, boolean flag) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      String parameter = httpServletRequest.getParameter("keyword");
+      String parameter2 = httpServletRequest.getParameter("type");
+      String parameter3 = httpServletRequest.getParameter("sortByName");
+      String parameter4 = httpServletRequest.getParameter("sortByAsc");
+      ProjectQuery projectQuery = ProjectManager.ins.newQuery();
+      String loginUsername = SecurityUtils.getLoginUsername(httpServletRequest);
+      if (flag) {
+         projectQuery.userId(loginUsername);
       }
 
-      if (StringUtils.isNotBlank(var5)) {
-         var9.nameLike(var5);
+      if (StringUtils.isNotBlank(parameter)) {
+         projectQuery.nameLike(parameter);
       }
 
-      if (StringUtils.isNotBlank(var6)) {
-         var9.type(var6);
+      if (StringUtils.isNotBlank(parameter2)) {
+         projectQuery.type(parameter2);
       }
 
-      if (StringUtils.isNotBlank(var4)) {
-         var9.groupId(var4);
+      if (StringUtils.isNotBlank(groupId)) {
+         projectQuery.groupId(groupId);
       }
 
-      if (StringUtils.isNotBlank(var7) && StringUtils.isNotBlank(var8)) {
-         if ("NAME_".equals(var7)) {
-            var9.orderbyName(var8);
+      if (StringUtils.isNotBlank(parameter3) && StringUtils.isNotBlank(parameter4)) {
+         if ("NAME_".equals(parameter3)) {
+            projectQuery.orderbyName(parameter4);
          }
 
-         if ("CREATE_DATE_".equals(var7)) {
-            var9.orderbyCreateDate(var8);
+         if ("CREATE_DATE_".equals(parameter3)) {
+            projectQuery.orderbyCreateDate(parameter4);
          }
       }
 
-      List var11 = var9.list();
-      ArrayList var12 = new ArrayList();
-      User var13 = SecurityUtils.getLoginUser(var1);
-      List var14 = ProjectManager.ins.newQuery().groupId(var4).userId(var10).listIds();
+      List items = projectQuery.list();
+      ArrayList items2 = new ArrayList();
+      User loginUser = SecurityUtils.getLoginUser(httpServletRequest);
+      List items3 = ProjectManager.ins.newQuery().groupId(groupId).userId(loginUsername).listIds();
 
-      for(Project var16 : (Iterable<Project>)(Iterable<?>)(var11)) {
-         ProjectVO var17 = new ProjectVO();
-         BeanUtils.copyProperties(var17, var16);
-         ContextHolder.setProjectId(var16.getId());
-         boolean var18 = AuthenticationManager.decide(var13, RoleCategory.group, GroupModule.projects.toString(), "remove");
-         if (!var18) {
-            var18 = AuthenticationManager.decide(var13, RoleCategory.project, ProjectModule.project.toString(), "remove");
+      for(Project project : (Iterable<Project>)(Iterable<?>)(items)) {
+         ProjectVO projectVO = new ProjectVO();
+         BeanUtils.copyProperties(projectVO, project);
+         ContextHolder.setProjectId(project.getId());
+         boolean flag2 = AuthenticationManager.decide(loginUser, RoleCategory.group, GroupModule.projects.toString(), "remove");
+         if (!flag2) {
+            flag2 = AuthenticationManager.decide(loginUser, RoleCategory.project, ProjectModule.project.toString(), "remove");
          }
 
-         var17.setRemoveAble(var18);
-         var18 = AuthenticationManager.decide(var13, RoleCategory.group, GroupModule.projects.toString(), "export");
-         if (!var18) {
-            var18 = AuthenticationManager.decide(var13, RoleCategory.project, ProjectModule.project.toString(), "export");
+         projectVO.setRemoveAble(flag2);
+         flag2 = AuthenticationManager.decide(loginUser, RoleCategory.group, GroupModule.projects.toString(), "export");
+         if (!flag2) {
+            flag2 = AuthenticationManager.decide(loginUser, RoleCategory.project, ProjectModule.project.toString(), "export");
          }
 
-         var17.setExportAble(var18);
-         if (var14.contains(var16.getId())) {
-            var17.setAccessable(true);
+         projectVO.setExportAble(flag2);
+         if (items3.contains(project.getId())) {
+            projectVO.setAccessable(true);
          }
 
-         var12.add(var17);
+         items2.add(projectVO);
       }
 
-      this.a(var2, var12);
+      this.writeObjectToJson(httpServletResponse, items2);
    }
 
-   public void projectList(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      this.a(var1, var2, false);
+   public void projectList(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      this.writeProjectList(req, resp, false);
    }
 
-   public void countUserLogin(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      Calendar var4 = Calendar.getInstance();
-      var4.add(5, -7);
-      var4.set(10, 0);
-      var4.set(12, 0);
-      var4.set(13, 0);
-      var4.set(14, 0);
-      Date var5 = var4.getTime();
-      var4 = Calendar.getInstance();
-      var4.add(5, 1);
-      var4.set(10, 0);
-      var4.set(12, 0);
-      var4.set(13, 0);
-      var4.set(14, 0);
-      Date var6 = var4.getTime();
-      List var7 = ReportGroupQuery.getUserLoginCountByDay(var3, var5, var6);
-      this.a(var2, var7);
+   /**统计近期用户规则文件执行情况*/
+   public void countUserLogin(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(5, -7);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time = calendar.getTime();
+      calendar = Calendar.getInstance();
+      calendar.add(5, 1);
+      calendar.set(10, 0);
+      calendar.set(12, 0);
+      calendar.set(13, 0);
+      calendar.set(14, 0);
+      Date time2 = calendar.getTime();
+      List userLoginCountByDay = ReportGroupQuery.getUserLoginCountByDay(groupId, time, time2);
+      this.writeObjectToJson(resp, userLoginCountByDay);
    }
 
-   public void countRuleProjectCount(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      List var4 = ReportGroupQuery.countProjectRuleFiles(var3);
-      this.a(var2, var4);
+   /**统计项目规则文件数量*/
+   public void countRuleProjectCount(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      List items = ReportGroupQuery.countProjectRuleFiles(groupId);
+      this.writeObjectToJson(resp, items);
    }
 
-   public void listPacketDeploys(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      List var4 = ReportGroupQuery.listPacketDeploys(var3);
-      if (var4.size() > 5) {
-         this.a(var2, var4.subList(0, 5));
+   public void listPacketDeploys(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      List items = ReportGroupQuery.listPacketDeploys(groupId);
+      if (items.size() > 5) {
+         this.writeObjectToJson(resp, items.subList(0, 5));
       } else {
-         this.a(var2, var4);
+         this.writeObjectToJson(resp, items);
       }
 
    }
 
-   public void listUserProjects(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      List var4 = ReportGroupQuery.countUserCreateProjects(var3);
-      this.a(var2, var4);
+   public void listUserProjects(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      List items = ReportGroupQuery.countUserCreateProjects(groupId);
+      this.writeObjectToJson(resp, items);
    }
 
-   public void getSummary(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      int var4 = ProjectManager.ins.newQuery().groupId(var3).list().size();
-      int var5 = ReportGroupQuery.countKnByGroupId(var3);
-      int var6 = ReportGroupQuery.countFileByGroupId(var3);
-      int var7 = ReportGroupQuery.countBatchByGroupId(var3);
-      HashMap var8 = new HashMap();
-      var8.put("projectCount", var4);
-      var8.put("packetCount", var5);
-      var8.put("fileCount", var6);
-      var8.put("batchCount", var7);
-      this.a(var2, var8);
+   public void getSummary(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      int number = ProjectManager.ins.newQuery().groupId(groupId).list().size();
+      int number2 = ReportGroupQuery.countKnByGroupId(groupId);
+      int number3 = ReportGroupQuery.countFileByGroupId(groupId);
+      int number4 = ReportGroupQuery.countBatchByGroupId(groupId);
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("projectCount", number);
+      valuesByKey.put("packetCount", number2);
+      valuesByKey.put("fileCount", number3);
+      valuesByKey.put("batchCount", number4);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    public String url() {

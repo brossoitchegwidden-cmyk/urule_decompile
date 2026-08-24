@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class ActionTemplateDeserializer implements Deserializer<ActionTemplate> {
    public static final String BEAN_ID = "urule.actionTemplateDeserializer";
-   private ActionTemplateParser a;
+   private ActionTemplateParser actionTemplateParser;
 
-   public ActionTemplate deserialize(Element var1) {
-      return this.a.parse(var1);
+   public ActionTemplate deserialize(Element root) {
+      return this.actionTemplateParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.actionTemplateParser.support(root.getName());
    }
 
-   public void setActionTemplateParser(ActionTemplateParser var1) {
-      this.a = var1;
+   public void setActionTemplateParser(ActionTemplateParser actionTemplateParser) {
+      this.actionTemplateParser = actionTemplateParser;
    }
 }

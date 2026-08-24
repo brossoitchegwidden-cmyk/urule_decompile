@@ -6,27 +6,28 @@ import java.util.Date;
 import java.util.List;
 
 public interface KnowledgeLogQuery {
-   KnowledgeLogQuery projectId(Long var1);
+   KnowledgeLogQuery projectId(Long projectId);
 
-   KnowledgeLogQuery groupId(String var1);
+   KnowledgeLogQuery groupId(String groupId);
 
-   KnowledgeLogQuery user(String var1);
+   KnowledgeLogQuery user(String user);
 
-   KnowledgeLogQuery ip(String var1);
+   KnowledgeLogQuery ip(String ip);
 
-   KnowledgeLogQuery packetId(Long var1);
+   KnowledgeLogQuery packetId(Long packetId);
 
-   KnowledgeLogQuery packetNameLike(String var1);
+   KnowledgeLogQuery packetNameLike(String packetName);
 
    KnowledgeLogQuery orderTime();
 
-   KnowledgeLogQuery dateBegin(Date var1);
+   KnowledgeLogQuery dateBegin(Date date);
 
-   KnowledgeLogQuery dateEnd(Date var1);
+   KnowledgeLogQuery dateEnd(Date date);
 
-   Page paging(int var1, int var2);
+   Page paging(int pageIndex, int pageSize);
 
    List list();
 
-   KnowledgeLog details(Long var1);
+   /**获取日志详情*/
+   KnowledgeLog details(Long id);
 }

@@ -16,114 +16,114 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 
 public class JsonServletHandler extends ApiServletHandler {
-   public void convert(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("json");
-      if (StringUtils.isBlank(var3)) {
+   public void convert(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("json");
+      if (StringUtils.isBlank(parameter)) {
          throw new RuleException("JSON不能为空！");
       } else {
-         var3 = var3.trim();
-         StringBuilder var4 = new StringBuilder();
+         parameter = parameter.trim();
+         StringBuilder stringBuilder = new StringBuilder();
 
          try {
-            ObjectMapper var5 = JsonMapper.builder().build();
-            if (var3.startsWith("[") && var3.endsWith("]")) {
-               List var10 = (List)var5.readValue(var3, ArrayList.class);
-               var4.append(this.a(var10));
+            ObjectMapper objectMapper = JsonMapper.builder().build();
+            if (parameter.startsWith("[") && parameter.endsWith("]")) {
+               List items = (List)objectMapper.readValue(parameter, ArrayList.class);
+               stringBuilder.append(this.convertListToVariableDefinitionJson(items));
             } else {
-               if (!var3.startsWith("{") || !var3.endsWith("}")) {
+               if (!parameter.startsWith("{") || !parameter.endsWith("}")) {
                   throw new RuleException("不支持的JSON格式");
                }
 
-               Map var6 = (Map)var5.readValue(var3, HashMap.class);
-               var4.append(this.a(var6));
+               Map valuesByKey = (Map)objectMapper.readValue(parameter, HashMap.class);
+               stringBuilder.append(this.convertMapToVariableDefinitionJson(valuesByKey));
             }
-         } catch (Exception var7) {
+         } catch (Exception exception) {
             throw new RuleException("不支持的JSON格式");
          }
 
-         HashMap var9 = new HashMap();
-         var9.put("json", var4.toString());
-         this.a(var2, var9);
+         HashMap valuesByKey2 = new HashMap();
+         valuesByKey2.put("json", stringBuilder.toString());
+         this.writeObjectToJson(resp, valuesByKey2);
       }
    }
 
-   public void gzip(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("json");
-      if (StringUtils.isBlank(var3)) {
+   public void gzip(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("json");
+      if (StringUtils.isBlank(parameter)) {
          throw new RuleException("JSON不能为空！");
       } else {
-         var3 = var3.trim();
-         HashMap var4 = new HashMap();
-         var4.put("data", this.doGzip(var3));
-         this.a(var2, var4);
+         parameter = parameter.trim();
+         HashMap valuesByKey = new HashMap();
+         valuesByKey.put("data", this.doGzip(parameter));
+         this.writeObjectToJson(resp, valuesByKey);
       }
    }
 
-   public String doGzip(String var1) throws Exception {
-      ByteArrayOutputStream var2 = new ByteArrayOutputStream();
-      GZIPOutputStream var3 = new GZIPOutputStream(var2);
-      var3.write(var1.getBytes("utf-8"));
-      var3.close();
-      Base64 var4 = new Base64();
-      return var4.encodeAsString(var2.toByteArray());
+   public String doGzip(String json) throws Exception {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+      gZIPOutputStream.write(json.getBytes("utf-8"));
+      gZIPOutputStream.close();
+      Base64 base64 = new Base64();
+      return base64.encodeAsString(byteArrayOutputStream.toByteArray());
    }
 
-   private String a(Map var1) {
-      StringBuilder var2 = new StringBuilder();
-      var2.append("{");
-      var2.append("\"name\"");
-      var2.append(":");
-      var2.append("\"待填写的变量分类名\"");
-      var2.append(",");
-      var2.append("\"fields\"");
-      var2.append(":");
-      var2.append("{");
-      int var3 = 0;
+   private String convertMapToVariableDefinitionJson(Map valuesByKey) {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("{");
+      stringBuilder.append("\"name\"");
+      stringBuilder.append(":");
+      stringBuilder.append("\"待填写的变量分类名\"");
+      stringBuilder.append(",");
+      stringBuilder.append("\"fields\"");
+      stringBuilder.append(":");
+      stringBuilder.append("{");
+      int number = 0;
 
-      for(String var5 : (Iterable<String>)(Iterable<?>)(var1.keySet())) {
-         Object var6 = var1.get(var5);
-         if (var6 != null) {
-            if (var3 > 0) {
-               var2.append(",");
+      for(String text : (Iterable<String>)(Iterable<?>)(valuesByKey.keySet())) {
+         Object objectValue = valuesByKey.get(text);
+         if (objectValue != null) {
+            if (number > 0) {
+               stringBuilder.append(",");
             }
 
-            var2.append("\"" + var5 + "\"");
-            var2.append(":");
-            if (var6 instanceof Map) {
-               var2.append(this.a((Map)var6));
-            } else if (var6 instanceof List) {
-               var2.append(this.a((List)var6));
-            } else if (var6 instanceof Number) {
-               var2.append(var6);
+            stringBuilder.append("\"" + text + "\"");
+            stringBuilder.append(":");
+            if (objectValue instanceof Map) {
+               stringBuilder.append(this.convertMapToVariableDefinitionJson((Map)objectValue));
+            } else if (objectValue instanceof List) {
+               stringBuilder.append(this.convertListToVariableDefinitionJson((List)objectValue));
+            } else if (objectValue instanceof Number) {
+               stringBuilder.append(objectValue);
             } else {
-               var2.append("\"" + var6 + "\"");
+               stringBuilder.append("\"" + objectValue + "\"");
             }
 
-            ++var3;
+            ++number;
          }
       }
 
-      var2.append("}");
-      var2.append("}");
-      return var2.toString();
+      stringBuilder.append("}");
+      stringBuilder.append("}");
+      return stringBuilder.toString();
    }
 
-   private String a(List var1) {
-      StringBuilder var2 = new StringBuilder();
-      var2.append("[");
-      int var3 = 0;
+   private String convertListToVariableDefinitionJson(List items) {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("[");
+      int number = 0;
 
-      for(Map var5 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         if (var3 > 0) {
-            var2.append(",");
+      for(Map valuesByKey : (Iterable<Map>)(Iterable<?>)(items)) {
+         if (number > 0) {
+            stringBuilder.append(",");
          }
 
-         var2.append(this.a(var5));
-         ++var3;
+         stringBuilder.append(this.convertMapToVariableDefinitionJson(valuesByKey));
+         ++number;
       }
 
-      var2.append("]");
-      return var2.toString();
+      stringBuilder.append("]");
+      return stringBuilder.toString();
    }
 
    public String url() {

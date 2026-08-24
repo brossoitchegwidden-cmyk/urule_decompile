@@ -1,7 +1,7 @@
 package com.bstek.urule.console;
 
 public class ParameterInvaidException extends RuntimeException {
-   private static final long a = -422427375344153292L;
+   private static final long serialVersionUID = -422427375344153292L;
 
    public ParameterInvaidException() {
       super("Parameter invalid or missing!");

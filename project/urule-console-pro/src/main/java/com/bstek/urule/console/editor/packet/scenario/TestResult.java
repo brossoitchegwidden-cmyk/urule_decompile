@@ -4,94 +4,94 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestResult {
-   private String a;
-   private String b;
-   private long c;
-   private List d = new ArrayList();
-   private List e = new ArrayList();
-   private List f = new ArrayList();
-   private List g = new ArrayList();
-   private String h;
-   private String i;
-   private List j;
+   private String scenarioId;
+   private String scenarioDesc;
+   private long consumeTime;
+   private List logs = new ArrayList();
+   private List matchedRuleList = new ArrayList();
+   private List notMatchedRuleList = new ArrayList();
+   private List flowNodeList = new ArrayList();
+   private String inputData;
+   private String outputData;
+   private List valueCompares;
 
    public String getScenarioId() {
-      return this.a;
+      return this.scenarioId;
    }
 
-   public void setScenarioId(String var1) {
-      this.a = var1;
+   public void setScenarioId(String scenarioId) {
+      this.scenarioId = scenarioId;
    }
 
    public String getScenarioDesc() {
-      return this.b;
+      return this.scenarioDesc;
    }
 
-   public void setScenarioDesc(String var1) {
-      this.b = var1;
+   public void setScenarioDesc(String scenarioDesc) {
+      this.scenarioDesc = scenarioDesc;
    }
 
    public long getConsumeTime() {
-      return this.c;
+      return this.consumeTime;
    }
 
-   public void setConsumeTime(long var1) {
-      this.c = var1;
+   public void setConsumeTime(long consumeTime) {
+      this.consumeTime = consumeTime;
    }
 
    public List getValueCompares() {
-      return this.j;
+      return this.valueCompares;
    }
 
-   public void setValueCompares(List var1) {
-      this.j = var1;
+   public void setValueCompares(List valueCompares) {
+      this.valueCompares = valueCompares;
    }
 
    public List getLogs() {
-      return this.d;
+      return this.logs;
    }
 
-   public void addLogs(List var1) {
-      this.d.addAll(var1);
+   public void addLogs(List logs) {
+      this.logs.addAll(logs);
    }
 
    public List getMatchedRuleList() {
-      return this.e;
+      return this.matchedRuleList;
    }
 
-   public void addMatchedRuleList(List var1) {
-      this.e.addAll(var1);
+   public void addMatchedRuleList(List matchedRuleList) {
+      this.matchedRuleList.addAll(matchedRuleList);
    }
 
    public List getNotMatchedRuleList() {
-      return this.f;
+      return this.notMatchedRuleList;
    }
 
-   public void addNotMatchedRuleList(List var1) {
-      this.f.addAll(var1);
+   public void addNotMatchedRuleList(List notMatchedRuleList) {
+      this.notMatchedRuleList.addAll(notMatchedRuleList);
    }
 
    public List getFlowNodeList() {
-      return this.g;
+      return this.flowNodeList;
    }
 
-   public void addFlowNodeList(List var1) {
-      this.g.addAll(var1);
+   public void addFlowNodeList(List flowNodeList) {
+      this.flowNodeList.addAll(flowNodeList);
    }
 
    public String getInputData() {
-      return this.h;
+      return this.inputData;
    }
 
-   public void setInputData(String var1) {
-      this.h = var1;
+   public void setInputData(String inputData) {
+      this.inputData = inputData;
    }
 
    public String getOutputData() {
-      return this.i;
+      return this.outputData;
    }
 
-   public void setOutputData(String var1) {
-      this.i = var1;
+   public void setOutputData(String outputData) {
+      this.outputData = outputData;
    }
 }

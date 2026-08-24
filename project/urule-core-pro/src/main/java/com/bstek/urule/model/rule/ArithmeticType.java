@@ -73,31 +73,31 @@ public enum ArithmeticType {
    ArithmeticType() {
    }
 
-   public static ArithmeticType parse(String var0) {
-      if (var0.equals("+")) {
+   public static ArithmeticType parse(String type) {
+      if (type.equals("+")) {
          return Add;
-      } else if (var0.equals("-")) {
+      } else if (type.equals("-")) {
          return Sub;
-      } else if (var0.equals("*")) {
+      } else if (type.equals("*")) {
          return Mul;
-      } else if (var0.equals("/")) {
+      } else if (type.equals("/")) {
          return Div;
-      } else if (var0.equals("%")) {
+      } else if (type.equals("%")) {
          return Mod;
-      } else if (var0.equals(">")) {
+      } else if (type.equals(">")) {
          return Gt;
-      } else if (var0.equals("<")) {
+      } else if (type.equals("<")) {
          return Lt;
-      } else if (var0.equals("≥")) {
+      } else if (type.equals("≥")) {
          return Gte;
-      } else if (var0.equals("≤")) {
+      } else if (type.equals("≤")) {
          return Lte;
-      } else if (var0.equals("==")) {
+      } else if (type.equals("==")) {
          return Eq;
-      } else if (var0.equals("≠")) {
+      } else if (type.equals("≠")) {
          return NotEq;
       } else {
-         throw new RuleException("Unsupport arithmetic type [" + var0 + "]");
+         throw new RuleException("Unsupport arithmetic type [" + type + "]");
       }
    }
 }

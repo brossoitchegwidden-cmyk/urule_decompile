@@ -1,58 +1,58 @@
 package com.bstek.urule.console.editor.packet.scenario;
 
 public class ValueCompare {
-   private boolean a;
-   private String b;
-   private String c;
-   private String d;
-   private Object e;
-   private Object f;
+   private boolean matched;
+   private String op;
+   private String category;
+   private String fieldName;
+   private Object data;
+   private Object expectedData;
 
    public boolean isMatched() {
-      return this.a;
+      return this.matched;
    }
 
-   public void setMatched(boolean var1) {
-      this.a = var1;
+   public void setMatched(boolean matched) {
+      this.matched = matched;
    }
 
    public String getOp() {
-      return this.b;
+      return this.op;
    }
 
-   public void setOp(String var1) {
-      this.b = var1;
+   public void setOp(String op) {
+      this.op = op;
    }
 
    public String getCategory() {
-      return this.c;
+      return this.category;
    }
 
-   public void setCategory(String var1) {
-      this.c = var1;
+   public void setCategory(String category) {
+      this.category = category;
    }
 
    public String getFieldName() {
-      return this.d;
+      return this.fieldName;
    }
 
-   public void setFieldName(String var1) {
-      this.d = var1;
+   public void setFieldName(String fieldName) {
+      this.fieldName = fieldName;
    }
 
    public Object getData() {
-      return this.e;
+      return this.data;
    }
 
-   public void setData(Object var1) {
-      this.e = var1;
+   public void setData(Object data) {
+      this.data = data;
    }
 
    public Object getExpectedData() {
-      return this.f;
+      return this.expectedData;
    }
 
-   public void setExpectedData(Object var1) {
-      this.f = var1;
+   public void setExpectedData(Object expectedData) {
+      this.expectedData = expectedData;
    }
 }

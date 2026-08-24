@@ -3,9 +3,9 @@ package com.bstek.urule.console.database.manager.batch.resolver;
 import java.util.List;
 
 public interface ResolverQuery {
-   ResolverQuery id(Long var1);
+   ResolverQuery id(Long id);
 
-   ResolverQuery batchId(Long var1);
+   ResolverQuery batchId(Long batchId);
 
    List list();
 }

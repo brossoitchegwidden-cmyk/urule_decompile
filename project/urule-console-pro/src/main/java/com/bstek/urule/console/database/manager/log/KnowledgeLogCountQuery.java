@@ -4,19 +4,19 @@ import java.util.Date;
 import java.util.List;
 
 public interface KnowledgeLogCountQuery {
-   KnowledgeLogCountQuery projectId(Long var1);
+   KnowledgeLogCountQuery projectId(Long projectId);
 
-   KnowledgeLogCountQuery groupId(String var1);
+   KnowledgeLogCountQuery groupId(String groupId);
 
-   KnowledgeLogCountQuery user(String var1);
+   KnowledgeLogCountQuery user(String user);
 
-   KnowledgeLogCountQuery packageId(Long var1);
+   KnowledgeLogCountQuery packageId(Long packageId);
 
-   KnowledgeLogCountQuery packageName(String var1);
+   KnowledgeLogCountQuery packageName(String packageName);
 
-   KnowledgeLogCountQuery dateBegin(Date var1);
+   KnowledgeLogCountQuery dateBegin(Date date);
 
-   KnowledgeLogCountQuery dateEnd(Date var1);
+   KnowledgeLogCountQuery dateEnd(Date date);
 
    List listExec();
 

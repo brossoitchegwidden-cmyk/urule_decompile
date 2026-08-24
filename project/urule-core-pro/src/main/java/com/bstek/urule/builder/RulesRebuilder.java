@@ -74,105 +74,105 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 public class RulesRebuilder {
-   private ResourceLibraryBuilder a;
+   private ResourceLibraryBuilder resourceLibraryBuilder;
 
-   public void rebuildRules(List<Library> var1, List<Rule> var2, List<Predefine> var3) {
-      if (var1 != null) {
-         if (var2 != null) {
-            ResourceLibrary var4 = this.a.buildResourceLibrary(var1, var3);
-            if (var3 != null) {
-               for (Predefine var6 : var3) {
-                  Junction var7 = var6.getJunction();
-                  if (var7 != null) {
-                     this.rebuildCriterion(var7, var4, false);
+   public void rebuildRules(List<Library> libraries, List<Rule> rules, List<Predefine> predefines) {
+      if (libraries != null) {
+         if (rules != null) {
+            ResourceLibrary resourceLibrary = this.resourceLibraryBuilder.buildResourceLibrary(libraries, predefines);
+            if (predefines != null) {
+               for (Predefine predefine : predefines) {
+                  Junction junction = predefine.getJunction();
+                  if (junction != null) {
+                     this.rebuildCriterion(junction, resourceLibrary, false);
                   }
 
-                  Value var8 = var6.getValue();
-                  if (var8 != null) {
-                     this.rebuildValue(var8, var4, false);
+                  Value localValue = predefine.getValue();
+                  if (localValue != null) {
+                     this.rebuildValue(localValue, resourceLibrary, false);
                   }
                }
             }
 
-            for (Rule var21 : var2) {
-               if (var21.getLhs() != null) {
-                  Criterion var22 = var21.getLhs().getCriterion();
-                  this.rebuildCriterion(var22, var4, false);
+            for (Rule rule : rules) {
+               if (rule.getLhs() != null) {
+                  Criterion criterion = rule.getLhs().getCriterion();
+                  this.rebuildCriterion(criterion, resourceLibrary, false);
                }
 
-               Rhs var23 = var21.getRhs();
-               List var25 = null;
-               if (var23 != null) {
-                  var25 = var23.getActions();
+               Rhs rhs = rule.getRhs();
+               List actions2 = null;
+               if (rhs != null) {
+                  actions2 = rhs.getActions();
                }
 
-               if (var25 != null) {
-                  for (Action var10 : (Iterable<Action>)(Iterable<?>)(var25)) {
-                     this.rebuildAction(var10, var4, false);
-                     this.a(var10, var4);
-                  }
-               }
-
-               Other var26 = var21.getOther();
-               if (var26 != null) {
-                  List var28 = var26.getActions();
-                  if (var28 != null) {
-                     for (Action var12 : (Iterable<Action>)(Iterable<?>)(var28)) {
-                        this.rebuildAction(var12, var4, false);
-                        this.a(var12, var4);
-                     }
+               if (actions2 != null) {
+                  for (Action action : (Iterable<Action>)(Iterable<?>)(actions2)) {
+                     this.rebuildAction(action, resourceLibrary, false);
+                     this.rebuildTemplateAction(action, resourceLibrary);
                   }
                }
 
-               if (var21 instanceof LoopRule) {
-                  LoopRule var29 = (LoopRule)var21;
-                  LoopTarget var30 = var29.getLoopTarget();
-                  if (var30 != null) {
-                     Value var31 = var30.getValue();
-                     this.rebuildValue(var31, var4, false);
-                  }
-
-                  LoopStart var32 = var29.getLoopStart();
-                  if (var32 != null && var32.getActions() != null) {
-                     for (Action var14 : var32.getActions()) {
-                        this.rebuildAction(var14, var4, false);
-                        this.a(var14, var4);
+               Other other = rule.getOther();
+               if (other != null) {
+                  List actions = other.getActions();
+                  if (actions != null) {
+                     for (Action action2 : (Iterable<Action>)(Iterable<?>)(actions)) {
+                        this.rebuildAction(action2, resourceLibrary, false);
+                        this.rebuildTemplateAction(action2, resourceLibrary);
                      }
                   }
+               }
 
-                  LoopEnd var33 = var29.getLoopEnd();
-                  if (var33 != null && var33.getActions() != null) {
-                     for (Action var15 : var33.getActions()) {
-                        this.rebuildAction(var15, var4, false);
-                        this.a(var15, var4);
+               if (rule instanceof LoopRule) {
+                  LoopRule loopRule = (LoopRule)rule;
+                  LoopTarget loopTarget = loopRule.getLoopTarget();
+                  if (loopTarget != null) {
+                     Value localValue2 = loopTarget.getValue();
+                     this.rebuildValue(localValue2, resourceLibrary, false);
+                  }
+
+                  LoopStart loopStart = loopRule.getLoopStart();
+                  if (loopStart != null && loopStart.getActions() != null) {
+                     for (Action action3 : loopStart.getActions()) {
+                        this.rebuildAction(action3, resourceLibrary, false);
+                        this.rebuildTemplateAction(action3, resourceLibrary);
                      }
                   }
 
-                  for (LoopRuleUnit var16 : ((LoopRule)var21).getUnits()) {
-                     if (var16.getLhs() != null) {
-                        Criterion var17 = var16.getLhs().getCriterion();
-                        this.rebuildCriterion(var17, var4, false);
+                  LoopEnd loopEnd = loopRule.getLoopEnd();
+                  if (loopEnd != null && loopEnd.getActions() != null) {
+                     for (Action action4 : loopEnd.getActions()) {
+                        this.rebuildAction(action4, resourceLibrary, false);
+                        this.rebuildTemplateAction(action4, resourceLibrary);
+                     }
+                  }
+
+                  for (LoopRuleUnit loopRuleUnit : ((LoopRule)rule).getUnits()) {
+                     if (loopRuleUnit.getLhs() != null) {
+                        Criterion criterion2 = loopRuleUnit.getLhs().getCriterion();
+                        this.rebuildCriterion(criterion2, resourceLibrary, false);
                      }
 
-                     var23 = var16.getRhs();
-                     if (var23 != null) {
-                        var25 = var23.getActions();
+                     rhs = loopRuleUnit.getRhs();
+                     if (rhs != null) {
+                        actions2 = rhs.getActions();
                      }
 
-                     if (var25 != null) {
-                        for (Action var18 : (Iterable<Action>)(Iterable<?>)(var25)) {
-                           this.rebuildAction(var18, var4, false);
-                           this.a(var18, var4);
+                     if (actions2 != null) {
+                        for (Action action5 : (Iterable<Action>)(Iterable<?>)(actions2)) {
+                           this.rebuildAction(action5, resourceLibrary, false);
+                           this.rebuildTemplateAction(action5, resourceLibrary);
                         }
                      }
 
-                     var26 = var16.getOther();
-                     if (var26 != null) {
-                        List var38 = var26.getActions();
-                        if (var38 != null) {
-                           for (Action var19 : (Iterable<Action>)(Iterable<?>)(var38)) {
-                              this.rebuildAction(var19, var4, false);
-                              this.a(var19, var4);
+                     other = loopRuleUnit.getOther();
+                     if (other != null) {
+                        List actions3 = other.getActions();
+                        if (actions3 != null) {
+                           for (Action action6 : (Iterable<Action>)(Iterable<?>)(actions3)) {
+                              this.rebuildAction(action6, resourceLibrary, false);
+                              this.rebuildTemplateAction(action6, resourceLibrary);
                            }
                         }
                      }
@@ -183,332 +183,332 @@ public class RulesRebuilder {
       }
    }
 
-   public void rebuildRulesForDSL(List<Library> var1, List<Rule> var2, List<Predefine> var3) {
-      if (var1 != null) {
-         if (var2 != null) {
-            ResourceLibrary var4 = this.a.buildResourceLibrary(var1, var3);
+   public void rebuildRulesForDSL(List<Library> libraries, List<Rule> rules, List<Predefine> predefines) {
+      if (libraries != null) {
+         if (rules != null) {
+            ResourceLibrary resourceLibrary = this.resourceLibraryBuilder.buildResourceLibrary(libraries, predefines);
 
-            for (Rule var6 : var2) {
-               if (var6.getLhs() != null) {
-                  Criterion var7 = var6.getLhs().getCriterion();
-                  this.rebuildCriterion(var7, var4, true);
+            for (Rule rule : rules) {
+               if (rule.getLhs() != null) {
+                  Criterion criterion = rule.getLhs().getCriterion();
+                  this.rebuildCriterion(criterion, resourceLibrary, true);
                }
 
-               Rhs var12 = var6.getRhs();
-               if (var12 != null && var12.getActions() != null) {
-                  for (Action var10 : var12.getActions()) {
-                     this.rebuildAction(var10, var4, true);
+               Rhs rhs = rule.getRhs();
+               if (rhs != null && rhs.getActions() != null) {
+                  for (Action action : rhs.getActions()) {
+                     this.rebuildAction(action, resourceLibrary, true);
                   }
                }
 
-               Other var13 = var6.getOther();
-               if (var13 != null) {
-                  List var14 = var13.getActions();
-                  if (var14 != null) {
-                     for (Action var11 : (Iterable<Action>)(Iterable<?>)(var14)) {
-                        this.rebuildAction(var11, var4, true);
+               Other other = rule.getOther();
+               if (other != null) {
+                  List actions = other.getActions();
+                  if (actions != null) {
+                     for (Action action2 : (Iterable<Action>)(Iterable<?>)(actions)) {
+                        this.rebuildAction(action2, resourceLibrary, true);
                      }
                   }
                }
 
-               if (var6 instanceof LoopRule) {
-                  this.a(var4, var6);
+               if (rule instanceof LoopRule) {
+                  this.rebuildLoopRuleForDSL(resourceLibrary, rule);
                }
             }
          }
       }
    }
 
-   private void a(Action var1, ResourceLibrary var2) {
-      if (var1 instanceof TemplateAction) {
-         TemplateAction var3 = (TemplateAction)var1;
-         ActionTemplateUnit var4 = var2.getActionTemplateUnit(var3.getId());
-         if (var4 == null) {
-            throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用动作模版【" + var3.getName() + "】不存在！");
+   private void rebuildTemplateAction(Action action, ResourceLibrary resourceLibrary) {
+      if (action instanceof TemplateAction) {
+         TemplateAction templateAction = (TemplateAction)action;
+         ActionTemplateUnit actionTemplateUnit = resourceLibrary.getActionTemplateUnit(templateAction.getId());
+         if (actionTemplateUnit == null) {
+            throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用动作模版【" + templateAction.getName() + "】不存在！");
          }
 
-         var3.setName(var4.getName());
-         var3.setPath(var4.getPath());
+         templateAction.setName(actionTemplateUnit.getName());
+         templateAction.setPath(actionTemplateUnit.getPath());
       }
    }
 
-   private void a(ResourceLibrary var1, Rule var2) {
-      LoopRule var3 = (LoopRule)var2;
-      LoopTarget var4 = var3.getLoopTarget();
-      if (var4 != null) {
-         Value var5 = var4.getValue();
-         this.rebuildValue(var5, var1, true);
+   private void rebuildLoopRuleForDSL(ResourceLibrary resourceLibrary, Rule rule) {
+      LoopRule loopRule = (LoopRule)rule;
+      LoopTarget loopTarget = loopRule.getLoopTarget();
+      if (loopTarget != null) {
+         Value localValue = loopTarget.getValue();
+         this.rebuildValue(localValue, resourceLibrary, true);
       }
 
-      LoopStart var16 = var3.getLoopStart();
-      if (var16 != null && var16.getActions() != null) {
-         for (Action var7 : var16.getActions()) {
-            this.rebuildAction(var7, var1, true);
+      LoopStart loopStart = loopRule.getLoopStart();
+      if (loopStart != null && loopStart.getActions() != null) {
+         for (Action action : loopStart.getActions()) {
+            this.rebuildAction(action, resourceLibrary, true);
          }
       }
 
-      LoopEnd var17 = var3.getLoopEnd();
-      if (var17 != null && var17.getActions() != null) {
-         for (Action var8 : var17.getActions()) {
-            this.rebuildAction(var8, var1, true);
+      LoopEnd loopEnd = loopRule.getLoopEnd();
+      if (loopEnd != null && loopEnd.getActions() != null) {
+         for (Action action2 : loopEnd.getActions()) {
+            this.rebuildAction(action2, resourceLibrary, true);
          }
       }
 
-      for (LoopRuleUnit var9 : var3.getUnits()) {
-         Lhs var10 = var9.getLhs();
-         if (var10 != null) {
-            Criterion var11 = var10.getCriterion();
-            this.rebuildCriterion(var11, var1, true);
+      for (LoopRuleUnit loopRuleUnit : loopRule.getUnits()) {
+         Lhs lhs = loopRuleUnit.getLhs();
+         if (lhs != null) {
+            Criterion criterion = lhs.getCriterion();
+            this.rebuildCriterion(criterion, resourceLibrary, true);
          }
 
-         Rhs var21 = var9.getRhs();
-         if (var21 != null) {
-            for (Action var14 : var21.getActions()) {
-               this.rebuildAction(var14, var1, true);
+         Rhs rhs = loopRuleUnit.getRhs();
+         if (rhs != null) {
+            for (Action action3 : rhs.getActions()) {
+               this.rebuildAction(action3, resourceLibrary, true);
             }
          }
 
-         Other var22 = var9.getOther();
-         if (var22 != null) {
-            List var23 = var22.getActions();
-            if (var23 != null) {
-               for (Action var15 : (Iterable<Action>)(Iterable<?>)(var23)) {
-                  this.rebuildAction(var15, var1, true);
+         Other other = loopRuleUnit.getOther();
+         if (other != null) {
+            List actions = other.getActions();
+            if (actions != null) {
+               for (Action action4 : (Iterable<Action>)(Iterable<?>)(actions)) {
+                  this.rebuildAction(action4, resourceLibrary, true);
                }
             }
          }
       }
    }
 
-   public void convertNamedJunctions(List<Rule> var1) {
-      for (Rule var3 : var1) {
-         if (var3.getLhs() != null) {
-            Criterion var4 = var3.getLhs().getCriterion();
-            Criterion var5 = this.a(var4);
-            var3.getLhs().setCriterion(var5);
+   public void convertNamedJunctions(List<Rule> rules) {
+      for (Rule rule : rules) {
+         if (rule.getLhs() != null) {
+            Criterion criterion = rule.getLhs().getCriterion();
+            Criterion criterion2 = this.buildCriterion(criterion);
+            rule.getLhs().setCriterion(criterion2);
          }
       }
    }
 
-   private Criterion a(Criterion var1) {
-      if (!(var1 instanceof Junction)) {
-         return var1;
+   private Criterion buildCriterion(Criterion criterion) {
+      if (!(criterion instanceof Junction)) {
+         return criterion;
       }
 
-      if (var1 instanceof Junction) {
-         this.a((Junction)var1);
+      if (criterion instanceof Junction) {
+         this.buildJunction((Junction)criterion);
       }
 
-      return var1;
+      return criterion;
    }
 
-   private void a(Junction var1) {
-      List var2 = var1.getCriterions();
-      ArrayList var3 = new ArrayList();
+   private void buildJunction(Junction junction) {
+      List criterions = junction.getCriterions();
+      ArrayList items = new ArrayList();
 
-      for (Criterion var5 : (Iterable<Criterion>)(Iterable<?>)(var2)) {
-         if (var5 instanceof Junction) {
-            this.a((Junction)var5);
+      for (Criterion criterion : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+         if (criterion instanceof Junction) {
+            this.buildJunction((Junction)criterion);
          }
 
-         var3.add(var5);
+         items.add(criterion);
       }
 
-      var1.setCriterions(var3);
+      junction.setCriterions(items);
    }
 
-   public void rebuildAction(Action var1, ResourceLibrary var2, boolean var3) {
-      if (var1 != null) {
-         if (var1 instanceof PredefineAssignAction) {
-            PredefineAssignAction var4 = (PredefineAssignAction)var1;
-            Predefine var5 = var2.getPredefine(var4.getUuid());
-            if (var5 != null) {
-               var4.setName(var5.getName());
-               String var6 = var5.getType();
-               if (Datatype.isType(var6)) {
-                  var4.setDatatype(Datatype.valueOf(var6));
+   public void rebuildAction(Action action, ResourceLibrary resLibraries, boolean forDSL) {
+      if (action != null) {
+         if (action instanceof PredefineAssignAction) {
+            PredefineAssignAction predefineAssignAction = (PredefineAssignAction)action;
+            Predefine predefine = resLibraries.getPredefine(predefineAssignAction.getUuid());
+            if (predefine != null) {
+               predefineAssignAction.setName(predefine.getName());
+               String type = predefine.getType();
+               if (Datatype.isType(type)) {
+                  predefineAssignAction.setDatatype(Datatype.valueOf(type));
                } else {
-                  String var7 = var4.getPropertyUuid();
-                  if (var7 != null) {
-                     VariableData var8 = var2.getVariableByUuid(var6, var7);
-                     var4.setVariableCategory(var8.getCategory().getName());
-                     var4.setPropertyName(var8.getVariable().getName());
-                     var4.setPropertyDatatype(var8.getVariable().getType());
-                     var4.setPropertyLabel(var8.getVariable().getLabel());
-                     var4.setVariableCategoryUuid(var8.getCategory().getUuid());
+                  String propertyUuid = predefineAssignAction.getPropertyUuid();
+                  if (propertyUuid != null) {
+                     VariableData variableByUuid = resLibraries.getVariableByUuid(type, propertyUuid);
+                     predefineAssignAction.setVariableCategory(variableByUuid.getCategory().getName());
+                     predefineAssignAction.setPropertyName(variableByUuid.getVariable().getName());
+                     predefineAssignAction.setPropertyDatatype(variableByUuid.getVariable().getType());
+                     predefineAssignAction.setPropertyLabel(variableByUuid.getVariable().getLabel());
+                     predefineAssignAction.setVariableCategoryUuid(variableByUuid.getCategory().getUuid());
                   } else {
-                     VariableCategory var28 = var2.getVariableCategoryByUuid(var6);
-                     var4.setVariableCategory(var28.getName());
-                     var4.setVariableCategoryUuid(var28.getUuid());
+                     VariableCategory variableCategoryByUuid = resLibraries.getVariableCategoryByUuid(type);
+                     predefineAssignAction.setVariableCategory(variableCategoryByUuid.getName());
+                     predefineAssignAction.setVariableCategoryUuid(variableCategoryByUuid.getUuid());
                   }
                }
             }
 
-            Value var20 = var4.getValue();
-            this.rebuildValue(var20, var2, var3);
-         } else if (var1 instanceof VariableAssignAction) {
-            List var12 = var2.getVariableCategories();
-            if (var12 == null) {
+            Value localValue = predefineAssignAction.getValue();
+            this.rebuildValue(localValue, resLibraries, forDSL);
+         } else if (action instanceof VariableAssignAction) {
+            List variableCategories = resLibraries.getVariableCategories();
+            if (variableCategories == null) {
                return;
             }
 
-            VariableAssignAction var16 = (VariableAssignAction)var1;
-            VariableData var21 = var2.getVariableByUuid(var16.getCategoryUuid(), var16.getUuid());
-            if (var21 == null) {
+            VariableAssignAction variableAssignAction = (VariableAssignAction)action;
+            VariableData variableByUuid2 = resLibraries.getVariableByUuid(variableAssignAction.getCategoryUuid(), variableAssignAction.getUuid());
+            if (variableByUuid2 == null) {
                throw new RuleException(
-                  "文件【" + RuleFileHolder.getRuleFile() + "】中，变量赋值对象【" + var16.getVariableCategory() + "." + var16.getVariableLabel() + "】不存在"
+                  "文件【" + RuleFileHolder.getRuleFile() + "】中，变量赋值对象【" + variableAssignAction.getVariableCategory() + "." + variableAssignAction.getVariableLabel() + "】不存在"
                );
             }
 
-            LeftType var25 = var16.getType();
-            if (var25 != null) {
-               Variable var29 = var21.getVariable();
-               if (var16.getKeyUuid() == null) {
-                  var16.setVariableName(var29.getName());
-                  var16.setVariableLabel(var29.getLabel());
-                  var16.setDatatype(var29.getType());
+            LeftType type2 = variableAssignAction.getType();
+            if (type2 != null) {
+               Variable variable = variableByUuid2.getVariable();
+               if (variableAssignAction.getKeyUuid() == null) {
+                  variableAssignAction.setVariableName(variable.getName());
+                  variableAssignAction.setVariableLabel(variable.getLabel());
+                  variableAssignAction.setDatatype(variable.getType());
                } else {
-                  var16.setKeyLabel(var29.getLabel());
-                  var16.setKeyName(var29.getName());
-                  VariableData var9 = var2.getVariableByUuid(var16.getKeyCategoryUuid(), var16.getKeyUuid());
-                  if (var9 == null) {
+                  variableAssignAction.setKeyLabel(variable.getLabel());
+                  variableAssignAction.setKeyName(variable.getName());
+                  VariableData variableByUuid3 = resLibraries.getVariableByUuid(variableAssignAction.getKeyCategoryUuid(), variableAssignAction.getKeyUuid());
+                  if (variableByUuid3 == null) {
                      throw new RuleException(
                         "文件【"
                            + RuleFileHolder.getRuleFile()
                            + "】中，对象【"
-                           + var16.getVariableCategory()
+                           + variableAssignAction.getVariableCategory()
                            + "."
-                           + var16.getVariableLabel()
+                           + variableAssignAction.getVariableLabel()
                            + "("
-                           + var16.getVariableName()
+                           + variableAssignAction.getVariableName()
                            + ")】对应的属性在库中不存在"
                      );
                   }
 
-                  var16.setVariableName(var9.getVariable().getName());
-                  var16.setVariableLabel(var9.getVariable().getLabel());
-                  var16.setDatatype(var9.getVariable().getType());
+                  variableAssignAction.setVariableName(variableByUuid3.getVariable().getName());
+                  variableAssignAction.setVariableLabel(variableByUuid3.getVariable().getLabel());
+                  variableAssignAction.setDatatype(variableByUuid3.getVariable().getType());
                }
 
-               var16.setDatatype(var29.getType());
-               var16.setVariableCategory(var21.getCategory().getName());
-            } else if (var25 == null) {
-               String var30 = var16.getVariableCategory();
-               String var34 = var16.getVariableLabel();
-               if (var34 == null) {
+               variableAssignAction.setDatatype(variable.getType());
+               variableAssignAction.setVariableCategory(variableByUuid2.getCategory().getName());
+            } else if (type2 == null) {
+               String variableCategory = variableAssignAction.getVariableCategory();
+               String variableLabel = variableAssignAction.getVariableLabel();
+               if (variableLabel == null) {
                   throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，赋值只能针对具体变量或参数，请检查规则中变量赋值操作中是否存在直接对对象赋值的操作.");
                }
 
-               if (var34.equals("return_value__")) {
-                  var16.setVariableName(var34);
-                  var16.setDatatype(Datatype.Boolean);
-               } else if (var34.equals("return_to__")) {
-                  var16.setVariableName(var34);
-                  var16.setDatatype(Datatype.String);
+               if (variableLabel.equals("return_value__")) {
+                  variableAssignAction.setVariableName(variableLabel);
+                  variableAssignAction.setDatatype(Datatype.Boolean);
+               } else if (variableLabel.equals("return_to__")) {
+                  variableAssignAction.setVariableName(variableLabel);
+                  variableAssignAction.setDatatype(Datatype.String);
                } else {
-                  VariableData var10 = var2.getVariableByUuid(var16.getCategoryUuid(), var16.getUuid());
-                  if (var10 == null) {
-                     throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，变量[" + var30 + "." + var34 + "]不存在");
+                  VariableData variableByUuid4 = resLibraries.getVariableByUuid(variableAssignAction.getCategoryUuid(), variableAssignAction.getUuid());
+                  if (variableByUuid4 == null) {
+                     throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，变量[" + variableCategory + "." + variableLabel + "]不存在");
                   }
 
-                  Variable var11 = var10.getVariable();
-                  var16.setDatatype(var11.getType());
-                  var16.setVariableLabel(var11.getLabel());
-                  var16.setDatatype(var11.getType());
-                  var16.setVariableName(var11.getName());
-                  var16.setDatatype(var11.getType());
-                  var16.setVariableCategory(var10.getCategory().getName());
+                  Variable variable2 = variableByUuid4.getVariable();
+                  variableAssignAction.setDatatype(variable2.getType());
+                  variableAssignAction.setVariableLabel(variable2.getLabel());
+                  variableAssignAction.setDatatype(variable2.getType());
+                  variableAssignAction.setVariableName(variable2.getName());
+                  variableAssignAction.setDatatype(variable2.getType());
+                  variableAssignAction.setVariableCategory(variableByUuid4.getCategory().getName());
                }
             }
 
-            Value var31 = var16.getValue();
-            this.rebuildValue(var31, var2, var3);
-         } else if (var1 instanceof PredefineAssignAction) {
-            PredefineAssignAction var13 = (PredefineAssignAction)var1;
-            Predefine var17 = var2.getPredefine(var13.getUuid());
-            if (var17 != null) {
-               var13.setName(var17.getName());
-               String var22 = var17.getType();
-               if (Datatype.isType(var22)) {
-                  var13.setDatatype(Datatype.valueOf(var22));
+            Value localValue2 = variableAssignAction.getValue();
+            this.rebuildValue(localValue2, resLibraries, forDSL);
+         } else if (action instanceof PredefineAssignAction) {
+            PredefineAssignAction predefineAssignAction2 = (PredefineAssignAction)action;
+            Predefine predefine2 = resLibraries.getPredefine(predefineAssignAction2.getUuid());
+            if (predefine2 != null) {
+               predefineAssignAction2.setName(predefine2.getName());
+               String type3 = predefine2.getType();
+               if (Datatype.isType(type3)) {
+                  predefineAssignAction2.setDatatype(Datatype.valueOf(type3));
                } else {
-                  String var26 = var13.getPropertyUuid();
-                  if (var26 != null) {
-                     VariableData var32 = var2.getVariableByUuid(var22, var26);
-                     var13.setVariableCategory(var32.getCategory().getName());
-                     var13.setPropertyName(var32.getVariable().getName());
-                     var13.setPropertyLabel(var32.getVariable().getLabel());
-                     var13.setVariableCategoryUuid(var32.getCategory().getUuid());
+                  String propertyUuid2 = predefineAssignAction2.getPropertyUuid();
+                  if (propertyUuid2 != null) {
+                     VariableData variableByUuid5 = resLibraries.getVariableByUuid(type3, propertyUuid2);
+                     predefineAssignAction2.setVariableCategory(variableByUuid5.getCategory().getName());
+                     predefineAssignAction2.setPropertyName(variableByUuid5.getVariable().getName());
+                     predefineAssignAction2.setPropertyLabel(variableByUuid5.getVariable().getLabel());
+                     predefineAssignAction2.setVariableCategoryUuid(variableByUuid5.getCategory().getUuid());
                   } else {
-                     VariableCategory var33 = var2.getVariableCategoryByUuid(var22);
-                     var13.setVariableCategory(var33.getName());
-                     var13.setVariableCategoryUuid(var33.getUuid());
+                     VariableCategory variableCategoryByUuid2 = resLibraries.getVariableCategoryByUuid(type3);
+                     predefineAssignAction2.setVariableCategory(variableCategoryByUuid2.getName());
+                     predefineAssignAction2.setVariableCategoryUuid(variableCategoryByUuid2.getUuid());
                   }
                }
             }
-         } else if (var1 instanceof ConsolePrintAction) {
-            ConsolePrintAction var14 = (ConsolePrintAction)var1;
-            Value var18 = var14.getValue();
-            this.rebuildValue(var18, var2, var3);
-         } else if (var1 instanceof ExecuteMethodAction) {
-            List var15 = var2.getActionLibraries();
-            if (var15 == null) {
+         } else if (action instanceof ConsolePrintAction) {
+            ConsolePrintAction consolePrintAction = (ConsolePrintAction)action;
+            Value localValue3 = consolePrintAction.getValue();
+            this.rebuildValue(localValue3, resLibraries, forDSL);
+         } else if (action instanceof ExecuteMethodAction) {
+            List actionLibraries = resLibraries.getActionLibraries();
+            if (actionLibraries == null) {
                return;
             }
 
-            ExecuteMethodAction var19 = (ExecuteMethodAction)var1;
-            ActionData var23 = null;
-            if (var19.getCategoryUuid() == null) {
-               var23 = var2.getActionByName(var19.getBeanLabel(), var19.getMethodLabel());
-               if (var23 == null) {
-                  var23 = var2.getActionByBean(var19.getBeanId(), var19.getMethodName());
+            ExecuteMethodAction executeMethodAction = (ExecuteMethodAction)action;
+            ActionData actionData = null;
+            if (executeMethodAction.getCategoryUuid() == null) {
+               actionData = resLibraries.getActionByName(executeMethodAction.getBeanLabel(), executeMethodAction.getMethodLabel());
+               if (actionData == null) {
+                  actionData = resLibraries.getActionByBean(executeMethodAction.getBeanId(), executeMethodAction.getMethodName());
                }
             } else {
-               var23 = var2.getActionByUuid(var19.getCategoryUuid(), var19.getUuid());
+               actionData = resLibraries.getActionByUuid(executeMethodAction.getCategoryUuid(), executeMethodAction.getUuid());
             }
 
-            if (var23 == null) {
-               throw new RuleException("Bean [" + var19.getBeanLabel() + "] not define methods.");
+            if (actionData == null) {
+               throw new RuleException("Bean [" + executeMethodAction.getBeanLabel() + "] not define methods.");
             }
 
-            var19.setBeanId(var23.getBean().getId());
-            var19.setBeanLabel(var23.getBean().getName());
-            var19.setMethodName(var23.getMethod().getMethodName());
-            var19.setMethodLabel(var23.getMethod().getName());
-            List var27 = var19.getParameters();
-            this.a(var2, var27, var23.getMethod().getParameters(), var3);
+            executeMethodAction.setBeanId(actionData.getBean().getId());
+            executeMethodAction.setBeanLabel(actionData.getBean().getName());
+            executeMethodAction.setMethodName(actionData.getMethod().getMethodName());
+            executeMethodAction.setMethodLabel(actionData.getMethod().getName());
+            List parameters = executeMethodAction.getParameters();
+            this.rebuildParameters(resLibraries, parameters, actionData.getMethod().getParameters(), forDSL);
          }
       }
    }
 
-   private void a(CommonFunctionParameter var1, ResourceLibrary var2, boolean var3) {
-      if (var1 != null) {
-         String var4 = var1.getProperty();
-         if (!StringUtils.isEmpty(var4)) {
-            Value var5 = var1.getObjectParameter();
-            this.rebuildValue(var5, var2, var3);
-            String var6 = null;
-            if (var5 instanceof VariableValue) {
-               VariableValue var7 = (VariableValue)var5;
-               var6 = var7.getCategoryUuid();
-            } else if (var5 instanceof VariableCategoryValue) {
-               VariableCategoryValue var13 = (VariableCategoryValue)var5;
-               var6 = var13.getUuid();
+   private void rebuildCommonFunctionParameter(CommonFunctionParameter commonFunctionParameter, ResourceLibrary resourceLibrary, boolean forDSL) {
+      if (commonFunctionParameter != null) {
+         String property = commonFunctionParameter.getProperty();
+         if (!StringUtils.isEmpty(property)) {
+            Value objectParameter = commonFunctionParameter.getObjectParameter();
+            this.rebuildValue(objectParameter, resourceLibrary, forDSL);
+            String text = null;
+            if (objectParameter instanceof VariableValue) {
+               VariableValue variableValue = (VariableValue)objectParameter;
+               text = variableValue.getCategoryUuid();
+            } else if (objectParameter instanceof VariableCategoryValue) {
+               VariableCategoryValue variableCategoryValue = (VariableCategoryValue)objectParameter;
+               text = variableCategoryValue.getUuid();
             } else {
-               if (!(var5 instanceof ParameterValue)) {
+               if (!(objectParameter instanceof ParameterValue)) {
                   throw new RuleException("Function parameter is invalid.");
                }
 
-               ParameterValue var14 = (ParameterValue)var5;
-               var6 = var14.getUuid();
+               ParameterValue parameterValue = (ParameterValue)objectParameter;
+               text = parameterValue.getUuid();
             }
 
-            for (VariableCategory var9 : var2.getVariableCategories()) {
-               if (var6.equals(var9.getUuid())) {
-                  for (Variable var11 : var9.getVariables()) {
-                     if (var11.getName().equals(var4) || var11.getLabel().equals(var4)) {
-                        var1.setProperty(var11.getName());
-                        var1.setPropertyLabel(var11.getLabel());
+            for (VariableCategory variableCategory : resourceLibrary.getVariableCategories()) {
+               if (text.equals(variableCategory.getUuid())) {
+                  for (Variable variable : variableCategory.getVariables()) {
+                     if (variable.getName().equals(property) || variable.getLabel().equals(property)) {
+                        commonFunctionParameter.setProperty(variable.getName());
+                        commonFunctionParameter.setPropertyLabel(variable.getLabel());
                         break;
                      }
                   }
@@ -518,396 +518,396 @@ public class RulesRebuilder {
       }
    }
 
-   private void a(ResourceLibrary var1, List<Parameter> var2, List<com.bstek.urule.model.library.action.Parameter> var3, boolean var4) {
-      if (var2 != null && var3 != null) {
-         for (int var5 = 0; var5 < var2.size() && var5 <= var3.size() - 1; var5++) {
-            Parameter var6 = (Parameter)var2.get(var5);
-            com.bstek.urule.model.library.action.Parameter var7 = (com.bstek.urule.model.library.action.Parameter)var3.get(var5);
-            var6.setType(var7.getType());
-            Value var8 = var6.getValue();
-            this.rebuildValue(var8, var1, var4);
+   private void rebuildParameters(ResourceLibrary resourceLibrary, List<Parameter> parameters, List<com.bstek.urule.model.library.action.Parameter> targetParameters, boolean forDSL) {
+      if (parameters != null && targetParameters != null) {
+         for (int index = 0; index < parameters.size() && index <= targetParameters.size() - 1; index++) {
+            Parameter parameter = (Parameter)parameters.get(index);
+            com.bstek.urule.model.library.action.Parameter targetParameter = (com.bstek.urule.model.library.action.Parameter)targetParameters.get(index);
+            parameter.setType(targetParameter.getType());
+            Value value = parameter.getValue();
+            this.rebuildValue(value, resourceLibrary, forDSL);
          }
       }
    }
 
-   public void rebuildCriterion(Criterion var1, ResourceLibrary var2, boolean var3) {
-      if (var1 != null) {
-         if (var1 instanceof Criteria) {
-            Criteria var4 = (Criteria)var1;
-            this.a(var2, var4, var3);
-         } else if (var1 instanceof Junction) {
-            Junction var8 = (Junction)var1;
-            List var5 = var8.getCriterions();
-            if (var5 != null) {
-               for (Criterion var7 : (Iterable<Criterion>)(Iterable<?>)(var5)) {
-                  this.rebuildCriterion(var7, var2, var3);
+   public void rebuildCriterion(Criterion criterion, ResourceLibrary resLibraries, boolean forDSL) {
+      if (criterion != null) {
+         if (criterion instanceof Criteria) {
+            Criteria criteria = (Criteria)criterion;
+            this.rebuildCriteria(resLibraries, criteria, forDSL);
+         } else if (criterion instanceof Junction) {
+            Junction junction = (Junction)criterion;
+            List criterions = junction.getCriterions();
+            if (criterions != null) {
+               for (Criterion criterion2 : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+                  this.rebuildCriterion(criterion2, resLibraries, forDSL);
                }
             }
-         } else if (var1 instanceof ConditionTemplateCriterion) {
-            ConditionTemplateCriterion var9 = (ConditionTemplateCriterion)var1;
-            ConditionTemplateUnit var10 = var2.getConditionTemplateUnit(var9.getId());
-            if (var10 == null) {
-               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用条件模版【" + var9.getName() + "】不存在!");
+         } else if (criterion instanceof ConditionTemplateCriterion) {
+            ConditionTemplateCriterion conditionTemplateCriterion = (ConditionTemplateCriterion)criterion;
+            ConditionTemplateUnit conditionTemplateUnit = resLibraries.getConditionTemplateUnit(conditionTemplateCriterion.getId());
+            if (conditionTemplateUnit == null) {
+               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用条件模版【" + conditionTemplateCriterion.getName() + "】不存在!");
             }
 
-            var9.setName(var10.getName());
-            var9.setPath(var10.getPath());
+            conditionTemplateCriterion.setName(conditionTemplateUnit.getName());
+            conditionTemplateCriterion.setPath(conditionTemplateUnit.getPath());
          }
       }
    }
 
-   private void a(ResourceLibrary var1, Criteria var2, boolean var3) {
-      Left var4 = var2.getLeft();
-      LeftPart var5 = var4.getLeftPart();
-      if (var5 instanceof VariableLeftPart) {
-         VariableLeftPart var6 = (VariableLeftPart)var5;
-         if (var6.getKeyCategoryUuid() != null) {
-            VariableData var7 = var1.getVariableByUuid(var6.getKeyCategoryUuid(), var6.getKeyUuid());
-            Variable var8 = var7.getVariable();
-            var6.setDatatype(var8.getType());
-            var6.setVariableLabel(var8.getLabel());
-            var6.setDatatype(var8.getType());
-            var6.setVariableName(var8.getName());
-            var7 = var1.getVariableByUuid(var6.getCategoryUuid(), var6.getUuid());
-            var6.setKeyName(var7.getVariable().getName());
-            var6.setKeyLabel(var7.getVariable().getLabel());
+   private void rebuildCriteria(ResourceLibrary resourceLibrary, Criteria criteria, boolean forDSL) {
+      Left left = criteria.getLeft();
+      LeftPart leftPart = left.getLeftPart();
+      if (leftPart instanceof VariableLeftPart) {
+         VariableLeftPart variableLeftPart = (VariableLeftPart)leftPart;
+         if (variableLeftPart.getKeyCategoryUuid() != null) {
+            VariableData variableByUuid = resourceLibrary.getVariableByUuid(variableLeftPart.getKeyCategoryUuid(), variableLeftPart.getKeyUuid());
+            Variable variable = variableByUuid.getVariable();
+            variableLeftPart.setDatatype(variable.getType());
+            variableLeftPart.setVariableLabel(variable.getLabel());
+            variableLeftPart.setDatatype(variable.getType());
+            variableLeftPart.setVariableName(variable.getName());
+            variableByUuid = resourceLibrary.getVariableByUuid(variableLeftPart.getCategoryUuid(), variableLeftPart.getUuid());
+            variableLeftPart.setKeyName(variableByUuid.getVariable().getName());
+            variableLeftPart.setKeyLabel(variableByUuid.getVariable().getLabel());
          } else {
-            VariableData var21 = null;
-            if ("参数".equals(var6.getVariableCategory())) {
-               Variable var30 = var1.getParameterByUuid(var6.getKeyUuid(), var6.getKeyName(), var6.getKeyLabel());
-               if (var30 != null && var30.getType() == Datatype.Object) {
-                  var21 = var1.getVariableByUuid(var30.getDataType(), var6.getUuid());
-                  if (StringUtils.isBlank(var6.getKeyUuid())) {
-                     var6.setKeyUuid(var30.getUuid());
+            VariableData variableData = null;
+            if ("参数".equals(variableLeftPart.getVariableCategory())) {
+               Variable parameterByUuid = resourceLibrary.getParameterByUuid(variableLeftPart.getKeyUuid(), variableLeftPart.getKeyName(), variableLeftPart.getKeyLabel());
+               if (parameterByUuid != null && parameterByUuid.getType() == Datatype.Object) {
+                  variableData = resourceLibrary.getVariableByUuid(parameterByUuid.getDataType(), variableLeftPart.getUuid());
+                  if (StringUtils.isBlank(variableLeftPart.getKeyUuid())) {
+                     variableLeftPart.setKeyUuid(parameterByUuid.getUuid());
                   }
                }
 
-               if (var21 == null) {
-                  var21 = var1.getVariableByName(var6.getCategoryUuid(), var6.getVariableName());
+               if (variableData == null) {
+                  variableData = resourceLibrary.getVariableByName(variableLeftPart.getCategoryUuid(), variableLeftPart.getVariableName());
                }
             } else {
-               var21 = var1.getVariableByUuid(var6.getCategoryUuid(), var6.getUuid());
+               variableData = resourceLibrary.getVariableByUuid(variableLeftPart.getCategoryUuid(), variableLeftPart.getUuid());
             }
 
-            if (var21 == null) {
-               var21 = var1.getVariableByName(var6.getVariableCategory(), var6.getVariableName());
+            if (variableData == null) {
+               variableData = resourceLibrary.getVariableByName(variableLeftPart.getVariableCategory(), variableLeftPart.getVariableName());
             }
 
-            if (var21 == null) {
-               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，变量[" + var6.getVariableCategory() + "." + var6.getVariableLabel() + "]不存在");
+            if (variableData == null) {
+               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，变量[" + variableLeftPart.getVariableCategory() + "." + variableLeftPart.getVariableLabel() + "]不存在");
             }
 
-            Variable var31 = var21.getVariable();
-            var6.setDatatype(var31.getType());
-            var6.setVariableLabel(var31.getLabel());
-            var6.setDatatype(var31.getType());
-            var6.setVariableName(var31.getName());
-            if (!"参数".equals(var6.getVariableCategory())) {
-               var6.setVariableCategory(var21.getCategory().getName());
+            Variable variable2 = variableData.getVariable();
+            variableLeftPart.setDatatype(variable2.getType());
+            variableLeftPart.setVariableLabel(variable2.getLabel());
+            variableLeftPart.setDatatype(variable2.getType());
+            variableLeftPart.setVariableName(variable2.getName());
+            if (!"参数".equals(variableLeftPart.getVariableCategory())) {
+               variableLeftPart.setVariableCategory(variableData.getCategory().getName());
             }
          }
-      } else if (var5 instanceof PredefineLeftPart) {
-         PredefineLeftPart var14 = (PredefineLeftPart)var5;
-         Predefine var22 = var1.getPredefine(var14.getUuid());
-         if (var22 != null) {
-            var14.setName(var22.getName());
-            String var32 = var22.getType();
-            if (Datatype.isType(var32)) {
-               var14.setDatatype(Datatype.valueOf(var32));
+      } else if (leftPart instanceof PredefineLeftPart) {
+         PredefineLeftPart predefineLeftPart = (PredefineLeftPart)leftPart;
+         Predefine predefine = resourceLibrary.getPredefine(predefineLeftPart.getUuid());
+         if (predefine != null) {
+            predefineLeftPart.setName(predefine.getName());
+            String type = predefine.getType();
+            if (Datatype.isType(type)) {
+               predefineLeftPart.setDatatype(Datatype.valueOf(type));
             } else {
-               String var9 = var14.getPropertyUuid();
-               if (var9 != null) {
-                  VariableData var10 = var1.getVariableByUuid(var32, var9);
-                  if (var10 == null) {
-                     throw new RuleException("变量属性不存在:" + var9);
+               String propertyUuid = predefineLeftPart.getPropertyUuid();
+               if (propertyUuid != null) {
+                  VariableData variableByUuid2 = resourceLibrary.getVariableByUuid(type, propertyUuid);
+                  if (variableByUuid2 == null) {
+                     throw new RuleException("变量属性不存在:" + propertyUuid);
                   }
 
-                  var14.setVariableCategory(var10.getCategory().getName());
-                  var14.setPropertyName(var10.getVariable().getName());
-                  var14.setPropertyLabel(var10.getVariable().getLabel());
-                  var14.setVariableCategoryUuid(var10.getCategory().getUuid());
+                  predefineLeftPart.setVariableCategory(variableByUuid2.getCategory().getName());
+                  predefineLeftPart.setPropertyName(variableByUuid2.getVariable().getName());
+                  predefineLeftPart.setPropertyLabel(variableByUuid2.getVariable().getLabel());
+                  predefineLeftPart.setVariableCategoryUuid(variableByUuid2.getCategory().getUuid());
                } else {
-                  VariableCategory var41 = var1.getVariableCategoryByUuid(var32);
-                  if (var41 == null) {
-                     throw new RuleException("变量不存在:" + var9);
+                  VariableCategory variableCategoryByUuid = resourceLibrary.getVariableCategoryByUuid(type);
+                  if (variableCategoryByUuid == null) {
+                     throw new RuleException("变量不存在:" + propertyUuid);
                   }
 
-                  var14.setVariableCategory(var41.getName());
-                  var14.setVariableCategoryUuid(var41.getUuid());
+                  predefineLeftPart.setVariableCategory(variableCategoryByUuid.getName());
+                  predefineLeftPart.setVariableCategoryUuid(variableCategoryByUuid.getUuid());
                }
             }
          }
-      } else if (var5 instanceof CommonFunctionLeftPart) {
-         CommonFunctionLeftPart var15 = (CommonFunctionLeftPart)var5;
-         CommonFunctionParameter var23 = var15.getParameter();
-         this.a(var23, var1, var3);
-      } else if (var5 instanceof MethodLeftPart) {
-         MethodLeftPart var16 = (MethodLeftPart)var5;
-         ActionData var24 = null;
-         if (var16.getCategoryUuid() == null) {
-            var24 = var1.getActionByName(var16.getBeanLabel(), var16.getMethodLabel());
-            if (var24 == null) {
-               var24 = var1.getActionByBean(var16.getBeanId(), var16.getMethodName());
+      } else if (leftPart instanceof CommonFunctionLeftPart) {
+         CommonFunctionLeftPart commonFunctionLeftPart = (CommonFunctionLeftPart)leftPart;
+         CommonFunctionParameter parameter = commonFunctionLeftPart.getParameter();
+         this.rebuildCommonFunctionParameter(parameter, resourceLibrary, forDSL);
+      } else if (leftPart instanceof MethodLeftPart) {
+         MethodLeftPart methodLeftPart = (MethodLeftPart)leftPart;
+         ActionData actionData = null;
+         if (methodLeftPart.getCategoryUuid() == null) {
+            actionData = resourceLibrary.getActionByName(methodLeftPart.getBeanLabel(), methodLeftPart.getMethodLabel());
+            if (actionData == null) {
+               actionData = resourceLibrary.getActionByBean(methodLeftPart.getBeanId(), methodLeftPart.getMethodName());
             }
          } else {
-            var24 = var1.getActionByUuid(var16.getCategoryUuid(), var16.getUuid());
+            actionData = resourceLibrary.getActionByUuid(methodLeftPart.getCategoryUuid(), methodLeftPart.getUuid());
          }
 
-         if (var24 == null) {
-            throw new RuleException("Bean[" + var16.getBeanLabel() + "] not exist.");
+         if (actionData == null) {
+            throw new RuleException("Bean[" + methodLeftPart.getBeanLabel() + "] not exist.");
          }
 
-         var16.setBeanId(var24.getBean().getId());
-         var16.setBeanLabel(var24.getBean().getName());
-         var16.setMethodName(var24.getMethod().getMethodName());
-         var16.setMethodLabel(var24.getMethod().getName());
-         List var33 = var16.getParameters();
-         this.a(var1, var33, var24.getMethod().getParameters(), var3);
-      } else if (var5 instanceof FunctionLeftPart) {
-         FunctionLeftPart var17 = (FunctionLeftPart)var5;
-         List var26 = var17.getParameters();
-         if (var26 != null && var26.size() > 0) {
-            for (Parameter var37 : (Iterable<Parameter>)(Iterable<?>)(var26)) {
-               Value var42 = var37.getValue();
-               if (var42 != null) {
-                  this.rebuildValue(var42, var1, var3);
+         methodLeftPart.setBeanId(actionData.getBean().getId());
+         methodLeftPart.setBeanLabel(actionData.getBean().getName());
+         methodLeftPart.setMethodName(actionData.getMethod().getMethodName());
+         methodLeftPart.setMethodLabel(actionData.getMethod().getName());
+         List parameters = methodLeftPart.getParameters();
+         this.rebuildParameters(resourceLibrary, parameters, actionData.getMethod().getParameters(), forDSL);
+      } else if (leftPart instanceof FunctionLeftPart) {
+         FunctionLeftPart functionLeftPart = (FunctionLeftPart)leftPart;
+         List parameters2 = functionLeftPart.getParameters();
+         if (parameters2 != null && parameters2.size() > 0) {
+            for (Parameter parameter2 : (Iterable<Parameter>)(Iterable<?>)(parameters2)) {
+               Value localValue = parameter2.getValue();
+               if (localValue != null) {
+                  this.rebuildValue(localValue, resourceLibrary, forDSL);
                }
             }
          }
-      } else if (var5 instanceof AccumulateLeftPart) {
-         AccumulateLeftPart var18 = (AccumulateLeftPart)var5;
-         List var27 = var18.getConditionItems();
-         if (var27 != null) {
-            for (ConditionItem var38 : (Iterable<ConditionItem>)(Iterable<?>)(var27)) {
-               Value var43 = var38.getValue();
-               this.rebuildValue(var43, var1, var3);
+      } else if (leftPart instanceof AccumulateLeftPart) {
+         AccumulateLeftPart accumulateLeftPart = (AccumulateLeftPart)leftPart;
+         List conditionItems = accumulateLeftPart.getConditionItems();
+         if (conditionItems != null) {
+            for (ConditionItem conditionItem : (Iterable<ConditionItem>)(Iterable<?>)(conditionItems)) {
+               Value localValue2 = conditionItem.getValue();
+               this.rebuildValue(localValue2, resourceLibrary, forDSL);
             }
          }
 
-         List var36 = var18.getCalculateItems();
-         if (var36 != null) {
-            for (CalculateItem var44 : (Iterable<CalculateItem>)(Iterable<?>)(var36)) {
-               String var11 = var44.getAssignCategoryUuid();
-               String var12 = var44.getAssignVariableUuid();
-               if (StringUtils.isNotBlank(var12) && StringUtils.isNotBlank(var11)) {
-                  VariableData var13 = var1.getVariableByUuid(var11, var12);
-                  if (var13 == null) {
+         List calculateItems = accumulateLeftPart.getCalculateItems();
+         if (calculateItems != null) {
+            for (CalculateItem calculateItem : (Iterable<CalculateItem>)(Iterable<?>)(calculateItems)) {
+               String assignCategoryUuid = calculateItem.getAssignCategoryUuid();
+               String assignVariableUuid = calculateItem.getAssignVariableUuid();
+               if (StringUtils.isNotBlank(assignVariableUuid) && StringUtils.isNotBlank(assignCategoryUuid)) {
+                  VariableData variableByUuid3 = resourceLibrary.getVariableByUuid(assignCategoryUuid, assignVariableUuid);
+                  if (variableByUuid3 == null) {
                      throw new RuleException(
-                        "文件【" + RuleFileHolder.getRuleFile() + "】中，引用变量[" + var44.getAssignVariableCategory() + "." + var44.getAssignVariableLabel() + "]不存在"
+                        "文件【" + RuleFileHolder.getRuleFile() + "】中，引用变量[" + calculateItem.getAssignVariableCategory() + "." + calculateItem.getAssignVariableLabel() + "]不存在"
                      );
                   }
 
-                  var44.setAssignDatatype(var13.getVariable().getType());
-                  var44.setAssignVariableCategory(var13.getCategory().getName());
-                  var44.setAssignVariable(var13.getVariable().getName());
-                  var44.setAssignVariableLabel(var13.getVariable().getLabel());
+                  calculateItem.setAssignDatatype(variableByUuid3.getVariable().getType());
+                  calculateItem.setAssignVariableCategory(variableByUuid3.getCategory().getName());
+                  calculateItem.setAssignVariable(variableByUuid3.getVariable().getName());
+                  calculateItem.setAssignVariableLabel(variableByUuid3.getVariable().getLabel());
                }
             }
          }
 
-         LoopTarget var40 = var18.getLoopTarget();
-         Value var45 = var40.getValue();
-         this.rebuildValue(var45, var1, var3);
+         LoopTarget loopTarget = accumulateLeftPart.getLoopTarget();
+         Value localValue3 = loopTarget.getValue();
+         this.rebuildValue(localValue3, resourceLibrary, forDSL);
       }
 
-      ComplexArithmetic var19 = var4.getArithmetic();
-      if (var19 != null) {
-         Value var28 = var19.getValue();
-         this.rebuildValue(var28, var1, var3);
+      ComplexArithmetic arithmetic = left.getArithmetic();
+      if (arithmetic != null) {
+         Value localValue4 = arithmetic.getValue();
+         this.rebuildValue(localValue4, resourceLibrary, forDSL);
       }
 
-      Value var29 = var2.getValue();
-      this.rebuildValue(var29, var1, var3);
+      Value localValue5 = criteria.getValue();
+      this.rebuildValue(localValue5, resourceLibrary, forDSL);
    }
 
-   public void rebuildValue(Value var1, ResourceLibrary var2, boolean var3) {
-      if (var1 != null) {
-         if (var1 instanceof ParenValue) {
-            ParenValue var4 = (ParenValue)var1;
-            Value var5 = var4.getValue();
-            this.rebuildValue(var5, var2, var3);
-         } else if (var1 instanceof ConstantValue) {
-            ConstantValue var10 = (ConstantValue)var1;
-            ConstantData var19 = var2.getConstantByUuid(var10.getCategoryUuid(), var10.getUuid());
-            if (var19 == null) {
+   public void rebuildValue(Value value, ResourceLibrary resLibraries, boolean forDSL) {
+      if (value != null) {
+         if (value instanceof ParenValue) {
+            ParenValue parenValue = (ParenValue)value;
+            Value localValue = parenValue.getValue();
+            this.rebuildValue(localValue, resLibraries, forDSL);
+         } else if (value instanceof ConstantValue) {
+            ConstantValue constantValue = (ConstantValue)value;
+            ConstantData constantByUuid = resLibraries.getConstantByUuid(constantValue.getCategoryUuid(), constantValue.getUuid());
+            if (constantByUuid == null) {
                throw new RuleException(
-                  "文件【" + RuleFileHolder.getRuleFile() + "】中，引用常量[" + var10.getConstantCategory() + "." + var10.getConstantLabel() + "]不存在"
+                  "文件【" + RuleFileHolder.getRuleFile() + "】中，引用常量[" + constantValue.getConstantCategory() + "." + constantValue.getConstantLabel() + "]不存在"
                );
             }
 
-            var10.setConstantCategory(var19.getCategory().getLabel());
-            var10.setConstantName(var19.getConstant().getName());
-            var10.setConstantLabel(var19.getConstant().getLabel());
-            var10.setDatatype(var19.getConstant().getType());
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var11 = (VariableValue)var1;
-            VariableData var20 = var2.getVariableByUuid(var11.getCategoryUuid(), var11.getUuid());
-            if (var20 == null) {
+            constantValue.setConstantCategory(constantByUuid.getCategory().getLabel());
+            constantValue.setConstantName(constantByUuid.getConstant().getName());
+            constantValue.setConstantLabel(constantByUuid.getConstant().getLabel());
+            constantValue.setDatatype(constantByUuid.getConstant().getType());
+         } else if (value instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)value;
+            VariableData variableByUuid = resLibraries.getVariableByUuid(variableValue.getCategoryUuid(), variableValue.getUuid());
+            if (variableByUuid == null) {
                throw new RuleException(
-                  "文件【" + RuleFileHolder.getRuleFile() + "】中，引用变量[" + var11.getVariableCategory() + "." + var11.getVariableLabel() + "]不存在"
+                  "文件【" + RuleFileHolder.getRuleFile() + "】中，引用变量[" + variableValue.getVariableCategory() + "." + variableValue.getVariableLabel() + "]不存在"
                );
             }
 
-            Variable var6 = var20.getVariable();
-            var11.setDatatype(var6.getType());
-            var11.setVariableLabel(var6.getLabel());
-            var11.setDatatype(var6.getType());
-            var11.setVariableName(var6.getName());
-            var11.setDatatype(var6.getType());
-            var11.setVariableCategory(var20.getCategory().getName());
-         } else if (var1 instanceof PredefineValue) {
-            PredefineValue var12 = (PredefineValue)var1;
-            String var21 = var12.getUuid();
-            Predefine var30 = var2.getPredefine(var21);
-            if (var30 == null) {
-               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用预定义对象[" + var21 + "]不存在");
+            Variable variable = variableByUuid.getVariable();
+            variableValue.setDatatype(variable.getType());
+            variableValue.setVariableLabel(variable.getLabel());
+            variableValue.setDatatype(variable.getType());
+            variableValue.setVariableName(variable.getName());
+            variableValue.setDatatype(variable.getType());
+            variableValue.setVariableCategory(variableByUuid.getCategory().getName());
+         } else if (value instanceof PredefineValue) {
+            PredefineValue predefineValue = (PredefineValue)value;
+            String uuid = predefineValue.getUuid();
+            Predefine predefine = resLibraries.getPredefine(uuid);
+            if (predefine == null) {
+               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用预定义对象[" + uuid + "]不存在");
             }
 
-            var12.setName(var30.getName());
-            String var7 = var30.getType();
-            if (Datatype.isType(var7)) {
-               var12.setDatatype(Datatype.valueOf(var7));
+            predefineValue.setName(predefine.getName());
+            String type = predefine.getType();
+            if (Datatype.isType(type)) {
+               predefineValue.setDatatype(Datatype.valueOf(type));
             } else {
-               String var8 = var12.getPropertyUuid();
-               if (var8 != null) {
-                  VariableData var9 = var2.getVariableByUuid(var7, var8);
-                  var12.setVariableCategory(var9.getCategory().getName());
-                  var12.setPropertyName(var9.getVariable().getName());
-                  var12.setPropertyLabel(var9.getVariable().getLabel());
-                  var12.setVariableCategoryUuid(var9.getCategory().getUuid());
+               String propertyUuid = predefineValue.getPropertyUuid();
+               if (propertyUuid != null) {
+                  VariableData variableByUuid2 = resLibraries.getVariableByUuid(type, propertyUuid);
+                  predefineValue.setVariableCategory(variableByUuid2.getCategory().getName());
+                  predefineValue.setPropertyName(variableByUuid2.getVariable().getName());
+                  predefineValue.setPropertyLabel(variableByUuid2.getVariable().getLabel());
+                  predefineValue.setVariableCategoryUuid(variableByUuid2.getCategory().getUuid());
                } else {
-                  VariableCategory var34 = var2.getVariableCategoryByUuid(var7);
-                  var12.setVariableCategory(var34.getName());
-                  var12.setVariableCategoryUuid(var34.getUuid());
+                  VariableCategory variableCategoryByUuid = resLibraries.getVariableCategoryByUuid(type);
+                  predefineValue.setVariableCategory(variableCategoryByUuid.getName());
+                  predefineValue.setVariableCategoryUuid(variableCategoryByUuid.getUuid());
                }
             }
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var13 = (VariableCategoryValue)var1;
-            VariableCategory var22 = var2.getVariableCategoryByUuid(var13.getUuid());
-            if (var22 != null) {
-               var13.setVariableCategory(var22.getName());
+         } else if (value instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)value;
+            VariableCategory variableCategoryByUuid2 = resLibraries.getVariableCategoryByUuid(variableCategoryValue.getUuid());
+            if (variableCategoryByUuid2 != null) {
+               variableCategoryValue.setVariableCategory(variableCategoryByUuid2.getName());
             }
-         } else if (var1 instanceof ParameterValue) {
-            ParameterValue var14 = (ParameterValue)var1;
-            VariableData var23 = var2.getVariableByUuid("参数", var14.getUuid());
-            if (var23 == null) {
-               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用的参数[" + "参数" + "." + var14.getVariableLabel() + "]不存在");
+         } else if (value instanceof ParameterValue) {
+            ParameterValue parameterValue = (ParameterValue)value;
+            VariableData variableByUuid3 = resLibraries.getVariableByUuid("参数", parameterValue.getUuid());
+            if (variableByUuid3 == null) {
+               throw new RuleException("文件【" + RuleFileHolder.getRuleFile() + "】中，引用的参数[" + "参数" + "." + parameterValue.getVariableLabel() + "]不存在");
             }
 
-            Variable var31 = var23.getVariable();
-            if (var14.getKeyUuid() == null) {
-               var14.setVariableLabel(var31.getLabel());
-               var14.setVariableName(var31.getName());
-               var14.setDatatype(var31.getType());
+            Variable variable2 = variableByUuid3.getVariable();
+            if (parameterValue.getKeyUuid() == null) {
+               parameterValue.setVariableLabel(variable2.getLabel());
+               parameterValue.setVariableName(variable2.getName());
+               parameterValue.setDatatype(variable2.getType());
             } else {
-               var14.setKeyLabel(var31.getLabel());
-               var14.setKeyName(var31.getName());
-               var23 = var2.getVariableByUuid(var14.getKeyCategoryUuid(), var14.getKeyUuid());
-               if (var23 == null) {
+               parameterValue.setKeyLabel(variable2.getLabel());
+               parameterValue.setKeyName(variable2.getName());
+               variableByUuid3 = resLibraries.getVariableByUuid(parameterValue.getKeyCategoryUuid(), parameterValue.getKeyUuid());
+               if (variableByUuid3 == null) {
                   throw new RuleException(
-                     "文件【" + RuleFileHolder.getRuleFile() + "】中，引用的参数[" + "参数" + "." + var14.getKeyLabel() + "." + var14.getVariableLabel() + "]不存在"
+                     "文件【" + RuleFileHolder.getRuleFile() + "】中，引用的参数[" + "参数" + "." + parameterValue.getKeyLabel() + "." + parameterValue.getVariableLabel() + "]不存在"
                   );
                }
 
-               var31 = var23.getVariable();
-               var14.setVariableLabel(var31.getLabel());
-               var14.setVariableName(var31.getName());
-               var14.setDatatype(var31.getType());
+               variable2 = variableByUuid3.getVariable();
+               parameterValue.setVariableLabel(variable2.getLabel());
+               parameterValue.setVariableName(variable2.getName());
+               parameterValue.setDatatype(variable2.getType());
             }
-         } else if (var1 instanceof CommonFunctionValue) {
-            CommonFunctionValue var15 = (CommonFunctionValue)var1;
-            CommonFunctionParameter var25 = var15.getParameter();
-            this.a(var25, var2, var3);
-         } else if (var1 instanceof MethodValue) {
-            MethodValue var16 = (MethodValue)var1;
-            ActionData var26 = null;
-            if (var16.getCategoryUuid() != null) {
-               var26 = var2.getActionByUuid(var16.getCategoryUuid(), var16.getUuid());
+         } else if (value instanceof CommonFunctionValue) {
+            CommonFunctionValue commonFunctionValue = (CommonFunctionValue)value;
+            CommonFunctionParameter parameter = commonFunctionValue.getParameter();
+            this.rebuildCommonFunctionParameter(parameter, resLibraries, forDSL);
+         } else if (value instanceof MethodValue) {
+            MethodValue methodValue = (MethodValue)value;
+            ActionData actionData = null;
+            if (methodValue.getCategoryUuid() != null) {
+               actionData = resLibraries.getActionByUuid(methodValue.getCategoryUuid(), methodValue.getUuid());
             } else {
-               var26 = var2.getActionByName(var16.getBeanLabel(), var16.getMethodLabel());
-               if (var26 == null) {
-                  var26 = var2.getActionByBean(var16.getBeanId(), var16.getMethodName());
+               actionData = resLibraries.getActionByName(methodValue.getBeanLabel(), methodValue.getMethodLabel());
+               if (actionData == null) {
+                  actionData = resLibraries.getActionByBean(methodValue.getBeanId(), methodValue.getMethodName());
                }
             }
 
-            if (var26 == null) {
-               throw new RuleException("Bean[" + var16.getBeanLabel() + "] not exist.");
+            if (actionData == null) {
+               throw new RuleException("Bean[" + methodValue.getBeanLabel() + "] not exist.");
             }
 
-            var16.setBeanId(var26.getBean().getId());
-            var16.setBeanLabel(var26.getBean().getName());
-            var16.setMethodName(var26.getMethod().getMethodName());
-            var16.setMethodLabel(var26.getMethod().getName());
-            List var33 = var16.getParameters();
-            this.a(var2, var33, var26.getMethod().getParameters(), var3);
-         } else if (var1 instanceof MathValue) {
-            MathValue var17 = (MathValue)var1;
-            MathSign var28 = var17.getMathSign();
-            this.a(var28, var2, var3);
+            methodValue.setBeanId(actionData.getBean().getId());
+            methodValue.setBeanLabel(actionData.getBean().getName());
+            methodValue.setMethodName(actionData.getMethod().getMethodName());
+            methodValue.setMethodLabel(actionData.getMethod().getName());
+            List parameters = methodValue.getParameters();
+            this.rebuildParameters(resLibraries, parameters, actionData.getMethod().getParameters(), forDSL);
+         } else if (value instanceof MathValue) {
+            MathValue mathValue = (MathValue)value;
+            MathSign mathSign = mathValue.getMathSign();
+            this.rebuildMathSign(mathSign, resLibraries, forDSL);
          }
 
-         ComplexArithmetic var18 = var1.getArithmetic();
-         if (var18 != null) {
-            Value var29 = var18.getValue();
-            this.rebuildValue(var29, var2, var3);
-         }
-      }
-   }
-
-   private void a(MathSign var1, ResourceLibrary var2, boolean var3) {
-      if (var1 != null) {
-         if (var1 instanceof AbsoluteMath) {
-            AbsoluteMath var4 = (AbsoluteMath)var1;
-            this.rebuildValue(var4.getValue(), var2, var3);
-         } else if (var1 instanceof DownRoundMath) {
-            DownRoundMath var5 = (DownRoundMath)var1;
-            this.rebuildValue(var5.getValue(), var2, var3);
-         } else if (var1 instanceof ExtremumMath) {
-            ExtremumMath var6 = (ExtremumMath)var1;
-            this.rebuildValue(var6.getValue1(), var2, var3);
-            this.rebuildValue(var6.getValue2(), var2, var3);
-         } else if (var1 instanceof FractionMath) {
-            FractionMath var7 = (FractionMath)var1;
-            this.rebuildValue(var7.getDenominator(), var2, var3);
-            this.rebuildValue(var7.getNumerator(), var2, var3);
-         } else if (var1 instanceof LnMath) {
-            LnMath var8 = (LnMath)var1;
-            this.rebuildValue(var8.getValue(), var2, var3);
-         } else if (var1 instanceof LogMath) {
-            LogMath var9 = (LogMath)var1;
-            this.rebuildValue(var9.getValue(), var2, var3);
-            this.rebuildValue(var9.getBaseValue(), var2, var3);
-         } else if (var1 instanceof NRadicalMath) {
-            NRadicalMath var10 = (NRadicalMath)var1;
-            this.rebuildValue(var10.getValue(), var2, var3);
-            this.rebuildValue(var10.getPower(), var2, var3);
-         } else if (var1 instanceof PowerMath) {
-            PowerMath var11 = (PowerMath)var1;
-            this.rebuildValue(var11.getBase(), var2, var3);
-            this.rebuildValue(var11.getPower(), var2, var3);
-         } else if (var1 instanceof RadicalMath) {
-            RadicalMath var12 = (RadicalMath)var1;
-            this.rebuildValue(var12.getValue(), var2, var3);
-         } else if (var1 instanceof SigmaMath) {
-            SigmaMath var13 = (SigmaMath)var1;
-            this.rebuildValue(var13.getExpr(), var2, var3);
-            this.rebuildValue(var13.getIvalue(), var2, var3);
-            this.rebuildValue(var13.getSuperior(), var2, var3);
-         } else if (var1 instanceof TriangleFunctionMath) {
-            TriangleFunctionMath var14 = (TriangleFunctionMath)var1;
-            this.rebuildValue(var14.getValue(), var2, var3);
-         } else if (var1 instanceof UpRoundMath) {
-            UpRoundMath var15 = (UpRoundMath)var1;
-            this.rebuildValue(var15.getValue(), var2, var3);
+         ComplexArithmetic arithmetic = value.getArithmetic();
+         if (arithmetic != null) {
+            Value localValue2 = arithmetic.getValue();
+            this.rebuildValue(localValue2, resLibraries, forDSL);
          }
       }
    }
 
-   public void setResourceLibraryBuilder(ResourceLibraryBuilder var1) {
-      this.a = var1;
+   private void rebuildMathSign(MathSign mathSign, ResourceLibrary resourceLibrary, boolean forDSL) {
+      if (mathSign != null) {
+         if (mathSign instanceof AbsoluteMath) {
+            AbsoluteMath absoluteMath = (AbsoluteMath)mathSign;
+            this.rebuildValue(absoluteMath.getValue(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof DownRoundMath) {
+            DownRoundMath downRoundMath = (DownRoundMath)mathSign;
+            this.rebuildValue(downRoundMath.getValue(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof ExtremumMath) {
+            ExtremumMath extremumMath = (ExtremumMath)mathSign;
+            this.rebuildValue(extremumMath.getValue1(), resourceLibrary, forDSL);
+            this.rebuildValue(extremumMath.getValue2(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof FractionMath) {
+            FractionMath fractionMath = (FractionMath)mathSign;
+            this.rebuildValue(fractionMath.getDenominator(), resourceLibrary, forDSL);
+            this.rebuildValue(fractionMath.getNumerator(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof LnMath) {
+            LnMath lnMath = (LnMath)mathSign;
+            this.rebuildValue(lnMath.getValue(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof LogMath) {
+            LogMath logMath = (LogMath)mathSign;
+            this.rebuildValue(logMath.getValue(), resourceLibrary, forDSL);
+            this.rebuildValue(logMath.getBaseValue(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof NRadicalMath) {
+            NRadicalMath nRadicalMath = (NRadicalMath)mathSign;
+            this.rebuildValue(nRadicalMath.getValue(), resourceLibrary, forDSL);
+            this.rebuildValue(nRadicalMath.getPower(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof PowerMath) {
+            PowerMath powerMath = (PowerMath)mathSign;
+            this.rebuildValue(powerMath.getBase(), resourceLibrary, forDSL);
+            this.rebuildValue(powerMath.getPower(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof RadicalMath) {
+            RadicalMath radicalMath = (RadicalMath)mathSign;
+            this.rebuildValue(radicalMath.getValue(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof SigmaMath) {
+            SigmaMath sigmaMath = (SigmaMath)mathSign;
+            this.rebuildValue(sigmaMath.getExpr(), resourceLibrary, forDSL);
+            this.rebuildValue(sigmaMath.getIvalue(), resourceLibrary, forDSL);
+            this.rebuildValue(sigmaMath.getSuperior(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof TriangleFunctionMath) {
+            TriangleFunctionMath triangleFunctionMath = (TriangleFunctionMath)mathSign;
+            this.rebuildValue(triangleFunctionMath.getValue(), resourceLibrary, forDSL);
+         } else if (mathSign instanceof UpRoundMath) {
+            UpRoundMath upRoundMath = (UpRoundMath)mathSign;
+            this.rebuildValue(upRoundMath.getValue(), resourceLibrary, forDSL);
+         }
+      }
+   }
+
+   public void setResourceLibraryBuilder(ResourceLibraryBuilder resourceLibraryBuilder) {
+      this.resourceLibraryBuilder = resourceLibraryBuilder;
    }
 
    public ResourceLibraryBuilder getResourceLibraryBuilder() {
-      return this.a;
+      return this.resourceLibraryBuilder;
    }
 }

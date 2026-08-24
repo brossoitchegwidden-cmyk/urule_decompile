@@ -16,203 +16,199 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class ConfigurationManagerImpl implements ConfigurationManager {
-   public void getConfigurations(Configuration var1, Page var2) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void getConfigurations(Configuration condition, Page page) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var4 = "select ID_, KEY_, VALUE_, LABEL_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_PROPERTY";
-         String var5 = "";
-         if (StringUtils.isNotBlank(var1.getKey())) {
-            if (StringUtils.isNotBlank(var5)) {
-               var5 = var5 + " or ";
+         String text = "select ID_, KEY_, VALUE_, LABEL_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_PROPERTY";
+         String text2 = "";
+         if (StringUtils.isNotBlank(condition.getKey())) {
+            if (StringUtils.isNotBlank(text2)) {
+               text2 = text2 + " or ";
             }
 
-            var5 = var5 + "KEY_ like :key ";
+            text2 = text2 + "KEY_ like :key ";
          }
 
-         if (StringUtils.isNotBlank(var1.getLabel())) {
-            if (StringUtils.isNotBlank(var5)) {
-               var5 = var5 + " or ";
+         if (StringUtils.isNotBlank(condition.getLabel())) {
+            if (StringUtils.isNotBlank(text2)) {
+               text2 = text2 + " or ";
             }
 
-            var5 = var5 + "LABEL_ like :label ";
+            text2 = text2 + "LABEL_ like :label ";
          }
 
-         if (StringUtils.isNotBlank(var1.getType())) {
-            if (StringUtils.isNotBlank(var5)) {
-               var5 = var5 + " or ";
+         if (StringUtils.isNotBlank(condition.getType())) {
+            if (StringUtils.isNotBlank(text2)) {
+               text2 = text2 + " or ";
             }
 
-            var5 = var5 + "TYPE_ = :type ";
+            text2 = text2 + "TYPE_ = :type ";
          }
 
-         if (StringUtils.isNotBlank(var5)) {
-            var5 = " where " + var5;
+         if (StringUtils.isNotBlank(text2)) {
+            text2 = " where " + text2;
          }
 
-         ParsedSql var6 = NamedSQLUtils.parseSql(JdbcUtils.getPageSql(var4 + var5, var2.getStartRow(), var2.getPageSize()));
-         PreparedStatement var7 = var3.prepareStatement(JdbcUtils.getOriginSql(var6.getOriginalSql()));
+         ParsedSql sql = NamedSQLUtils.parseSql(JdbcUtils.getPageSql(text + text2, page.getStartRow(), page.getPageSize()));
+         PreparedStatement preparedStatement = connection.prepareStatement(JdbcUtils.getOriginSql(sql.getOriginalSql()));
 
-         for(int var8 = 0; var8 < var6.getParameterNames().size(); ++var8) {
-            String var9 = (String)var6.getParameterNames().get(var8);
-            int var10 = var8 + 1;
-            if ("key".equals(var9)) {
-               var7.setString(var10, "%" + var1.getKey() + "%");
+         for(int index = 0; index < sql.getParameterNames().size(); ++index) {
+            String text3 = (String)sql.getParameterNames().get(index);
+            int number = index + 1;
+            if ("key".equals(text3)) {
+               preparedStatement.setString(number, "%" + condition.getKey() + "%");
             }
 
-            if ("label".equals(var9)) {
-               var7.setString(var10, "%" + var1.getLabel() + "%");
+            if ("label".equals(text3)) {
+               preparedStatement.setString(number, "%" + condition.getLabel() + "%");
             }
 
-            if ("type".equals(var9)) {
-               var7.setString(var10, var1.getType());
-            }
-         }
-
-         ArrayList var21 = new ArrayList();
-         ResultSet var22 = var7.executeQuery();
-
-         while(var22.next()) {
-            Configuration var24 = new Configuration();
-            var24.setId(var22.getLong(1));
-            var24.setKey(var22.getString(2));
-            var24.setValue(var22.getString(3));
-            var24.setLabel(var22.getString(4));
-            var24.setType(var22.getString(5));
-            var24.setCreateDate(var22.getTimestamp(6));
-            var24.setUpdateDate(var22.getTimestamp(7));
-            var21.add(var24);
-         }
-
-         JdbcUtils.closeResultSet(var22);
-         var2.setData(var21);
-         String var25 = JdbcUtils.getCountSql(var4 + var5);
-         var6 = NamedSQLUtils.parseSql(var25);
-         var7 = var3.prepareStatement(JdbcUtils.getOriginSql(var6.getOriginalSql()));
-
-         for(int var11 = 0; var11 < var6.getParameterNames().size(); ++var11) {
-            String var12 = (String)var6.getParameterNames().get(var11);
-            int var13 = var11 + 1;
-            if ("key".equals(var12)) {
-               var7.setString(var13, "%" + var1.getKey() + "%");
-            }
-
-            if ("label".equals(var12)) {
-               var7.setString(var13, "%" + var1.getLabel() + "%");
-            }
-
-            if ("type".equals(var12)) {
-               var7.setString(var13, var1.getType());
+            if ("type".equals(text3)) {
+               preparedStatement.setString(number, condition.getType());
             }
          }
 
-         var22 = var7.executeQuery();
-         if (var22.next()) {
-            var2.setTotalRows(var22.getLong(1));
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
+
+         while(resultSet.next()) {
+            Configuration configuration = new Configuration();
+            configuration.setId(resultSet.getLong(1));
+            configuration.setKey(resultSet.getString(2));
+            configuration.setValue(resultSet.getString(3));
+            configuration.setLabel(resultSet.getString(4));
+            configuration.setType(resultSet.getString(5));
+            configuration.setCreateDate(resultSet.getTimestamp(6));
+            configuration.setUpdateDate(resultSet.getTimestamp(7));
+            items.add(configuration);
          }
 
-         JdbcUtils.closeStatement(var7);
-      } catch (Exception var17) {
-         throw new RuleException(var17);
+         JdbcUtils.closeResultSet(resultSet);
+         page.setData(items);
+         String countSql = JdbcUtils.getCountSql(text + text2);
+         sql = NamedSQLUtils.parseSql(countSql);
+         preparedStatement = connection.prepareStatement(JdbcUtils.getOriginSql(sql.getOriginalSql()));
+
+         for(int index2 = 0; index2 < sql.getParameterNames().size(); ++index2) {
+            String text4 = (String)sql.getParameterNames().get(index2);
+            int number2 = index2 + 1;
+            if ("key".equals(text4)) {
+               preparedStatement.setString(number2, "%" + condition.getKey() + "%");
+            }
+
+            if ("label".equals(text4)) {
+               preparedStatement.setString(number2, "%" + condition.getLabel() + "%");
+            }
+
+            if ("type".equals(text4)) {
+               preparedStatement.setString(number2, condition.getType());
+            }
+         }
+
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page.setTotalRows(resultSet.getLong(1));
+         }
+
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void updateConfiguration(Configuration var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void updateConfiguration(Configuration configuration) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("update URULE_PROPERTY set KEY_=?, LABEL_=?, TYPE_=?, VALUE_=?, UPDATE_DATE_=? where ID_=?");
-         var3.setString(1, var1.getKey());
-         var3.setString(2, var1.getLabel());
-         var3.setString(3, var1.getType());
-         var3.setString(4, var1.getValue());
-         var3.setTimestamp(5, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setLong(6, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         configuration.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_PROPERTY set KEY_=?, LABEL_=?, TYPE_=?, VALUE_=?, UPDATE_DATE_=? where ID_=?");
+         preparedStatement.setString(1, configuration.getKey());
+         preparedStatement.setString(2, configuration.getLabel());
+         preparedStatement.setString(3, configuration.getType());
+         preparedStatement.setString(4, configuration.getValue());
+         preparedStatement.setTimestamp(5, new Timestamp(configuration.getUpdateDate().getTime()));
+         preparedStatement.setLong(6, configuration.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void insertConfiguration(Configuration var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void insertConfiguration(Configuration configuration) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_PROPERTY (ID_, KEY_, LABEL_, TYPE_, VALUE_, CREATE_DATE_, UPDATE_DATE_) values(?,?,?,?,?,?,?)");
-         long var4 = IDGenerator.getInstance().nextId(IDType.PROPERTY);
-         var1.setCreateDate(new Timestamp(System.currentTimeMillis()));
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         var1.setId(var4);
-         var3.setLong(1, var1.getId());
-         var3.setString(2, var1.getKey());
-         var3.setString(3, var1.getLabel());
-         var3.setString(4, var1.getType());
-         var3.setString(5, var1.getValue());
-         var3.setTimestamp(6, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setTimestamp(7, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_PROPERTY (ID_, KEY_, LABEL_, TYPE_, VALUE_, CREATE_DATE_, UPDATE_DATE_) values(?,?,?,?,?,?,?)");
+         long longValue = IDGenerator.getInstance().nextId(IDType.PROPERTY);
+         configuration.setCreateDate(new Timestamp(System.currentTimeMillis()));
+         configuration.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         configuration.setId(longValue);
+         preparedStatement.setLong(1, configuration.getId());
+         preparedStatement.setString(2, configuration.getKey());
+         preparedStatement.setString(3, configuration.getLabel());
+         preparedStatement.setString(4, configuration.getType());
+         preparedStatement.setString(5, configuration.getValue());
+         preparedStatement.setTimestamp(6, new Timestamp(configuration.getCreateDate().getTime()));
+         preparedStatement.setTimestamp(7, new Timestamp(configuration.getUpdateDate().getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void deleteConfiguration(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteConfiguration(long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete FROM URULE_PROPERTY where ID_=? and TYPE_!='system'");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_PROPERTY where ID_=? and TYPE_!='system'");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public Configuration getConfiguration(String key) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public Configuration getConfiguration(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      Configuration var7;
+      Configuration configuration;
       try {
-         String var3 = "select ID_, KEY_, VALUE_, LABEL_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_PROPERTY WHERE KEY_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         if (!var5.next()) {
-            JdbcUtils.closeStatement(var4);
+         String text = "select ID_, KEY_, VALUE_, LABEL_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_PROPERTY WHERE KEY_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, key);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (!resultSet.next()) {
+            JdbcUtils.closeStatement(preparedStatement);
             return null;
          }
 
-         Configuration var6 = new Configuration();
-         var6.setId(var5.getLong(1));
-         var6.setKey(var5.getString(2));
-         var6.setValue(var5.getString(3));
-         var6.setLabel(var5.getString(4));
-         var6.setType(var5.getString(5));
-         var6.setCreateDate(var5.getTimestamp(6));
-         var6.setUpdateDate(var5.getTimestamp(7));
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         Configuration configuration2 = new Configuration();
+         configuration2.setId(resultSet.getLong(1));
+         configuration2.setKey(resultSet.getString(2));
+         configuration2.setValue(resultSet.getString(3));
+         configuration2.setLabel(resultSet.getString(4));
+         configuration2.setType(resultSet.getString(5));
+         configuration2.setCreateDate(resultSet.getTimestamp(6));
+         configuration2.setUpdateDate(resultSet.getTimestamp(7));
+         configuration = configuration2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return configuration;
    }
 }

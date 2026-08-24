@@ -23,209 +23,216 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class LogServletHandler extends ApiServletHandler {
-   public void login(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("dateBegin");
-      String var4 = var1.getParameter("dateEnd");
-      String var5 = var1.getParameter("ip");
-      int var6 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var7 = Integer.valueOf(var1.getParameter("pageSize"));
-      LoginLogQuery var8 = LoginLogManager.ins.newQuery();
-      var8.userIdLike(var1.getParameter("userId"));
-      var8.username(var1.getParameter("username"));
-      if (StringUtils.isNotBlank(var5)) {
-         var8.ip(var5);
+   /**获取登录日志*/
+   public void login(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("dateBegin");
+      String parameter2 = req.getParameter("dateEnd");
+      String parameter3 = req.getParameter("ip");
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      LoginLogQuery loginLogQuery = LoginLogManager.ins.newQuery();
+      loginLogQuery.userIdLike(req.getParameter("userId"));
+      loginLogQuery.username(req.getParameter("username"));
+      if (StringUtils.isNotBlank(parameter3)) {
+         loginLogQuery.ip(parameter3);
       }
 
-      if (StringUtils.isNotBlank(var3)) {
-         var8.loginDateBegin(DateFormat.getDateInstance().parse(var3));
+      if (StringUtils.isNotBlank(parameter)) {
+         loginLogQuery.loginDateBegin(DateFormat.getDateInstance().parse(parameter));
       }
 
-      if (StringUtils.isNotBlank(var4)) {
-         var8.loginDateEnd(DateFormat.getDateInstance().parse(var4));
+      if (StringUtils.isNotBlank(parameter2)) {
+         loginLogQuery.loginDateEnd(DateFormat.getDateInstance().parse(parameter2));
       }
 
-      Page var9 = var8.paging(var6, var7);
-      this.a(var2, var9);
+      Page page = loginLogQuery.paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
-   public void operation(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("dateBegin");
-      String var4 = var1.getParameter("dateEnd");
-      int var5 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var6 = Integer.valueOf(var1.getParameter("pageSize"));
-      OperationLogQuery var7 = OperationLogManager.ins.newQuery();
-      String var8 = var1.getParameter("userId");
-      String var9 = var1.getParameter("username");
-      String var10 = var1.getParameter("category");
-      String var11 = var1.getParameter("type");
-      if ("project".equals(var11) && ContextHolder.getProjectId() == null) {
+   /**获取操作日志*/
+   public void operation(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("dateBegin");
+      String parameter2 = req.getParameter("dateEnd");
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      OperationLogQuery operationLogQuery = OperationLogManager.ins.newQuery();
+      String parameter3 = req.getParameter("userId");
+      String parameter4 = req.getParameter("username");
+      String parameter5 = req.getParameter("category");
+      String parameter6 = req.getParameter("type");
+      if ("project".equals(parameter6) && ContextHolder.getProjectId() == null) {
          throw new ParameterInvaidException();
       } else if (StringUtils.isNotBlank(ContextHolder.getGroupId())) {
-         var7.groupId(ContextHolder.getGroupId());
-         if (StringUtils.isNotBlank(var8)) {
-            var7.userIdLike(var8);
+         operationLogQuery.groupId(ContextHolder.getGroupId());
+         if (StringUtils.isNotBlank(parameter3)) {
+            operationLogQuery.userIdLike(parameter3);
          }
 
-         if (StringUtils.isNotBlank(var9)) {
-            var7.username(var9);
+         if (StringUtils.isNotBlank(parameter4)) {
+            operationLogQuery.username(parameter4);
          }
 
-         if (StringUtils.isNotBlank(var10)) {
-            var7.categoryLike(var10);
+         if (StringUtils.isNotBlank(parameter5)) {
+            operationLogQuery.categoryLike(parameter5);
          }
 
-         if ("project".equals(var11) && ContextHolder.getProjectId() != null) {
-            var7.projectId(ContextHolder.getProjectId());
+         if ("project".equals(parameter6) && ContextHolder.getProjectId() != null) {
+            operationLogQuery.projectId(ContextHolder.getProjectId());
          }
 
-         if (StringUtils.isNotBlank(var3)) {
-            var7.dateBegin(DateFormat.getDateInstance().parse(var3));
+         if (StringUtils.isNotBlank(parameter)) {
+            operationLogQuery.dateBegin(DateFormat.getDateInstance().parse(parameter));
          }
 
-         if (StringUtils.isNotBlank(var4)) {
-            var7.dateEnd(DateFormat.getDateInstance().parse(var4));
+         if (StringUtils.isNotBlank(parameter2)) {
+            operationLogQuery.dateEnd(DateFormat.getDateInstance().parse(parameter2));
          }
 
-         Page var12 = var7.paging(var5, var6);
-         this.a(var2, var12);
+         Page page = operationLogQuery.paging(number, number2);
+         this.writeObjectToJson(resp, page);
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void knowledge(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("dateBegin");
-      String var4 = var1.getParameter("dateEnd");
-      int var5 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var6 = Integer.valueOf(var1.getParameter("pageSize"));
-      KnowledgeLogQuery var7 = KnowledgeLogManager.ins.newQuery();
-      String var8 = var1.getParameter("user");
-      String var9 = var1.getParameter("ip");
-      if (StringUtils.isNotBlank(var8)) {
-         var7.user(var8);
+   /**获取知识包执行日志*/
+   public void knowledge(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("dateBegin");
+      String parameter2 = req.getParameter("dateEnd");
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      KnowledgeLogQuery knowledgeLogQuery = KnowledgeLogManager.ins.newQuery();
+      String parameter3 = req.getParameter("user");
+      String parameter4 = req.getParameter("ip");
+      if (StringUtils.isNotBlank(parameter3)) {
+         knowledgeLogQuery.user(parameter3);
       }
 
-      if (StringUtils.isNotBlank(var9)) {
-         var7.ip(var9);
+      if (StringUtils.isNotBlank(parameter4)) {
+         knowledgeLogQuery.ip(parameter4);
       }
 
-      String var10 = var1.getParameter("groupId");
-      if (StringUtils.isNotBlank(var10)) {
-         var7.groupId(var10);
+      String parameter5 = req.getParameter("groupId");
+      if (StringUtils.isNotBlank(parameter5)) {
+         knowledgeLogQuery.groupId(parameter5);
       }
 
-      String var11 = var1.getParameter("projectId");
-      if (StringUtils.isNotBlank(var11)) {
-         var7.projectId(Long.parseLong(var11));
+      String parameter6 = req.getParameter("projectId");
+      if (StringUtils.isNotBlank(parameter6)) {
+         knowledgeLogQuery.projectId(Long.parseLong(parameter6));
       }
 
-      String var12 = var1.getParameter("knowledgeId");
-      if (StringUtils.isNotBlank(var12)) {
-         var7.packetId(Long.parseLong(var12));
+      String parameter7 = req.getParameter("knowledgeId");
+      if (StringUtils.isNotBlank(parameter7)) {
+         knowledgeLogQuery.packetId(Long.parseLong(parameter7));
       }
 
-      String var13 = var1.getParameter("knowledgeName");
-      if (StringUtils.isNotBlank(var13)) {
-         var7.packetNameLike(var13);
+      String parameter8 = req.getParameter("knowledgeName");
+      if (StringUtils.isNotBlank(parameter8)) {
+         knowledgeLogQuery.packetNameLike(parameter8);
       }
 
-      if (StringUtils.isNotBlank(var3)) {
-         var7.dateBegin(DateFormat.getDateInstance().parse(var3));
+      if (StringUtils.isNotBlank(parameter)) {
+         knowledgeLogQuery.dateBegin(DateFormat.getDateInstance().parse(parameter));
       }
 
-      if (StringUtils.isNotBlank(var4)) {
-         var7.dateEnd(DateFormat.getDateInstance().parse(var4));
+      if (StringUtils.isNotBlank(parameter2)) {
+         knowledgeLogQuery.dateEnd(DateFormat.getDateInstance().parse(parameter2));
       }
 
-      Page var14 = var7.paging(var5, var6);
-      this.a(var2, var14);
+      Page page = knowledgeLogQuery.paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
-   public void batch(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      int var3 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var4 = Integer.valueOf(var1.getParameter("pageSize"));
-      BatchLogQuery var5 = BatchLogManager.ins.newQuery();
-      String var6 = var1.getParameter("user");
-      if (StringUtils.isNotBlank(var6)) {
-         var5.user(var6);
+   /**获取批处理执行日志*/
+   public void batch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      BatchLogQuery batchLogQuery = BatchLogManager.ins.newQuery();
+      String parameter = req.getParameter("user");
+      if (StringUtils.isNotBlank(parameter)) {
+         batchLogQuery.user(parameter);
       }
 
-      String var7 = var1.getParameter("ip");
-      if (StringUtils.isNotBlank(var7)) {
-         var5.ip(var7);
+      String parameter2 = req.getParameter("ip");
+      if (StringUtils.isNotBlank(parameter2)) {
+         batchLogQuery.ip(parameter2);
       }
 
-      String var8 = var1.getParameter("status");
-      if (StringUtils.isNotBlank(var8)) {
-         var5.status(var8);
+      String parameter3 = req.getParameter("status");
+      if (StringUtils.isNotBlank(parameter3)) {
+         batchLogQuery.status(parameter3);
       }
 
-      String var9 = var1.getParameter("groupId");
-      if (StringUtils.isNotBlank(var9)) {
-         var5.groupId(var9);
+      String parameter4 = req.getParameter("groupId");
+      if (StringUtils.isNotBlank(parameter4)) {
+         batchLogQuery.groupId(parameter4);
       }
 
-      String var10 = var1.getParameter("projectId");
-      if (StringUtils.isNotBlank(var10)) {
-         var5.projectId(Long.parseLong(var10));
+      String parameter5 = req.getParameter("projectId");
+      if (StringUtils.isNotBlank(parameter5)) {
+         batchLogQuery.projectId(Long.parseLong(parameter5));
       }
 
-      String var11 = var1.getParameter("batchId");
-      if (StringUtils.isNotBlank(var11)) {
-         var5.batchId(Long.parseLong(var11));
+      String parameter6 = req.getParameter("batchId");
+      if (StringUtils.isNotBlank(parameter6)) {
+         batchLogQuery.batchId(Long.parseLong(parameter6));
       }
 
-      String var12 = var1.getParameter("batchName");
-      if (StringUtils.isNotBlank(var12)) {
-         var5.batchNameLike(var12);
+      String parameter7 = req.getParameter("batchName");
+      if (StringUtils.isNotBlank(parameter7)) {
+         batchLogQuery.batchNameLike(parameter7);
       }
 
-      String var13 = var1.getParameter("dateBegin");
-      if (StringUtils.isNotBlank(var13)) {
-         var5.dateBegin(DateFormat.getDateInstance().parse(var13));
+      String parameter8 = req.getParameter("dateBegin");
+      if (StringUtils.isNotBlank(parameter8)) {
+         batchLogQuery.dateBegin(DateFormat.getDateInstance().parse(parameter8));
       }
 
-      String var14 = var1.getParameter("dateEnd");
-      if (StringUtils.isNotBlank(var14)) {
-         var5.dateEnd(DateFormat.getDateInstance().parse(var14));
+      String parameter9 = req.getParameter("dateEnd");
+      if (StringUtils.isNotBlank(parameter9)) {
+         batchLogQuery.dateEnd(DateFormat.getDateInstance().parse(parameter9));
       }
 
-      Page var15 = var5.paging(var3, var4);
-      this.a(var2, var15);
+      Page page = batchLogQuery.paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
-   public void batchSkip(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("logId");
-      BatchSkipLogQuery var4 = BatchSkipLogManager.ins.newQuery();
-      this.a(var2, var4.batchLogId(Long.parseLong(var3)).list());
+   public void batchSkip(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("logId");
+      BatchSkipLogQuery batchSkipLogQuery = BatchSkipLogManager.ins.newQuery();
+      this.writeObjectToJson(resp, batchSkipLogQuery.batchLogId(Long.parseLong(parameter)).list());
    }
 
-   public void knowledgeDetail(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("id");
-      if (StringUtils.isNotBlank(var3)) {
-         KnowledgeLogQuery var4 = KnowledgeLogManager.ins.newQuery();
-         KnowledgeLog var5 = var4.details(Long.parseLong(var3));
-         this.a(var2, var5);
-      }
-
-   }
-
-   public void batchDetail(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("id");
-      if (StringUtils.isNotBlank(var3)) {
-         BatchLogQuery var4 = BatchLogManager.ins.newQuery();
-         BatchLog var5 = var4.details(Long.parseLong(var3));
-         this.a(var2, var5);
+   /**获取知识包执行日志详情*/
+   public void knowledgeDetail(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("id");
+      if (StringUtils.isNotBlank(parameter)) {
+         KnowledgeLogQuery knowledgeLogQuery = KnowledgeLogManager.ins.newQuery();
+         KnowledgeLog knowledgeLog = knowledgeLogQuery.details(Long.parseLong(parameter));
+         this.writeObjectToJson(resp, knowledgeLog);
       }
 
    }
 
-   public void batchSkipDetail(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("logId");
-      if (StringUtils.isNotBlank(var3)) {
-         BatchSkipLogQuery var4 = BatchSkipLogManager.ins.newQuery();
-         BatchSkipLog var5 = var4.details(Long.parseLong(var3));
-         this.a(var2, var5);
+   /**获取批处理执行日志详情*/
+   public void batchDetail(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("id");
+      if (StringUtils.isNotBlank(parameter)) {
+         BatchLogQuery batchLogQuery = BatchLogManager.ins.newQuery();
+         BatchLog batchLog = batchLogQuery.details(Long.parseLong(parameter));
+         this.writeObjectToJson(resp, batchLog);
+      }
+
+   }
+
+   /**获取批处理异常日志详情*/
+   public void batchSkipDetail(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("logId");
+      if (StringUtils.isNotBlank(parameter)) {
+         BatchSkipLogQuery batchSkipLogQuery = BatchSkipLogManager.ins.newQuery();
+         BatchSkipLog batchSkipLog = batchSkipLogQuery.details(Long.parseLong(parameter));
+         this.writeObjectToJson(resp, batchSkipLog);
       }
 
    }

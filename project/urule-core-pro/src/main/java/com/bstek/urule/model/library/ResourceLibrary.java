@@ -42,8 +42,8 @@ public class ResourceLibrary {
    public ResourceLibrary() {
    }
 
-   public ResourceLibrary(List<VariableCategory> var1) {
-      this.variableCategories = var1;
+   public ResourceLibrary(List<VariableCategory> vcs) {
+      this.variableCategories = vcs;
       this.actionLibraries = new ArrayList<>();
       this.constantCategories = new ArrayList<>();
       this.conditionTemplateUnits = new ArrayList<>();
@@ -51,12 +51,12 @@ public class ResourceLibrary {
    }
 
    public ResourceLibrary(
-      List<VariableLibrary> var1,
-      List<ActionLibrary> var2,
-      List<ConstantLibrary> var3,
-      List<ConditionTemplate> var4,
-      List<ActionTemplate> var5,
-      List<Predefine> var6
+      List<VariableLibrary> variableLibraries,
+      List<ActionLibrary> actionLibraries,
+      List<ConstantLibrary> constantLibraries,
+      List<ConditionTemplate> conditionTemplates,
+      List<ActionTemplate> actionTemplates,
+      List<Predefine> predefines
    ) {
       this.variableCategories = new ArrayList<>();
       this.actionLibraries = new ArrayList<>();
@@ -64,157 +64,157 @@ public class ResourceLibrary {
       this.conditionTemplateUnits = new ArrayList<>();
       this.actionTemplateUnits = new ArrayList<>();
 
-      for (VariableLibrary var8 : var1) {
-         for (VariableCategory var10 : var8.getVariableCategories()) {
-            this.variableCategoryNameMap.put(var10.getName(), var10);
-            this.variableCategoryUuidMap.put(var10.getUuid(), var10);
-            this.variableCategories.add(var10);
+      for (VariableLibrary variableLibrary : variableLibraries) {
+         for (VariableCategory variableCategory : variableLibrary.getVariableCategories()) {
+            this.variableCategoryNameMap.put(variableCategory.getName(), variableCategory);
+            this.variableCategoryUuidMap.put(variableCategory.getUuid(), variableCategory);
+            this.variableCategories.add(variableCategory);
 
-            for (Variable var12 : var10.getVariables()) {
-               VariableData var13 = new VariableData(var10, var12);
-               this.variableDataMap.put(var10.getName() + "," + var12.getName(), var13);
-               this.variableDataUuidMap.put(var10.getUuid() + "," + var12.getUuid(), var13);
+            for (Variable variable : variableCategory.getVariables()) {
+               VariableData variableData = new VariableData(variableCategory, variable);
+               this.variableDataMap.put(variableCategory.getName() + "," + variable.getName(), variableData);
+               this.variableDataUuidMap.put(variableCategory.getUuid() + "," + variable.getUuid(), variableData);
             }
          }
       }
 
-      this.actionLibraries.addAll(var2);
+      this.actionLibraries.addAll(actionLibraries);
 
-      for (ActionLibrary var19 : this.actionLibraries) {
-         for (SpringBean var26 : var19.getSpringBeans()) {
-            for (Method var30 : var26.getMethods()) {
-               ActionData var32 = new ActionData(var26, var30);
-               this.actionDataMap.put(var26.getId() + "," + var30.getMethodName(), var32);
-               this.actionDataUuidMap.put(var26.getUuid() + "," + var30.getUuid(), var32);
-               this.actionDataLabelMap.put(var26.getName() + "," + var30.getName(), var32);
+      for (ActionLibrary actionLibrary : this.actionLibraries) {
+         for (SpringBean springBean : actionLibrary.getSpringBeans()) {
+            for (Method method : springBean.getMethods()) {
+               ActionData actionData = new ActionData(springBean, method);
+               this.actionDataMap.put(springBean.getId() + "," + method.getMethodName(), actionData);
+               this.actionDataUuidMap.put(springBean.getUuid() + "," + method.getUuid(), actionData);
+               this.actionDataLabelMap.put(springBean.getName() + "," + method.getName(), actionData);
             }
          }
       }
 
-      for (ConstantLibrary var20 : var3) {
-         for (ConstantCategory var27 : var20.getCategories()) {
-            this.constantCategories.add(var27);
+      for (ConstantLibrary constantLibrary : constantLibraries) {
+         for (ConstantCategory constantCategory : constantLibrary.getCategories()) {
+            this.constantCategories.add(constantCategory);
 
-            for (Constant var31 : var27.getConstants()) {
-               this.constantDataUuidMap.put(var27.getUuid() + "," + var31.getUuid(), new ConstantData(var27, var31));
+            for (Constant constant : constantCategory.getConstants()) {
+               this.constantDataUuidMap.put(constantCategory.getUuid() + "," + constant.getUuid(), new ConstantData(constantCategory, constant));
             }
          }
       }
 
-      for (ConditionTemplate var21 : var4) {
-         this.conditionTemplateUnits.addAll(var21.getTemplates());
+      for (ConditionTemplate conditionTemplate : conditionTemplates) {
+         this.conditionTemplateUnits.addAll(conditionTemplate.getTemplates());
       }
 
-      for (ActionTemplate var22 : var5) {
-         this.actionTemplateUnits.addAll(var22.getTemplates());
+      for (ActionTemplate actionTemplate : actionTemplates) {
+         this.actionTemplateUnits.addAll(actionTemplate.getTemplates());
       }
 
-      if (var6 != null) {
-         for (Predefine var23 : var6) {
-            this.predefineMap.put(var23.getUuid(), var23);
+      if (predefines != null) {
+         for (Predefine predefine : predefines) {
+            this.predefineMap.put(predefine.getUuid(), predefine);
          }
       }
    }
 
-   public void addVariableCategory(VariableCategory var1) {
-      this.variableCategoryNameMap.put(var1.getName(), var1);
-      this.variableCategoryUuidMap.put(var1.getUuid(), var1);
+   public void addVariableCategory(VariableCategory vc) {
+      this.variableCategoryNameMap.put(vc.getName(), vc);
+      this.variableCategoryUuidMap.put(vc.getUuid(), vc);
 
-      for (Variable var3 : var1.getVariables()) {
-         VariableData var4 = new VariableData(var1, var3);
-         this.variableDataMap.put(var1.getName() + "," + var3.getName(), var4);
-         this.variableDataUuidMap.put(var1.getUuid() + "," + var3.getUuid(), var4);
+      for (Variable variable : vc.getVariables()) {
+         VariableData variableData = new VariableData(vc, variable);
+         this.variableDataMap.put(vc.getName() + "," + variable.getName(), variableData);
+         this.variableDataUuidMap.put(vc.getUuid() + "," + variable.getUuid(), variableData);
       }
 
-      this.variableCategories.add(var1);
+      this.variableCategories.add(vc);
    }
 
-   public Predefine getPredefine(String var1) {
-      return this.predefineMap.get(var1);
+   public Predefine getPredefine(String uuid) {
+      return this.predefineMap.get(uuid);
    }
 
-   public ConditionTemplateUnit getConditionTemplateUnit(String var1) {
-      for (ConditionTemplateUnit var3 : this.conditionTemplateUnits) {
-         if (var3.getId().equals(var1)) {
-            return var3;
-         }
-      }
-
-      return null;
-   }
-
-   public ActionTemplateUnit getActionTemplateUnit(String var1) {
-      for (ActionTemplateUnit var3 : this.actionTemplateUnits) {
-         if (var3.getId().equals(var1)) {
-            return var3;
+   public ConditionTemplateUnit getConditionTemplateUnit(String id) {
+      for (ConditionTemplateUnit conditionTemplateUnit : this.conditionTemplateUnits) {
+         if (conditionTemplateUnit.getId().equals(id)) {
+            return conditionTemplateUnit;
          }
       }
 
       return null;
    }
 
-   public Variable getParameterByUuid(String var1, String var2, String var3) {
-      VariableCategory var4 = this.getVariableCategoryByUuid("参数");
-      List var5 = var4.getVariables();
-      Variable var6 = null;
-      Variable var7 = null;
-
-      for (Variable var9 : (Iterable<Variable>)(Iterable<?>)(var5)) {
-         if (var9.getUuid().equals(var1)) {
-            var6 = var9;
-         }
-
-         if (StringUtils.isNotBlank(var9.getName()) && StringUtils.isNotBlank(var9.getLabel()) && var9.getName().equals(var2) && var9.getLabel().equals(var3)) {
-            var7 = var9;
-         }
-      }
-
-      if (var6 == null && var7 != null) {
-         var6 = var7;
-      }
-
-      return var6;
-   }
-
-   public VariableCategory getVariableCategoryByUuid(String var1) {
-      if (this.variableCategoryUuidMap.containsKey(var1)) {
-         return this.variableCategoryUuidMap.get(var1);
-      }
-
-      for (VariableCategory var3 : this.variableCategories) {
-         if (var3.getUuid().equals(var1)) {
-            return var3;
+   public ActionTemplateUnit getActionTemplateUnit(String id) {
+      for (ActionTemplateUnit actionTemplateUnit : this.actionTemplateUnits) {
+         if (actionTemplateUnit.getId().equals(id)) {
+            return actionTemplateUnit;
          }
       }
 
       return null;
    }
 
-   public VariableCategory getVariableCategoryByCategoryName(String var1) {
-      if (this.variableCategoryNameMap.containsKey(var1)) {
-         return this.variableCategoryNameMap.get(var1);
+   public Variable getParameterByUuid(String parameterUuid, String parameterName, String parameterLabel) {
+      VariableCategory variableCategoryByUuid = this.getVariableCategoryByUuid("参数");
+      List variables = variableCategoryByUuid.getVariables();
+      Variable variable = null;
+      Variable variable2 = null;
+
+      for (Variable variable3 : (Iterable<Variable>)(Iterable<?>)(variables)) {
+         if (variable3.getUuid().equals(parameterUuid)) {
+            variable = variable3;
+         }
+
+         if (StringUtils.isNotBlank(variable3.getName()) && StringUtils.isNotBlank(variable3.getLabel()) && variable3.getName().equals(parameterName) && variable3.getLabel().equals(parameterLabel)) {
+            variable2 = variable3;
+         }
       }
 
-      for (VariableCategory var3 : this.variableCategories) {
-         if (var3.getName().equals(var1)) {
-            return var3;
+      if (variable == null && variable2 != null) {
+         variable = variable2;
+      }
+
+      return variable;
+   }
+
+   public VariableCategory getVariableCategoryByUuid(String categoryUuid) {
+      if (this.variableCategoryUuidMap.containsKey(categoryUuid)) {
+         return this.variableCategoryUuidMap.get(categoryUuid);
+      }
+
+      for (VariableCategory variableCategory : this.variableCategories) {
+         if (variableCategory.getUuid().equals(categoryUuid)) {
+            return variableCategory;
          }
       }
 
       return null;
    }
 
-   public VariableData getVariableByName(String var1, String var2) {
-      String var3 = var1 + "," + var2;
-      if (this.variableDataMap.containsKey(var3)) {
-         return this.variableDataMap.get(var3);
+   public VariableCategory getVariableCategoryByCategoryName(String categoryName) {
+      if (this.variableCategoryNameMap.containsKey(categoryName)) {
+         return this.variableCategoryNameMap.get(categoryName);
       }
 
-      for (VariableCategory var5 : this.variableCategories) {
-         if (var5.getName().equals(var1)) {
-            for (Variable var7 : var5.getVariables()) {
-               if (var7.getName().equals(var2)) {
-                  return new VariableData(var5, var7);
+      for (VariableCategory variableCategory : this.variableCategories) {
+         if (variableCategory.getName().equals(categoryName)) {
+            return variableCategory;
+         }
+      }
+
+      return null;
+   }
+
+   public VariableData getVariableByName(String category, String name) {
+      String text = category + "," + name;
+      if (this.variableDataMap.containsKey(text)) {
+         return this.variableDataMap.get(text);
+      }
+
+      for (VariableCategory variableCategory : this.variableCategories) {
+         if (variableCategory.getName().equals(category)) {
+            for (Variable variable : variableCategory.getVariables()) {
+               if (variable.getName().equals(name)) {
+                  return new VariableData(variableCategory, variable);
                }
             }
          }
@@ -223,17 +223,17 @@ public class ResourceLibrary {
       return null;
    }
 
-   public VariableData getVariableByUuid(String var1, String var2) {
-      String var3 = var1 + "," + var2;
-      if (this.variableDataUuidMap.containsKey(var3)) {
-         return this.variableDataUuidMap.get(var3);
+   public VariableData getVariableByUuid(String categoryUuid, String uuid) {
+      String text = categoryUuid + "," + uuid;
+      if (this.variableDataUuidMap.containsKey(text)) {
+         return this.variableDataUuidMap.get(text);
       }
 
-      for (VariableCategory var5 : this.variableCategories) {
-         if (var5.getUuid().equals(var1)) {
-            for (Variable var7 : var5.getVariables()) {
-               if (var7.getUuid().equals(var2)) {
-                  return new VariableData(var5, var7);
+      for (VariableCategory variableCategory : this.variableCategories) {
+         if (variableCategory.getUuid().equals(categoryUuid)) {
+            for (Variable variable : variableCategory.getVariables()) {
+               if (variable.getUuid().equals(uuid)) {
+                  return new VariableData(variableCategory, variable);
                }
             }
          }
@@ -242,18 +242,18 @@ public class ResourceLibrary {
       return null;
    }
 
-   public ActionData getActionByUuid(String var1, String var2) {
-      String var3 = var1 + "," + var2;
-      if (this.actionDataUuidMap.containsKey(var3)) {
-         return this.actionDataUuidMap.get(var3);
+   public ActionData getActionByUuid(String categoryUuid, String uuid) {
+      String text = categoryUuid + "," + uuid;
+      if (this.actionDataUuidMap.containsKey(text)) {
+         return this.actionDataUuidMap.get(text);
       }
 
-      for (ActionLibrary var5 : this.actionLibraries) {
-         for (SpringBean var8 : var5.getSpringBeans()) {
-            if (var1.equals(var8.getUuid())) {
-               for (Method var10 : var8.getMethods()) {
-                  if (var10.getUuid().contentEquals(var2)) {
-                     return new ActionData(var8, var10);
+      for (ActionLibrary actionLibrary : this.actionLibraries) {
+         for (SpringBean springBean : actionLibrary.getSpringBeans()) {
+            if (categoryUuid.equals(springBean.getUuid())) {
+               for (Method method : springBean.getMethods()) {
+                  if (method.getUuid().contentEquals(uuid)) {
+                     return new ActionData(springBean, method);
                   }
                }
             }
@@ -263,18 +263,18 @@ public class ResourceLibrary {
       return null;
    }
 
-   public ActionData getActionByName(String var1, String var2) {
-      String var3 = var1 + "," + var2;
-      if (this.actionDataLabelMap.containsKey(var3)) {
-         return this.actionDataLabelMap.get(var3);
+   public ActionData getActionByName(String beanLabel, String methodName) {
+      String text = beanLabel + "," + methodName;
+      if (this.actionDataLabelMap.containsKey(text)) {
+         return this.actionDataLabelMap.get(text);
       }
 
-      for (ActionLibrary var5 : this.actionLibraries) {
-         for (SpringBean var8 : var5.getSpringBeans()) {
-            if (var1.equals(var8.getName())) {
-               for (Method var10 : var8.getMethods()) {
-                  if (var10.getName().contentEquals(var2)) {
-                     return new ActionData(var8, var10);
+      for (ActionLibrary actionLibrary : this.actionLibraries) {
+         for (SpringBean springBean : actionLibrary.getSpringBeans()) {
+            if (beanLabel.equals(springBean.getName())) {
+               for (Method method : springBean.getMethods()) {
+                  if (method.getName().contentEquals(methodName)) {
+                     return new ActionData(springBean, method);
                   }
                }
             }
@@ -284,18 +284,18 @@ public class ResourceLibrary {
       return null;
    }
 
-   public ActionData getActionByBean(String var1, String var2) {
-      String var3 = var1 + "," + var2;
-      if (this.actionDataMap.containsKey(var3)) {
-         return this.actionDataMap.get(var3);
+   public ActionData getActionByBean(String beanId, String methodName) {
+      String text = beanId + "," + methodName;
+      if (this.actionDataMap.containsKey(text)) {
+         return this.actionDataMap.get(text);
       }
 
-      for (ActionLibrary var5 : this.actionLibraries) {
-         for (SpringBean var8 : var5.getSpringBeans()) {
-            if (var1.equals(var8.getId())) {
-               for (Method var10 : var8.getMethods()) {
-                  if (var10.getMethodName().contentEquals(var2)) {
-                     return new ActionData(var8, var10);
+      for (ActionLibrary actionLibrary : this.actionLibraries) {
+         for (SpringBean springBean : actionLibrary.getSpringBeans()) {
+            if (beanId.equals(springBean.getId())) {
+               for (Method method : springBean.getMethods()) {
+                  if (method.getMethodName().contentEquals(methodName)) {
+                     return new ActionData(springBean, method);
                   }
                }
             }
@@ -305,17 +305,17 @@ public class ResourceLibrary {
       return null;
    }
 
-   public ConstantData getConstantByUuid(String var1, String var2) {
-      String var3 = var1 + "," + var2;
-      if (this.constantDataUuidMap.containsKey(var3)) {
-         return this.constantDataUuidMap.get(var3);
+   public ConstantData getConstantByUuid(String categoryUuid, String uuid) {
+      String text = categoryUuid + "," + uuid;
+      if (this.constantDataUuidMap.containsKey(text)) {
+         return this.constantDataUuidMap.get(text);
       }
 
-      for (ConstantCategory var5 : this.constantCategories) {
-         if (var5.getUuid().equals(var1)) {
-            for (Constant var7 : var5.getConstants()) {
-               if (var7.getUuid().equals(var2)) {
-                  return new ConstantData(var5, var7);
+      for (ConstantCategory constantCategory : this.constantCategories) {
+         if (constantCategory.getUuid().equals(categoryUuid)) {
+            for (Constant constant : constantCategory.getConstants()) {
+               if (constant.getUuid().equals(uuid)) {
+                  return new ConstantData(constantCategory, constant);
                }
             }
          }

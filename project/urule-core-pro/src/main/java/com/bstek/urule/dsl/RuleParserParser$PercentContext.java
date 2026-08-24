@@ -9,15 +9,15 @@ public class RuleParserParser$PercentContext extends ParserRuleContext {
       return this.getToken(94, 0);
    }
 
-   public RuleParserParser$PercentContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$PercentContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 43;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitPercent(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitPercent(this) : parseTreeVisitor.visitChildren(this));
    }
 }

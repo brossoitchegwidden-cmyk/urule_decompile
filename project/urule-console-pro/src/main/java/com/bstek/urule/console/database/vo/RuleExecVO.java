@@ -1,40 +1,40 @@
 package com.bstek.urule.console.database.vo;
 
 public class RuleExecVO {
-   private Long a;
-   private String b;
-   private int c;
-   private int d;
+   private Long knowledgeId;
+   private String knowledgeName;
+   private int time;
+   private int count;
 
    public Long getKnowledgeId() {
-      return this.a;
+      return this.knowledgeId;
    }
 
-   public void setKnowledgeId(Long var1) {
-      this.a = var1;
+   public void setKnowledgeId(Long knowledgeId) {
+      this.knowledgeId = knowledgeId;
    }
 
    public String getKnowledgeName() {
-      return this.b;
+      return this.knowledgeName;
    }
 
-   public void setKnowledgeName(String var1) {
-      this.b = var1;
+   public void setKnowledgeName(String knowledgeName) {
+      this.knowledgeName = knowledgeName;
    }
 
    public int getCount() {
-      return this.d;
+      return this.count;
    }
 
-   public void setCount(int var1) {
-      this.d = var1;
+   public void setCount(int count) {
+      this.count = count;
    }
 
    public int getTime() {
-      return this.c;
+      return this.time;
    }
 
-   public void setTime(int var1) {
-      this.c = var1;
+   public void setTime(int time) {
+      this.time = time;
    }
 }

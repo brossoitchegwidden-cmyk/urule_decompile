@@ -4,19 +4,19 @@ import com.bstek.urule.model.flow.JoinNode;
 import org.dom4j.Element;
 
 public class JoinNodeParser extends FlowNodeParser<JoinNode> {
-   public JoinNode parse(Element var1) {
-      JoinNode var2 = new JoinNode(var1.attributeValue("name"));
-      var2.setConnections(this.a(var1));
-      var2.setEventBean(var1.attributeValue("event-bean"));
-      var2.setX(var1.attributeValue("x"));
-      var2.setY(var1.attributeValue("y"));
-      var2.setWidth(var1.attributeValue("width"));
-      var2.setHeight(var1.attributeValue("height"));
-      return var2;
+   public JoinNode parse(Element element) {
+      JoinNode joinNode = new JoinNode(element.attributeValue("name"));
+      joinNode.setConnections(this.parseConnections(element));
+      joinNode.setEventBean(element.attributeValue("event-bean"));
+      joinNode.setX(element.attributeValue("x"));
+      joinNode.setY(element.attributeValue("y"));
+      joinNode.setWidth(element.attributeValue("width"));
+      joinNode.setHeight(element.attributeValue("height"));
+      return joinNode;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("join");
+   public boolean support(String name) {
+      return name.equals("join");
    }
 }

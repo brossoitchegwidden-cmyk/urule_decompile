@@ -8,24 +8,34 @@ import java.util.List;
 public interface GroupManager {
    GroupManagerImpl ins = new GroupManagerImpl();
 
-   Group get(String var1);
+   /**获取Group对象*/
+   Group get(String id);
 
-   void add(Group var1);
+   /**新增Group*/
+   void add(Group group);
 
-   void update(Group var1);
+   /**更新Group*/
+   void update(Group group);
 
-   void remove(String var1);
+   /**删除Group*/
+   void remove(String id);
 
-   User getGroupUser(String var1, String var2);
+   /**获取Group用户*/
+   User getGroupUser(String groupId, String account);
 
-   void addGroupUser(String var1, String var2, String var3);
+   /**新增Group用户*/
+   void addGroupUser(String groupId, String account, String username);
 
-   void removeGroupUser(String var1, String var2);
+   /**删除Group用户*/
+   void removeGroupUser(String groupId, String account);
 
-   void removeGroupUsers(String var1);
+   /**删除Group的所用用户*/
+   void removeGroupUsers(String groupId);
 
-   List getUsers(String var1);
+   /**查询Group的用户列表*/
+   List getUsers(String groupId);
 
+   /**获取总团队数量*/
    int count();
 
    GroupQuery createQuery();

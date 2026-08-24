@@ -3,5 +3,5 @@ package com.bstek.urule.console.batch.service;
 import com.bstek.urule.console.batch.BatchContext;
 
 public interface BatchService {
-   void execute(BatchContext var1);
+   void execute(BatchContext batchContext);
 }

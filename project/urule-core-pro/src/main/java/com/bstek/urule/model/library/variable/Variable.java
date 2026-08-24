@@ -17,71 +17,71 @@ public class Variable {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
       return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.label = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public Datatype getType() {
       return this.type;
    }
 
-   public void setType(Datatype var1) {
-      this.type = var1;
+   public void setType(Datatype type) {
+      this.type = type;
    }
 
    public String getDataType() {
       return this.dataType;
    }
 
-   public void setDataType(String var1) {
-      this.dataType = var1;
+   public void setDataType(String dataType) {
+      this.dataType = dataType;
    }
 
    public String getDefaultValue() {
       return this.defaultValue;
    }
 
-   public void setDefaultValue(String var1) {
-      this.defaultValue = var1;
+   public void setDefaultValue(String defaultValue) {
+      this.defaultValue = defaultValue;
    }
 
    public Act getAct() {
       return this.act;
    }
 
-   public void setAct(Act var1) {
-      this.act = var1;
+   public void setAct(Act act) {
+      this.act = act;
    }
 
    public String getChildType() {
       return this.childType;
    }
 
-   public void setChildType(String var1) {
-      this.childType = var1;
+   public void setChildType(String childType) {
+      this.childType = childType;
    }
 
    public String getChildTypeUuid() {
       return this.childTypeUuid;
    }
 
-   public void setChildTypeUuid(String var1) {
-      this.childTypeUuid = var1;
+   public void setChildTypeUuid(String childTypeUuid) {
+      this.childTypeUuid = childTypeUuid;
    }
 }

@@ -6,9 +6,9 @@ import java.sql.Connection;
 import java.util.List;
 
 public interface ItemReader {
-   int getTotleRows(BatchDataProvider var1) throws Exception;
+   int getTotleRows(BatchDataProvider dataProvider) throws Exception;
 
-   List getPageDatas(Connection var1, BatchContext var2, int var3, int var4) throws ReaderException;
+   List getPageDatas(Connection loadConnection, BatchContext context, int pageIndex, int pageSize) throws ReaderException;
 
-   List getDatas(Connection var1, BatchContext var2) throws ReaderException;
+   List getDatas(Connection loadConnection, BatchContext context) throws ReaderException;
 }

@@ -6,30 +6,30 @@ import com.bstek.urule.parse.table.JointParser;
 import org.dom4j.Element;
 
 public class ConditionCrossCellParser extends CrossCellParser implements Parser<ConditionCrossCell> {
-   private JointParser a;
+   private JointParser jointParser;
 
-   public ConditionCrossCell parse(Element var1) {
-      ConditionCrossCell var2 = new ConditionCrossCell();
-      this.a(var2, var1);
+   public ConditionCrossCell parse(Element element) {
+      ConditionCrossCell conditionCrossCell = new ConditionCrossCell();
+      this.parseCrossCell(conditionCrossCell, element);
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (this.a.support(var5.getName())) {
-               var2.setJoint(this.a.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.jointParser.support(element2.getName())) {
+               conditionCrossCell.setJoint(this.jointParser.parse(element2));
             }
          }
       }
 
-      return var2;
+      return conditionCrossCell;
    }
 
    @Override
-   public boolean support(String var1) {
-      return "condition-cell".equals(var1);
+   public boolean support(String name) {
+      return "condition-cell".equals(name);
    }
 
-   public void setJointParser(JointParser var1) {
-      this.a = var1;
+   public void setJointParser(JointParser jointParser) {
+      this.jointParser = jointParser;
    }
 }

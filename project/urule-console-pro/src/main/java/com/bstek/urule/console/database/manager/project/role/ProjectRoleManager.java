@@ -7,33 +7,48 @@ import java.util.List;
 public interface ProjectRoleManager {
    ProjectRoleManagerImpl ins = new ProjectRoleManagerImpl();
 
-   List loadRoles(long var1);
+   /**获取项目对应的角色*/
+   List loadRoles(long projectId);
 
-   List loadUserRoles(long var1, String var3);
+   /**获取用户的角色列表*/
+   List loadUserRoles(long projectId, String account);
 
-   List loadRoleUsers(long var1, long var3);
+   /**获取角色的用户列表*/
+   List loadRoleUsers(long projectId, long roleId);
 
-   void add(ProjectRole var1);
+   /**新增角色*/
+   void add(ProjectRole role);
 
-   void update(ProjectRole var1);
+   /**更新角色*/
+   void update(ProjectRole role);
 
-   void remove(Long var1);
+   /**删除角色*/
+   void remove(Long id);
 
-   void removeByProjectId(Long var1);
+   /**删除项目的所有角色*/
+   void removeByProjectId(Long id);
 
-   boolean checkExist(long var1, String var3);
+   /**检测相同项目下是否有相同名称的角色*/
+   boolean checkExist(long projectId, String name);
 
-   void addUserRole(long var1, String var3, long var4);
+   /**添加用户角色关系*/
+   void addUserRole(long projectId, String userId, long roleId);
 
-   void removeUserRole(String var1, long var2);
+   /**删除用户角色关系*/
+   void removeUserRole(String userId, long roleId);
 
-   void removeRoleUsers(long var1);
+   /**删除角色对应的用户列表*/
+   void removeRoleUsers(long roleId);
 
-   void removeUserRoles(String var1);
+   /**删除用户对应的角色列表*/
+   void removeUserRoles(String userId);
 
-   ProjectRole get(long var1);
+   /**获取项目角色*/
+   ProjectRole get(long roleId);
 
-   ProjectRole get(long var1, String var3);
+   /**获取项目角色*/
+   ProjectRole get(long projectId, String name);
 
-   UserRole getUserRole(String var1, long var2);
+   /**获取用户角色关系*/
+   UserRole getUserRole(String userId, long roleId);
 }

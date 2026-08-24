@@ -3,76 +3,76 @@ package com.bstek.urule.console.batch;
 import com.bstek.urule.console.database.model.batch.BatchUpdateMode;
 
 public class BatchItemResult {
-   private String a;
-   private int b = 0;
-   private int c = 0;
-   private int d = 0;
-   private String e;
-   private BatchUpdateMode f;
-   private String g;
-   private String h;
+   private String name;
+   private int readCount = 0;
+   private int writeCount = 0;
+   private int filterCount = 0;
+   private String tableName;
+   private BatchUpdateMode updateMode;
+   private String exitCode;
+   private String exitMessage;
 
    public int getReadCount() {
-      return this.b;
+      return this.readCount;
    }
 
-   public void setReadCount(int var1) {
-      this.b = var1;
+   public void setReadCount(int recordCount) {
+      this.readCount = recordCount;
    }
 
    public int getWriteCount() {
-      return this.c;
+      return this.writeCount;
    }
 
-   public void setWriteCount(int var1) {
-      this.c = var1;
+   public void setWriteCount(int successCount) {
+      this.writeCount = successCount;
    }
 
    public String getTableName() {
-      return this.e;
+      return this.tableName;
    }
 
-   public void setTableName(String var1) {
-      this.e = var1;
+   public void setTableName(String tableName) {
+      this.tableName = tableName;
    }
 
    public BatchUpdateMode getUpdateMode() {
-      return this.f;
+      return this.updateMode;
    }
 
-   public void setUpdateMode(BatchUpdateMode var1) {
-      this.f = var1;
+   public void setUpdateMode(BatchUpdateMode updateMode) {
+      this.updateMode = updateMode;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public int getFilterCount() {
-      return this.d;
+      return this.filterCount;
    }
 
-   public void setFilterCount(int var1) {
-      this.d = var1;
+   public void setFilterCount(int filterCount) {
+      this.filterCount = filterCount;
    }
 
    public String getExitCode() {
-      return this.g;
+      return this.exitCode;
    }
 
-   public void setExitCode(String var1) {
-      this.g = var1;
+   public void setExitCode(String exitCode) {
+      this.exitCode = exitCode;
    }
 
    public String getExitMessage() {
-      return this.h;
+      return this.exitMessage;
    }
 
-   public void setExitMessage(String var1) {
-      this.h = var1;
+   public void setExitMessage(String exitMessage) {
+      this.exitMessage = exitMessage;
    }
 }

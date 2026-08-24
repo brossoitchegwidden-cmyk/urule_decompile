@@ -13,177 +13,177 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 public class BatchContext {
-   private Batch b;
-   private BatchLog c;
-   Map a;
-   private Map d;
-   private Map e;
-   private VariableCategory f;
-   private VariableCategory g;
-   private KnowledgeService h;
-   private KnowledgePackage i;
-   private Map j;
-   private Map k;
-   private Map l;
-   private Connection m;
-   private DataSource n;
-   private int o = 0;
-   private int p = 0;
-   private int q = 0;
-   private GeneralEntity r;
-   private BatchResult s;
+   private Batch batch;
+   private BatchLog batchLog;
+   Map params;
+   private Map paramValueMap;
+   private Map paramDefinitionsByName;
+   private VariableCategory parameterVariableCategory;
+   private VariableCategory providerVariableCategory;
+   private KnowledgeService knowledgeService;
+   private KnowledgePackage knowledgePackage;
+   private Map packetParamValueMap;
+   private Map packetParamDefinitionsByName;
+   private Map readerDataSoruceMap;
+   private Connection readConnection;
+   private DataSource writeDataSource;
+   private int readCount = 0;
+   private int pageCount = 0;
+   private int batchCount = 0;
+   private GeneralEntity hiveLastData;
+   private BatchResult result;
 
-   public BatchContext(Batch var1, Map var2, BatchResult var3) {
-      this.b = var1;
-      this.a = var2;
-      this.d = new HashMap();
-      this.e = new HashMap();
+   public BatchContext(Batch batch, Map params, BatchResult result) {
+      this.batch = batch;
+      this.params = params;
+      this.paramValueMap = new HashMap();
+      this.paramDefinitionsByName = new HashMap();
 
-      for(DataParam var5 : (Iterable<DataParam>)(Iterable<?>)(var1.getParams())) {
-         this.d.put(var5.getName(), var5.getValue());
-         this.e.put(var5.getName(), var5);
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batch.getParams())) {
+         this.paramValueMap.put(dataParam.getName(), dataParam.getValue());
+         this.paramDefinitionsByName.put(dataParam.getName(), dataParam);
       }
 
-      this.j = new HashMap();
-      this.k = new HashMap();
+      this.packetParamValueMap = new HashMap();
+      this.packetParamDefinitionsByName = new HashMap();
 
-      for(DataParam var7 : (Iterable<DataParam>)(Iterable<?>)(var1.getPacketParams())) {
-         this.j.put(var7.getName(), var7.getValue());
-         this.k.put(var7.getName(), var7);
+      for(DataParam dataParam2 : (Iterable<DataParam>)(Iterable<?>)(batch.getPacketParams())) {
+         this.packetParamValueMap.put(dataParam2.getName(), dataParam2.getValue());
+         this.packetParamDefinitionsByName.put(dataParam2.getName(), dataParam2);
       }
 
-      this.s = var3;
+      this.result = result;
    }
 
    public int getReadCount() {
-      return this.o;
+      return this.readCount;
    }
 
-   public void setReadCount(int var1) {
-      this.o = var1;
+   public void setReadCount(int readCount) {
+      this.readCount = readCount;
    }
 
    public int getPageCount() {
-      return this.p;
+      return this.pageCount;
    }
 
-   public void setPageCount(int var1) {
-      this.p = var1;
+   public void setPageCount(int pageCount) {
+      this.pageCount = pageCount;
    }
 
    public int getBatchCount() {
-      return this.q;
+      return this.batchCount;
    }
 
-   public void setBatchCount(int var1) {
-      this.q = var1;
+   public void setBatchCount(int batchCount) {
+      this.batchCount = batchCount;
    }
 
    public Batch getBatch() {
-      return this.b;
+      return this.batch;
    }
 
-   public void setBatch(Batch var1) {
-      this.b = var1;
+   public void setBatch(Batch batch) {
+      this.batch = batch;
    }
 
    public Map getParamValueMap() {
-      return this.d;
+      return this.paramValueMap;
    }
 
-   public DataParam getParamObject(String var1) {
-      return (DataParam)this.e.get(var1);
+   public DataParam getParamObject(String name) {
+      return (DataParam)this.paramDefinitionsByName.get(name);
    }
 
-   public DataParam getPacketParamObject(String var1) {
-      return (DataParam)this.k.get(var1);
+   public DataParam getPacketParamObject(String name) {
+      return (DataParam)this.packetParamDefinitionsByName.get(name);
    }
 
    public Map getPacketParamValueMap() {
-      return this.j;
+      return this.packetParamValueMap;
    }
 
    public BatchLog getBatchLog() {
-      return this.c;
+      return this.batchLog;
    }
 
-   public void setBatchLog(BatchLog var1) {
-      this.c = var1;
+   public void setBatchLog(BatchLog batchLog) {
+      this.batchLog = batchLog;
    }
 
    public VariableCategory getParameterVariableCategory() {
-      return this.f;
+      return this.parameterVariableCategory;
    }
 
-   public void setParameterVariableCategory(VariableCategory var1) {
-      this.f = var1;
+   public void setParameterVariableCategory(VariableCategory parameterVariableCategory) {
+      this.parameterVariableCategory = parameterVariableCategory;
    }
 
    public VariableCategory getProviderVariableCategory() {
-      return this.g;
+      return this.providerVariableCategory;
    }
 
-   public void setProviderVariableCategory(VariableCategory var1) {
-      this.g = var1;
+   public void setProviderVariableCategory(VariableCategory providerVariableCategory) {
+      this.providerVariableCategory = providerVariableCategory;
    }
 
    public KnowledgeService getKnowledgeService() {
-      return this.h;
+      return this.knowledgeService;
    }
 
-   public void setKnowledgeService(KnowledgeService var1) {
-      this.h = var1;
+   public void setKnowledgeService(KnowledgeService knowledgeService) {
+      this.knowledgeService = knowledgeService;
    }
 
    public KnowledgePackage getKnowledgePackage() {
-      return this.i;
+      return this.knowledgePackage;
    }
 
-   public void setKnowledgePackage(KnowledgePackage var1) {
-      this.i = var1;
+   public void setKnowledgePackage(KnowledgePackage knowledgePackage) {
+      this.knowledgePackage = knowledgePackage;
    }
 
    public Map getParams() {
-      return this.a;
+      return this.params;
    }
 
-   public void setParams(Map var1) {
-      this.a = var1;
+   public void setParams(Map params) {
+      this.params = params;
    }
 
    public Map getReaderDataSoruceMap() {
-      return this.l;
+      return this.readerDataSoruceMap;
    }
 
-   public void setReaderDataSoruceMap(Map var1) {
-      this.l = var1;
+   public void setReaderDataSoruceMap(Map readerDataSoruceMap) {
+      this.readerDataSoruceMap = readerDataSoruceMap;
    }
 
    public DataSource getWriteDataSource() {
-      return this.n;
+      return this.writeDataSource;
    }
 
-   public void setWriteDataSource(DataSource var1) {
-      this.n = var1;
+   public void setWriteDataSource(DataSource writeDataSource) {
+      this.writeDataSource = writeDataSource;
    }
 
    public Connection getReadConnection() {
-      return this.m;
+      return this.readConnection;
    }
 
-   public void setReadConnection(Connection var1) {
-      this.m = var1;
+   public void setReadConnection(Connection readConnection) {
+      this.readConnection = readConnection;
    }
 
    public BatchResult getResult() {
-      return this.s;
+      return this.result;
    }
 
    public GeneralEntity getHiveLastData() {
-      return this.r;
+      return this.hiveLastData;
    }
 
-   public void setHiveLastData(GeneralEntity var1) {
-      this.r = var1;
+   public void setHiveLastData(GeneralEntity hiveLastData) {
+      this.hiveLastData = hiveLastData;
    }
 }

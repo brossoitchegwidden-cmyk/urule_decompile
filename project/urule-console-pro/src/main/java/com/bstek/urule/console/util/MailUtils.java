@@ -18,42 +18,42 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 public class MailUtils {
-   public static void sendHtmlMail(MailInfo var0) throws Exception {
-      var0.setHost(Configure.getConfigure().getProperty("urule.mail.smtp.host"));
-      var0.setFormName(Configure.getConfigure().getProperty("urule.mail.smtp.user"));
-      var0.setFormPassword(Configure.getConfigure().getProperty("urule.mail.smtp.pass"));
-      var0.setAuth(Configure.getConfigure().getBoolean("urule.mail.smtp.auth", true));
-      Message var1 = a(var0);
-      MimeMultipart var2 = new MimeMultipart();
-      MimeBodyPart var3 = new MimeBodyPart();
-      ((BodyPart)var3).setContent(var0.getContent(), "text/html; charset=utf-8");
-      ((Multipart)var2).addBodyPart(var3);
-      var1.setContent(var2);
-      Transport.send(var1);
+   public static void sendHtmlMail(MailInfo info) throws Exception {
+      info.setHost(Configure.getConfigure().getProperty("urule.mail.smtp.host"));
+      info.setFormName(Configure.getConfigure().getProperty("urule.mail.smtp.user"));
+      info.setFormPassword(Configure.getConfigure().getProperty("urule.mail.smtp.pass"));
+      info.setAuth(Configure.getConfigure().getBoolean("urule.mail.smtp.auth", true));
+      Message message = resolveMessage(info);
+      MimeMultipart mimeMultipart = new MimeMultipart();
+      MimeBodyPart mimeBodyPart = new MimeBodyPart();
+      ((BodyPart)mimeBodyPart).setContent(info.getContent(), "text/html; charset=utf-8");
+      ((Multipart)mimeMultipart).addBodyPart(mimeBodyPart);
+      message.setContent(mimeMultipart);
+      Transport.send(message);
    }
 
-   private static Message a(MailInfo var0) throws Exception {
-      final Properties var1 = System.getProperties();
-      var1.setProperty("mail.smtp.host", var0.getHost());
-      var1.setProperty("mail.smtp.auth", Boolean.toString(var0.isAuth()));
-      var1.setProperty("mail.smtp.user", var0.getFormName());
-      var1.setProperty("mail.smtp.pass", var0.getFormPassword());
-      Session var2 = null;
-      if (var0.isAuth()) {
-         var2 = Session.getInstance(var1, new Authenticator() {
+   private static Message resolveMessage(MailInfo mailInfo) throws Exception {
+      final Properties properties = System.getProperties();
+      properties.setProperty("mail.smtp.host", mailInfo.getHost());
+      properties.setProperty("mail.smtp.auth", Boolean.toString(mailInfo.isAuth()));
+      properties.setProperty("mail.smtp.user", mailInfo.getFormName());
+      properties.setProperty("mail.smtp.pass", mailInfo.getFormPassword());
+      Session session = null;
+      if (mailInfo.isAuth()) {
+         session = Session.getInstance(properties, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-               return new PasswordAuthentication(var1.getProperty("mail.smtp.user"), var1.getProperty("mail.smtp.pass"));
+               return new PasswordAuthentication(properties.getProperty("mail.smtp.user"), properties.getProperty("mail.smtp.pass"));
             }
          });
       } else {
-         var2 = Session.getInstance(var1);
+         session = Session.getInstance(properties);
       }
 
-      MimeMessage var3 = new MimeMessage(var2);
-      ((Message)var3).setSubject(MimeUtility.encodeText(var0.getSubject(), "UTF-8", "B"));
-      ((Message)var3).setFrom(new InternetAddress(var1.getProperty("mail.smtp.user"), Configure.getConfigure().getProperty("urule.application.title", "URULE")));
-      ((Message)var3).setRecipient(RecipientType.TO, new InternetAddress(var0.getToAddress()));
-      ((Message)var3).setSentDate(new Date());
-      return var3;
+      MimeMessage mimeMessage = new MimeMessage(session);
+      ((Message)mimeMessage).setSubject(MimeUtility.encodeText(mailInfo.getSubject(), "UTF-8", "B"));
+      ((Message)mimeMessage).setFrom(new InternetAddress(properties.getProperty("mail.smtp.user"), Configure.getConfigure().getProperty("urule.application.title", "URULE")));
+      ((Message)mimeMessage).setRecipient(RecipientType.TO, new InternetAddress(mailInfo.getToAddress()));
+      ((Message)mimeMessage).setSentDate(new Date());
+      return mimeMessage;
    }
 }

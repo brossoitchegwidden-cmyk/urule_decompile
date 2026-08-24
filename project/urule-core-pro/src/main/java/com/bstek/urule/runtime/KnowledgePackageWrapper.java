@@ -36,61 +36,61 @@ public class KnowledgePackageWrapper {
       this.id = UUID.randomUUID().toString();
    }
 
-   public KnowledgePackageWrapper(KnowledgePackage var1) {
-      this.knowledgePackage = var1;
+   public KnowledgePackageWrapper(KnowledgePackage knowledgePackage) {
+      this.knowledgePackage = knowledgePackage;
       this.id = UUID.randomUUID().toString();
       this.initNodes();
    }
 
    private void initNodes() {
-      Rete var1 = this.knowledgePackage.getRete();
-      this.initReteNodes(var1);
-      List var2 = this.knowledgePackage.getAloneRetes();
-      if (var2 != null) {
-         for (Rete var4 : (Iterable<Rete>)(Iterable<?>)(var2)) {
-            this.initReteNodes(var4);
+      Rete rete = this.knowledgePackage.getRete();
+      this.initReteNodes(rete);
+      List aloneRetes = this.knowledgePackage.getAloneRetes();
+      if (aloneRetes != null) {
+         for (Rete rete2 : (Iterable<Rete>)(Iterable<?>)(aloneRetes)) {
+            this.initReteNodes(rete2);
          }
       }
    }
 
-   private void initReteNodes(Rete var1) {
-      List var2 = var1.getObjectTypeNodes();
-      ArrayList var3 = new ArrayList();
-      var3.addAll(var2);
-      this.buildChildrenNodes(var3, var1.getMutexGroupRetesMap());
-      this.buildChildrenNodes(var3, var1.getPendedGroupRetesMap());
-      this.queryReteNodes(var3);
-      this.initAllRuleData(var1);
-      var1.initReteInstance();
+   private void initReteNodes(Rete rete) {
+      List objectTypeNodes = rete.getObjectTypeNodes();
+      ArrayList items = new ArrayList();
+      items.addAll(objectTypeNodes);
+      this.buildChildrenNodes(items, rete.getMutexGroupRetesMap());
+      this.buildChildrenNodes(items, rete.getPendedGroupRetesMap());
+      this.queryReteNodes(items);
+      this.initAllRuleData(rete);
+      rete.initReteInstance();
    }
 
-   private void initAllRuleData(Rete var1) {
-      ArrayList var2 = new ArrayList();
-      var1.setAllRuleData(var2);
+   private void initAllRuleData(Rete rete) {
+      ArrayList items = new ArrayList();
+      rete.setAllRuleData(items);
 
-      for (ReteNode var4 : this.allNodes) {
-         if (var4 instanceof TerminalNode) {
-            TerminalNode var5 = (TerminalNode)var4;
-            Rule var6 = var5.getRule();
-            if (!var6.isTargetResource(ResourceType.Flow)) {
-               var2.add(new RuleData(var6));
+      for (ReteNode reteNode : this.allNodes) {
+         if (reteNode instanceof TerminalNode) {
+            TerminalNode terminalNode = (TerminalNode)reteNode;
+            Rule rule = terminalNode.getRule();
+            if (!rule.isTargetResource(ResourceType.Flow)) {
+               items.add(new RuleData(rule));
             }
          }
       }
    }
 
-   private void buildChildrenNodes(List<ReteNode> var1, Map<String, List<ReteUnit>> var2) {
-      if (var2 != null) {
-         for (List var4 : var2.values()) {
-            for (ReteUnit var6 : (Iterable<ReteUnit>)(Iterable<?>)(var4)) {
-               if (var6.getRete() != null) {
-                  var1.addAll(var6.getRete().getObjectTypeNodes());
-               } else if (var6 instanceof MutexReteUnit) {
-                  MutexReteUnit var7 = (MutexReteUnit)var6;
+   private void buildChildrenNodes(List<ReteNode> reteNodes, Map<String, List<ReteUnit>> valuesByKey) {
+      if (valuesByKey != null) {
+         for (List items : valuesByKey.values()) {
+            for (ReteUnit reteUnit : (Iterable<ReteUnit>)(Iterable<?>)(items)) {
+               if (reteUnit.getRete() != null) {
+                  reteNodes.addAll(reteUnit.getRete().getObjectTypeNodes());
+               } else if (reteUnit instanceof MutexReteUnit) {
+                  MutexReteUnit mutexReteUnit = (MutexReteUnit)reteUnit;
 
-                  for (ReteUnit var10 : var7.getList()) {
-                     if (var10.getRete() != null) {
-                        var1.addAll(var10.getRete().getObjectTypeNodes());
+                  for (ReteUnit reteUnit2 : mutexReteUnit.getList()) {
+                     if (reteUnit2.getRete() != null) {
+                        reteNodes.addAll(reteUnit2.getRete().getObjectTypeNodes());
                      }
                   }
                }
@@ -99,17 +99,17 @@ public class KnowledgePackageWrapper {
       }
    }
 
-   private void queryReteNodes(List<ReteNode> var1) {
-      if (var1 != null) {
-         for (ReteNode var3 : var1) {
-            if (!this.allNodes.contains(var3) && !(var3 instanceof ObjectTypeNode)) {
-               this.allNodes.add(var3);
-               this.allNodeMap.put(var3.getId(), var3);
+   private void queryReteNodes(List<ReteNode> reteNodes) {
+      if (reteNodes != null) {
+         for (ReteNode reteNode : reteNodes) {
+            if (!this.allNodes.contains(reteNode) && !(reteNode instanceof ObjectTypeNode)) {
+               this.allNodes.add(reteNode);
+               this.allNodeMap.put(reteNode.getId(), reteNode);
             }
 
-            if (var3 instanceof BaseReteNode) {
-               BaseReteNode var4 = (BaseReteNode)var3;
-               this.queryReteNodes(var4.getChildrenNodes());
+            if (reteNode instanceof BaseReteNode) {
+               BaseReteNode baseReteNode = (BaseReteNode)reteNode;
+               this.queryReteNodes(baseReteNode.getChildrenNodes());
             }
          }
       }
@@ -117,78 +117,78 @@ public class KnowledgePackageWrapper {
 
    public void buildDeserialize() {
       this.buildPredefineExecuteUnits();
-      Rete var1 = this.knowledgePackage.getRete();
+      Rete rete = this.knowledgePackage.getRete();
 
-      for (ReteNode var3 : this.allNodes) {
-         if (!this.allNodeMap.containsKey(var3.getId())) {
-            this.allNodeMap.put(var3.getId(), var3);
+      for (ReteNode reteNode : this.allNodes) {
+         if (!this.allNodeMap.containsKey(reteNode.getId())) {
+            this.allNodeMap.put(reteNode.getId(), reteNode);
          }
       }
 
-      this.buildDeserialize(var1);
-      List var7 = this.knowledgePackage.getAloneRetes();
-      if (var7 != null) {
-         for (Rete var4 : (Iterable<Rete>)(Iterable<?>)(var7)) {
-            this.buildDeserialize(var4);
+      this.buildDeserialize(rete);
+      List aloneRetes = this.knowledgePackage.getAloneRetes();
+      if (aloneRetes != null) {
+         for (Rete rete2 : (Iterable<Rete>)(Iterable<?>)(aloneRetes)) {
+            this.buildDeserialize(rete2);
          }
       }
 
-      HashMap var9 = new HashMap();
-      List var10 = this.knowledgePackage.getVariableCategories();
-      if (var10 != null) {
-         for (VariableCategory var6 : (Iterable<VariableCategory>)(Iterable<?>)(var10)) {
-            var9.put(var6.getClazz(), var6.newVariableCategoryWithDefaultValue());
+      HashMap valuesByKey = new HashMap();
+      List variableCategories = this.knowledgePackage.getVariableCategories();
+      if (variableCategories != null) {
+         for (VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableCategories)) {
+            valuesByKey.put(variableCategory.getClazz(), variableCategory.newVariableCategoryWithDefaultValue());
          }
       }
 
-      ((KnowledgePackageImpl)this.knowledgePackage).setVariableCategoryWithDefaultValueClassMap(var9);
+      ((KnowledgePackageImpl)this.knowledgePackage).setVariableCategoryWithDefaultValueClassMap(valuesByKey);
    }
 
    private void buildPredefineExecuteUnits() {
-      List var1 = this.knowledgePackage.getPredefineExecutionUnits();
-      if (var1 != null) {
-         for (PredefineExecutionUnit var3 : (Iterable<PredefineExecutionUnit>)(Iterable<?>)(var1)) {
-            PredefineGroup var4 = var3.getGroup();
-            KnowledgePackageWrapper var5 = var4.getKnowledgePackageWrapper();
-            if (var5 != null) {
-               var5.buildDeserialize();
+      List predefineExecutionUnits = this.knowledgePackage.getPredefineExecutionUnits();
+      if (predefineExecutionUnits != null) {
+         for (PredefineExecutionUnit predefineExecutionUnit : (Iterable<PredefineExecutionUnit>)(Iterable<?>)(predefineExecutionUnits)) {
+            PredefineGroup group = predefineExecutionUnit.getGroup();
+            KnowledgePackageWrapper knowledgePackageWrapper = group.getKnowledgePackageWrapper();
+            if (knowledgePackageWrapper != null) {
+               knowledgePackageWrapper.buildDeserialize();
             }
          }
       }
    }
 
-   private void buildDeserialize(Rete var1) {
-      this.rebuildReteLine(var1);
-      this.buildRetesMap(var1.getMutexGroupRetesMap());
-      this.buildRetesMap(var1.getPendedGroupRetesMap());
-      Map var2 = this.knowledgePackage.getFlowMap();
-      if (var2 != null && var2.size() > 0) {
-         for (FlowDefinition var4 : (Iterable<FlowDefinition>)(Iterable<?>)(var2.values())) {
-            var4.buildConnectionToNode();
+   private void buildDeserialize(Rete rete) {
+      this.rebuildReteLine(rete);
+      this.buildRetesMap(rete.getMutexGroupRetesMap());
+      this.buildRetesMap(rete.getPendedGroupRetesMap());
+      Map flowMap = this.knowledgePackage.getFlowMap();
+      if (flowMap != null && flowMap.size() > 0) {
+         for (FlowDefinition flowDefinition : (Iterable<FlowDefinition>)(Iterable<?>)(flowMap.values())) {
+            flowDefinition.buildConnectionToNode();
          }
       }
 
-      this.initAllRuleData(var1);
-      var1.initReteInstance();
+      this.initAllRuleData(rete);
+      rete.initReteInstance();
    }
 
-   private void buildRetesMap(Map<String, List<ReteUnit>> var1) {
-      if (var1 != null) {
-         for (List var3 : var1.values()) {
-            for (ReteUnit var5 : (Iterable<ReteUnit>)(Iterable<?>)(var3)) {
-               if (var5 instanceof MutexReteUnit) {
-                  MutexReteUnit var11 = (MutexReteUnit)var5;
+   private void buildRetesMap(Map<String, List<ReteUnit>> valuesByKey) {
+      if (valuesByKey != null) {
+         for (List items : valuesByKey.values()) {
+            for (ReteUnit reteUnit : (Iterable<ReteUnit>)(Iterable<?>)(items)) {
+               if (reteUnit instanceof MutexReteUnit) {
+                  MutexReteUnit mutexReteUnit = (MutexReteUnit)reteUnit;
 
-                  for (ReteUnit var9 : var11.getList()) {
-                     Rete var10 = var9.getRete();
-                     if (var10 != null) {
-                        this.rebuildReteLine(var10);
+                  for (ReteUnit reteUnit2 : mutexReteUnit.getList()) {
+                     Rete rete = reteUnit2.getRete();
+                     if (rete != null) {
+                        this.rebuildReteLine(rete);
                      }
                   }
                } else {
-                  Rete var6 = var5.getRete();
-                  if (var6 != null) {
-                     this.rebuildReteLine(var6);
+                  Rete rete2 = reteUnit.getRete();
+                  if (rete2 != null) {
+                     this.rebuildReteLine(rete2);
                   }
                }
             }
@@ -196,49 +196,49 @@ public class KnowledgePackageWrapper {
       }
    }
 
-   private void rebuildReteLine(Rete var1) {
-      for (ObjectTypeNode var4 : var1.getObjectTypeNodes()) {
-         List var5 = var4.getLines();
+   private void rebuildReteLine(Rete rete) {
+      for (ObjectTypeNode objectTypeNode : rete.getObjectTypeNodes()) {
+         List lines = objectTypeNode.getLines();
 
-         for (Line var7 : (Iterable<Line>)(Iterable<?>)(var5)) {
-            var7.setFrom(var4);
+         for (Line line : (Iterable<Line>)(Iterable<?>)(lines)) {
+            line.setFrom(objectTypeNode);
          }
 
-         this.rebuildLine(var5, this.allNodes);
+         this.rebuildLine(lines, this.allNodes);
       }
    }
 
-   private void rebuildLine(List<Line> var1, List<ReteNode> var2) {
-      if (var1 != null) {
-         for (Line var4 : var1) {
-            if (var4.getFrom() == null) {
-               int var5 = var4.getFromNodeId();
-               ReteNode var6 = this.findTargetNode(var2, var5);
-               var4.setFrom(var6);
-               if (var6 instanceof BaseReteNode) {
-                  BaseReteNode var7 = (BaseReteNode)var6;
-                  this.rebuildLine(var7.getLines(), var2);
+   private void rebuildLine(List<Line> lines, List<ReteNode> reteNodes) {
+      if (lines != null) {
+         for (Line line : lines) {
+            if (line.getFrom() == null) {
+               int fromNodeId = line.getFromNodeId();
+               ReteNode targetNode = this.findTargetNode(reteNodes, fromNodeId);
+               line.setFrom(targetNode);
+               if (targetNode instanceof BaseReteNode) {
+                  BaseReteNode baseReteNode2 = (BaseReteNode)targetNode;
+                  this.rebuildLine(baseReteNode2.getLines(), reteNodes);
                }
             }
 
-            if (var4.getTo() == null) {
-               int var8 = var4.getToNodeId();
-               ReteNode var9 = this.findTargetNode(var2, var8);
-               var4.setTo(var9);
-               if (var9 instanceof BaseReteNode) {
-                  BaseReteNode var10 = (BaseReteNode)var9;
-                  this.rebuildLine(var10.getLines(), var2);
+            if (line.getTo() == null) {
+               int toNodeId = line.getToNodeId();
+               ReteNode targetNode2 = this.findTargetNode(reteNodes, toNodeId);
+               line.setTo(targetNode2);
+               if (targetNode2 instanceof BaseReteNode) {
+                  BaseReteNode baseReteNode = (BaseReteNode)targetNode2;
+                  this.rebuildLine(baseReteNode.getLines(), reteNodes);
                }
             }
          }
       }
    }
 
-   private ReteNode findTargetNode(List<ReteNode> var1, int var2) {
-      if (this.allNodeMap.containsKey(var2)) {
-         return this.allNodeMap.get(var2);
+   private ReteNode findTargetNode(List<ReteNode> reteNodes, int number) {
+      if (this.allNodeMap.containsKey(number)) {
+         return this.allNodeMap.get(number);
       } else {
-         throw new RuleException("Node[" + var2 + "] not exist.");
+         throw new RuleException("Node[" + number + "] not exist.");
       }
    }
 

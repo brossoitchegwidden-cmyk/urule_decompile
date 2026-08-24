@@ -6,29 +6,36 @@ import java.util.List;
 public interface UserManager {
    UserManagerImpl ins = new UserManagerImpl();
 
-   List getUsersByGroupId(String var1);
+   /**获取团队下的用户列表*/
+   List getUsersByGroupId(String groupdId);
 
-   List getUsersByRoleId(long var1);
+   /**获取团队下的用户列表*/
+   List getUsersByRoleId(long roleId);
 
-   List getUsersByProjectId(long var1);
+   /**获取项目下的用户列表*/
+   List getUsersByProjectId(long projectId);
 
-   void add(User var1);
+   void add(User user);
 
-   void update(User var1);
+   void update(User user);
 
-   void remove(String var1);
+   void remove(String account);
 
-   User get(String var1);
+   User get(String account);
 
-   User getByEmail(String var1);
+   User getByEmail(String email);
 
-   User getGroupUser(String var1, String var2);
+   /**获取组用户*/
+   User getGroupUser(String groupId, String account);
 
-   User getProjectUser(long var1, String var3);
+   /**获取项目用户*/
+   User getProjectUser(long projectId, String account);
 
-   void changePassword(String var1, String var2);
+   /**密码修改*/
+   void changePassword(String account, String password);
 
-   void changeEmail(String var1, String var2);
+   /**邮箱修改*/
+   void changeEmail(String account, String email);
 
    UserQuery newQuery();
 }

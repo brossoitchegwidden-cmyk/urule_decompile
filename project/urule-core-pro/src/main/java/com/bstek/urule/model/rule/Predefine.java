@@ -21,38 +21,38 @@ public class Predefine {
    @JsonDeserialize(using = JunctionJsonDeserializer.class)
    private Junction junction;
 
-   public boolean evalCriterias(EvaluationContext var1, Map<String, Object> var2) {
-      return this.junction != null && this.junction.getCriterions().size() != 0 ? this.evalCriterion(this.junction, var1, var2) : true;
+   public boolean evalCriterias(EvaluationContext context, Map<String, Object> factMap) {
+      return this.junction != null && this.junction.getCriterions().size() != 0 ? this.evalCriterion(this.junction, context, factMap) : true;
    }
 
-   private boolean evalCriterion(Criterion var1, EvaluationContext var2, Map<String, Object> var3) {
-      if (var1 instanceof Criteria) {
-         Criteria var9 = (Criteria)var1;
-         EvaluateResponse var10 = var9.evaluate(var2, var3);
-         return var10.getResult();
+   private boolean evalCriterion(Criterion criterion, EvaluationContext evaluationContext, Map<String, Object> valuesByKey) {
+      if (criterion instanceof Criteria) {
+         Criteria criteria = (Criteria)criterion;
+         EvaluateResponse evaluateResponse = criteria.evaluate(evaluationContext, valuesByKey);
+         return evaluateResponse.getResult();
       }
 
-      if (var1 instanceof Junction) {
-         Junction var4 = (Junction)var1;
-         boolean var5 = true;
-         if (var4.getJunctionType().contentEquals("and")) {
-            var5 = false;
+      if (criterion instanceof Junction) {
+         Junction junction = (Junction)criterion;
+         boolean flag = true;
+         if (junction.getJunctionType().contentEquals("and")) {
+            flag = false;
          }
 
-         for (Criterion var7 : this.junction.getCriterions()) {
-            boolean var8 = this.evalCriterion(var7, var2, var3);
-            if (var5) {
-               if (var8) {
+         for (Criterion criterion2 : this.junction.getCriterions()) {
+            boolean flag2 = this.evalCriterion(criterion2, evaluationContext, valuesByKey);
+            if (flag) {
+               if (flag2) {
                   return true;
                }
-            } else if (!var8) {
+            } else if (!flag2) {
                return false;
             }
          }
 
-         return !var5;
+         return !flag;
       } else {
-         throw new RuleException("Unsupport Criterion [" + var1.getClass().getName() + "] In Predefine Conditions");
+         throw new RuleException("Unsupport Criterion [" + criterion.getClass().getName() + "] In Predefine Conditions");
       }
    }
 
@@ -64,47 +64,47 @@ public class Predefine {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getType() {
       return this.type;
    }
 
-   public void setType(String var1) {
-      this.type = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public PredefineValueType getValueType() {
       return this.valueType;
    }
 
-   public void setValueType(PredefineValueType var1) {
-      this.valueType = var1;
+   public void setValueType(PredefineValueType valueType) {
+      this.valueType = valueType;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public Junction getJunction() {
       return this.junction;
    }
 
-   public void setJunction(Junction var1) {
-      this.junction = var1;
+   public void setJunction(Junction junction) {
+      this.junction = junction;
    }
 }

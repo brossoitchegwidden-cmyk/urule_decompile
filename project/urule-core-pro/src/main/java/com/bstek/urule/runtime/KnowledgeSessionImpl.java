@@ -18,149 +18,137 @@ import java.util.List;
 import java.util.Map;
 
 public class KnowledgeSessionImpl extends AbstractWorkingMemory implements KnowledgeSession {
-   private List<ReteInstance> h = new ArrayList<>();
-   private List<PredefineExecutionUnit> i = new ArrayList<>();
-   private List<KnowledgePackage> j = new ArrayList<>();
+   private List<ReteInstance> reteInstanceList = new ArrayList<>();
+   private List<PredefineExecutionUnit> predefineExecutionUnits = new ArrayList<>();
+   private List<KnowledgePackage> knowledgePackageList = new ArrayList<>();
 
-   protected KnowledgeSessionImpl(KnowledgePackage var1, boolean var2, long var3) {
-      this(new KnowledgePackage[]{var1}, null, var2, var3);
+   protected KnowledgeSessionImpl(KnowledgePackage knowledgePackage, boolean reg, long limit) {
+      this(new KnowledgePackage[]{knowledgePackage}, null, reg, limit);
    }
 
-   protected KnowledgeSessionImpl(KnowledgePackage var1, KnowledgeSession var2, boolean var3, long var4) {
-      this(new KnowledgePackage[]{var1}, var2, var3, var4);
+   protected KnowledgeSessionImpl(KnowledgePackage knowledgePackage, KnowledgeSession parentSession, boolean reg, long limit) {
+      this(new KnowledgePackage[]{knowledgePackage}, parentSession, reg, limit);
    }
 
-   protected KnowledgeSessionImpl(KnowledgePackage[] var1, KnowledgeSession var2, boolean var3, long var4) {
-      this.a = new LogManager(var2);
-      this.b = new FactManager(var2);
-      HashMap var6 = new HashMap();
+   protected KnowledgeSessionImpl(KnowledgePackage[] knowledgePackages, KnowledgeSession parentSession, boolean reg, long limit) {
+      this.logManager = new LogManager(parentSession);
+      this.factManager = new FactManager(parentSession);
+      HashMap valuesByKey = new HashMap();
 
-      for (KnowledgePackage var10 : var1) {
-         this.a(var10);
-         var6.putAll(var10.getVariableCateogoryMap());
+      for (KnowledgePackage knowledgePackage : knowledgePackages) {
+         this.registerKnowledgePackage(knowledgePackage);
+         valuesByKey.putAll(knowledgePackage.getVariableCateogoryMap());
       }
 
-      this.initFromParentSession(var2);
-      this.c = new RuleExecution(this, var6, var3, var4);
+      this.initFromParentSession(parentSession);
+      this.ruleExecution = new RuleExecution(this, valuesByKey, reg, limit);
    }
 
-   private void a(KnowledgePackage var1) {
-      this.j.add(var1);
-      if (var1.getPredefineExecutionUnits() != null) {
-         this.i.addAll(var1.getPredefineExecutionUnits());
+   private void registerKnowledgePackage(KnowledgePackage knowledgePackage) {
+      this.knowledgePackageList.add(knowledgePackage);
+      if (knowledgePackage.getPredefineExecutionUnits() != null) {
+         this.predefineExecutionUnits.addAll(knowledgePackage.getPredefineExecutionUnits());
       }
 
-      this.h.addAll(var1.getAloneReteInstances());
-      this.h.add(var1.loadReteInstance());
-      this.b.initKnowledgePackageParameters(var1);
+      this.reteInstanceList.addAll(knowledgePackage.getAloneReteInstances());
+      this.reteInstanceList.add(knowledgePackage.loadReteInstance());
+      this.factManager.initKnowledgePackageParameters(knowledgePackage);
    }
 
    @Override
-   public void initFromParentSession(KnowledgeSession var1) {
-      if (var1 != null) {
-         this.d = var1;
-         this.g = var1.getKnowledgeSessionMap();
-         this.f.putAll(var1.getSessionValueMap());
-         AbstractWorkingMemory var2 = (AbstractWorkingMemory)var1;
-         this.e = var2.getPredefineValueMap();
+   public void initFromParentSession(KnowledgeSession parentSession) {
+      if (parentSession != null) {
+         this.knowledgeSession = parentSession;
+         this.knowledgeSessionMap = parentSession.getKnowledgeSessionMap();
+         this.sessionValueMap.putAll(parentSession.getSessionValueMap());
+         AbstractWorkingMemory abstractWorkingMemory = (AbstractWorkingMemory)parentSession;
+         this.predefineValueMap = abstractWorkingMemory.getPredefineValueMap();
       }
    }
-
    @Override
-   public boolean insert(Object var1) {
-      boolean var2 = super.insert(var1);
-      if (var1 instanceof GeneralEntity) {
-         GeneralEntity var3 = (GeneralEntity)var1;
-         Utils.assignVariableObjectDefaultValue(var3, this);
+   public boolean insert(Object fact) {
+      boolean insertResult = super.insert(fact);
+      if (fact instanceof GeneralEntity) {
+         GeneralEntity generalEntity = (GeneralEntity)fact;
+         Utils.assignVariableObjectDefaultValue(generalEntity, this);
       }
 
-      return var2;
+      return insertResult;
    }
-
    @Override
    public RuleExecutionResponse fireRules() {
-      return this.a(null, null, Integer.MAX_VALUE);
+      return this.fireRulesInternal(null, null, Integer.MAX_VALUE);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(int var1) {
-      return this.a(null, null, var1);
+   public RuleExecutionResponse fireRules(int max) {
+      return this.fireRulesInternal(null, null, max);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(AgendaFilter var1) {
-      return this.a(var1, null, Integer.MAX_VALUE);
+   public RuleExecutionResponse fireRules(AgendaFilter filter) {
+      return this.fireRulesInternal(filter, null, Integer.MAX_VALUE);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(AgendaFilter var1, int var2) {
-      return this.a(var1, null, var2);
+   public RuleExecutionResponse fireRules(AgendaFilter filter, int max) {
+      return this.fireRulesInternal(filter, null, max);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(Map<String, Object> var1) {
-      return this.a(null, var1, Integer.MAX_VALUE);
+   public RuleExecutionResponse fireRules(Map<String, Object> parameters) {
+      return this.fireRulesInternal(null, parameters, Integer.MAX_VALUE);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(Map<String, Object> var1, AgendaFilter var2) {
-      return this.a(var2, var1, Integer.MAX_VALUE);
+   public RuleExecutionResponse fireRules(Map<String, Object> parameters, AgendaFilter filter) {
+      return this.fireRulesInternal(filter, parameters, Integer.MAX_VALUE);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(Map<String, Object> var1, AgendaFilter var2, int var3) {
-      return this.a(var2, var1, var3);
+   public RuleExecutionResponse fireRules(Map<String, Object> parameters, AgendaFilter filter, int max) {
+      return this.fireRulesInternal(filter, parameters, max);
    }
-
    @Override
-   public RuleExecutionResponse fireRules(Map<String, Object> var1, int var2) {
-      return this.a(null, var1, var2);
+   public RuleExecutionResponse fireRules(Map<String, Object> parameters, int max) {
+      return this.fireRulesInternal(null, parameters, max);
    }
-
    @Override
-   public FlowExecutionResponse startProcess(String var1) {
-      return this.startProcess(var1, null);
+   public FlowExecutionResponse startProcess(String processId) {
+      return this.startProcess(processId, null);
    }
-
    @Override
-   public FlowExecutionResponse startProcess(String var1, Map<String, Object> var2) {
-      return this.c.startProcess(var1, var2);
+   public FlowExecutionResponse startProcess(String processId, Map<String, Object> parameters) {
+      return this.ruleExecution.startProcess(processId, parameters);
    }
 
-   private RuleExecutionResponse a(AgendaFilter var1, Map<String, Object> var2, int var3) {
+   private RuleExecutionResponse fireRulesInternal(AgendaFilter agendaFilter, Map<String, Object> valuesByKey, int number) {
       try {
-         return this.c.fireRules(var1, var2, var3);
-      } catch (RuleExecutionException var5) {
-         throw new RuleException(var5.getMessage());
+         return this.ruleExecution.fireRules(agendaFilter, valuesByKey, number);
+      } catch (RuleExecutionException ruleExecutionException) {
+         throw new RuleException(ruleExecutionException.getMessage());
       }
    }
 
    @Override
    public List<KnowledgePackage> getKnowledgePackageList() {
-      return this.j;
+      return this.knowledgePackageList;
    }
-
    @Override
    public void writeLogFile() throws IOException {
-      this.a.writeLog();
+      this.logManager.writeLog();
    }
 
    @Override
    public Map<String, KnowledgeSession> getKnowledgeSessionMap() {
-      return this.g;
+      return this.knowledgeSessionMap;
    }
 
    @Override
    public KnowledgeSession getParentSession() {
-      return this.d;
+      return this.knowledgeSession;
    }
 
    @Override
    public List<ReteInstance> getReteInstanceList() {
-      return this.h;
+      return this.reteInstanceList;
    }
 
    public List<PredefineExecutionUnit> getPredefineExecutionUnits() {
-      return this.i;
+      return this.predefineExecutionUnits;
    }
 }

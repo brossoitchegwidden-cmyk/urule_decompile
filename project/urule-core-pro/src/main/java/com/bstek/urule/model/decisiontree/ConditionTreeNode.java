@@ -15,39 +15,39 @@ public class ConditionTreeNode extends TreeNode {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public Op getOp() {
       return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.op = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
    public List<ConditionTreeNode> getConditionTreeNodes() {
       return this.conditionTreeNodes;
    }
 
-   public void setConditionTreeNodes(List<ConditionTreeNode> var1) {
-      this.conditionTreeNodes = var1;
+   public void setConditionTreeNodes(List<ConditionTreeNode> conditionTreeNodes) {
+      this.conditionTreeNodes = conditionTreeNodes;
    }
 
    public List<VariableTreeNode> getVariableTreeNodes() {
       return this.variableTreeNodes;
    }
 
-   public void setVariableTreeNodes(List<VariableTreeNode> var1) {
-      this.variableTreeNodes = var1;
+   public void setVariableTreeNodes(List<VariableTreeNode> variableTreeNodes) {
+      this.variableTreeNodes = variableTreeNodes;
    }
 
    public List<ActionTreeNode> getActionTreeNodes() {
       return this.actionTreeNodes;
    }
 
-   public void setActionTreeNodes(List<ActionTreeNode> var1) {
-      this.actionTreeNodes = var1;
+   public void setActionTreeNodes(List<ActionTreeNode> actionTreeNodes) {
+      this.actionTreeNodes = actionTreeNodes;
    }
 }

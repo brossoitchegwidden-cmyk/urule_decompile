@@ -17,89 +17,89 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ActionServletHandler extends ApiServletHandler {
-   public void loadMethods(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("beanId");
-      Object var4 = Utils.getApplicationContext().getBean(var3);
-      Object var5 = ProxyUtils.getTargetObject(var4);
-      ArrayList var6 = new ArrayList();
-      Method[] var7 = var5.getClass().getMethods();
+   public void loadMethods(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("beanId");
+      Object objectValue = Utils.getApplicationContext().getBean(parameter);
+      Object targetObject = ProxyUtils.getTargetObject(objectValue);
+      ArrayList items = new ArrayList();
+      Method[] methods = targetObject.getClass().getMethods();
 
-      for(Method var11 : var7) {
-         ExposeAction var12 = (ExposeAction)var11.getAnnotation(ExposeAction.class);
-         if (var12 != null) {
-            String var13 = var11.getName();
-            com.bstek.urule.model.library.action.Method var14 = new com.bstek.urule.model.library.action.Method();
-            var14.setMethodName(var13);
-            var14.setName(var12.value());
-            var14.setParameters(this.a(var11, var12.parameters()));
-            var6.add(var14);
+      for(Method method : methods) {
+         ExposeAction annotation = (ExposeAction)method.getAnnotation(ExposeAction.class);
+         if (annotation != null) {
+            String name = method.getName();
+            com.bstek.urule.model.library.action.Method method2 = new com.bstek.urule.model.library.action.Method();
+            method2.setMethodName(name);
+            method2.setName(annotation.value());
+            method2.setParameters(this.buildParameters(method, annotation.parameters()));
+            items.add(method2);
          }
       }
 
-      this.a(var2, var6);
+      this.writeObjectToJson(resp, items);
    }
 
-   private List a(Method var1, String[] var2) {
-      ArrayList var3 = new ArrayList();
-      Class[] var4 = var1.getParameterTypes();
+   private List buildParameters(Method method, String[] values) {
+      ArrayList items = new ArrayList();
+      Class[] parameterTypes = method.getParameterTypes();
 
-      for(int var5 = 0; var5 < var4.length; ++var5) {
-         Class var6 = var4[var5];
-         Parameter var7 = new Parameter();
-         if (var5 < var2.length) {
-            var7.setName(var2[var5]);
+      for(int index = 0; index < parameterTypes.length; ++index) {
+         Class valueType = parameterTypes[index];
+         Parameter parameter = new Parameter();
+         if (index < values.length) {
+            parameter.setName(values[index]);
          } else {
-            var7.setName("参数" + var5);
+            parameter.setName("参数" + index);
          }
 
-         var7.setType(this.a(var6));
-         var3.add(var7);
+         parameter.setType(this.resolveDatatype(valueType));
+         items.add(parameter);
       }
 
-      return var3;
+      return items;
    }
 
-   private Datatype a(Class var1) {
-      if (var1.equals(String.class)) {
+   private Datatype resolveDatatype(Class valueType) {
+      if (valueType.equals(String.class)) {
          return Datatype.String;
-      } else if (var1.equals(BigDecimal.class)) {
+      } else if (valueType.equals(BigDecimal.class)) {
          return Datatype.BigDecimal;
-      } else if (var1.equals(Boolean.class)) {
+      } else if (valueType.equals(Boolean.class)) {
          return Datatype.Boolean;
-      } else if (var1.equals(Boolean.class)) {
+      } else if (valueType.equals(Boolean.class)) {
          return Datatype.Boolean;
-      } else if (var1.equals(Boolean.TYPE)) {
+      } else if (valueType.equals(Boolean.TYPE)) {
          return Datatype.Boolean;
-      } else if (var1.equals(Date.class)) {
+      } else if (valueType.equals(Date.class)) {
          return Datatype.Date;
-      } else if (var1.equals(Double.class)) {
+      } else if (valueType.equals(Double.class)) {
          return Datatype.Double;
-      } else if (var1.equals(Double.TYPE)) {
+      } else if (valueType.equals(Double.TYPE)) {
          return Datatype.Double;
-      } else if (Enum.class.isAssignableFrom(var1)) {
+      } else if (Enum.class.isAssignableFrom(valueType)) {
          return Datatype.Enum;
-      } else if (var1.equals(Float.class)) {
+      } else if (valueType.equals(Float.class)) {
          return Datatype.Float;
-      } else if (var1.equals(Float.TYPE)) {
+      } else if (valueType.equals(Float.TYPE)) {
          return Datatype.Float;
-      } else if (var1.equals(Integer.class)) {
+      } else if (valueType.equals(Integer.class)) {
          return Datatype.Integer;
-      } else if (var1.equals(Integer.TYPE)) {
+      } else if (valueType.equals(Integer.TYPE)) {
          return Datatype.Integer;
-      } else if (var1.equals(Character.class)) {
+      } else if (valueType.equals(Character.class)) {
          return Datatype.Char;
-      } else if (var1.equals(Character.TYPE)) {
+      } else if (valueType.equals(Character.TYPE)) {
          return Datatype.Char;
-      } else if (List.class.isAssignableFrom(var1)) {
+      } else if (List.class.isAssignableFrom(valueType)) {
          return Datatype.List;
-      } else if (var1.equals(Long.TYPE)) {
+      } else if (valueType.equals(Long.TYPE)) {
          return Datatype.Long;
-      } else if (var1.equals(Long.class)) {
+      } else if (valueType.equals(Long.class)) {
          return Datatype.Long;
-      } else if (Map.class.isAssignableFrom(var1)) {
+      } else if (Map.class.isAssignableFrom(valueType)) {
          return Datatype.Map;
       } else {
-         return Set.class.isAssignableFrom(var1) ? Datatype.Set : Datatype.Object;
+         return Set.class.isAssignableFrom(valueType) ? Datatype.Set : Datatype.Object;
       }
    }
 

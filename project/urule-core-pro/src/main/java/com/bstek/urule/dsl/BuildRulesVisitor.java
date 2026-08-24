@@ -35,377 +35,368 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class BuildRulesVisitor extends RuleParserBaseVisitor<Object> {
-   private Map<ParseTree, Junction> a = new HashMap<>();
-   private Collection<ContextBuilder> b;
-   private CommonTokenStream c;
+   private Map<ParseTree, Junction> junctionsByParseTree = new HashMap<>();
+   private Collection<ContextBuilder> builders;
+   private CommonTokenStream tokenStream;
 
-   public BuildRulesVisitor(Collection<ContextBuilder> var1, CommonTokenStream var2) {
-      this.b = var1;
-      this.c = var2;
+   public BuildRulesVisitor(Collection<ContextBuilder> builders, CommonTokenStream tokenStream) {
+      this.builders = builders;
+      this.tokenStream = tokenStream;
    }
 
-   public RuleSet buildRuleSet(RuleParserParser$RuleSetContext var1, String var2) {
-      RuleSet var3 = this.visitRuleSet(var1);
+   public RuleSet buildRuleSet(RuleParserParser$RuleSetContext ctx, String path) {
+      RuleSet ruleSet = this.visitRuleSet(ctx);
 
-      for (Rule var5 : var3.getRules()) {
-         var5.setFile(var2);
+      for (Rule rule : ruleSet.getRules()) {
+         rule.setFile(path);
       }
 
-      return var3;
+      return ruleSet;
    }
-
-   public RuleSet visitRuleSet(RuleParserParser$RuleSetContext var1) {
-      RuleSet var2 = new RuleSet();
-      RuleParserParser$RuleSetHeaderContext var3 = var1.ruleSetHeader();
-      List var4 = var3.resource();
-      if (var4 != null) {
-         for (RuleParserParser$ResourceContext var6 : (Iterable<RuleParserParser$ResourceContext>)(Iterable<?>)(var4)) {
-            var2.addLibrary(this.visitResource(var6));
+   public RuleSet visitRuleSet(RuleParserParser$RuleSetContext ctx) {
+      RuleSet ruleSet = new RuleSet();
+      RuleParserParser$RuleSetHeaderContext ruleParserParser$RuleSetHeaderContext = ctx.ruleSetHeader();
+      List items = ruleParserParser$RuleSetHeaderContext.resource();
+      if (items != null) {
+         for (RuleParserParser$ResourceContext ruleParserParser$ResourceContext : (Iterable<RuleParserParser$ResourceContext>)(Iterable<?>)(items)) {
+            ruleSet.addLibrary(this.visitResource(ruleParserParser$ResourceContext));
          }
       }
 
-      StringBuffer var15 = null;
-      List var17 = var3.functionImport();
-      if (var17 != null) {
-         var15 = new StringBuffer();
+      StringBuffer stringBuffer = null;
+      List items2 = ruleParserParser$RuleSetHeaderContext.functionImport();
+      if (items2 != null) {
+         stringBuffer = new StringBuffer();
 
-         for (RuleParserParser$FunctionImportContext var8 : (Iterable<RuleParserParser$FunctionImportContext>)(Iterable<?>)(var17)) {
-            var15.append("import ");
-            var15.append(var8.packageDef().getText());
-            var15.append(";");
+         for (RuleParserParser$FunctionImportContext ruleParserParser$FunctionImportContext : (Iterable<RuleParserParser$FunctionImportContext>)(Iterable<?>)(items2)) {
+            stringBuffer.append("import ");
+            stringBuffer.append(ruleParserParser$FunctionImportContext.packageDef().getText());
+            stringBuffer.append(";");
          }
       }
 
-      RuleParserParser$RuleSetBodyContext var18 = var1.ruleSetBody();
-      List var19 = var18.rules();
-      if (var19 != null) {
-         ArrayList var9 = new ArrayList();
-         var2.setRules(var9);
+      RuleParserParser$RuleSetBodyContext ruleParserParser$RuleSetBodyContext = ctx.ruleSetBody();
+      List items3 = ruleParserParser$RuleSetBodyContext.rules();
+      if (items3 != null) {
+         ArrayList items4 = new ArrayList();
+         ruleSet.setRules(items4);
 
-         for (RuleParserParser$RulesContext var11 : (Iterable<RuleParserParser$RulesContext>)(Iterable<?>)(var19)) {
-            RuleParserParser$RuleDefContext var12 = var11.ruleDef();
-            if (var12 != null) {
-               Rule var13 = this.visitRuleDef(var12);
-               var9.add(var13);
+         for (RuleParserParser$RulesContext ruleParserParser$RulesContext : (Iterable<RuleParserParser$RulesContext>)(Iterable<?>)(items3)) {
+            RuleParserParser$RuleDefContext ruleParserParser$RuleDefContext = ruleParserParser$RulesContext.ruleDef();
+            if (ruleParserParser$RuleDefContext != null) {
+               Rule rule = this.visitRuleDef(ruleParserParser$RuleDefContext);
+               items4.add(rule);
             }
 
-            RuleParserParser$LoopRuleDefContext var20 = var11.loopRuleDef();
-            if (var20 != null) {
-               LoopRule var14 = this.visitLoopRuleDef(var20);
-               var9.add(var14);
+            RuleParserParser$LoopRuleDefContext ruleParserParser$LoopRuleDefContext = ruleParserParser$RulesContext.loopRuleDef();
+            if (ruleParserParser$LoopRuleDefContext != null) {
+               LoopRule loopRule = this.visitLoopRuleDef(ruleParserParser$LoopRuleDefContext);
+               items4.add(loopRule);
             }
          }
       }
 
-      return var2;
+      return ruleSet;
    }
 
-   private String a(RuleParserParser$ExpressionBodyContext var1) {
-      StringBuffer var2 = new StringBuffer();
+   private String buildFunctionBody(RuleParserParser$ExpressionBodyContext ruleParserParser$ExpressionBodyContext) {
+      StringBuffer stringBuffer = new StringBuffer();
 
-      for (ParseTree var4 : var1.children) {
-         Interval var5 = var4.getSourceInterval();
-         int var6 = var5.a;
-         List var7 = this.c.getHiddenTokensToLeft(var6);
-         if (var7 != null) {
-            Token var8 = (Token)var7.get(0);
-            String var9 = var8.getText();
-            var2.append(var9);
+      for (ParseTree parseTree : ruleParserParser$ExpressionBodyContext.children) {
+         Interval sourceInterval = parseTree.getSourceInterval();
+         int number = sourceInterval.a;
+         List hiddenTokensToLeft = this.tokenStream.getHiddenTokensToLeft(number);
+         if (hiddenTokensToLeft != null) {
+            Token token = (Token)hiddenTokensToLeft.get(0);
+            String text = token.getText();
+            stringBuffer.append(text);
          }
 
-         var2.append(var4.getText());
-         List var11 = this.c.getHiddenTokensToRight(var6);
-         if (var11 != null) {
-            Token var12 = (Token)var11.get(0);
-            String var10 = var12.getText();
-            var2.append(var10);
+         stringBuffer.append(parseTree.getText());
+         List hiddenTokensToRight = this.tokenStream.getHiddenTokensToRight(number);
+         if (hiddenTokensToRight != null) {
+            Token token2 = (Token)hiddenTokensToRight.get(0);
+            String text2 = token2.getText();
+            stringBuffer.append(text2);
          }
       }
 
-      return var2.toString();
+      return stringBuffer.toString();
    }
-
-   public Library visitResource(RuleParserParser$ResourceContext var1) {
-      return (Library)this.a(var1);
+   public Library visitResource(RuleParserParser$ResourceContext ctx) {
+      return (Library)this.doBuilder(ctx);
    }
-
-   public LoopRule visitLoopRuleDef(RuleParserParser$LoopRuleDefContext var1) {
-      SimpleDateFormat var2 = new SimpleDateFormat(Configure.getDateFormat());
-      LoopRule var3 = new LoopRule();
-      String var4 = var1.STRING().getText();
-      var4 = var4.substring(1, var4.length() - 1);
-      var3.setName(var4);
-      RuleParserParser$LoopTargetContext var5 = var1.loopTarget();
-      RuleParserParser$ComplexValueContext var6 = var5.complexValue();
-      LoopTarget var7 = new LoopTarget();
-      var7.setValue(BuildUtils.buildValue(var6));
-      var3.setLoopTarget(var7);
-      RuleParserParser$LoopStartContext var8 = var1.loopStart();
-      if (var8 != null) {
-         List var9 = var8.action();
-         if (var9 != null) {
-            LoopStart var10 = new LoopStart();
-            var10.setActions(this.a(var9));
-            var3.setLoopStart(var10);
+   public LoopRule visitLoopRuleDef(RuleParserParser$LoopRuleDefContext ctx) {
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      LoopRule loopRule = new LoopRule();
+      String text = ctx.STRING().getText();
+      text = text.substring(1, text.length() - 1);
+      loopRule.setName(text);
+      RuleParserParser$LoopTargetContext ruleParserParser$LoopTargetContext = ctx.loopTarget();
+      RuleParserParser$ComplexValueContext ruleParserParser$ComplexValueContext = ruleParserParser$LoopTargetContext.complexValue();
+      LoopTarget loopTarget = new LoopTarget();
+      loopTarget.setValue(BuildUtils.buildValue(ruleParserParser$ComplexValueContext));
+      loopRule.setLoopTarget(loopTarget);
+      RuleParserParser$LoopStartContext ruleParserParser$LoopStartContext = ctx.loopStart();
+      if (ruleParserParser$LoopStartContext != null) {
+         List items = ruleParserParser$LoopStartContext.action();
+         if (items != null) {
+            LoopStart loopStart = new LoopStart();
+            loopStart.setActions(this.buildActions(items));
+            loopRule.setLoopStart(loopStart);
          }
       }
 
-      RuleParserParser$LoopEndContext var25 = var1.loopEnd();
-      if (var25 != null) {
-         List var26 = var25.action();
-         if (var26 != null) {
-            LoopEnd var11 = new LoopEnd();
-            var11.setActions(this.a(var26));
-            var3.setLoopEnd(var11);
+      RuleParserParser$LoopEndContext ruleParserParser$LoopEndContext = ctx.loopEnd();
+      if (ruleParserParser$LoopEndContext != null) {
+         List items2 = ruleParserParser$LoopEndContext.action();
+         if (items2 != null) {
+            LoopEnd loopEnd = new LoopEnd();
+            loopEnd.setActions(this.buildActions(items2));
+            loopRule.setLoopEnd(loopEnd);
          }
       }
 
-      List var27 = var1.attribute();
-      if (var27 != null) {
-         for (RuleParserParser$AttributeContext var12 : (Iterable<RuleParserParser$AttributeContext>)(Iterable<?>)(var27)) {
-            if (var12.salienceAttribute() != null) {
-               var3.setSalience(Integer.valueOf(var12.salienceAttribute().NUMBER().getText()));
-            } else if (var12.loopAttribute() != null) {
-               var3.setLoop(Boolean.valueOf(var12.loopAttribute().Boolean().getText()));
-            } else if (var12.effectiveDateAttribute() != null) {
+      List items3 = ctx.attribute();
+      if (items3 != null) {
+         for (RuleParserParser$AttributeContext ruleParserParser$AttributeContext : (Iterable<RuleParserParser$AttributeContext>)(Iterable<?>)(items3)) {
+            if (ruleParserParser$AttributeContext.salienceAttribute() != null) {
+               loopRule.setSalience(Integer.valueOf(ruleParserParser$AttributeContext.salienceAttribute().NUMBER().getText()));
+            } else if (ruleParserParser$AttributeContext.loopAttribute() != null) {
+               loopRule.setLoop(Boolean.valueOf(ruleParserParser$AttributeContext.loopAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.effectiveDateAttribute() != null) {
                try {
-                  String var13 = var12.effectiveDateAttribute().STRING().getText();
-                  var13 = var13.substring(1, var13.length() - 1);
-                  var3.setEffectiveDate(var2.parse(var13));
-               } catch (ParseException var23) {
-                  throw new RuleException(var23);
+                  String substring = ruleParserParser$AttributeContext.effectiveDateAttribute().STRING().getText();
+                  substring = substring.substring(1, substring.length() - 1);
+                  loopRule.setEffectiveDate(simpleDateFormat.parse(substring));
+               } catch (ParseException parseException) {
+                  throw new RuleException(parseException);
                }
-            } else if (var12.expiresDateAttribute() != null) {
+            } else if (ruleParserParser$AttributeContext.expiresDateAttribute() != null) {
                try {
-                  String var32 = var12.expiresDateAttribute().STRING().getText();
-                  var32 = var32.substring(1, var32.length() - 1);
-                  var3.setExpiresDate(var2.parse(var32));
-               } catch (ParseException var22) {
-                  throw new RuleException(var22);
+                  String substring2 = ruleParserParser$AttributeContext.expiresDateAttribute().STRING().getText();
+                  substring2 = substring2.substring(1, substring2.length() - 1);
+                  loopRule.setExpiresDate(simpleDateFormat.parse(substring2));
+               } catch (ParseException parseException2) {
+                  throw new RuleException(parseException2);
                }
-            } else if (var12.enabledAttribute() != null) {
-               var3.setEnabled(Boolean.valueOf(var12.enabledAttribute().Boolean().getText()));
-            } else if (var12.debugAttribute() != null) {
-               var3.setDebug(Boolean.valueOf(var12.debugAttribute().Boolean().getText()));
-            } else if (var12.activationGroupAttribute() != null) {
-               String var34 = var12.activationGroupAttribute().STRING().getText();
-               var34 = var34.substring(1, var34.length() - 1);
-               var3.setMutexGroup(var34);
-            } else if (var12.agendaGroupAttribute() != null) {
-               String var36 = var12.agendaGroupAttribute().STRING().getText();
-               var36 = var36.substring(1, var36.length() - 1);
-               var3.setPendedGroup(var36);
-            } else if (var12.autoFocusAttribute() != null) {
-               var3.setAutoFocus(Boolean.valueOf(var12.autoFocusAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.enabledAttribute() != null) {
+               loopRule.setEnabled(Boolean.valueOf(ruleParserParser$AttributeContext.enabledAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.debugAttribute() != null) {
+               loopRule.setDebug(Boolean.valueOf(ruleParserParser$AttributeContext.debugAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.activationGroupAttribute() != null) {
+               String substring3 = ruleParserParser$AttributeContext.activationGroupAttribute().STRING().getText();
+               substring3 = substring3.substring(1, substring3.length() - 1);
+               loopRule.setMutexGroup(substring3);
+            } else if (ruleParserParser$AttributeContext.agendaGroupAttribute() != null) {
+               String substring4 = ruleParserParser$AttributeContext.agendaGroupAttribute().STRING().getText();
+               substring4 = substring4.substring(1, substring4.length() - 1);
+               loopRule.setPendedGroup(substring4);
+            } else if (ruleParserParser$AttributeContext.autoFocusAttribute() != null) {
+               loopRule.setAutoFocus(Boolean.valueOf(ruleParserParser$AttributeContext.autoFocusAttribute().Boolean().getText()));
             }
          }
       }
 
-      ArrayList var29 = new ArrayList();
-      var3.setUnits(var29);
+      ArrayList items4 = new ArrayList();
+      loopRule.setUnits(items4);
 
-      for (RuleParserParser$LoopRuleUnitContext var14 : var1.loopRuleUnit()) {
-         LoopRuleUnit var15 = new LoopRuleUnit();
-         var29.add(var15);
-         if (var14.STRING() != null) {
-            String var16 = var14.STRING().getText();
-            if (var16.length() > 2) {
-               var16 = var16.substring(1, var4.length() - 1);
-               var15.setName(var16);
+      for (RuleParserParser$LoopRuleUnitContext ruleParserParser$LoopRuleUnitContext : ctx.loopRuleUnit()) {
+         LoopRuleUnit loopRuleUnit = new LoopRuleUnit();
+         items4.add(loopRuleUnit);
+         if (ruleParserParser$LoopRuleUnitContext.STRING() != null) {
+            String substring5 = ruleParserParser$LoopRuleUnitContext.STRING().getText();
+            if (substring5.length() > 2) {
+               substring5 = substring5.substring(1, text.length() - 1);
+               loopRuleUnit.setName(substring5);
             } else {
-               var15.setName("");
+               loopRuleUnit.setName("");
             }
          }
 
-         RuleParserParser$LeftContext var40 = var14.left();
-         ParseTree var17 = var40.getChild(1);
-         Lhs var18 = new Lhs();
-         var15.setLhs(var18);
-         Criterion var19 = this.buildCriterion(var17);
-         var18.setCriterion(var19);
-         Rhs var20 = new Rhs();
-         var20.setActions(this.visitRight(var14.right()));
-         var15.setRhs(var20);
-         Other var21 = new Other();
-         var21.setActions(this.visitOther(var14.other()));
-         var15.setOther(var21);
+         RuleParserParser$LeftContext ruleParserParser$LeftContext = ruleParserParser$LoopRuleUnitContext.left();
+         ParseTree child = ruleParserParser$LeftContext.getChild(1);
+         Lhs lhs = new Lhs();
+         loopRuleUnit.setLhs(lhs);
+         Criterion criterion = this.buildCriterion(child);
+         lhs.setCriterion(criterion);
+         Rhs rhs = new Rhs();
+         rhs.setActions(this.visitRight(ruleParserParser$LoopRuleUnitContext.right()));
+         loopRuleUnit.setRhs(rhs);
+         Other other = new Other();
+         other.setActions(this.visitOther(ruleParserParser$LoopRuleUnitContext.other()));
+         loopRuleUnit.setOther(other);
       }
 
-      return var3;
+      return loopRule;
    }
-
-   public Rule visitRuleDef(RuleParserParser$RuleDefContext var1) {
-      SimpleDateFormat var2 = new SimpleDateFormat(Configure.getDateFormat());
-      Rule var3 = new Rule();
-      String var4 = var1.STRING().getText();
-      var4 = var4.substring(1, var4.length() - 1);
-      var3.setName(var4);
-      List var5 = var1.attribute();
-      if (var5 != null) {
-         for (RuleParserParser$AttributeContext var7 : (Iterable<RuleParserParser$AttributeContext>)(Iterable<?>)(var5)) {
-            if (var7.salienceAttribute() != null) {
-               var3.setSalience(Integer.valueOf(var7.salienceAttribute().NUMBER().getText()));
-            } else if (var7.loopAttribute() != null) {
-               var3.setLoop(Boolean.valueOf(var7.loopAttribute().Boolean().getText()));
-            } else if (var7.effectiveDateAttribute() != null) {
+   public Rule visitRuleDef(RuleParserParser$RuleDefContext ctx) {
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      Rule rule = new Rule();
+      String text = ctx.STRING().getText();
+      text = text.substring(1, text.length() - 1);
+      rule.setName(text);
+      List items = ctx.attribute();
+      if (items != null) {
+         for (RuleParserParser$AttributeContext ruleParserParser$AttributeContext : (Iterable<RuleParserParser$AttributeContext>)(Iterable<?>)(items)) {
+            if (ruleParserParser$AttributeContext.salienceAttribute() != null) {
+               rule.setSalience(Integer.valueOf(ruleParserParser$AttributeContext.salienceAttribute().NUMBER().getText()));
+            } else if (ruleParserParser$AttributeContext.loopAttribute() != null) {
+               rule.setLoop(Boolean.valueOf(ruleParserParser$AttributeContext.loopAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.effectiveDateAttribute() != null) {
                try {
-                  String var8 = var7.effectiveDateAttribute().STRING().getText();
-                  var8 = var8.substring(1, var8.length() - 1);
-                  var3.setEffectiveDate(var2.parse(var8));
-               } catch (ParseException var13) {
-                  throw new RuleException(var13);
+                  String substring = ruleParserParser$AttributeContext.effectiveDateAttribute().STRING().getText();
+                  substring = substring.substring(1, substring.length() - 1);
+                  rule.setEffectiveDate(simpleDateFormat.parse(substring));
+               } catch (ParseException parseException) {
+                  throw new RuleException(parseException);
                }
-            } else if (var7.expiresDateAttribute() != null) {
+            } else if (ruleParserParser$AttributeContext.expiresDateAttribute() != null) {
                try {
-                  String var18 = var7.expiresDateAttribute().STRING().getText();
-                  var18 = var18.substring(1, var18.length() - 1);
-                  var3.setExpiresDate(var2.parse(var18));
-               } catch (ParseException var12) {
-                  throw new RuleException(var12);
+                  String substring2 = ruleParserParser$AttributeContext.expiresDateAttribute().STRING().getText();
+                  substring2 = substring2.substring(1, substring2.length() - 1);
+                  rule.setExpiresDate(simpleDateFormat.parse(substring2));
+               } catch (ParseException parseException2) {
+                  throw new RuleException(parseException2);
                }
-            } else if (var7.enabledAttribute() != null) {
-               var3.setEnabled(Boolean.valueOf(var7.enabledAttribute().Boolean().getText()));
-            } else if (var7.debugAttribute() != null) {
-               var3.setDebug(Boolean.valueOf(var7.debugAttribute().Boolean().getText()));
-            } else if (var7.activationGroupAttribute() != null) {
-               String var20 = var7.activationGroupAttribute().STRING().getText();
-               var20 = var20.substring(1, var20.length() - 1);
-               var3.setMutexGroup(var20);
-            } else if (var7.agendaGroupAttribute() != null) {
-               String var22 = var7.agendaGroupAttribute().STRING().getText();
-               var22 = var22.substring(1, var22.length() - 1);
-               var3.setPendedGroup(var22);
-            } else if (var7.autoFocusAttribute() != null) {
-               var3.setAutoFocus(Boolean.valueOf(var7.autoFocusAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.enabledAttribute() != null) {
+               rule.setEnabled(Boolean.valueOf(ruleParserParser$AttributeContext.enabledAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.debugAttribute() != null) {
+               rule.setDebug(Boolean.valueOf(ruleParserParser$AttributeContext.debugAttribute().Boolean().getText()));
+            } else if (ruleParserParser$AttributeContext.activationGroupAttribute() != null) {
+               String substring3 = ruleParserParser$AttributeContext.activationGroupAttribute().STRING().getText();
+               substring3 = substring3.substring(1, substring3.length() - 1);
+               rule.setMutexGroup(substring3);
+            } else if (ruleParserParser$AttributeContext.agendaGroupAttribute() != null) {
+               String substring4 = ruleParserParser$AttributeContext.agendaGroupAttribute().STRING().getText();
+               substring4 = substring4.substring(1, substring4.length() - 1);
+               rule.setPendedGroup(substring4);
+            } else if (ruleParserParser$AttributeContext.autoFocusAttribute() != null) {
+               rule.setAutoFocus(Boolean.valueOf(ruleParserParser$AttributeContext.autoFocusAttribute().Boolean().getText()));
             }
          }
       }
 
-      RuleParserParser$LeftContext var15 = var1.left();
-      ParseTree var16 = var15.getChild(1);
-      Lhs var24 = new Lhs();
-      var3.setLhs(var24);
-      Criterion var9 = this.buildCriterion(var16);
-      var24.setCriterion(var9);
-      Rhs var10 = new Rhs();
-      var10.setActions(this.visitRight(var1.right()));
-      var3.setRhs(var10);
-      Other var11 = new Other();
-      var11.setActions(this.visitOther(var1.other()));
-      var3.setOther(var11);
-      return var3;
+      RuleParserParser$LeftContext ruleParserParser$LeftContext = ctx.left();
+      ParseTree child = ruleParserParser$LeftContext.getChild(1);
+      Lhs lhs = new Lhs();
+      rule.setLhs(lhs);
+      Criterion criterion = this.buildCriterion(child);
+      lhs.setCriterion(criterion);
+      Rhs rhs = new Rhs();
+      rhs.setActions(this.visitRight(ctx.right()));
+      rule.setRhs(rhs);
+      Other other = new Other();
+      other.setActions(this.visitOther(ctx.other()));
+      rule.setOther(other);
+      return rule;
    }
-
-   public Criteria visitSingleCondition(RuleParserParser$SingleConditionContext var1) {
-      return (Criteria)this.a(var1);
+   public Criteria visitSingleCondition(RuleParserParser$SingleConditionContext ctx) {
+      return (Criteria)this.doBuilder(ctx);
    }
-
-   public Criterion visitParenConditions(RuleParserParser$ParenConditionsContext var1) {
-      ParseTree var2 = var1.getChild(1);
-      return this.buildCriterion(var2);
+   public Criterion visitParenConditions(RuleParserParser$ParenConditionsContext ctx) {
+      ParseTree child = ctx.getChild(1);
+      return this.buildCriterion(child);
    }
+   public Criterion visitMultiConditions(RuleParserParser$MultiConditionsContext ctx) {
+      Junction junction = null;
+      Criterion criterion = null;
+      Junction junction2 = this.junctionsByParseTree.get(ctx);
+      int childCount = ctx.getChildCount();
 
-   public Criterion visitMultiConditions(RuleParserParser$MultiConditionsContext var1) {
-      Junction var2 = null;
-      Criterion var3 = null;
-      Junction var4 = this.a.get(var1);
-      int var5 = var1.getChildCount();
-
-      for (int var6 = 0; var6 < var5; var6++) {
-         ParseTree var7 = var1.getChild(var6);
-         if (var7 instanceof RuleParserParser$JoinContext) {
-            RuleParserParser$JoinContext var8 = (RuleParserParser$JoinContext)var7;
-            if (var8.AND() != null) {
-               if (var4 == null) {
-                  var4 = new And();
-                  var2 = var4;
-                  var4.addCriterion(var3);
-               } else if (!(var4 instanceof And)) {
-                  And var9 = new And();
-                  var4.addCriterion(var9);
-                  var4 = var9;
+      for (int index = 0; index < childCount; index++) {
+         ParseTree child = ctx.getChild(index);
+         if (child instanceof RuleParserParser$JoinContext) {
+            RuleParserParser$JoinContext ruleParserParser$JoinContext = (RuleParserParser$JoinContext)child;
+            if (ruleParserParser$JoinContext.AND() != null) {
+               if (junction2 == null) {
+                  junction2 = new And();
+                  junction = junction2;
+                  junction2.addCriterion(criterion);
+               } else if (!(junction2 instanceof And)) {
+                  And and = new And();
+                  junction2.addCriterion(and);
+                  junction2 = and;
                }
-            } else if (var4 == null) {
-               var4 = new Or();
-               var2 = var4;
-               var4.addCriterion(var3);
-            } else if (!(var4 instanceof Or)) {
-               Or var11 = new Or();
-               var4.addCriterion(var11);
-               var4 = var11;
+            } else if (junction2 == null) {
+               junction2 = new Or();
+               junction = junction2;
+               junction2.addCriterion(criterion);
+            } else if (!(junction2 instanceof Or)) {
+               Or or = new Or();
+               junction2.addCriterion(or);
+               junction2 = or;
             }
          } else {
-            boolean var10 = false;
-            if (var7 instanceof RuleParserParser$MultiConditionsContext) {
-               var10 = true;
+            boolean flag = false;
+            if (child instanceof RuleParserParser$MultiConditionsContext) {
+               flag = true;
             }
 
-            if (var4 != null && var10) {
-               this.a.put(var7, var4);
+            if (junction2 != null && flag) {
+               this.junctionsByParseTree.put(child, junction2);
             }
 
-            var3 = this.buildCriterion(var7);
-            if (var4 != null && !var10) {
-               var4.addCriterion(var3);
+            criterion = this.buildCriterion(child);
+            if (junction2 != null && !flag) {
+               junction2.addCriterion(criterion);
             }
          }
       }
 
-      return var2 != null ? var2 : var3;
+      return junction != null ? junction : criterion;
    }
-
-   public List<Action> visitRight(RuleParserParser$RightContext var1) {
-      if (var1 != null && var1.action() != null) {
-         List var2 = var1.action();
-         return this.a(var2);
+   public List<Action> visitRight(RuleParserParser$RightContext ctx) {
+      if (ctx != null && ctx.action() != null) {
+         List items = ctx.action();
+         return this.buildActions(items);
       } else {
          return null;
       }
    }
 
-   private List<Action> a(List<RuleParserParser$ActionContext> var1) {
-      ArrayList var2 = new ArrayList();
+   private List<Action> buildActions(List<RuleParserParser$ActionContext> ruleParserParser$ActionContexts) {
+      ArrayList items = new ArrayList();
 
-      for (RuleParserParser$ActionContext var4 : var1) {
-         Action var5 = (Action)this.a(var4);
-         var2.add(var5);
+      for (RuleParserParser$ActionContext ruleParserParser$ActionContext : ruleParserParser$ActionContexts) {
+         Action action = (Action)this.doBuilder(ruleParserParser$ActionContext);
+         items.add(action);
       }
 
-      return var2;
+      return items;
    }
+   public List<Action> visitOther(RuleParserParser$OtherContext ctx) {
+      if (ctx != null && ctx.action() != null) {
+         ArrayList visitOtherResult = new ArrayList();
 
-   public List<Action> visitOther(RuleParserParser$OtherContext var1) {
-      if (var1 != null && var1.action() != null) {
-         ArrayList var2 = new ArrayList();
-
-         for (RuleParserParser$ActionContext var4 : var1.action()) {
-            Action var5 = (Action)this.a(var4);
-            var2.add(var5);
+         for (RuleParserParser$ActionContext ruleParserParser$ActionContext : ctx.action()) {
+            Action action = (Action)this.doBuilder(ruleParserParser$ActionContext);
+            visitOtherResult.add(action);
          }
 
-         return var2;
+         return visitOtherResult;
       } else {
          return null;
       }
    }
 
-   public Criterion buildCriterion(ParseTree var1) {
-      Criterion var2 = null;
-      if (var1 instanceof RuleParserParser$ParenConditionsContext) {
-         var2 = this.visitParenConditions((RuleParserParser$ParenConditionsContext)var1);
-      } else if (var1 instanceof RuleParserParser$SingleConditionContext) {
-         var2 = this.visitSingleCondition((RuleParserParser$SingleConditionContext)var1);
-      } else if (var1 instanceof RuleParserParser$MultiConditionsContext) {
-         var2 = this.visitMultiConditions((RuleParserParser$MultiConditionsContext)var1);
+   public Criterion buildCriterion(ParseTree parseTree) {
+      Criterion criterion = null;
+      if (parseTree instanceof RuleParserParser$ParenConditionsContext) {
+         criterion = this.visitParenConditions((RuleParserParser$ParenConditionsContext)parseTree);
+      } else if (parseTree instanceof RuleParserParser$SingleConditionContext) {
+         criterion = this.visitSingleCondition((RuleParserParser$SingleConditionContext)parseTree);
+      } else if (parseTree instanceof RuleParserParser$MultiConditionsContext) {
+         criterion = this.visitMultiConditions((RuleParserParser$MultiConditionsContext)parseTree);
       }
 
-      return var2;
+      return criterion;
    }
 
-   private Object a(ParserRuleContext var1) {
-      for (ContextBuilder var3 : this.b) {
-         if (var3.support(var1)) {
-            return var3.build(var1);
+   private Object doBuilder(ParserRuleContext parserRuleContext) {
+      for (ContextBuilder contextBuilder : this.builders) {
+         if (contextBuilder.support(parserRuleContext)) {
+            return contextBuilder.build(parserRuleContext);
          }
       }
 

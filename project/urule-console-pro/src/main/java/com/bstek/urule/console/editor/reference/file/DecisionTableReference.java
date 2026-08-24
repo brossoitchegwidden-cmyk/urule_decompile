@@ -12,12 +12,12 @@ public class DecisionTableReference extends Reference {
    protected DecisionTableReference() {
    }
 
-   public boolean exist(Object var1, Long var2) {
-      DecisionTable var3 = (DecisionTable)var1;
-      List var4 = var3.getLibraries();
-      if (var4 != null) {
-         for(Library var6 : (Iterable<Library>)(Iterable<?>)(var4)) {
-            if (var6.getId() == var2) {
+   public boolean exist(Object obj, Long fileId) {
+      DecisionTable decisionTable = (DecisionTable)obj;
+      List libraries = decisionTable.getLibraries();
+      if (libraries != null) {
+         for(Library library : (Iterable<Library>)(Iterable<?>)(libraries)) {
+            if (library.getId() == fileId) {
                return true;
             }
          }
@@ -26,27 +26,27 @@ public class DecisionTableReference extends Reference {
       return false;
    }
 
-   public FileReference build(Object var1) {
-      DecisionTable var2 = (DecisionTable)var1;
-      FileReference var3 = new FileReference();
-      var3.setType(ResourceType.DecisionTable);
-      ArrayList var4 = new ArrayList();
-      var3.setChildren(var4);
-      FileReference var5 = this.b(var2.getLibraries());
-      if (var5 != null) {
-         var4.add(var5);
+   public FileReference build(Object obj) {
+      DecisionTable decisionTable = (DecisionTable)obj;
+      FileReference fileReference = new FileReference();
+      fileReference.setType(ResourceType.DecisionTable);
+      ArrayList items = new ArrayList();
+      fileReference.setChildren(items);
+      FileReference fileReference2 = this.buildLibraryReferences(decisionTable.getLibraries());
+      if (fileReference2 != null) {
+         items.add(fileReference2);
       }
 
-      Map var6 = var2.getCellMap();
-      List var7 = this.a(var6);
-      if (var7 != null) {
-         var4.addAll(var7);
+      Map cellMap = decisionTable.getCellMap();
+      List items2 = this.buildActionReferences(cellMap);
+      if (items2 != null) {
+         items.addAll(items2);
       }
 
-      return var3;
+      return fileReference;
    }
 
-   public boolean support(Object var1) {
-      return var1 instanceof DecisionTable;
+   public boolean support(Object obj) {
+      return obj instanceof DecisionTable;
    }
 }

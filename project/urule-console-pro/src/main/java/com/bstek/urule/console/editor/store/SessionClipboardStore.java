@@ -6,58 +6,58 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionClipboardStore implements ClipboardStore {
-   private Map a = new HashMap();
+   private Map clipboardsBySessionId = new HashMap();
 
    protected SessionClipboardStore() {
    }
 
-   public void set(String var1, String var2) {
-      this.a();
-      String var3 = RequestHolder.getRequest().getSession().getId();
-      ObjectData var4 = null;
-      if (this.a.containsKey(var3)) {
-         var4 = (ObjectData)this.a.get(var3);
+   public void set(String key, String value) {
+      this.initializeState();
+      String id = RequestHolder.getRequest().getSession().getId();
+      ObjectData objectData = null;
+      if (this.clipboardsBySessionId.containsKey(id)) {
+         objectData = (ObjectData)this.clipboardsBySessionId.get(id);
       } else {
-         var4 = new ObjectData();
-         this.a.put(var3, var4);
+         objectData = new ObjectData();
+         this.clipboardsBySessionId.put(id, objectData);
       }
 
-      var4.putObject(var1, var2);
+      objectData.putObject(key, value);
    }
 
-   public String get(String var1) {
-      this.a();
-      String var2 = RequestHolder.getRequest().getSession().getId();
-      if (this.a.containsKey(var2)) {
-         ObjectData var3 = (ObjectData)this.a.get(var2);
-         return var3.getObject(var1);
+   public String get(String key) {
+      this.initializeState();
+      String id = RequestHolder.getRequest().getSession().getId();
+      if (this.clipboardsBySessionId.containsKey(id)) {
+         ObjectData objectData = (ObjectData)this.clipboardsBySessionId.get(id);
+         return objectData.getObject(key);
       } else {
          return null;
       }
    }
 
-   public void remove(String var1) {
-      this.a();
-      String var2 = RequestHolder.getRequest().getSession().getId();
-      if (this.a.containsKey(var2)) {
-         ObjectData var3 = (ObjectData)this.a.get(var2);
-         var3.removeObject(var1);
+   public void remove(String key) {
+      this.initializeState();
+      String id = RequestHolder.getRequest().getSession().getId();
+      if (this.clipboardsBySessionId.containsKey(id)) {
+         ObjectData objectData = (ObjectData)this.clipboardsBySessionId.get(id);
+         objectData.removeObject(key);
       }
 
    }
 
-   private void a() {
-      ArrayList var1 = new ArrayList();
+   private void initializeState() {
+      ArrayList items = new ArrayList();
 
-      for(String var3 : (Iterable<String>)(Iterable<?>)(this.a.keySet())) {
-         ObjectData var4 = (ObjectData)this.a.get(var3);
-         if (var4.overdue()) {
-            var1.add(var3);
+      for(String text : (Iterable<String>)(Iterable<?>)(this.clipboardsBySessionId.keySet())) {
+         ObjectData objectData = (ObjectData)this.clipboardsBySessionId.get(text);
+         if (objectData.overdue()) {
+            items.add(text);
          }
       }
 
-      for(String var6 : (Iterable<String>)(Iterable<?>)(var1)) {
-         this.a.remove(var6);
+      for(String text2 : (Iterable<String>)(Iterable<?>)(items)) {
+         this.clipboardsBySessionId.remove(text2);
       }
 
    }

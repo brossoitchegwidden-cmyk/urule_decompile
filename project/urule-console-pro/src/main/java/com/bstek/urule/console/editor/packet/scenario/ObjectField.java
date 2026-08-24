@@ -4,59 +4,59 @@ import com.bstek.urule.model.library.Datatype;
 import com.bstek.urule.model.rule.Op;
 
 public class ObjectField {
-   private String a;
-   private String b;
-   private String c;
-   private Datatype d;
-   private Op e;
+   private String name;
+   private String label;
+   private String value;
+   private Datatype datatype;
+   private Op op;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.b;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.b = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public String getValue() {
-      return this.c;
+      return this.value;
    }
 
-   public void setValue(String var1) {
-      this.c = var1;
+   public void setValue(String value) {
+      this.value = value;
    }
 
    public Datatype getDatatype() {
-      return this.d;
+      return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.d = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    public Op getOp() {
-      return this.e;
+      return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.e = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
    public String toString() {
-      String var1 = "{name=" + this.a + ", label=" + this.b + ", value=" + this.c;
-      if (this.e != null) {
-         var1 = var1 + ", op=" + this.e;
+      String toStringResult = "{name=" + this.name + ", label=" + this.label + ", value=" + this.value;
+      if (this.op != null) {
+         toStringResult = toStringResult + ", op=" + this.op;
       }
 
-      var1 = var1 + "}";
-      return var1;
+      toStringResult = toStringResult + "}";
+      return toStringResult;
    }
 }

@@ -5,24 +5,24 @@ import com.bstek.urule.console.config.manager.JNDIConfigManager;
 import com.bstek.urule.console.config.manager.JdbcConfigManager;
 
 public class ConfigureManagerFactory {
-   public static ConfigManager initConfigManager(ApplicationConfig var0) {
-      Object var1 = null;
-      String var2 = var0.getConfigType();
-      ConfigType var3 = ConfigType.valueOf(var2);
-      if (var3 != ConfigType.embed && var3 != ConfigType.jdbc) {
-         if (var3 == ConfigType.connection) {
-            var1 = new ConnectionConfigManager(var0);
-         } else if (var3 == ConfigType.jndi) {
-            var1 = new JNDIConfigManager(var0);
+   public static ConfigManager initConfigManager(ApplicationConfig applicationConfig) {
+      Object objectValue = null;
+      String configType = applicationConfig.getConfigType();
+      ConfigType configType2 = ConfigType.valueOf(configType);
+      if (configType2 != ConfigType.embed && configType2 != ConfigType.jdbc) {
+         if (configType2 == ConfigType.connection) {
+            objectValue = new ConnectionConfigManager(applicationConfig);
+         } else if (configType2 == ConfigType.jndi) {
+            objectValue = new JNDIConfigManager(applicationConfig);
          }
       } else {
-         var1 = new JdbcConfigManager(var0);
+         objectValue = new JdbcConfigManager(applicationConfig);
       }
 
-      if (var1 == null) {
-         var1 = new JdbcConfigManager(var0);
+      if (objectValue == null) {
+         objectValue = new JdbcConfigManager(applicationConfig);
       }
 
-      return (ConfigManager)var1;
+      return (ConfigManager)objectValue;
    }
 }

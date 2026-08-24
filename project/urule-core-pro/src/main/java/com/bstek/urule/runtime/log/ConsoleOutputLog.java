@@ -4,24 +4,21 @@ import com.bstek.urule.Utils;
 import java.math.BigDecimal;
 
 public class ConsoleOutputLog extends DataLog {
-   private static final String b = "控制台输出：%s";
-   private static final String c = "Print: %s";
-
-   public ConsoleOutputLog(Object var1) {
-      var1 = this.a(var1);
-      String var2 = this.a() ? "Print: %s" : "控制台输出：%s";
-      var1 = var1 == null ? "null" : var1.toString();
-      this.a = "☢☢☢" + String.format(var2, var1);
+   public ConsoleOutputLog(Object content) {
+      content = this.normalizeDisplayValue(content);
+      String text = this.isEnglishLanguage() ? "Print: %s" : "控制台输出：%s";
+      content = content == null ? "null" : content.toString();
+      this.msg = "☢☢☢" + String.format(text, content);
    }
 
-   private Object a(Object var1) {
-      if (var1 == null) {
-         return var1;
-      } else if (var1 instanceof Number) {
-         BigDecimal var2 = Utils.toBigDecimal(var1);
-         return var2.stripTrailingZeros().toPlainString();
+   private Object normalizeDisplayValue(Object objectValue) {
+      if (objectValue == null) {
+         return objectValue;
+      } else if (objectValue instanceof Number) {
+         BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+         return decimalValue.stripTrailingZeros().toPlainString();
       } else {
-         return var1;
+         return objectValue;
       }
    }
 }

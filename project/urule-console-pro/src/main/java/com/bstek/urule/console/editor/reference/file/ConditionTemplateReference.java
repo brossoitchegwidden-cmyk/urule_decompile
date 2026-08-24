@@ -11,12 +11,12 @@ public class ConditionTemplateReference extends Reference {
    protected ConditionTemplateReference() {
    }
 
-   public boolean exist(Object var1, Long var2) {
-      ConditionTemplate var3 = (ConditionTemplate)var1;
-      List var4 = var3.getLibraries();
-      if (var4 != null) {
-         for(Library var6 : (Iterable<Library>)(Iterable<?>)(var4)) {
-            if (var6.getId() == var2) {
+   public boolean exist(Object obj, Long fileId) {
+      ConditionTemplate conditionTemplate = (ConditionTemplate)obj;
+      List libraries = conditionTemplate.getLibraries();
+      if (libraries != null) {
+         for(Library library : (Iterable<Library>)(Iterable<?>)(libraries)) {
+            if (library.getId() == fileId) {
                return true;
             }
          }
@@ -25,21 +25,21 @@ public class ConditionTemplateReference extends Reference {
       return false;
    }
 
-   public FileReference build(Object var1) {
-      ConditionTemplate var2 = (ConditionTemplate)var1;
-      FileReference var3 = new FileReference();
-      ArrayList var4 = new ArrayList();
-      var3.setChildren(var4);
-      var3.setType(ResourceType.ConditionTemplate);
-      FileReference var5 = this.b(var2.getLibraries());
-      if (var5 != null) {
-         var4.add(var5);
+   public FileReference build(Object obj) {
+      ConditionTemplate conditionTemplate = (ConditionTemplate)obj;
+      FileReference fileReference = new FileReference();
+      ArrayList items = new ArrayList();
+      fileReference.setChildren(items);
+      fileReference.setType(ResourceType.ConditionTemplate);
+      FileReference fileReference2 = this.buildLibraryReferences(conditionTemplate.getLibraries());
+      if (fileReference2 != null) {
+         items.add(fileReference2);
       }
 
-      return var3;
+      return fileReference;
    }
 
-   public boolean support(Object var1) {
-      return var1 instanceof ConditionTemplate;
+   public boolean support(Object obj) {
+      return obj instanceof ConditionTemplate;
    }
 }

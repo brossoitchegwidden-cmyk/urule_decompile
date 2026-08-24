@@ -7,34 +7,30 @@ import com.bstek.urule.runtime.WorkingMemory;
 
 public class UpdateFactFunctionDescriptor implements FunctionDescriptor {
    private boolean disabled = false;
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("要更新的对象");
-      var1.setEname("Object");
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("要更新的对象");
+      argument.setEname("Object");
+      return argument;
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      if (var1 instanceof String) {
-         String var4 = (String)var1;
-         if (!var4.equals("参数") && !var4.equals("parameter")) {
-            throw new RuleException("Unsupport parameter[" + var4 + "].");
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      if (object instanceof String) {
+         String text = (String)object;
+         if (!text.equals("参数") && !text.equals("parameter")) {
+            throw new RuleException("Unsupport parameter[" + text + "].");
          } else {
-            return var3.update(var3.getParameters());
+            return workingMemory.update(workingMemory.getParameters());
          }
       } else {
-         return var3.update(var1);
+         return workingMemory.update(object);
       }
    }
-
    @Override
    public String getName() {
       return "UpdateFact";
    }
-
    @Override
    public String getLabel() {
       return "更新工作区对象";
@@ -45,7 +41,7 @@ public class UpdateFactFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
 }

@@ -2,159 +2,160 @@ package com.bstek.urule.console.database.model;
 
 import java.util.Date;
 
+/**知识包执行日志*/
 public class KnowledgeLog extends URuleLog {
-   private static final long a = 1L;
-   private Long b;
-   private String c;
-   private String d;
-   private Long e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private Long k;
-   private String l;
-   private String m;
-   private String n;
-   private Date o;
-   private Date p;
+   private static final long serialVersionUID = 1L;
+   private Long knowledgeId;
+   private String knowledgeName;
+   private String version;
+   private Long time;
+   private String inParams;
+   private String outParams;
+   private String logs;
+   private String groupId;
+   private String groupName;
+   private Long projectId;
+   private String projectName;
+   private String userAgent;
+   private String ip;
+   private Date startTime;
+   private Date endTime;
 
    public String getUserAgent() {
-      return this.m;
+      return this.userAgent;
    }
 
-   public void setUserAgent(String var1) {
-      this.m = var1;
+   public void setUserAgent(String userAgent) {
+      this.userAgent = userAgent;
    }
 
    public String getIp() {
-      return this.n;
+      return this.ip;
    }
 
-   public void setIp(String var1) {
-      this.n = var1;
+   public void setIp(String ip) {
+      this.ip = ip;
    }
 
    public String getVersion() {
-      return this.d;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.d = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getKnowledgeName() {
-      return this.c;
+      return this.knowledgeName;
    }
 
-   public void setKnowledgeId(Long var1) {
-      this.b = var1;
+   public void setKnowledgeId(Long knowledgeId) {
+      this.knowledgeId = knowledgeId;
    }
 
    public Long getKnowledgeId() {
-      return this.b;
+      return this.knowledgeId;
    }
 
-   public void setKnowledgeName(String var1) {
-      this.c = var1;
+   public void setKnowledgeName(String knowledgeName) {
+      this.knowledgeName = knowledgeName;
    }
 
    public Long getTime() {
-      return this.e;
+      return this.time;
    }
 
-   public void setTime(Long var1) {
-      this.e = var1;
+   public void setTime(Long time) {
+      this.time = time;
    }
 
    public String getInParams() {
-      return this.f;
+      return this.inParams;
    }
 
-   public void setInParams(String var1) {
-      this.f = var1;
+   public void setInParams(String inParams) {
+      this.inParams = inParams;
    }
 
    public String getOutParams() {
-      return this.g;
+      return this.outParams;
    }
 
-   public void setOutParams(String var1) {
-      this.g = var1;
+   public void setOutParams(String outParams) {
+      this.outParams = outParams;
    }
 
    public String getLogs() {
-      return this.h;
+      return this.logs;
    }
 
-   public void setLogs(String var1) {
-      this.h = var1;
+   public void setLogs(String logs) {
+      this.logs = logs;
    }
 
    public Long getProjectId() {
-      return this.k;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.k = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public String getGroupId() {
-      return this.i;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.i = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public Date getStartTime() {
-      return this.o;
+      return this.startTime;
    }
 
-   public void setStartTime(Date var1) {
-      this.o = var1;
+   public void setStartTime(Date startTime) {
+      this.startTime = startTime;
    }
 
    public Date getEndTime() {
-      return this.p;
+      return this.endTime;
    }
 
-   public void setEndTime(Date var1) {
-      this.p = var1;
+   public void setEndTime(Date endTime) {
+      this.endTime = endTime;
    }
 
    public String getGroupName() {
-      return this.j;
+      return this.groupName;
    }
 
-   public void setGroupName(String var1) {
-      this.j = var1;
+   public void setGroupName(String groupName) {
+      this.groupName = groupName;
    }
 
    public String getProjectName() {
-      return this.l;
+      return this.projectName;
    }
 
-   public void setProjectName(String var1) {
-      this.l = var1;
+   public void setProjectName(String projectName) {
+      this.projectName = projectName;
    }
 
    public String toString() {
-      StringBuilder var1 = new StringBuilder();
-      var1.append(this.getClass().getSimpleName());
-      var1.append(" [");
-      var1.append("Hash = ").append(this.hashCode());
-      var1.append(", id=").append(this.getId());
-      var1.append(", username=").append(this.getUsername());
-      var1.append(", ip=").append(this.n);
-      var1.append(", userAgent=").append(this.m);
-      var1.append(", knowledge=").append(this.c);
-      var1.append(", time=").append(this.e);
-      var1.append(", createDate=").append(this.getCreateDate());
-      var1.append(", projectId=").append(this.k);
-      var1.append(", serialVersionUID=").append(1L);
-      var1.append("]");
-      return var1.toString();
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append(this.getClass().getSimpleName());
+      stringBuilder.append(" [");
+      stringBuilder.append("Hash = ").append(this.hashCode());
+      stringBuilder.append(", id=").append(this.getId());
+      stringBuilder.append(", username=").append(this.getUsername());
+      stringBuilder.append(", ip=").append(this.ip);
+      stringBuilder.append(", userAgent=").append(this.userAgent);
+      stringBuilder.append(", knowledge=").append(this.knowledgeName);
+      stringBuilder.append(", time=").append(this.time);
+      stringBuilder.append(", createDate=").append(this.getCreateDate());
+      stringBuilder.append(", projectId=").append(this.projectId);
+      stringBuilder.append(", serialVersionUID=").append(1L);
+      stringBuilder.append("]");
+      return stringBuilder.toString();
    }
 }

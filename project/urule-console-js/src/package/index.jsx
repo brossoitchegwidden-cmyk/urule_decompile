@@ -11,10 +11,11 @@ import thunk from 'redux-thunk';
 import reducer from './reducer.js';
 import PackageEditor from './components/PackageEditor.jsx';
 import * as action from './action.js';
+import {getParameter} from '../Utils.js';
 
 $(document).ready(function(){
     const store=createStore(reducer,applyMiddleware(thunk));
-    const project=_getParameter("file");
+    const project=getParameter("file");
     store.dispatch(action.loadMasterData(project));
     ReactDOM.render(
         <Provider store={store}>
@@ -23,9 +24,3 @@ $(document).ready(function(){
         document.getElementById('container')
     );
 });
-function _getParameter(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null)return unescape(r[2]);
-    return null;
-};

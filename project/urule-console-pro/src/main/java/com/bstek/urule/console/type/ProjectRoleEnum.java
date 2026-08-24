@@ -14,13 +14,13 @@ public enum ProjectRoleEnum {
    ConditionTemplate("条件模版管理员"),
    ActionTemplate("动作模版管理员");
 
-   private String a;
+   private String name;
 
-   private ProjectRoleEnum(String var3) {
-      this.a = var3;
+   private ProjectRoleEnum(String text) {
+      this.name = text;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 }

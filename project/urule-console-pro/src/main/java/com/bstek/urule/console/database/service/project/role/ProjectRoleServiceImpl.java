@@ -11,75 +11,69 @@ import com.bstek.urule.console.type.GroupRoleEnum;
 import java.util.ArrayList;
 import java.util.List;
 
+/**项目角色服务类*/
 public class ProjectRoleServiceImpl implements ProjectRoleService {
-   public List loadRoles(long var1) {
-      return ProjectRoleManager.ins.loadRoles(var1);
+   public List loadRoles(long projectId) {
+      return ProjectRoleManager.ins.loadRoles(projectId);
    }
-
-   public void add(ProjectRole var1) {
-      if (ProjectRoleManager.ins.checkExist(var1.getProjectId(), var1.getName())) {
+   public void add(ProjectRole role) {
+      if (ProjectRoleManager.ins.checkExist(role.getProjectId(), role.getName())) {
          throw new InfoException("Duplicate role name!");
       } else {
-         ProjectRoleManager.ins.add(var1);
+         ProjectRoleManager.ins.add(role);
       }
    }
-
-   public void update(ProjectRole var1) {
-      if (ProjectRoleManager.ins.checkExist(var1.getProjectId(), var1.getName())) {
+   public void update(ProjectRole role) {
+      if (ProjectRoleManager.ins.checkExist(role.getProjectId(), role.getName())) {
          throw new InfoException("Duplicate role name!");
       } else {
-         ProjectRoleManager.ins.update(var1);
+         ProjectRoleManager.ins.update(role);
       }
    }
-
-   public void remove(Long var1) {
-      ProjectRoleManager.ins.remove(var1);
+   public void remove(Long id) {
+      ProjectRoleManager.ins.remove(id);
    }
-
-   public void addUserRole(long var1, String var3, long var4) {
-      if (ProjectRoleManager.ins.getUserRole(var3, var4) == null) {
-         ProjectRoleManager.ins.addUserRole(var1, var3, var4);
+   public void addUserRole(long projectId, String userId, long roleId) {
+      if (ProjectRoleManager.ins.getUserRole(userId, roleId) == null) {
+         ProjectRoleManager.ins.addUserRole(projectId, userId, roleId);
       }
 
    }
-
-   public void removeUserRole(String var1, long var2) {
-      ProjectRoleManager.ins.removeUserRole(var1, var2);
+   public void removeUserRole(String userId, long roleId) {
+      ProjectRoleManager.ins.removeUserRole(userId, roleId);
    }
+   public List loadUserRoles(long projectId, String account) {
+      List roles = ProjectRoleManager.ins.loadRoles(projectId);
+      List userRoles = ProjectRoleManager.ins.loadUserRoles(projectId, account);
+      ArrayList userRoles2 = new ArrayList();
 
-   public List loadUserRoles(long var1, String var3) {
-      List var4 = ProjectRoleManager.ins.loadRoles(var1);
-      List var5 = ProjectRoleManager.ins.loadUserRoles(var1, var3);
-      ArrayList var6 = new ArrayList();
+      for(Role role : (Iterable<Role>)(Iterable<?>)(roles)) {
+         if (!role.getName().equals(GroupRoleEnum.Owner.name())) {
+            ProjectRoleVO projectRoleVO = new ProjectRoleVO();
+            projectRoleVO.setId(role.getId());
+            projectRoleVO.setName(role.getName());
+            projectRoleVO.setType(role.getType());
+            projectRoleVO.setProjectId(projectId);
 
-      for(Role var8 : (Iterable<Role>)(Iterable<?>)(var4)) {
-         if (!var8.getName().equals(GroupRoleEnum.Owner.name())) {
-            ProjectRoleVO var9 = new ProjectRoleVO();
-            var9.setId(var8.getId());
-            var9.setName(var8.getName());
-            var9.setType(var8.getType());
-            var9.setProjectId(var1);
-
-            for(Role var11 : (Iterable<Role>)(Iterable<?>)(var5)) {
-               if (var11.getId() == var8.getId()) {
-                  var9.setSelected(true);
+            for(Role role2 : (Iterable<Role>)(Iterable<?>)(userRoles)) {
+               if (role2.getId() == role.getId()) {
+                  projectRoleVO.setSelected(true);
                   break;
                }
             }
 
-            var6.add(var9);
+            userRoles2.add(projectRoleVO);
          }
       }
 
-      return var6;
+      return userRoles2;
    }
+   public List users(long projectId, long roleId) {
+      List roleUsers = ProjectRoleManager.ins.loadRoleUsers(projectId, roleId);
+      ArrayList items = new ArrayList();
 
-   public List users(long var1, long var3) {
-      List var5 = ProjectRoleManager.ins.loadRoleUsers(var1, var3);
-      ArrayList var6 = new ArrayList();
-
-      for(User var8 : (Iterable<User>)(Iterable<?>)(var5)) {
-         var6.add(UserServiceManager.getUserService().get(var8.getId()));
+      for(User user : (Iterable<User>)(Iterable<?>)(roleUsers)) {
+         items.add(UserServiceManager.getUserService().get(user.getId()));
       }
 
       return null;

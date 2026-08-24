@@ -5,7 +5,7 @@ import com.bstek.urule.model.rule.ValueType;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface ValueDeserializer {
-   Value deserialize(JsonNode var1);
+   Value deserialize(JsonNode jsonNode);
 
-   boolean support(ValueType var1);
+   boolean support(ValueType type);
 }

@@ -8,25 +8,35 @@ import java.util.List;
 public interface ProjectManager {
    ProjectManagerImpl ins = new ProjectManagerImpl();
 
-   List getProjectsByGroupId(String var1);
+   /**根据团队ID获取对应的项目*/
+   List getProjectsByGroupId(String groupId);
 
-   void add(Project var1);
+   /**新建项目*/
+   void add(Project project);
 
-   void update(Project var1);
+   /**更新项目*/
+   void update(Project project);
 
-   void remove(long var1);
+   /**删除项目*/
+   void remove(long id);
 
-   Project get(long var1);
+   /**获取项目*/
+   Project get(long id);
 
-   void addProjectUser(long var1, String var3, String var4);
+   /**添加项目用户*/
+   void addProjectUser(long id, String account, String username);
 
-   void removeProjectUser(long var1, String var3);
+   /**移除项目用户*/
+   void removeProjectUser(long id, String account);
 
-   void removeProjectUsers(long var1);
+   /**删除项目的所有用户*/
+   void removeProjectUsers(long id);
 
-   String getApproveUser(long var1, ApplyType var3);
+   /**获取审批用户*/
+   String getApproveUser(long id, ApplyType type);
 
-   void updateApproveUser(long var1, ApplyType var3, String var4);
+   /**更新审批用户*/
+   void updateApproveUser(long id, ApplyType type, String account);
 
    ProjectQuery newQuery();
 

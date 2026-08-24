@@ -10,195 +10,195 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectQueryImpl implements ProjectQuery {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private List h = new ArrayList();
+   private String userId;
+   private String name;
+   private String nameLike;
+   private String type;
+   private String groupId;
+   private String createDateOrder;
+   private String nameOrder;
+   private List queryParameters = new ArrayList();
 
    public List listIds() {
-      Connection var1 = JdbcUtils.getConnection();
-      String var2 = "select ID_ from URULE_PROJECT";
-      StringBuilder var3 = this.b();
-      if (var3.length() > 0) {
-         var2 = var2 + " where" + var3.toString();
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select ID_ from URULE_PROJECT";
+      StringBuilder stringBuilder = this.buildQueryConditions();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      ArrayList var7;
+      ArrayList listIdsResult;
       try {
-         PreparedStatement var4 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.h, var4);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            var5.add(var6.getLong("ID_"));
+         while(resultSet.next()) {
+            items.add(resultSet.getLong("ID_"));
          }
 
-         JdbcUtils.closeStatement(var4);
-         var7 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeStatement(preparedStatement);
+         listIdsResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listIdsResult;
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
-      String var2 = "select ID_, NAME_, TYPE_, DESC_, GROUP_ID_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_ from URULE_PROJECT";
-      StringBuilder var3 = this.b();
-      if (var3.length() > 0) {
-         var2 = var2 + " where" + var3.toString();
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select ID_, NAME_, TYPE_, DESC_, GROUP_ID_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_ from URULE_PROJECT";
+      StringBuilder stringBuilder = this.buildQueryConditions();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      StringBuilder var4 = this.a();
-      if (var4.length() > 0) {
-         var2 = var2 + " order by" + var4.toString();
+      StringBuilder stringBuilder2 = this.buildOrderByClause();
+      if (stringBuilder2.length() > 0) {
+         text = text + " order by" + stringBuilder2.toString();
       }
 
-      ArrayList var14;
+      ArrayList listResult;
       try {
-         PreparedStatement var5 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.h, var5);
-         ArrayList var6 = new ArrayList();
-         ResultSet var7 = var5.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var7.next()) {
-            Project var8 = new Project();
-            var8.setId(var7.getLong("ID_"));
-            var8.setName(var7.getString("NAME_"));
-            var8.setType(var7.getString("TYPE_"));
-            var8.setDesc(var7.getString("DESC_"));
-            var8.setGroupId(var7.getString("GROUP_ID_"));
-            var8.setCreateUser(var7.getString("CREATE_USER_"));
-            var8.setCreateDate(var7.getTimestamp("CREATE_DATE_"));
-            var8.setUpdateUser(var7.getString("UPDATE_USER_"));
-            var8.setUpdateDate(var7.getTimestamp("UPDATE_DATE_"));
-            var6.add(var8);
+         while(resultSet.next()) {
+            Project project = new Project();
+            project.setId(resultSet.getLong("ID_"));
+            project.setName(resultSet.getString("NAME_"));
+            project.setType(resultSet.getString("TYPE_"));
+            project.setDesc(resultSet.getString("DESC_"));
+            project.setGroupId(resultSet.getString("GROUP_ID_"));
+            project.setCreateUser(resultSet.getString("CREATE_USER_"));
+            project.setCreateDate(resultSet.getTimestamp("CREATE_DATE_"));
+            project.setUpdateUser(resultSet.getString("UPDATE_USER_"));
+            project.setUpdateDate(resultSet.getTimestamp("UPDATE_DATE_"));
+            items.add(project);
          }
 
-         JdbcUtils.closeStatement(var5);
-         var14 = var6;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return listResult;
    }
 
-   private StringBuilder a() {
-      StringBuilder var1 = new StringBuilder();
-      if (this.f != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildOrderByClause() {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.createDateOrder != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" CREATE_DATE_ ").append(this.f);
+         stringBuilder.append(" CREATE_DATE_ ").append(this.createDateOrder);
       }
 
-      if (this.g != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.nameOrder != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ ").append(this.g);
+         stringBuilder.append(" NAME_ ").append(this.nameOrder);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   private StringBuilder b() {
-      this.h.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildQueryConditions() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.name != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ = ?");
-         this.h.add(this.b);
+         stringBuilder.append(" NAME_ = ?");
+         this.queryParameters.add(this.name);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.nameLike != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ like ?");
-         this.h.add("%" + this.c + "%");
+         stringBuilder.append(" NAME_ like ?");
+         this.queryParameters.add("%" + this.nameLike + "%");
       }
 
-      if (this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.type != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" TYPE_=?");
-         this.h.add(this.d);
+         stringBuilder.append(" TYPE_=?");
+         this.queryParameters.add(this.type);
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.groupId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" GROUP_ID_=?");
-         this.h.add(this.e);
+         stringBuilder.append(" GROUP_ID_=?");
+         this.queryParameters.add(this.groupId);
       }
 
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.userId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" (CREATE_USER_=? or ID_ in (select PROJECT_ID_ from URULE_PROJECT_USER where USER_ID_=?)) ");
-         this.h.add(this.a);
-         this.h.add(this.a);
+         stringBuilder.append(" (CREATE_USER_=? or ID_ in (select PROJECT_ID_ from URULE_PROJECT_USER where USER_ID_=?)) ");
+         this.queryParameters.add(this.userId);
+         this.queryParameters.add(this.userId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public ProjectQuery name(String var1) {
-      this.b = var1;
+   public ProjectQuery name(String name) {
+      this.name = name;
       return this;
    }
 
-   public ProjectQuery nameLike(String var1) {
-      this.c = var1;
+   public ProjectQuery nameLike(String name) {
+      this.nameLike = name;
       return this;
    }
 
-   public ProjectQuery type(String var1) {
-      this.d = var1;
+   public ProjectQuery type(String type) {
+      this.type = type;
       return this;
    }
 
-   public ProjectQuery groupId(String var1) {
-      this.e = var1;
+   public ProjectQuery groupId(String groupId) {
+      this.groupId = groupId;
       return this;
    }
 
-   public ProjectQuery orderbyCreateDate(String var1) {
-      this.f = var1;
+   public ProjectQuery orderbyCreateDate(String asc) {
+      this.createDateOrder = asc;
       return this;
    }
 
-   public ProjectQuery orderbyName(String var1) {
-      this.g = var1;
+   public ProjectQuery orderbyName(String asc) {
+      this.nameOrder = asc;
       return this;
    }
 
-   public ProjectQuery userId(String var1) {
-      this.a = var1;
+   public ProjectQuery userId(String userId) {
+      this.userId = userId;
       return this;
    }
 }

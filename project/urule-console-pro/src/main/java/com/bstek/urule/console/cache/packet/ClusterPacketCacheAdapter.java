@@ -5,17 +5,24 @@ import java.util.List;
 public interface ClusterPacketCacheAdapter {
    String BEAN_ID = "urule.clusterPacketCacheAdapter";
 
-   void putPacket(long var1, PacketData var3);
+   /**缓存知识包*/
+   void putPacket(long id, PacketData pd);
 
-   void putPacket(String var1, PacketData var2);
+   /**缓存知识包*/
+   void putPacket(String code, PacketData pd);
 
-   void remove(long var1);
+   /**根据id删除知识包*/
+   void remove(long id);
 
-   void remove(String var1);
+   /**根据code删除知识包*/
+   void remove(String code);
 
-   List refreshPacket(String var1, long var2);
+   /**重新加载知识包,知识包审批通过时触发*/
+   List refreshPacket(String groupId, long packetId);
 
-   List recacheAllPackets(String var1);
+   /**将缓存中的知识包清除，重新加载所有发布的知识包, 客户端团队缓存刷新时触发*/
+   List recacheAllPackets(String groupId);
 
-   List removeProject(String var1, long var2, List var4);
+   /**项目删除时,清除缓存中该项目下的所有知识包*/
+   List removeProject(String groupId, long projectId, List list);
 }

@@ -23,54 +23,55 @@ import java.util.Map;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class PacketCacheImpl implements PacketCache {
-   private ClusterPacketCacheAdapter a = null;
-   private ClientPacketCacheAdapter b = null;
-   private MemoryPacketCache c = new MemoryPacketCache();
+   private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PacketCacheImpl.class.getName());
+   private ClusterPacketCacheAdapter defaultClusterPacketCacheAdapter = null;
+   private ClientPacketCacheAdapter clientPacketCacheAdapter = null;
+   private MemoryPacketCache memoryPacketCache = new MemoryPacketCache();
 
    protected PacketCacheImpl() {
-      this.b();
+      this.initializeState();
 
       try {
-         this.a = (ClusterPacketCacheAdapter)Utils.getApplicationContext().getBean("urule.clusterPacketCacheAdapter");
-      } catch (NoSuchBeanDefinitionException var3) {
-         this.a = new DefaultClusterPacketCacheAdapter();
+         this.defaultClusterPacketCacheAdapter = (ClusterPacketCacheAdapter)Utils.getApplicationContext().getBean("urule.clusterPacketCacheAdapter");
+      } catch (NoSuchBeanDefinitionException noSuchBeanDefinitionException) {
+         this.defaultClusterPacketCacheAdapter = new DefaultClusterPacketCacheAdapter();
       }
 
       try {
-         this.b = (ClientPacketCacheAdapter)Utils.getApplicationContext().getBean("urule.clientPacketCacheAdapter");
-      } catch (NoSuchBeanDefinitionException var2) {
-         this.b = new DefaultClientPacketCacheAdapter();
+         this.clientPacketCacheAdapter = (ClientPacketCacheAdapter)Utils.getApplicationContext().getBean("urule.clientPacketCacheAdapter");
+      } catch (NoSuchBeanDefinitionException noSuchBeanDefinitionException2) {
+         this.clientPacketCacheAdapter = new DefaultClientPacketCacheAdapter();
       }
 
-      this.a();
+      this.syncMemoryCacheToCluster();
    }
 
-   private void a() {
-      Map var1 = this.c.getPacketIdMap();
+   private void syncMemoryCacheToCluster() {
+      Map packetIdMap = this.memoryPacketCache.getPacketIdMap();
 
-      for(Long var3 : (Iterable<Long>)(Iterable<?>)(var1.keySet())) {
-         PacketData var4 = (PacketData)var1.get(var3);
-         this.a.putPacket(var3, var4);
-         String var5 = var4.getPacket().getCode();
-         if (StringUtils.isNotBlank(var5)) {
-            this.a.putPacket(var5, var4);
+      for(Long longValue : (Iterable<Long>)(Iterable<?>)(packetIdMap.keySet())) {
+         PacketData packetData = (PacketData)packetIdMap.get(longValue);
+         this.defaultClusterPacketCacheAdapter.putPacket(longValue, packetData);
+         String code = packetData.getPacket().getCode();
+         if (StringUtils.isNotBlank(code)) {
+            this.defaultClusterPacketCacheAdapter.putPacket(code, packetData);
          }
       }
 
    }
 
    public ClientPacketCacheAdapter getClientPacketCacheAdapter() {
-      return this.b;
+      return this.clientPacketCacheAdapter;
    }
 
-   private void b() {
-      for(PacketDeploy var3 : (Iterable<PacketDeploy>)(Iterable<?>)(PacketDeployManager.ins.newQuery().enable(true).listWithContent())) {
-         Packet var4 = PacketManager.ins.load(var3.getPacketId());
-         if (var4 != null && var4.isEnable()) {
+   private void initializeState() {
+      for(PacketDeploy packetDeploy : (Iterable<PacketDeploy>)(Iterable<?>)(PacketDeployManager.ins.newQuery().enable(true).listWithContent())) {
+         Packet packet = PacketManager.ins.load(packetDeploy.getPacketId());
+         if (packet != null && packet.isEnable()) {
             try {
-               this.a(var3);
-            } catch (DeserializeException var6) {
-               System.out.println("Packet deserialize error, packetId:" + var3.getPacketId() + ", deployId:" + var3.getId());
+               this.cacheDeployedPacket(packetDeploy);
+            } catch (DeserializeException deserializeException) {
+               LOGGER.log(java.util.logging.Level.SEVERE, "Packet deserialize error, packetId:" + packetDeploy.getPacketId() + ", deployId:" + packetDeploy.getId(), deserializeException);
             }
          }
       }
@@ -78,163 +79,165 @@ public class PacketCacheImpl implements PacketCache {
       this.cacheUploadPacketPackage((Long)null);
    }
 
+   /**将缓存中的知识包清除，重新加载所有发布的知识包，此方法不在接口中声明*/
    public void doRecacheAllPackets() {
-      this.c.clear();
-      this.b();
+      this.memoryPacketCache.clear();
+      this.initializeState();
    }
 
-   public List recacheAllPackets(String var1) {
+   /**将缓存中的知识包清除，重新加载所有发布的知识包，并通知集群中的其它服务器执行同样操作，此方法不在接口中声明*/
+   public List recacheAllPackets(String groupId) {
       this.doRecacheAllPackets();
       IDGenerator.getInstance().clean();
-      List var2 = this.a.recacheAllPackets(var1);
-      this.a();
-      return var2;
+      List recacheAllPacketsResult = this.defaultClusterPacketCacheAdapter.recacheAllPackets(groupId);
+      this.syncMemoryCacheToCluster();
+      return recacheAllPacketsResult;
+   }
+   public PacketData getPacket(String code) {
+      return this.memoryPacketCache.getPacket(code);
+   }
+   public PacketData getPacket(long id) {
+      return this.memoryPacketCache.getPacket(id);
    }
 
-   public PacketData getPacket(String var1) {
-      return this.c.getPacket(var1);
+   public void removePacket(long id) {
+      this.doRemovePacket(id);
+      this.defaultClusterPacketCacheAdapter.remove(id);
    }
 
-   public PacketData getPacket(long var1) {
-      return this.c.getPacket(var1);
+   public void doRemovePacket(long id) {
+      this.memoryPacketCache.remove(id);
    }
 
-   public void removePacket(long var1) {
-      this.doRemovePacket(var1);
-      this.a.remove(var1);
+   public void removePacket(String code) {
+      this.doRemovePacket(code);
+      this.defaultClusterPacketCacheAdapter.remove(code);
    }
 
-   public void doRemovePacket(long var1) {
-      this.c.remove(var1);
+   public void doRemovePacket(String code) {
+      this.memoryPacketCache.remove(code);
    }
 
-   public void removePacket(String var1) {
-      this.doRemovePacket(var1);
-      this.a.remove(var1);
-   }
-
-   public void doRemovePacket(String var1) {
-      this.c.remove(var1);
-   }
-
-   public void refreshPacketConfig(long var1) {
-      PacketData var3 = this.getPacket(var1);
-      if (var3 != null) {
-         Packet var4 = PacketManager.ins.load(var1);
-         PacketData var5 = new PacketData(var4, var3.getKnowledgePackageWrapper());
-         this.c.putPacket(var1, var5);
-         String var6 = var4.getCode();
-         if (StringUtils.isNotBlank(var6)) {
-            this.c.putPacket(var6, var5);
+   public void refreshPacketConfig(long id) {
+      PacketData packet = this.getPacket(id);
+      if (packet != null) {
+         Packet packet2 = PacketManager.ins.load(id);
+         PacketData packetData = new PacketData(packet2, packet.getKnowledgePackageWrapper());
+         this.memoryPacketCache.putPacket(id, packetData);
+         String code = packet2.getCode();
+         if (StringUtils.isNotBlank(code)) {
+            this.memoryPacketCache.putPacket(code, packetData);
          }
 
-         String var7 = null;
+         String parameter = null;
          if (RequestHolder.getRequest() != null) {
-            var7 = RequestHolder.getRequest().getParameter("groupId");
+            parameter = RequestHolder.getRequest().getParameter("groupId");
          }
 
-         this.a.refreshPacket(var7, var1);
+         this.defaultClusterPacketCacheAdapter.refreshPacket(parameter, id);
       }
    }
 
-   public List refreshPacket(long var1) {
-      String var3 = null;
+   public List refreshPacket(long id) {
+      String parameter = null;
       if (RequestHolder.getRequest() != null) {
-         var3 = RequestHolder.getRequest().getParameter("groupId");
+         parameter = RequestHolder.getRequest().getParameter("groupId");
       }
 
-      this.doReloadPacket(var1);
-      return this.a.refreshPacket(var3, var1);
+      this.doReloadPacket(id);
+      return this.defaultClusterPacketCacheAdapter.refreshPacket(parameter, id);
    }
 
-   public Packet doReloadPacket(long var1) {
-      Packet var3 = PacketManager.ins.load(var1);
-      if (var3 == null) {
-         throw new RuleException("packet package:" + var1 + " not exist!");
-      } else if (!var3.isEnable()) {
-         this.c.remove(var1);
-         String var7 = var3.getCode();
-         if (StringUtils.isNotBlank(var7)) {
-            this.c.remove(var7);
+   /**此方法专用于集群服务器更新知识包使用,不在接口中声明*/
+   public Packet doReloadPacket(long id) {
+      Packet packet = PacketManager.ins.load(id);
+      if (packet == null) {
+         throw new RuleException("packet package:" + id + " not exist!");
+      } else if (!packet.isEnable()) {
+         this.memoryPacketCache.remove(id);
+         String code = packet.getCode();
+         if (StringUtils.isNotBlank(code)) {
+            this.memoryPacketCache.remove(code);
          }
 
-         return var3;
+         return packet;
       } else {
-         SimpleDateFormat var4 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-         List var5 = PacketDeployManager.ins.newQuery().packetId(var1).enable(true).listWithContent();
-         if (var5.size() > 0) {
-            PacketDeploy var6 = (PacketDeploy)var5.get(0);
-            this.a(var6);
-            System.out.println("[" + var4.format(new Date()) + "] Successfully reload file packet package:" + var1);
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+         List items = PacketDeployManager.ins.newQuery().packetId(id).enable(true).listWithContent();
+         if (items.size() > 0) {
+            PacketDeploy packetDeploy = (PacketDeploy)items.get(0);
+            this.cacheDeployedPacket(packetDeploy);
+            LOGGER.info("[" + simpleDateFormat.format(new Date()) + "] Successfully reloaded file packet package: " + id);
          } else {
-            this.cacheUploadPacketPackage(var1);
-            System.out.println("[" + var4.format(new Date()) + "] Successfully reload upload packet package:" + var1);
+            this.cacheUploadPacketPackage(id);
+            LOGGER.info("[" + simpleDateFormat.format(new Date()) + "] Successfully reloaded uploaded packet package: " + id);
          }
 
-         return var3;
+         return packet;
       }
    }
 
-   public List removeProject(long var1, String var3) {
-      ArrayList var4 = new ArrayList();
-      List var5 = this.doRemoveProjectPackets(var1);
-      return (List)(var5.size() == 0 ? var4 : this.a.removeProject(var3, var1, var5));
+   public List removeProject(long projectId, String groupId) {
+      ArrayList items = new ArrayList();
+      List items2 = this.doRemoveProjectPackets(projectId);
+      return (List)(items2.size() == 0 ? items : this.defaultClusterPacketCacheAdapter.removeProject(groupId, projectId, items2));
    }
 
-   public List doRemoveProjectPackets(long var1) {
-      ArrayList var3 = new ArrayList();
-      ArrayList var4 = new ArrayList();
-      Map var5 = this.c.getPacketCodeMap();
+   /**此方法专用于集群服务器更新知识包使用,不在接口中声明*/
+   public List doRemoveProjectPackets(long projectId) {
+      ArrayList doRemoveProjectPacketsResult = new ArrayList();
+      ArrayList items = new ArrayList();
+      Map packetCodeMap = this.memoryPacketCache.getPacketCodeMap();
 
-      for(String var7 : (Iterable<String>)(Iterable<?>)(var5.keySet())) {
-         PacketData var8 = (PacketData)var5.get(var7);
-         if (var8.getPacket().getProjectId() == var1) {
-            var4.add(var7);
-            var3.add(var8.getPacket());
+      for(String text : (Iterable<String>)(Iterable<?>)(packetCodeMap.keySet())) {
+         PacketData packetData = (PacketData)packetCodeMap.get(text);
+         if (packetData.getPacket().getProjectId() == projectId) {
+            items.add(text);
+            doRemoveProjectPacketsResult.add(packetData.getPacket());
          }
       }
 
-      for(PacketConfig var11 : (Iterable<PacketConfig>)(Iterable<?>)(var3)) {
-         this.c.remove(var11.getId());
+      for(PacketConfig packetConfig : (Iterable<PacketConfig>)(Iterable<?>)(doRemoveProjectPacketsResult)) {
+         this.memoryPacketCache.remove(packetConfig.getId());
       }
 
-      for(String var12 : (Iterable<String>)(Iterable<?>)(var4)) {
-         this.c.remove(var12);
+      for(String text2 : (Iterable<String>)(Iterable<?>)(items)) {
+         this.memoryPacketCache.remove(text2);
       }
 
-      return var3;
+      return doRemoveProjectPacketsResult;
    }
 
-   public void cacheUploadPacketPackage(Long var1) {
-      PacketQuery var2 = PacketManager.ins.newQuery();
-      if (var1 != null) {
-         var2.id(var1);
+   public void cacheUploadPacketPackage(Long packetId) {
+      PacketQuery packetQuery = PacketManager.ins.newQuery();
+      if (packetId != null) {
+         packetQuery.id(packetId);
       }
 
-      for(Packet var5 : (Iterable<Packet>)(Iterable<?>)(var2.enable(true).typeLike("upload").list())) {
-         PacketPackage var6 = PacketPackageManager.ins.loadByPacketId(var5.getId());
-         if (var6 != null) {
-            String var7 = PacketPackageManager.ins.loadContent(var6.getId());
-            if (!StringUtils.isBlank(var7)) {
-               boolean var8 = true;
-               KnowledgePackageWrapper var9 = null;
-               if (var1 == null) {
+      for(Packet packet : (Iterable<Packet>)(Iterable<?>)(packetQuery.enable(true).typeLike("upload").list())) {
+         PacketPackage byPacketId = PacketPackageManager.ins.loadByPacketId(packet.getId());
+         if (byPacketId != null) {
+            String content = PacketPackageManager.ins.loadContent(byPacketId.getId());
+            if (!StringUtils.isBlank(content)) {
+               boolean flag = true;
+               KnowledgePackageWrapper knowledgePackageWrapper = null;
+               if (packetId == null) {
                   try {
-                     var9 = Utils.stringToKnowledgePackageWrapper(var7);
-                  } catch (DeserializeException var11) {
-                     var8 = false;
-                     System.out.println("Packet deserialize error, packetId:" + var6.getPacketId() + ", deployId:" + var6.getId());
+                     knowledgePackageWrapper = Utils.stringToKnowledgePackageWrapper(content);
+                  } catch (DeserializeException deserializeException) {
+                     flag = false;
+                     LOGGER.log(java.util.logging.Level.SEVERE, "Packet deserialize error, packetId:" + byPacketId.getPacketId() + ", deployId:" + byPacketId.getId(), deserializeException);
                   }
                } else {
-                  var9 = Utils.stringToKnowledgePackageWrapper(var7);
+                  knowledgePackageWrapper = Utils.stringToKnowledgePackageWrapper(content);
                }
 
-               if (var8 && var9 != null) {
-                  KnowledgePackageImpl var10 = (KnowledgePackageImpl)var9.getKnowledgePackage();
-                  var10.setPackageInfo(String.valueOf(var5.getId()));
-                  var10.setMonitor(var5.isAuditEnable());
-                  var10.setTimestamp(var5.getUpdateDate().getTime());
-                  this.a(var5, var9);
+               if (flag && knowledgePackageWrapper != null) {
+                  KnowledgePackageImpl knowledgePackage = (KnowledgePackageImpl)knowledgePackageWrapper.getKnowledgePackage();
+                  knowledgePackage.setPackageInfo(String.valueOf(packet.getId()));
+                  knowledgePackage.setMonitor(packet.isAuditEnable());
+                  knowledgePackage.setTimestamp(packet.getUpdateDate().getTime());
+                  this.cachePacket(packet, knowledgePackageWrapper);
                }
             }
          }
@@ -242,36 +245,35 @@ public class PacketCacheImpl implements PacketCache {
 
    }
 
-   public List enableClientsPacket(String var1, long var2) {
-      return this.b.enableClientsPacket(var1, var2);
+   public List enableClientsPacket(String groupId, long packetId) {
+      return this.clientPacketCacheAdapter.enableClientsPacket(groupId, packetId);
    }
 
-   public List disableClientsPacket(String var1, long var2) {
-      return this.b.disableClientsPacket(var1, var2);
+   public List disableClientsPacket(String groupId, long packetId) {
+      return this.clientPacketCacheAdapter.disableClientsPacket(groupId, packetId);
    }
 
-   private void a(PacketDeploy var1) {
-      KnowledgePackageWrapper var2 = Utils.stringToKnowledgePackageWrapper(var1.getContent());
-      KnowledgePackageImpl var3 = (KnowledgePackageImpl)var2.getKnowledgePackage();
-      Packet var4 = PacketManager.ins.load(var1.getPacketId());
-      var3.setVersion(var1.getVersion());
-      var3.setPackageInfo(String.valueOf(var4.getId()));
-      var3.setMonitor(var4.isAuditEnable());
-      var3.setTimestamp(var4.getUpdateDate().getTime());
-      this.a(var4, var2);
+   private void cacheDeployedPacket(PacketDeploy packetDeploy) {
+      KnowledgePackageWrapper knowledgePackageWrapper = Utils.stringToKnowledgePackageWrapper(packetDeploy.getContent());
+      KnowledgePackageImpl knowledgePackage = (KnowledgePackageImpl)knowledgePackageWrapper.getKnowledgePackage();
+      Packet packet = PacketManager.ins.load(packetDeploy.getPacketId());
+      knowledgePackage.setVersion(packetDeploy.getVersion());
+      knowledgePackage.setPackageInfo(String.valueOf(packet.getId()));
+      knowledgePackage.setMonitor(packet.isAuditEnable());
+      knowledgePackage.setTimestamp(packet.getUpdateDate().getTime());
+      this.cachePacket(packet, knowledgePackageWrapper);
    }
 
-   private void a(Packet var1, KnowledgePackageWrapper var2) {
-      PacketData var3 = new PacketData(var1, var2);
-      this.c.putPacket(var1.getId(), var3);
-      String var4 = var1.getCode();
-      if (StringUtils.isNotBlank(var4)) {
-         this.c.putPacket(var4, var3);
+   private void cachePacket(Packet packet, KnowledgePackageWrapper knowledgePackageWrapper) {
+      PacketData packetData = new PacketData(packet, knowledgePackageWrapper);
+      this.memoryPacketCache.putPacket(packet.getId(), packetData);
+      String code = packet.getCode();
+      if (StringUtils.isNotBlank(code)) {
+         this.memoryPacketCache.putPacket(code, packetData);
       }
 
    }
-
-   public byte[] getKnowledgeContent(long var1) {
-      return this.c.getKnowledgeWrapper(var1);
+   public byte[] getKnowledgeContent(long id) {
+      return this.memoryPacketCache.getKnowledgeWrapper(id);
    }
 }

@@ -3,19 +3,19 @@ package com.bstek.urule.console.util;
 import java.io.InputStream;
 
 public class UploadFile {
-   private String a;
-   private InputStream b;
+   private String name;
+   private InputStream inputStream;
 
-   public UploadFile(String var1, InputStream var2) {
-      this.a = var1;
-      this.b = var2;
+   public UploadFile(String name, InputStream inputStream) {
+      this.name = name;
+      this.inputStream = inputStream;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
    public InputStream getInputStream() {
-      return this.b;
+      return this.inputStream;
    }
 }

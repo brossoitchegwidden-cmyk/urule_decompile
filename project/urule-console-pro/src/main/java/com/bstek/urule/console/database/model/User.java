@@ -8,121 +8,121 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class User {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private Date f;
-   private boolean g;
-   private String h;
-   private Date i;
-   private String j;
-   private Date k;
-   private String l;
-   private List m;
+   private String id;
+   private String name;
+   private String password;
+   private String email;
+   private String secretKey;
+   private Date expirDate;
+   private boolean enable;
+   private String desc;
+   private Date createDate;
+   private String createUser;
+   private Date updateDate;
+   private String updateUser;
+   private List groups;
 
    public String getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(String var1) {
-      this.a = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getPassword() {
-      return this.c;
+      return this.password;
    }
 
-   public void setPassword(String var1) {
-      this.c = var1;
+   public void setPassword(String password) {
+      this.password = password;
    }
 
    public boolean isEnable() {
-      return this.g;
+      return this.enable;
    }
 
-   public void setEnable(boolean var1) {
-      this.g = var1;
+   public void setEnable(boolean enable) {
+      this.enable = enable;
    }
 
    public String getDesc() {
-      return this.h;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.h = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public Date getCreateDate() {
-      return this.i;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.i = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.k;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.k = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getEmail() {
-      return this.d;
+      return this.email;
    }
 
-   public void setEmail(String var1) {
-      this.d = var1;
+   public void setEmail(String email) {
+      this.email = email;
    }
 
    public String getSecretKey() {
-      return this.e;
+      return this.secretKey;
    }
 
-   public void setSecretKey(String var1) {
-      this.e = var1;
+   public void setSecretKey(String secretKey) {
+      this.secretKey = secretKey;
    }
 
    public Date getExpirDate() {
-      return this.f;
+      return this.expirDate;
    }
 
-   public void setExpirDate(Date var1) {
-      this.f = var1;
+   public void setExpirDate(Date expirDate) {
+      this.expirDate = expirDate;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.l;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.l = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public List getGroups() {
-      return this.m;
+      return this.groups;
    }
 
-   public void setGroups(List var1) {
-      this.m = var1;
+   public void setGroups(List groups) {
+      this.groups = groups;
    }
 }

@@ -6,29 +6,29 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class NRadicalMathParser extends MathParser {
-   public NRadicalMathParser(ValueParser var1) {
-      super(var1);
+   public NRadicalMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
-   public MathSign parse(Element var1) {
-      NRadicalMath var2 = new NRadicalMath();
+   public MathSign parse(Element element) {
+      NRadicalMath nRadicalMath = new NRadicalMath();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("power")) {
-               var2.setPower(this.a(var5));
-            } else if (var5.getName().equals("value")) {
-               var2.setValue(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("power")) {
+               nRadicalMath.setPower(this.parseValue(element2));
+            } else if (element2.getName().equals("value")) {
+               nRadicalMath.setValue(this.parseValue(element2));
             }
          }
       }
 
-      return var2;
+      return nRadicalMath;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("nradical-sign");
+   public boolean support(String name) {
+      return name.equals("nradical-sign");
    }
 }

@@ -26,3 +26,14 @@ This project mirrored that skeleton into src/ as the restore target.
 1) Use webpack.config.js entry to map each bundle to its entry file.
 2) Diff src/_decompiled/<bundle>/module_*.js vs reference named files, backfill.
 3) If sourcemap build is available, use source-map to restore named source.
+
+## Development checks
+
+```powershell
+npm test
+npm run build
+```
+
+`npm test` covers shared URL, date, XML-escaping and theme-style behavior.
+The build output under `dist/legacy/` is generated reference material and is not
+the production asset source.

@@ -7,13 +7,17 @@ import java.sql.SQLException;
 public interface KnowledgeLogManager {
    KnowledgeLogManager ins = new KnowledgeLogManagerImpl();
 
-   void add(KnowledgeLog var1);
+   /**新增日志*/
+   void add(KnowledgeLog log);
 
-   void addBatch(PreparedStatement var1, KnowledgeLog var2) throws SQLException;
+   /**新增日志*/
+   void addBatch(PreparedStatement stmt, KnowledgeLog log) throws SQLException;
 
-   void removeByGroupId(String var1);
+   /**删除用户对应的日志*/
+   void removeByGroupId(String groupId);
 
-   void removeByProject(Long var1);
+   /**删除项目对应的日志*/
+   void removeByProject(Long projectId);
 
    KnowledgeLogQuery newQuery();
 

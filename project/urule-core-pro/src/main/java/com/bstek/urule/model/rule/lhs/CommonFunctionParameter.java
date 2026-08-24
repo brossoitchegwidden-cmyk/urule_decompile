@@ -27,39 +27,39 @@ public class CommonFunctionParameter {
       return this.id;
    }
 
-   public void setObjectParameter(Value var1) {
-      this.objectParameter = var1;
+   public void setObjectParameter(Value objectParameter) {
+      this.objectParameter = objectParameter;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getEname() {
       return this.ename;
    }
 
-   public void setEname(String var1) {
-      this.ename = var1;
+   public void setEname(String ename) {
+      this.ename = ename;
    }
 
    public String getProperty() {
       return this.property;
    }
 
-   public void setProperty(String var1) {
-      this.property = var1;
+   public void setProperty(String property) {
+      this.property = property;
    }
 
    public String getPropertyLabel() {
       return this.propertyLabel;
    }
 
-   public void setPropertyLabel(String var1) {
-      this.propertyLabel = var1;
+   public void setPropertyLabel(String propertyLabel) {
+      this.propertyLabel = propertyLabel;
    }
 }

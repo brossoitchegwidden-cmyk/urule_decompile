@@ -4,51 +4,51 @@ import java.io.InputStream;
 import java.net.URL;
 
 public class ClassLoaderWrapper {
-   ClassLoader a;
-   ClassLoader b;
+   ClassLoader defaultClassLoader;
+   ClassLoader systemClassLoader;
 
    ClassLoaderWrapper() {
       try {
-         this.b = ClassLoader.getSystemClassLoader();
-      } catch (SecurityException var2) {
+         this.systemClassLoader = ClassLoader.getSystemClassLoader();
+      } catch (SecurityException securityException) {
       }
 
    }
 
-   public URL getResourceAsURL(String var1) {
-      return this.b(var1, this.a((ClassLoader)null));
+   public URL getResourceAsURL(String resource) {
+      return this.getResourceUrl(resource, this.getClassLoaders(null));
    }
 
-   public URL getResourceAsURL(String var1, ClassLoader var2) {
-      return this.b(var1, this.a(var2));
+   public URL getResourceAsURL(String resource, ClassLoader classLoader) {
+      return this.getResourceUrl(resource, this.getClassLoaders(classLoader));
    }
 
-   public InputStream getResourceAsStream(String var1) {
-      return this.a(var1, this.a((ClassLoader)null));
+   public InputStream getResourceAsStream(String resource) {
+      return this.getResourceStream(resource, this.getClassLoaders(null));
    }
 
-   public InputStream getResourceAsStream(String var1, ClassLoader var2) {
-      return this.a(var1, this.a(var2));
+   public InputStream getResourceAsStream(String resource, ClassLoader classLoader) {
+      return this.getResourceStream(resource, this.getClassLoaders(classLoader));
    }
 
-   public Class classForName(String var1) throws ClassNotFoundException {
-      return this.c(var1, this.a((ClassLoader)null));
+   public Class classForName(String name) throws ClassNotFoundException {
+      return this.loadClass(name, this.getClassLoaders(null));
    }
 
-   public Class classForName(String var1, ClassLoader var2) throws ClassNotFoundException {
-      return this.c(var1, this.a(var2));
+   public Class classForName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+      return this.loadClass(name, this.getClassLoaders(classLoader));
    }
 
-   InputStream a(String var1, ClassLoader[] var2) {
-      for(ClassLoader var6 : var2) {
-         if (null != var6) {
-            InputStream var7 = var6.getResourceAsStream(var1);
-            if (null == var7) {
-               var7 = var6.getResourceAsStream("/" + var1);
+   InputStream getResourceStream(String resourcePath, ClassLoader[] classLoaders) {
+      for(ClassLoader classLoader2 : classLoaders) {
+         if (null != classLoader2) {
+            InputStream resourceAsStream = classLoader2.getResourceAsStream(resourcePath);
+            if (null == resourceAsStream) {
+               resourceAsStream = classLoader2.getResourceAsStream("/" + resourcePath);
             }
 
-            if (null != var7) {
-               return var7;
+            if (null != resourceAsStream) {
+               return resourceAsStream;
             }
          }
       }
@@ -56,16 +56,16 @@ public class ClassLoaderWrapper {
       return null;
    }
 
-   URL b(String var1, ClassLoader[] var2) {
-      for(ClassLoader var7 : var2) {
-         if (null != var7) {
-            URL var3 = var7.getResource(var1);
-            if (null == var3) {
-               var3 = var7.getResource("/" + var1);
+   URL getResourceUrl(String resourcePath, ClassLoader[] classLoaders) {
+      for(ClassLoader classLoader2 : classLoaders) {
+         if (null != classLoader2) {
+            URL resource = classLoader2.getResource(resourcePath);
+            if (null == resource) {
+               resource = classLoader2.getResource("/" + resourcePath);
             }
 
-            if (null != var3) {
-               return var3;
+            if (null != resource) {
+               return resource;
             }
          }
       }
@@ -73,23 +73,23 @@ public class ClassLoaderWrapper {
       return null;
    }
 
-   Class c(String var1, ClassLoader[] var2) throws ClassNotFoundException {
-      for(ClassLoader var6 : var2) {
-         if (null != var6) {
+   Class loadClass(String className, ClassLoader[] classLoaders) throws ClassNotFoundException {
+      for(ClassLoader classLoader2 : classLoaders) {
+         if (null != classLoader2) {
             try {
-               Class var7 = Class.forName(var1, true, var6);
-               if (null != var7) {
-                  return var7;
+               Class valueType = Class.forName(className, true, classLoader2);
+               if (null != valueType) {
+                  return valueType;
                }
-            } catch (ClassNotFoundException var8) {
+            } catch (ClassNotFoundException classNotFoundException) {
             }
          }
       }
 
-      throw new ClassNotFoundException("Cannot find class: " + var1);
+      throw new ClassNotFoundException("Cannot find class: " + className);
    }
 
-   ClassLoader[] a(ClassLoader var1) {
-      return new ClassLoader[]{var1, this.a, Thread.currentThread().getContextClassLoader(), this.getClass().getClassLoader(), this.b};
+   ClassLoader[] getClassLoaders(ClassLoader preferredClassLoader) {
+      return new ClassLoader[]{preferredClassLoader, this.defaultClassLoader, Thread.currentThread().getContextClassLoader(), this.getClass().getClassLoader(), this.systemClassLoader};
    }
 }

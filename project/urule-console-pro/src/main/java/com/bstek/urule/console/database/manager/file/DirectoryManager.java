@@ -7,31 +7,43 @@ public interface DirectoryManager {
    long ROOT_FILE_ID = 0L;
    DirectoryManager ins = new DirectoryManagerImpl();
 
-   void add(RuleFile var1);
+   /**新增目录*/
+   void add(RuleFile ruleFile);
 
-   RuleFile get(long var1);
+   /**获取目录对象*/
+   RuleFile get(long id);
 
-   void remove(long var1);
+   /**目录删除*/
+   void remove(long id);
 
-   void updateDeleteFlag(long var1, boolean var3, String var4);
+   /**设置目录删除标记*/
+   void updateDeleteFlag(long id, boolean deleted, String account);
 
-   void changeName(long var1, String var3, String var4);
+   /**更改目录名称*/
+   void changeName(long id, String newName, String account);
 
-   boolean checkExist(long var1, long var3, String var5, String var6);
+   /**检查是否重名*/
+   boolean checkExist(long projectId, long parentId, String type, String name);
 
-   List list(long var1, long var3);
+   /**加载目录列表*/
+   List list(long projectId, long parentId);
 
-   List list(long var1, long var3, String var5);
+   /**加载目录列表*/
+   List list(long projectId, long parentId, String type);
 
-   void changeParent(long var1, long var3);
+   /**目录移动*/
+   void changeParent(long id, long newParentId);
 
-   void changeGeneral(long var1);
+   /**目录类型转换*/
+   void changeGeneral(long projectId);
 
-   void changeType(long var1, String var3);
+   /**目录类型转换*/
+   void changeType(long id, String type);
 
-   void deleteByProjectId(long var1);
+   /**删除指定项目下的所有目录*/
+   void deleteByProjectId(long projectId);
 
-   long countByType(long var1, String var3);
+   long countByType(long projectId, String type);
 
-   boolean hasTypeFolder(long var1);
+   boolean hasTypeFolder(long projectId);
 }

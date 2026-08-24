@@ -4,10 +4,10 @@ import com.bstek.urule.runtime.WorkingMemory;
 
 public class WorkingMemoryHolderAdapter {
    public static void clean() {
-      WorkingMemoryHolder.a();
+      WorkingMemoryHolder.popWorkingMemory();
    }
 
-   public static void set(WorkingMemory var0) {
-      WorkingMemoryHolder.a(var0);
+   public static void set(WorkingMemory workingMemory) {
+      WorkingMemoryHolder.set(workingMemory);
    }
 }

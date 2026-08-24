@@ -40,43 +40,43 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class PacketDeployedServletHandler extends ApiServletHandler {
-   PacketPublishListener e = null;
+   PacketPublishListener packetPublishListener = null;
 
    public void init() {
       super.init();
-      if (this.e == null) {
+      if (this.packetPublishListener == null) {
          try {
-            this.e = (PacketPublishListener)Utils.getApplicationContext().getBean("urule.packetPublishListener");
-         } catch (NoSuchBeanDefinitionException var2) {
+            this.packetPublishListener = (PacketPublishListener)Utils.getApplicationContext().getBean("urule.packetPublishListener");
+         } catch (NoSuchBeanDefinitionException noSuchBeanDefinitionException) {
          }
       }
 
    }
 
-   public void load(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      int var3 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var4 = Integer.valueOf(var1.getParameter("pageSize"));
-      PacketDeployQuery var5 = PacketDeployManager.ins.newQuery();
-      var5.versionLike(var1.getParameter("version"));
-      var5.descLike(var1.getParameter("desc"));
-      String var6 = var1.getParameter("status");
-      if (StringUtils.isNotBlank(var6)) {
-         var5.status(ApplyStatus.valueOf(var6));
+   public void load(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      PacketDeployQuery packetDeployQuery = PacketDeployManager.ins.newQuery();
+      packetDeployQuery.versionLike(req.getParameter("version"));
+      packetDeployQuery.descLike(req.getParameter("desc"));
+      String parameter = req.getParameter("status");
+      if (StringUtils.isNotBlank(parameter)) {
+         packetDeployQuery.status(ApplyStatus.valueOf(parameter));
       }
 
-      Page var7 = var5.packetId(Long.valueOf(var1.getParameter("packetId"))).paging(var3, var4);
-      this.a(var2, var7);
+      Page page = packetDeployQuery.packetId(Long.valueOf(req.getParameter("packetId"))).paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
-   public void loadCompareContent(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("leftId"));
-      PacketDeploy var5 = PacketDeployManager.ins.load(var3);
-      HashMap var6 = new HashMap();
-      var6.put("left", var5.getContent());
-      long var7 = Long.valueOf(var1.getParameter("rightId"));
-      PacketDeploy var9 = PacketDeployManager.ins.load(var7);
-      var6.put("right", var9.getContent());
-      this.a(var2, var6);
+   public void loadCompareContent(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("leftId"));
+      PacketDeploy packetDeploy = PacketDeployManager.ins.load(longValue);
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("left", packetDeploy.getContent());
+      long longValue2 = Long.valueOf(req.getParameter("rightId"));
+      PacketDeploy packetDeploy2 = PacketDeployManager.ins.load(longValue2);
+      valuesByKey.put("right", packetDeploy2.getContent());
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    @URuleAuthorization(
@@ -84,31 +84,31 @@ public class PacketDeployedServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void enable(final HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      final long var3 = Long.valueOf(var1.getParameter("id"));
-      final PacketDeploy var5 = PacketDeployManager.ins.load(var3);
-      final Packet var6 = PacketManager.ins.load(var5.getPacketId());
-      this.a(new TransactionalInvoke() {
+   public void enable(final HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      final long longValue = Long.valueOf(req.getParameter("id"));
+      final PacketDeploy packetDeploy = PacketDeployManager.ins.load(longValue);
+      final Packet packet = PacketManager.ins.load(packetDeploy.getPacketId());
+      this.doInTransactional(new TransactionalInvoke() {
          public void doTransactional() {
-            if (PacketDeployedServletHandler.this.e != null) {
-               PacketDeployedServletHandler.this.e.beforeActive(var6, var5.getVersion());
+            if (PacketDeployedServletHandler.this.packetPublishListener != null) {
+               PacketDeployedServletHandler.this.packetPublishListener.beforeActive(packet, packetDeploy.getVersion());
             }
 
-            PacketDeployManager.ins.disableAll(var5.getPacketId());
-            PacketDeployManager.ins.updateEnable(var3, true);
-            var6.setUpdateDate(new Date());
-            var6.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-            PacketManager.ins.update(var6);
-            if (PacketDeployedServletHandler.this.e != null) {
-               PacketDeployedServletHandler.this.e.afterActive(var6, var5.getVersion());
+            PacketDeployManager.ins.disableAll(packetDeploy.getPacketId());
+            PacketDeployManager.ins.updateEnable(longValue, true);
+            packet.setUpdateDate(new Date());
+            packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+            PacketManager.ins.update(packet);
+            if (PacketDeployedServletHandler.this.packetPublishListener != null) {
+               PacketDeployedServletHandler.this.packetPublishListener.afterActive(packet, packetDeploy.getVersion());
             }
 
             String var1x = "Switch the version of the packet %s[%s] to %s";
-            SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), ApplyType.enable.name(), var6.getId(), String.format(var1x, var6.getName(), var6.getCode(), var5.getVersion()));
+            SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), ApplyType.enable.name(), packet.getId(), String.format(var1x, packet.getName(), packet.getCode(), packetDeploy.getVersion()));
          }
       });
-      List var7 = PacketCache.ins.refreshPacket(var5.getPacketId());
-      this.a(var2, var7);
+      List items = PacketCache.ins.refreshPacket(packetDeploy.getPacketId());
+      this.writeObjectToJson(resp, items);
    }
 
    @URuleAuthorization(
@@ -116,23 +116,23 @@ public class PacketDeployedServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void export(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      PacketDeploy var5 = PacketDeployManager.ins.load(var3);
-      String var6 = var5.getPacketId() + ".data";
-      var2.setHeader("Content-Disposition", "attachment; filename=" + new String(var6.getBytes("UTF-8"), "ISO8859-1"));
-      byte[] var7 = Utils.compress(var5.getContent());
-      ByteArrayInputStream var8 = new ByteArrayInputStream(var7);
-      ServletOutputStream var9 = var2.getOutputStream();
-      IOUtils.copy(var8, var9);
-      IOUtils.closeQuietly(var8);
-      IOUtils.closeQuietly(var9);
+   public void export(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      PacketDeploy packetDeploy = PacketDeployManager.ins.load(longValue);
+      String text = packetDeploy.getPacketId() + ".data";
+      resp.setHeader("Content-Disposition", "attachment; filename=" + new String(text.getBytes("UTF-8"), "ISO8859-1"));
+      byte[] bytes = Utils.compress(packetDeploy.getContent());
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+      ServletOutputStream outputStream = resp.getOutputStream();
+      IOUtils.copy(byteArrayInputStream, outputStream);
+      IOUtils.closeQuietly(byteArrayInputStream);
+      IOUtils.closeQuietly(outputStream);
    }
 
-   public void clients(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      List var4 = UrlService.ins.load(UrlType.client, var3).getList();
-      this.a(var2, var4);
+   public void clients(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      List list = UrlService.ins.load(UrlType.client, parameter).getList();
+      this.writeObjectToJson(resp, list);
    }
 
    @URuleAuthorization(
@@ -140,49 +140,49 @@ public class PacketDeployedServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void push(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("packetId"));
-      String var5 = var1.getParameter("id");
-      String var6 = null;
-      String var7 = null;
-      if (StringUtils.isNotBlank(var5)) {
-         long var8 = Long.valueOf(var5);
-         PacketDeploy var10 = PacketDeployManager.ins.load(var8);
-         var6 = var10.getContent();
-         var7 = var10.getVersion();
+   public void push(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("packetId"));
+      String parameter = req.getParameter("id");
+      String content = null;
+      String version = null;
+      if (StringUtils.isNotBlank(parameter)) {
+         long longValue2 = Long.valueOf(parameter);
+         PacketDeploy packetDeploy = PacketDeployManager.ins.load(longValue2);
+         content = packetDeploy.getContent();
+         version = packetDeploy.getVersion();
       } else {
-         var6 = this.c(var1);
+         content = this.loadUploadedKnowledgePackage(req);
       }
 
-      KnowledgePackageWrapper var16 = Utils.stringToKnowledgePackageWrapper(var6);
-      KnowledgePackageImpl var9 = (KnowledgePackageImpl)var16.getKnowledgePackage();
-      var9.initForActiveVersion();
-      Packet var17 = PacketManager.ins.load(var3);
-      PacketData var11 = new PacketData(var17, var16);
-      PacketConfig var12 = var11.getPacket();
-      var9.setMonitor(var17.isAuditEnable());
-      var9.setInputData(var12.getAuditInput());
-      var9.setOutputData(var12.getAuditOutput());
-      var9.setPackageInfo(String.valueOf(var3));
-      var9.setVersion(var7);
-      String var13 = var1.getParameter("groupId");
-      List var14 = ((PacketCacheImpl)PacketCache.ins).getClientPacketCacheAdapter().pushPacketToClients(var13, var11);
-      this.a(var2, var14);
+      KnowledgePackageWrapper knowledgePackageWrapper = Utils.stringToKnowledgePackageWrapper(content);
+      KnowledgePackageImpl knowledgePackage = (KnowledgePackageImpl)knowledgePackageWrapper.getKnowledgePackage();
+      knowledgePackage.initForActiveVersion();
+      Packet packet = PacketManager.ins.load(longValue);
+      PacketData packetData = new PacketData(packet, knowledgePackageWrapper);
+      PacketConfig packet2 = packetData.getPacket();
+      knowledgePackage.setMonitor(packet.isAuditEnable());
+      knowledgePackage.setInputData(packet2.getAuditInput());
+      knowledgePackage.setOutputData(packet2.getAuditOutput());
+      knowledgePackage.setPackageInfo(String.valueOf(longValue));
+      knowledgePackage.setVersion(version);
+      String parameter2 = req.getParameter("groupId");
+      List items = ((PacketCacheImpl)PacketCache.ins).getClientPacketCacheAdapter().pushPacketToClients(parameter2, packetData);
+      this.writeObjectToJson(resp, items);
    }
 
-   private String c(HttpServletRequest var1) {
-      String var2 = var1.getParameter("packetId");
-      if (StringUtils.isNotBlank(var2)) {
-         Packet var3 = PacketManager.ins.load(Long.valueOf(var2));
-         if (var3.getType().equals(PacketType.upload)) {
-            PacketPackage var4 = var3.getPacketPackage();
-            if (var4 != null && var4.getId() != 0L) {
-               String var5 = PacketPackageManager.ins.loadContent(var4.getId());
-               if (StringUtils.isBlank(var5)) {
+   private String loadUploadedKnowledgePackage(HttpServletRequest httpServletRequest) {
+      String parameter = httpServletRequest.getParameter("packetId");
+      if (StringUtils.isNotBlank(parameter)) {
+         Packet packet = PacketManager.ins.load(Long.valueOf(parameter));
+         if (packet.getType().equals(PacketType.upload)) {
+            PacketPackage packetPackage = packet.getPacketPackage();
+            if (packetPackage != null && packetPackage.getId() != 0L) {
+               String content = PacketPackageManager.ins.loadContent(packetPackage.getId());
+               if (StringUtils.isBlank(content)) {
                   throw new InfoException("请先上传知识包");
                }
 
-               return var5;
+               return content;
             }
 
             throw new InfoException("请先上传知识包");

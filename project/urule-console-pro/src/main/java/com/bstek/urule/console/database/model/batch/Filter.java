@@ -8,40 +8,40 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class Filter {
-   private String a;
-   private int b;
-   private String c;
-   private List d = new ArrayList();
+   private String uuid;
+   private int index;
+   private String name;
+   private List filterItems = new ArrayList();
 
    public int getIndex() {
-      return this.b;
+      return this.index;
    }
 
-   public void setIndex(int var1) {
-      this.b = var1;
+   public void setIndex(int index) {
+      this.index = index;
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public List getItems() {
-      return this.d;
+      return this.filterItems;
    }
 
-   public void setItems(List var1) {
-      this.d = var1;
+   public void setItems(List items) {
+      this.filterItems = items;
    }
 
    public String getUuid() {
-      return this.a;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.a = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 }

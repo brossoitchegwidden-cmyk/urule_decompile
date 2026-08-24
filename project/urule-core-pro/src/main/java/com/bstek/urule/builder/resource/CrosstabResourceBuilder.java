@@ -5,10 +5,10 @@ import com.bstek.urule.parse.deserializer.CrosstableDeserializer;
 import org.dom4j.Element;
 
 public class CrosstabResourceBuilder implements ResourceBuilder<CrosstabDefinition> {
-   private CrosstableDeserializer a;
+   private CrosstableDeserializer crosstableDeserializer;
 
-   public CrosstabDefinition build(Element var1, String var2) {
-      return this.a.deserialize(var1);
+   public CrosstabDefinition build(Element root, String file) {
+      return this.crosstableDeserializer.deserialize(root);
    }
 
    @Override
@@ -17,11 +17,11 @@ public class CrosstabResourceBuilder implements ResourceBuilder<CrosstabDefiniti
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1);
+   public boolean support(Element root) {
+      return this.crosstableDeserializer.support(root);
    }
 
-   public void setCrosstableDeserializer(CrosstableDeserializer var1) {
-      this.a = var1;
+   public void setCrosstableDeserializer(CrosstableDeserializer crosstableDeserializer) {
+      this.crosstableDeserializer = crosstableDeserializer;
    }
 }

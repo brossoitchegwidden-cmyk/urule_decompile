@@ -4,11 +4,11 @@ import com.bstek.urule.runtime.rete.Context;
 import java.util.Map;
 
 public interface Action extends Comparable<Action> {
-   ActionValue execute(Context var1, Map<String, Object> var2);
+   ActionValue execute(Context context, Map<String, Object> factMap);
 
    ActionType getActionType();
 
    int getPriority();
 
-   void setDebug(boolean var1);
+   void setDebug(boolean debug);
 }

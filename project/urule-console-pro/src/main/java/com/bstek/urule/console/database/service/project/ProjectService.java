@@ -7,21 +7,30 @@ import java.util.List;
 public interface ProjectService {
    ProjectService ins = new ProjectServiceImpl();
 
-   void add(Project var1);
+   /**添加项目*/
+   void add(Project project);
 
-   void update(Project var1);
+   /**更新项目*/
+   void update(Project project);
 
-   List remove(long var1);
+   /**删除项目*/
+   List remove(long projectId);
 
-   void addProjectuser(long var1, String var3);
+   /**添加项目用户*/
+   void addProjectuser(long projectId, String account);
 
-   List getUserCommits(Long var1, Date var2, Date var3);
+   /**统计近期规则提交信息*/
+   List getUserCommits(Long projectId, Date startDate, Date endDate);
 
-   List getRuleCommits(Long var1, Date var2, Date var3);
+   /**统计近期规则提交信息*/
+   List getRuleCommits(Long projectId, Date startDate, Date endDate);
 
-   List getRuleDeploys(Long var1, Date var2, Date var3);
+   /**统计近期规则发布信息*/
+   List getRuleDeploys(Long projectId, Date startDate, Date endDate);
 
-   List getRuleExecCount(Long var1, Date var2, Date var3);
+   /**统计近期规则调用次数信息*/
+   List getRuleExecCount(Long projectId, Date startDate, Date endDate);
 
-   List getRuleExecTime(Long var1, Date var2, Date var3);
+   /**统计近期规则执行耗时信息*/
+   List getRuleExecTime(Long projectId, Date startDate, Date endDate);
 }

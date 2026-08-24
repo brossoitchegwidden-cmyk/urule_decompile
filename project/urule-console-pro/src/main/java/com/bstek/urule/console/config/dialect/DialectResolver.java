@@ -7,45 +7,45 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class DialectResolver {
-   private static final Log a = LogFactory.getLog(DialectResolver.class);
+   private static final Log logger = LogFactory.getLog(DialectResolver.class);
 
-   public static final Dialect resolveDialect(Connection var0) {
+   public static final Dialect resolveDialect(Connection connection) {
       try {
-         return a(var0.getMetaData());
-      } catch (SQLException var2) {
-         a.warn(var2.getMessage());
+         return resolveDialectByMetaData(connection.getMetaData());
+      } catch (SQLException sQLException) {
+         DialectResolver.logger.warn(sQLException.getMessage());
          return null;
-      } catch (Throwable var3) {
-         a.warn("Error executing resolver [DialectResolver] : " + var3.getMessage());
+      } catch (Throwable throwable) {
+         DialectResolver.logger.warn("Error executing resolver [DialectResolver] : " + throwable.getMessage());
          return null;
       }
    }
 
-   protected static Dialect a(DatabaseMetaData var0) throws SQLException {
-      String var1 = var0.getDatabaseProductName();
-      if ("HSQL Database Engine".equals(var1)) {
+   protected static Dialect resolveDialectByMetaData(DatabaseMetaData metaData) throws SQLException {
+      String databaseProductName = metaData.getDatabaseProductName();
+      if ("HSQL Database Engine".equals(databaseProductName)) {
          return new HSQLDialect();
-      } else if ("H2".equals(var1)) {
+      } else if ("H2".equals(databaseProductName)) {
          return new H2Dialect();
-      } else if ("MySQL".equals(var1)) {
+      } else if ("MySQL".equals(databaseProductName)) {
          return new MySQLDialect();
-      } else if ("DM DBMS".equals(var1)) {
+      } else if ("DM DBMS".equals(databaseProductName)) {
          return new DmDialect();
-      } else if (!"PostgreSQL".equals(var1) && !"KingbaseES".equals(var1)) {
-         if (var1.startsWith("Microsoft SQL Server")) {
+      } else if (!"PostgreSQL".equals(databaseProductName) && !"KingbaseES".equals(databaseProductName)) {
+         if (databaseProductName.startsWith("Microsoft SQL Server")) {
             return new SQLServerDialect();
-         } else if ("Informix Dynamic Server".equals(var1)) {
+         } else if ("Informix Dynamic Server".equals(databaseProductName)) {
             return new InformixDialect();
-         } else if (var1.startsWith("DB2/")) {
+         } else if (databaseProductName.startsWith("DB2/")) {
             return new DB2Dialect();
-         } else if ("Oracle".equals(var1)) {
+         } else if ("Oracle".equals(databaseProductName)) {
             return new Oracle10gDialect();
-         } else if ("SQLite".equals(var1)) {
+         } else if ("SQLite".equals(databaseProductName)) {
             return new SQLLiteDialect();
-         } else if ("Apache Hive".equals(var1)) {
+         } else if ("Apache Hive".equals(databaseProductName)) {
             return new HiveDialect();
          } else {
-            return "Presto".equals(var1) ? new PrestoDialect() : null;
+            return "Presto".equals(databaseProductName) ? new PrestoDialect() : null;
          }
       } else {
          return new PostgreSQLDialect();

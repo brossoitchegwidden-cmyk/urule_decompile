@@ -13,155 +13,155 @@ import java.util.Date;
 import java.util.List;
 
 public class PacketDeployFileQueryImpl implements PacketDeployFileQuery {
-   private Long a;
-   private Long b;
-   private Long c;
-   private List d = new ArrayList();
+   private Long id;
+   private Long packetDeployId;
+   private Long projectId;
+   private List queryParameters = new ArrayList();
 
    protected PacketDeployFileQueryImpl() {
    }
 
    public List list() {
-      String var1 = "select ID_,DEPLOYED_PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,CREATE_USER_,CREATE_DATE_,DIGEST_ from URULE_DEPLOYED_PACKET_FILE";
-      return this.a(var1, false);
+      String text = "select ID_,DEPLOYED_PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,CREATE_USER_,CREATE_DATE_,DIGEST_ from URULE_DEPLOYED_PACKET_FILE";
+      return this.queryDeploymentFiles(text, false);
    }
 
    public List listWithContent() {
-      String var1 = "select ID_,DEPLOYED_PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,CONTENT_,CREATE_USER_,CREATE_DATE_,DIGEST_ from URULE_DEPLOYED_PACKET_FILE";
-      return this.a(var1, true);
+      String text = "select ID_,DEPLOYED_PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,CONTENT_,CREATE_USER_,CREATE_DATE_,DIGEST_ from URULE_DEPLOYED_PACKET_FILE";
+      return this.queryDeploymentFiles(text, true);
    }
 
-   private List a(String var1, boolean var2) {
-      this.d.clear();
-      StringBuilder var3 = this.a();
-      if (var3.length() > 0) {
-         var1 = var1 + " where " + var3.toString();
+   private List queryDeploymentFiles(String text, boolean flag) {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         text = text + " where " + stringBuilder.toString();
       }
 
-      var1 = var1 + " order by CREATE_DATE_ desc";
-      Connection var4 = JdbcUtils.getConnection();
-      PreparedStatement var5 = null;
-      ResultSet var6 = null;
+      text = text + " order by CREATE_DATE_ desc";
+      Connection connection = JdbcUtils.getConnection();
+      PreparedStatement preparedStatement = null;
+      ResultSet resultSet = null;
 
-      ArrayList var19;
+      ArrayList items;
       try {
-         var5 = var4.prepareStatement(var1);
+         preparedStatement = connection.prepareStatement(text);
 
-         for(int var7 = 0; var7 < this.d.size(); ++var7) {
-            Object var8 = this.d.get(var7);
-            if (var8 instanceof Long) {
-               Long var9 = (Long)var8;
-               var5.setLong(var7 + 1, var9);
-            } else if (var8 instanceof String) {
-               String var20 = (String)var8;
-               var5.setString(var7 + 1, var20);
+         for(int index = 0; index < this.queryParameters.size(); ++index) {
+            Object objectValue = this.queryParameters.get(index);
+            if (objectValue instanceof Long) {
+               Long objectValue2 = (Long)objectValue;
+               preparedStatement.setLong(index + 1, objectValue2);
+            } else if (objectValue instanceof String) {
+               String objectValue3 = (String)objectValue;
+               preparedStatement.setString(index + 1, objectValue3);
             } else {
-               var5.setObject(var7 + 1, var8);
+               preparedStatement.setObject(index + 1, objectValue);
             }
          }
 
-         var6 = var5.executeQuery();
+         resultSet = preparedStatement.executeQuery();
 
-         ArrayList var16 = new ArrayList();
-         while(var6.next()) {
-            PacketDeployFile var18;
-            if (var2) {
-               var18 = this.b(var6);
+         ArrayList items2 = new ArrayList();
+         while(resultSet.next()) {
+            PacketDeployFile packetDeployFile;
+            if (flag) {
+               packetDeployFile = this.resolvePacketDeployFile(resultSet);
             } else {
-               var18 = this.a(var6);
+               packetDeployFile = this.mapDeploymentFile(resultSet);
             }
 
-            var16.add(var18);
+            items2.add(packetDeployFile);
          }
 
-         var19 = var16;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         items = items2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var19;
+      return items;
    }
 
-   private PacketDeployFile a(ResultSet var1) throws SQLException {
-      PacketDeployFile var2 = new PacketDeployFile();
-      var2.setId(var1.getLong(1));
-      var2.setPacketDeployId(var1.getLong(2));
-      var2.setFileId(var1.getLong(3));
-      var2.setProjectId(var1.getLong(4));
-      var2.setPath(var1.getString(5));
-      var2.setVersion(var1.getString(6));
-      var2.setCreateUser(var1.getString(7));
-      var2.setCreateDate(new Date(var1.getTimestamp(8).getTime()));
-      var2.setDigest(var1.getString(9));
-      return var2;
+   private PacketDeployFile mapDeploymentFile(ResultSet resultSet) throws SQLException {
+      PacketDeployFile packetDeployFile = new PacketDeployFile();
+      packetDeployFile.setId(resultSet.getLong(1));
+      packetDeployFile.setPacketDeployId(resultSet.getLong(2));
+      packetDeployFile.setFileId(resultSet.getLong(3));
+      packetDeployFile.setProjectId(resultSet.getLong(4));
+      packetDeployFile.setPath(resultSet.getString(5));
+      packetDeployFile.setVersion(resultSet.getString(6));
+      packetDeployFile.setCreateUser(resultSet.getString(7));
+      packetDeployFile.setCreateDate(new Date(resultSet.getTimestamp(8).getTime()));
+      packetDeployFile.setDigest(resultSet.getString(9));
+      return packetDeployFile;
    }
 
-   private PacketDeployFile b(ResultSet var1) throws SQLException {
-      PacketDeployFile var2 = new PacketDeployFile();
-      var2.setId(var1.getLong(1));
-      var2.setPacketDeployId(var1.getLong(2));
-      var2.setFileId(var1.getLong(3));
-      var2.setProjectId(var1.getLong(4));
-      var2.setPath(var1.getString(5));
-      var2.setVersion(var1.getString(6));
-      var2.setContent(FileUtils.formatXml(var1.getString(7)));
-      var2.setCreateUser(var1.getString(8));
-      var2.setCreateDate(new Date(var1.getTimestamp(9).getTime()));
-      var2.setDigest(var1.getString(10));
-      return var2;
+   private PacketDeployFile resolvePacketDeployFile(ResultSet resultSet) throws SQLException {
+      PacketDeployFile packetDeployFile = new PacketDeployFile();
+      packetDeployFile.setId(resultSet.getLong(1));
+      packetDeployFile.setPacketDeployId(resultSet.getLong(2));
+      packetDeployFile.setFileId(resultSet.getLong(3));
+      packetDeployFile.setProjectId(resultSet.getLong(4));
+      packetDeployFile.setPath(resultSet.getString(5));
+      packetDeployFile.setVersion(resultSet.getString(6));
+      packetDeployFile.setContent(FileUtils.formatXml(resultSet.getString(7)));
+      packetDeployFile.setCreateUser(resultSet.getString(8));
+      packetDeployFile.setCreateDate(new Date(resultSet.getTimestamp(9).getTime()));
+      packetDeployFile.setDigest(resultSet.getString(10));
+      return packetDeployFile;
    }
 
-   private StringBuilder a() {
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() == 0) {
-            var1.append(" ID_=?");
+   private StringBuilder buildWhereClause() {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() == 0) {
+            stringBuilder.append(" ID_=?");
          } else {
-            var1.append(" and ID_=?");
+            stringBuilder.append(" and ID_=?");
          }
 
-         this.d.add(this.a);
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() == 0) {
-            var1.append(" DEPLOYED_PACKET_ID_=?");
+      if (this.packetDeployId != null) {
+         if (stringBuilder.length() == 0) {
+            stringBuilder.append(" DEPLOYED_PACKET_ID_=?");
          } else {
-            var1.append(" and DEPLOYED_PACKET_ID_=?");
+            stringBuilder.append(" and DEPLOYED_PACKET_ID_=?");
          }
 
-         this.d.add(this.b);
+         this.queryParameters.add(this.packetDeployId);
       }
 
-      if (this.c != null) {
-         if (var1.length() == 0) {
-            var1.append(" PROJECT_ID_=?");
+      if (this.projectId != null) {
+         if (stringBuilder.length() == 0) {
+            stringBuilder.append(" PROJECT_ID_=?");
          } else {
-            var1.append(" and PROJECT_ID_=?");
+            stringBuilder.append(" and PROJECT_ID_=?");
          }
 
-         this.d.add(this.c);
+         this.queryParameters.add(this.projectId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public PacketDeployFileQuery id(long var1) {
-      this.a = var1;
+   public PacketDeployFileQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public PacketDeployFileQuery packetDeployId(long var1) {
-      this.b = var1;
+   public PacketDeployFileQuery packetDeployId(long packetDeployId) {
+      this.packetDeployId = packetDeployId;
       return this;
    }
 
-   public PacketDeployFileQuery projectId(long var1) {
-      this.c = var1;
+   public PacketDeployFileQuery projectId(long projectId) {
+      this.projectId = projectId;
       return this;
    }
 }

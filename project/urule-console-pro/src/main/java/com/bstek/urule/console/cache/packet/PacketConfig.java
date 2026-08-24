@@ -3,121 +3,121 @@ package com.bstek.urule.console.cache.packet;
 import java.util.List;
 
 public class PacketConfig {
-   private long a;
-   private long b;
-   private boolean c;
-   private boolean d;
-   private boolean e;
-   private String f;
-   private String g;
-   private String h;
-   private List i;
-   private List j;
-   private List k;
-   private List l;
-   private boolean m;
+   private long id;
+   private long projectId;
+   private boolean enable;
+   private boolean restEnable;
+   private boolean restSecurityEnable;
+   private String code;
+   private String restSecurityUser;
+   private String restSecurityPassword;
+   private List restInput;
+   private List restOutput;
+   private List auditInput;
+   private List auditOutput;
+   private boolean auditEnable;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getProjectId() {
-      return this.b;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.b = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public boolean isEnable() {
-      return this.c;
+      return this.enable;
    }
 
-   public void setEnable(boolean var1) {
-      this.c = var1;
+   public void setEnable(boolean enable) {
+      this.enable = enable;
    }
 
    public boolean isRestEnable() {
-      return this.d;
+      return this.restEnable;
    }
 
-   public void setRestEnable(boolean var1) {
-      this.d = var1;
+   public void setRestEnable(boolean restEnable) {
+      this.restEnable = restEnable;
    }
 
    public String getCode() {
-      return this.f;
+      return this.code;
    }
 
-   public void setCode(String var1) {
-      this.f = var1;
+   public void setCode(String code) {
+      this.code = code;
    }
 
    public boolean isRestSecurityEnable() {
-      return this.e;
+      return this.restSecurityEnable;
    }
 
-   public void setRestSecurityEnable(boolean var1) {
-      this.e = var1;
+   public void setRestSecurityEnable(boolean restSecurityEnable) {
+      this.restSecurityEnable = restSecurityEnable;
    }
 
    public String getRestSecurityUser() {
-      return this.g;
+      return this.restSecurityUser;
    }
 
-   public void setRestSecurityUser(String var1) {
-      this.g = var1;
+   public void setRestSecurityUser(String restSecurityUser) {
+      this.restSecurityUser = restSecurityUser;
    }
 
    public String getRestSecurityPassword() {
-      return this.h;
+      return this.restSecurityPassword;
    }
 
-   public void setRestSecurityPassword(String var1) {
-      this.h = var1;
+   public void setRestSecurityPassword(String restSecurityPassword) {
+      this.restSecurityPassword = restSecurityPassword;
    }
 
    public List getRestInput() {
-      return this.i;
+      return this.restInput;
    }
 
-   public void setRestInput(List var1) {
-      this.i = var1;
+   public void setRestInput(List restInput) {
+      this.restInput = restInput;
    }
 
    public List getRestOutput() {
-      return this.j;
+      return this.restOutput;
    }
 
-   public void setRestOutput(List var1) {
-      this.j = var1;
+   public void setRestOutput(List restOutput) {
+      this.restOutput = restOutput;
    }
 
    public List getAuditInput() {
-      return this.k;
+      return this.auditInput;
    }
 
-   public void setAuditInput(List var1) {
-      this.k = var1;
+   public void setAuditInput(List auditInput) {
+      this.auditInput = auditInput;
    }
 
    public List getAuditOutput() {
-      return this.l;
+      return this.auditOutput;
    }
 
-   public void setAuditOutput(List var1) {
-      this.l = var1;
+   public void setAuditOutput(List auditOutput) {
+      this.auditOutput = auditOutput;
    }
 
    public boolean isAuditEnable() {
-      return this.m;
+      return this.auditEnable;
    }
 
-   public void setAuditEnable(boolean var1) {
-      this.m = var1;
+   public void setAuditEnable(boolean auditEnable) {
+      this.auditEnable = auditEnable;
    }
 }

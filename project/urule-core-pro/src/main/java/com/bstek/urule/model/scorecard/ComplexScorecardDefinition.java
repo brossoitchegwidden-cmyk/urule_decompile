@@ -41,152 +41,152 @@ public class ComplexScorecardDefinition {
       return this.salience;
    }
 
-   public void setSalience(Integer var1) {
-      this.salience = var1;
+   public void setSalience(Integer salience) {
+      this.salience = salience;
    }
 
    public Date getEffectiveDate() {
       return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public Boolean getEnabled() {
       return this.enabled;
    }
 
-   public void setEnabled(Boolean var1) {
-      this.enabled = var1;
+   public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
    }
 
    public Boolean getDebug() {
       return this.debug;
    }
 
-   public void setDebug(Boolean var1) {
-      this.debug = var1;
+   public void setDebug(Boolean debug) {
+      this.debug = debug;
    }
 
    public String getRemark() {
       return this.remark;
    }
 
-   public void setRemark(String var1) {
-      this.remark = var1;
+   public void setRemark(String remark) {
+      this.remark = remark;
    }
 
    public String getQuickTestData() {
       return this.quickTestData;
    }
 
-   public void setQuickTestData(String var1) {
-      this.quickTestData = var1;
+   public void setQuickTestData(String quickTestData) {
+      this.quickTestData = quickTestData;
    }
 
    public String getVariableCategory() {
       return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.variableCategory = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    public String getVariableName() {
       return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.variableName = var1;
+   public void setVariableName(String variableName) {
+      this.variableName = variableName;
    }
 
    public String getVariableLabel() {
       return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.variableLabel = var1;
+   public void setVariableLabel(String variableLabel) {
+      this.variableLabel = variableLabel;
    }
 
    public String getKeyLabel() {
       return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.keyLabel = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyName() {
       return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.keyName = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 
    public String getKeyUuid() {
       return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.keyUuid = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public Datatype getDatatype() {
       return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.datatype = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    public ScoringType getScoringType() {
       return this.scoringType;
    }
 
-   public void setScoringType(ScoringType var1) {
-      this.scoringType = var1;
+   public void setScoringType(ScoringType scoringType) {
+      this.scoringType = scoringType;
    }
 
    public String getScoringBean() {
       return this.scoringBean;
    }
 
-   public void setScoringBean(String var1) {
-      this.scoringBean = var1;
+   public void setScoringBean(String scoringBean) {
+      this.scoringBean = scoringBean;
    }
 
    public AssignTargetType getAssignTargetType() {
       return this.assignTargetType;
    }
 
-   public void setAssignTargetType(AssignTargetType var1) {
-      this.assignTargetType = var1;
+   public void setAssignTargetType(AssignTargetType assignTargetType) {
+      this.assignTargetType = assignTargetType;
    }
 
    public List<Row> getRows() {
@@ -197,52 +197,52 @@ public class ComplexScorecardDefinition {
       return this.predefines;
    }
 
-   public void setPredefines(List<Predefine> var1) {
-      this.predefines = var1;
+   public void setPredefines(List<Predefine> predefines) {
+      this.predefines = predefines;
    }
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 
-   public void addRow(Row var1) {
+   public void addRow(Row row) {
       if (this.rows == null) {
          this.rows = new ArrayList<>();
       }
 
-      this.rows.add(var1);
+      this.rows.add(row);
    }
 
-   public void addColumn(ComplexColumn var1) {
+   public void addColumn(ComplexColumn col) {
       if (this.columns == null) {
          this.columns = new ArrayList<>();
       }
 
-      this.columns.add(var1);
+      this.columns.add(col);
    }
 
-   public void addCell(Cell var1) {
+   public void addCell(Cell cell) {
       if (this.cellMap == null) {
          this.cellMap = new HashMap<>();
       }
 
-      this.cellMap.put(this.buildCellKey(var1.getRow(), var1.getCol()), var1);
+      this.cellMap.put(this.buildCellKey(cell.getRow(), cell.getCol()), cell);
    }
 
-   public void setRows(List<Row> var1) {
-      this.rows = var1;
+   public void setRows(List<Row> rows) {
+      this.rows = rows;
    }
 
    public List<ComplexColumn> getColumns() {
       return this.columns;
    }
 
-   public void setColumns(List<ComplexColumn> var1) {
-      this.columns = var1;
+   public void setColumns(List<ComplexColumn> columns) {
+      this.columns = columns;
    }
 
    public Map<String, Cell> getCellMap() {
@@ -253,11 +253,11 @@ public class ComplexScorecardDefinition {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
-   public String buildCellKey(int var1, int var2) {
-      return var1 + "," + var2;
+   public String buildCellKey(int row, int col) {
+      return row + "," + col;
    }
 }

@@ -70,52 +70,34 @@ import org.apache.commons.logging.LogFactory;
 
 public class BatchesServletHandler extends ApiServletHandler {
    public static final String URL = "/batches";
-   private static final Log e = LogFactory.getLog(StmtUtils.class);
+   private static final Log logger = LogFactory.getLog(StmtUtils.class);
 
+   /**新增方案*/
    @Transactional
    @URuleAuthorization(
       authType = "project",
       code = "manager",
       model = "batches"
    )
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("data");
-      String var4 = SecurityUtils.getLoginUsername(var1);
-      Batch var5 = (Batch)this.a().readValue(var3, Batch.class);
-      SchemeService.ins.add(var5, var4);
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("data");
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      Batch batch = (Batch)this.createObjectMapper().readValue(parameter, Batch.class);
+      SchemeService.ins.add(batch, loginUsername);
    }
 
+   /**更新方案*/
    @Transactional
    @URuleAuthorization(
       authType = "project",
       code = "manager",
       model = "batches"
    )
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("data");
-      String var4 = SecurityUtils.getLoginUsername(var1);
-      Batch var5 = (Batch)this.a().readValue(var3, Batch.class);
-      SchemeService.ins.update(var5, var4);
-   }
-
-   @Transactional
-   @URuleAuthorization(
-      authType = "project",
-      code = "manager",
-      model = "batches"
-   )
-   public void updateRestConfig(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("data");
-      String var4 = SecurityUtils.getLoginUsername(var1);
-      Batch var5 = (Batch)this.a().readValue(var3, Batch.class);
-      Batch var6 = BatchManager.ins.get(var5.getId());
-      var6.setRestEnable(var5.isRestEnable());
-      var6.setRestSecurityEnable(var5.isRestSecurityEnable());
-      var6.setRestSecurityUser(var5.getRestSecurityUser());
-      var6.setRestSecurityPassword(var5.getRestSecurityPassword());
-      var6.setUpdateUser(var4);
-      var6.setUpdateDate(new Date(System.currentTimeMillis()));
-      BatchManager.ins.update(var6);
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("data");
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      Batch batch = (Batch)this.createObjectMapper().readValue(parameter, Batch.class);
+      SchemeService.ins.update(batch, loginUsername);
    }
 
    @Transactional
@@ -124,9 +106,30 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "manager",
       model = "batches"
    )
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      SchemeService.ins.remove(var3);
+   public void updateRestConfig(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("data");
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      Batch batch = (Batch)this.createObjectMapper().readValue(parameter, Batch.class);
+      Batch batch2 = BatchManager.ins.get(batch.getId());
+      batch2.setRestEnable(batch.isRestEnable());
+      batch2.setRestSecurityEnable(batch.isRestSecurityEnable());
+      batch2.setRestSecurityUser(batch.getRestSecurityUser());
+      batch2.setRestSecurityPassword(batch.getRestSecurityPassword());
+      batch2.setUpdateUser(loginUsername);
+      batch2.setUpdateDate(new Date(System.currentTimeMillis()));
+      BatchManager.ins.update(batch2);
+   }
+
+   /**删除方案*/
+   @Transactional
+   @URuleAuthorization(
+      authType = "project",
+      code = "manager",
+      model = "batches"
+   )
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      SchemeService.ins.remove(longValue);
    }
 
    @URuleAuthorization(
@@ -134,9 +137,9 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "manager",
       model = "batches"
    )
-   public void enable(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      SchemeService.ins.enable(var3, SecurityUtils.getLoginUsername(var1));
+   public void enable(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      SchemeService.ins.enable(longValue, SecurityUtils.getLoginUsername(req));
    }
 
    @URuleAuthorization(
@@ -144,9 +147,9 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "manager",
       model = "batches"
    )
-   public void disable(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      SchemeService.ins.disable(var3, SecurityUtils.getLoginUsername(var1));
+   public void disable(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      SchemeService.ins.disable(longValue, SecurityUtils.getLoginUsername(req));
    }
 
    @URuleAuthorization(
@@ -154,9 +157,9 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "manager",
       model = "batches"
    )
-   public void stop(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      SchemeService.ins.stop(var3, SecurityUtils.getLoginUsername(var1));
+   public void stop(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      SchemeService.ins.stop(longValue, SecurityUtils.getLoginUsername(req));
    }
 
    @URuleAuthorization(
@@ -164,10 +167,10 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void get(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      Batch var5 = SchemeService.ins.getBatchData(var3);
-      this.a(var2, var5);
+   public void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      Batch batchData = SchemeService.ins.getBatchData(longValue);
+      this.writeObjectToJson(resp, batchData);
    }
 
    @URuleAuthorization(
@@ -175,10 +178,61 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void getProviderData(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("providerId"));
-      BatchDataProvider var5 = SchemeService.ins.getProviderData(var3);
-      this.a(var2, var5);
+   public void getProviderData(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("providerId"));
+      BatchDataProvider providerData = SchemeService.ins.getProviderData(longValue);
+      this.writeObjectToJson(resp, providerData);
+   }
+
+   /**查询所有方案*/
+   @URuleAuthorization(
+      authType = "project",
+      code = "view",
+      model = "batches"
+   )
+   public void page(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      int number = Integer.parseInt(req.getParameter("pageIndex"));
+      int number2 = Integer.parseInt(req.getParameter("pageSize"));
+      Page page = new Page(number, number2);
+      BatchQuery query = BatchManager.ins.createQuery();
+      String parameter = req.getParameter("name");
+      if (StringUtils.isNotBlank(parameter)) {
+         query.nameLike(parameter);
+      }
+
+      String parameter2 = req.getParameter("async");
+      if (StringUtils.isNotBlank(parameter2)) {
+         query.async(Boolean.valueOf(parameter2));
+      }
+
+      String parameter3 = req.getParameter("enable");
+      if (StringUtils.isNotBlank(parameter3)) {
+         query.enable(Boolean.valueOf(parameter3));
+      }
+
+      String parameter4 = req.getParameter("status");
+      if (StringUtils.isNotBlank(parameter4)) {
+         query.status(BatchStatus.valueOf(parameter4));
+      }
+
+      String parameter5 = req.getParameter("id");
+      if (StringUtils.isNotBlank(parameter5)) {
+         query.id(Long.valueOf(parameter5));
+      }
+
+      String parameter6 = req.getParameter("packetId");
+      if (StringUtils.isNotBlank(parameter6)) {
+         query.packetId(Long.valueOf(parameter6));
+      }
+
+      String parameter7 = req.getParameter("createUser");
+      if (StringUtils.isNotBlank(parameter7)) {
+         query.createUserLike(parameter7);
+      }
+
+      query.projectId(projectId).page(page);
+      this.writeObjectToJson(resp, page);
    }
 
    @URuleAuthorization(
@@ -186,49 +240,19 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void page(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      int var5 = Integer.parseInt(var1.getParameter("pageIndex"));
-      int var6 = Integer.parseInt(var1.getParameter("pageSize"));
-      Page var7 = new Page(var5, var6);
-      BatchQuery var8 = BatchManager.ins.createQuery();
-      String var9 = var1.getParameter("name");
-      if (StringUtils.isNotBlank(var9)) {
-         var8.nameLike(var9);
+   public void pagePacket(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long projectId = ContextHolder.getProjectId();
+      int number = Integer.parseInt(req.getParameter("pageIndex"));
+      int number2 = Integer.parseInt(req.getParameter("pageSize"));
+      new Page(number, number2);
+      PacketQuery packetQuery = PacketManager.ins.newQuery();
+      String parameter = req.getParameter("name");
+      if (StringUtils.isNotBlank(parameter)) {
+         packetQuery.nameLike(parameter);
       }
 
-      String var10 = var1.getParameter("async");
-      if (StringUtils.isNotBlank(var10)) {
-         var8.async(Boolean.valueOf(var10));
-      }
-
-      String var11 = var1.getParameter("enable");
-      if (StringUtils.isNotBlank(var11)) {
-         var8.enable(Boolean.valueOf(var11));
-      }
-
-      String var12 = var1.getParameter("status");
-      if (StringUtils.isNotBlank(var12)) {
-         var8.status(BatchStatus.valueOf(var12));
-      }
-
-      String var13 = var1.getParameter("id");
-      if (StringUtils.isNotBlank(var13)) {
-         var8.id(Long.valueOf(var13));
-      }
-
-      String var14 = var1.getParameter("packetId");
-      if (StringUtils.isNotBlank(var14)) {
-         var8.packetId(Long.valueOf(var14));
-      }
-
-      String var15 = var1.getParameter("createUser");
-      if (StringUtils.isNotBlank(var15)) {
-         var8.createUserLike(var15);
-      }
-
-      var8.projectId(var3).page(var7);
-      this.a(var2, var7);
+      Page page = packetQuery.enable(true).projectId(projectId).paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
    @URuleAuthorization(
@@ -236,37 +260,17 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void pagePacket(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = ContextHolder.getProjectId();
-      int var5 = Integer.parseInt(var1.getParameter("pageIndex"));
-      int var6 = Integer.parseInt(var1.getParameter("pageSize"));
-      new Page(var5, var6);
-      PacketQuery var8 = PacketManager.ins.newQuery();
-      String var9 = var1.getParameter("name");
-      if (StringUtils.isNotBlank(var9)) {
-         var8.nameLike(var9);
-      }
-
-      Page var7 = var8.enable(true).projectId(var3).paging(var5, var6);
-      this.a(var2, var7);
-   }
-
-   @URuleAuthorization(
-      authType = "project",
-      code = "view",
-      model = "batches"
-   )
-   public void buildVariableCategorys(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      ArrayList var3 = new ArrayList();
-      PacketData var4 = PacketCache.ins.getPacket(Long.valueOf(var1.getParameter("packetId")));
-      if (var4 == null) {
-         this.a(var2, var3);
+   public void buildVariableCategorys(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      ArrayList items = new ArrayList();
+      PacketData packet = PacketCache.ins.getPacket(Long.valueOf(req.getParameter("packetId")));
+      if (packet == null) {
+         this.writeObjectToJson(resp, items);
       } else {
-         for(VariableCategory var7 : var4.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories()) {
-            var3.add(var7.getName());
+         for(VariableCategory variableCategory : packet.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories()) {
+            items.add(variableCategory.getName());
          }
 
-         this.a(var2, var3);
+         this.writeObjectToJson(resp, items);
       }
    }
 
@@ -275,18 +279,18 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void buildVariables(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      PacketData var3 = PacketCache.ins.getPacket(Long.valueOf(var1.getParameter("packetId")));
-      if (var3 == null) {
-         this.a(var2, new ArrayList());
+   public void buildVariables(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      PacketData packet = PacketCache.ins.getPacket(Long.valueOf(req.getParameter("packetId")));
+      if (packet == null) {
+         this.writeObjectToJson(resp, new ArrayList());
       } else {
-         List var4 = var3.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
+         List variableCategories = packet.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
 
          try {
-            VariableCategory var5 = JsonBuilder.getInstance().findVariableCategory(var4, var1.getParameter("varName"));
-            this.a(var2, var5.getVariables());
-         } catch (VariableCategoryNotFoundException var6) {
-            throw new VariableCategoryNotFoundException(var6.getMessage() + "请确保当前版本的知识包中包含这个变量对象!");
+            VariableCategory variableCategory = JsonBuilder.getInstance().findVariableCategory(variableCategories, req.getParameter("varName"));
+            this.writeObjectToJson(resp, variableCategory.getVariables());
+         } catch (VariableCategoryNotFoundException variableCategoryNotFoundException) {
+            throw new VariableCategoryNotFoundException(variableCategoryNotFoundException.getMessage() + "请确保当前版本的知识包中包含这个变量对象!");
          }
       }
    }
@@ -296,22 +300,22 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void buildVariableTree(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      ArrayList var3 = new ArrayList();
-      PacketData var4 = PacketCache.ins.getPacket(Long.valueOf(var1.getParameter("packetId")));
-      if (var4 == null) {
-         this.a(var2, var3);
+   public void buildVariableTree(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      ArrayList items = new ArrayList();
+      PacketData packet = PacketCache.ins.getPacket(Long.valueOf(req.getParameter("packetId")));
+      if (packet == null) {
+         this.writeObjectToJson(resp, items);
       } else {
-         List var5 = var4.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
-         ArrayList var6 = new ArrayList();
+         List variableCategories = packet.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
+         ArrayList items2 = new ArrayList();
 
-         for(VariableCategory var8 : (Iterable<VariableCategory>)(Iterable<?>)(var5)) {
-            if (var8.getAct() == Act.InOut || var8.getAct() == Act.Out) {
-               var6.add(var8);
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableCategories)) {
+            if (variableCategory.getAct() == Act.InOut || variableCategory.getAct() == Act.Out) {
+               items2.add(variableCategory);
             }
          }
 
-         this.a(var2, var6);
+         this.writeObjectToJson(resp, items2);
       }
    }
 
@@ -320,39 +324,39 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void buildParams(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      PacketData var3 = PacketCache.ins.getPacket(Long.valueOf(var1.getParameter("packetId")));
-      if (var3 == null) {
+   public void buildParams(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      PacketData packet = PacketCache.ins.getPacket(Long.valueOf(req.getParameter("packetId")));
+      if (packet == null) {
          throw new BatchException("知识包不存在!");
       } else {
-         List var4 = var3.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
-         VariableCategory var5 = null;
+         List variableCategories = packet.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
+         VariableCategory variableCategory = null;
 
-         for(VariableCategory var7 : (Iterable<VariableCategory>)(Iterable<?>)(var4)) {
-            if ("参数".equals(var7.getName()) || "参数".equals(var7.getClazz())) {
-               var5 = var7;
+         for(VariableCategory variableCategory2 : (Iterable<VariableCategory>)(Iterable<?>)(variableCategories)) {
+            if ("参数".equals(variableCategory2.getName()) || "参数".equals(variableCategory2.getClazz())) {
+               variableCategory = variableCategory2;
                break;
             }
          }
 
-         if (var5 != null) {
-            this.a(var2, var5.getVariables());
+         if (variableCategory != null) {
+            this.writeObjectToJson(resp, variableCategory.getVariables());
          } else {
-            this.a(var2, new ArrayList());
+            this.writeObjectToJson(resp, new ArrayList());
          }
 
       }
    }
 
-   private boolean a(String var1) {
-      String var2 = var1.toLowerCase();
-      String var3 = "exec|execute|insert|delete|update|count|create|drop|chr|mid|master|truncate|char|declare|sitename|net user|xp_cmdshell|exec|execute|table|grant|use|group_concat|column_name|information_schema.columns|table_schema|union|";
-      List var4 = Arrays.asList(var3.split("\\|"));
-      StringTokenizer var5 = new StringTokenizer(var2);
+   private boolean containsUnsafeSqlKeyword(String text) {
+      String lowercaseText = text.toLowerCase();
+      String text2 = "exec|execute|insert|delete|update|count|create|drop|chr|mid|master|truncate|char|declare|sitename|net user|xp_cmdshell|exec|execute|table|grant|use|group_concat|column_name|information_schema.columns|table_schema|union|";
+      List items = Arrays.asList(text2.split("\\|"));
+      StringTokenizer stringTokenizer = new StringTokenizer(lowercaseText);
 
-      while(var5.hasMoreElements()) {
-         String var6 = var5.nextToken();
-         if (var4.contains(var6)) {
+      while(stringTokenizer.hasMoreElements()) {
+         String text3 = stringTokenizer.nextToken();
+         if (items.contains(text3)) {
             return true;
          }
       }
@@ -365,49 +369,49 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void getDatasourceExtInfo(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      HashMap var3 = new HashMap();
-      Connection var4 = null;
-      DataSource var5 = null;
-      com.bstek.urule.console.database.model.datasource.DataSource var6 = null;
+   public void getDatasourceExtInfo(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      HashMap valuesByKey = new HashMap();
+      Connection connection = null;
+      DataSource dataSource = null;
+      com.bstek.urule.console.database.model.datasource.DataSource dataSource2 = null;
 
       try {
-         String var7 = var1.getParameter("id");
-         String var8 = var1.getParameter("isresolver");
-         var6 = DataSourceManager.ins.get(Long.parseLong(var7));
-         if (var6 == null) {
-            if ("true".equalsIgnoreCase(var8)) {
-               throw new Exception("DataResolver DataSource[" + var7 + "] is not defined!");
+         String parameter = req.getParameter("id");
+         String parameter2 = req.getParameter("isresolver");
+         dataSource2 = DataSourceManager.ins.get(Long.parseLong(parameter));
+         if (dataSource2 == null) {
+            if ("true".equalsIgnoreCase(parameter2)) {
+               throw new Exception("DataResolver DataSource[" + parameter + "] is not defined!");
             }
 
-            throw new Exception("DataProvider DataSource[" + var7 + "] is not defined!");
+            throw new Exception("DataProvider DataSource[" + parameter + "] is not defined!");
          }
 
-         var5 = DataSourceHandlerManager.newDataSource(var6);
-         var4 = var5.getConnection();
-         Dialect var9 = DialectResolver.resolveDialect(var4);
-         var3.put("result", true);
-         var3.put("orderLimit", false);
-         if (var9 instanceof OrderLimitDialect) {
-            var3.put("orderLimit", true);
+         dataSource = DataSourceHandlerManager.newDataSource(dataSource2);
+         connection = dataSource.getConnection();
+         Dialect dialect = DialectResolver.resolveDialect(connection);
+         valuesByKey.put("result", true);
+         valuesByKey.put("orderLimit", false);
+         if (dialect instanceof OrderLimitDialect) {
+            valuesByKey.put("orderLimit", true);
          }
 
-         var3.put("hive", var9.getClass().getName().toLowerCase().indexOf("hive") > -1);
+         valuesByKey.put("hive", dialect.getClass().getName().toLowerCase().indexOf("hive") > -1);
       } finally {
-         this.a(var4);
+         this.closeConnection(connection);
       }
 
-      this.a(var2, var3);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
-   private void a(Connection var1) {
+   private void closeConnection(Connection connection) {
       try {
-         if (var1 != null) {
-            var1.close();
+         if (connection != null) {
+            connection.close();
          }
 
-      } catch (SQLException var3) {
-         throw new RuleException(var3);
+      } catch (SQLException sQLException) {
+         throw new RuleException(sQLException);
       }
    }
 
@@ -416,135 +420,135 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "view",
       model = "batches"
    )
-   public void buildFields(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("sql");
-      String var4 = var1.getParameter("tablename");
-      if (StringUtils.isNotBlank(var3)) {
-         var3 = URLDecoder.decode(var3, "utf-8");
-         boolean var5 = this.a(var3);
-         if (var5) {
+   public void buildFields(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("sql");
+      String parameter2 = req.getParameter("tablename");
+      if (StringUtils.isNotBlank(parameter)) {
+         parameter = URLDecoder.decode(parameter, "utf-8");
+         boolean flag = this.containsUnsafeSqlKeyword(parameter);
+         if (flag) {
             return;
          }
-      } else if (StringUtils.isNotBlank(var4)) {
-         var3 = "select * from " + var4;
+      } else if (StringUtils.isNotBlank(parameter2)) {
+         parameter = "select * from " + parameter2;
       }
 
-      if (!StringUtils.isBlank(var3)) {
-         String var39 = var1.getParameter("datasourceId");
-         if (!StringUtils.isBlank(var39)) {
-            String var6 = var1.getParameter("inputParams");
-            Object var7 = new ArrayList();
-            if (StringUtils.isNotBlank(var6)) {
-               var7 = (List)JsonUtils.getObjectJsonMapper().readValue(var6, new TypeReference() {
+      if (!StringUtils.isBlank(parameter)) {
+         String parameter3 = req.getParameter("datasourceId");
+         if (!StringUtils.isBlank(parameter3)) {
+            String parameter4 = req.getParameter("inputParams");
+            Object objectValue = new ArrayList();
+            if (StringUtils.isNotBlank(parameter4)) {
+               objectValue = (List)JsonUtils.getObjectJsonMapper().readValue(parameter4, new TypeReference() {
                });
             }
 
-            ArrayList var8 = new ArrayList();
-            com.bstek.urule.console.database.model.datasource.DataSource var9 = DataSourceManager.ins.get(Long.parseLong(var39));
-            if (var9 == null) {
-               this.a(var2, var8);
+            ArrayList items = new ArrayList();
+            com.bstek.urule.console.database.model.datasource.DataSource dataSource = DataSourceManager.ins.get(Long.parseLong(parameter3));
+            if (dataSource == null) {
+               this.writeObjectToJson(resp, items);
             } else {
-               DataSource var10 = DataSourceHandlerManager.getDataSource(var9);
-               Connection var11 = var10.getConnection();
+               DataSource dataSource2 = DataSourceHandlerManager.getDataSource(dataSource);
+               Connection connection = dataSource2.getConnection();
 
                try {
-                  Dialect var12 = DialectResolver.resolveDialect(var11);
-                  String var13 = var12.getLimitString(var3, 0, 1);
-                  if (var12 instanceof OrderLimitDialect) {
-                     var13 = var3 + " limit 1";
+                  Dialect dialect = DialectResolver.resolveDialect(connection);
+                  String limitString = dialect.getLimitString(parameter, 0, 1);
+                  if (dialect instanceof OrderLimitDialect) {
+                     limitString = parameter + " limit 1";
                   }
 
-                  ParsedSql var14 = NamedSQLUtils.parseSql(var13);
-                  String var15 = JdbcUtils.getOriginSql(var14.getOriginalSql());
-                  e.debug("builder fields sql:" + var15);
-                  PreparedStatement var16 = var11.prepareStatement(var15);
-                  if (StringUtils.isBlank(var4)) {
-                     ArrayList var17 = new ArrayList();
+                  ParsedSql sql = NamedSQLUtils.parseSql(limitString);
+                  String originSql = JdbcUtils.getOriginSql(sql.getOriginalSql());
+                  BatchesServletHandler.logger.debug("builder fields sql:" + originSql);
+                  PreparedStatement preparedStatement = connection.prepareStatement(originSql);
+                  if (StringUtils.isBlank(parameter2)) {
+                     ArrayList items2 = new ArrayList();
 
-                     for(String var19 : (Iterable<String>)(Iterable<?>)(var14.getParameterNames())) {
-                        DataParam var20 = null;
+                     for(String text : (Iterable<String>)(Iterable<?>)(sql.getParameterNames())) {
+                        DataParam dataParam = null;
 
-                        for(DataParam var22 : (Iterable<DataParam>)(Iterable<?>)(var7)) {
-                           if (var19.equalsIgnoreCase(var22.getName())) {
-                              var20 = var22;
+                        for(DataParam dataParam2 : (Iterable<DataParam>)(Iterable<?>)(objectValue)) {
+                           if (text.equalsIgnoreCase(dataParam2.getName())) {
+                              dataParam = dataParam2;
                               break;
                            }
                         }
 
-                        DataParam var44 = new DataParam();
-                        var44.setName(var19);
-                        if (var20 != null) {
-                           var44.setDataType(var20.getDataType());
-                           String var46 = var44.getDataType();
-                           if (!"String".equals(var46) && !"Char".equals(var46)) {
-                              if ("Integer".equals(var46)) {
-                                 var44.setValue(new Integer(0));
-                              } else if ("Long".equals(var46)) {
-                                 var44.setValue(new Long(0L));
-                              } else if ("Float".equals(var46)) {
-                                 var44.setValue(new Float(0.0F));
-                              } else if ("Double".equals(var46)) {
-                                 var44.setValue(new Double((double)0.0F));
-                              } else if ("BigDecimal".equals(var46)) {
-                                 var44.setValue(new BigDecimal(0));
-                              } else if ("Boolean".equals(var46)) {
-                                 var44.setValue(false);
-                              } else if ("Date".equals(var46)) {
-                                 var44.setValue(new Date());
-                              } else if ("DateTime".equals(var46)) {
-                                 var44.setValue(new Timestamp(System.currentTimeMillis()));
+                        DataParam dataParam3 = new DataParam();
+                        dataParam3.setName(text);
+                        if (dataParam != null) {
+                           dataParam3.setDataType(dataParam.getDataType());
+                           String dataType = dataParam3.getDataType();
+                           if (!"String".equals(dataType) && !"Char".equals(dataType)) {
+                              if ("Integer".equals(dataType)) {
+                                 dataParam3.setValue(new Integer(0));
+                              } else if ("Long".equals(dataType)) {
+                                 dataParam3.setValue(new Long(0L));
+                              } else if ("Float".equals(dataType)) {
+                                 dataParam3.setValue(new Float(0.0F));
+                              } else if ("Double".equals(dataType)) {
+                                 dataParam3.setValue(new Double((double)0.0F));
+                              } else if ("BigDecimal".equals(dataType)) {
+                                 dataParam3.setValue(new BigDecimal(0));
+                              } else if ("Boolean".equals(dataType)) {
+                                 dataParam3.setValue(false);
+                              } else if ("Date".equals(dataType)) {
+                                 dataParam3.setValue(new Date());
+                              } else if ("DateTime".equals(dataType)) {
+                                 dataParam3.setValue(new Timestamp(System.currentTimeMillis()));
                               }
                            } else {
-                              var44.setValue("");
+                              dataParam3.setValue("");
                            }
                         }
 
-                        var17.add(var44);
+                        items2.add(dataParam3);
                      }
 
-                     StmtUtils.setStmtQueryParameters(var14, var17, var16);
+                     StmtUtils.setStmtQueryParameters(sql, items2, preparedStatement);
                   }
 
-                  ResultSet var40 = var16.executeQuery();
-                  ResultSetMetaData var41 = var40.getMetaData();
-                  int var42 = var41.getColumnCount();
+                  ResultSet resultSet = preparedStatement.executeQuery();
+                  ResultSetMetaData metaData = resultSet.getMetaData();
+                  int columnCount = metaData.getColumnCount();
 
-                  for(int var43 = 0; var43 < var42; ++var43) {
-                     String var45 = var41.getColumnLabel(var43 + 1);
-                     if (StringUtils.isBlank(var45)) {
-                        var45 = var41.getColumnName(var43 + 1);
+                  for(int index = 0; index < columnCount; ++index) {
+                     String columnLabel = metaData.getColumnLabel(index + 1);
+                     if (StringUtils.isBlank(columnLabel)) {
+                        columnLabel = metaData.getColumnName(index + 1);
                      }
 
-                     int var47 = var45.lastIndexOf(".");
-                     if (var47 > -1) {
-                        var45 = var45.substring(var47 + 1);
+                     int number = columnLabel.lastIndexOf(".");
+                     if (number > -1) {
+                        columnLabel = columnLabel.substring(number + 1);
                      }
 
-                     if (!"rownum_".equals(var45)) {
-                        int var23 = var41.getColumnType(var43 + 1);
-                        FieldType var24 = JdbcUtils.buildJdbcFieldType(var23);
-                        var8.add(new Field(var45, var24));
+                     if (!"rownum_".equals(columnLabel)) {
+                        int columnType = metaData.getColumnType(index + 1);
+                        FieldType jdbcFieldType = JdbcUtils.buildJdbcFieldType(columnType);
+                        items.add(new Field(columnLabel, jdbcFieldType));
                      }
                   }
 
-                  JdbcUtils.closeResultSet(var40);
-                  JdbcUtils.closeStatement(var16);
-               } catch (Exception var37) {
-                  var37.printStackTrace();
+                  JdbcUtils.closeResultSet(resultSet);
+                  JdbcUtils.closeStatement(preparedStatement);
+               } catch (Exception exception) {
+                  java.util.logging.Logger.getLogger(BatchesServletHandler.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
                } finally {
-                  if (var11 != null) {
+                  if (connection != null) {
                      try {
-                        var11.close();
-                     } catch (SQLException var35) {
-                        throw new RuleException(var35);
-                     } catch (Throwable var36) {
-                        throw new RuleException(var36.getMessage());
+                        connection.close();
+                     } catch (SQLException sQLException) {
+                        throw new RuleException(sQLException);
+                     } catch (Throwable throwable) {
+                        throw new RuleException(throwable.getMessage());
                      }
                   }
 
                }
 
-               this.a(var2, var8);
+               this.writeObjectToJson(resp, items);
             }
          }
       }
@@ -555,41 +559,41 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "manager",
       model = "batches"
    )
-   public void doExport(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("type");
-      ArrayList var4 = new ArrayList();
-      SimpleDateFormat var5 = new SimpleDateFormat("yyyyMMddHHmmss");
-      String var6 = "batchs";
-      if ("all".equals(var3)) {
-         for(Batch var9 : (Iterable<Batch>)(Iterable<?>)(BatchManager.ins.createQuery().projectId(ContextHolder.getProjectId()).list())) {
-            Batch var10 = SchemeService.ins.getBatchData(var9.getId());
-            var4.add(var10);
+   public void doExport(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("type");
+      ArrayList items = new ArrayList();
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+      String text = "batchs";
+      if ("all".equals(parameter)) {
+         for(Batch batch : (Iterable<Batch>)(Iterable<?>)(BatchManager.ins.createQuery().projectId(ContextHolder.getProjectId()).list())) {
+            Batch batchData = SchemeService.ins.getBatchData(batch.getId());
+            items.add(batchData);
          }
       } else {
-         String var16 = var1.getParameter("ids");
-         if (StringUtils.isNotBlank(var16)) {
-            String[] var18 = var16.split(",");
-            if (var18.length == 1) {
-               Batch var19 = SchemeService.ins.getBatchData(Long.valueOf(var18[0].trim()));
-               var6 = var19.getName();
-               var4.add(var19);
+         String parameter2 = req.getParameter("ids");
+         if (StringUtils.isNotBlank(parameter2)) {
+            String[] parts = parameter2.split(",");
+            if (parts.length == 1) {
+               Batch batchData2 = SchemeService.ins.getBatchData(Long.valueOf(parts[0].trim()));
+               text = batchData2.getName();
+               items.add(batchData2);
             } else {
-               for(String var12 : var18) {
-                  Batch var13 = SchemeService.ins.getBatchData(Long.valueOf(var12));
-                  var4.add(var13);
+               for(String text2 : parts) {
+                  Batch batchData3 = SchemeService.ins.getBatchData(Long.valueOf(text2));
+                  items.add(batchData3);
                }
             }
          }
       }
 
-      var6 = var6 + "-" + var5.format(new Date()) + ".batch.bak";
-      var2.setContentType("application/octet-stream;charset=ISO8859-1");
-      var6 = new String(var6.getBytes("UTF-8"), "ISO8859-1");
-      var2.setHeader("Content-Disposition", "attachment;filename=\"" + var6 + "\"");
-      ServletOutputStream var17 = var2.getOutputStream();
-      BatchExport.ins.doExport((OutputStream)var17, var4);
-      var17.flush();
-      var17.close();
+      text = text + "-" + simpleDateFormat.format(new Date()) + ".batch.bak";
+      resp.setContentType("application/octet-stream;charset=ISO8859-1");
+      text = new String(text.getBytes("UTF-8"), "ISO8859-1");
+      resp.setHeader("Content-Disposition", "attachment;filename=\"" + text + "\"");
+      ServletOutputStream outputStream = resp.getOutputStream();
+      BatchExport.ins.doExport((OutputStream)outputStream, items);
+      outputStream.flush();
+      outputStream.close();
    }
 
    @Transactional
@@ -598,13 +602,13 @@ public class BatchesServletHandler extends ApiServletHandler {
       code = "manager",
       model = "batches"
    )
-   public void doImport(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = Long.parseLong(var1.getParameter("projectId"));
-      Project var4 = ProjectManager.ins.get(var3);
-      UploadFile var5 = FileUtils.uploadFile(var1);
-      InputStream var6 = var5.getInputStream();
-      BatchImport.ins.doImport(var6, var4);
-      IOUtils.closeQuietly(var6);
+   public void doImport(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long longValue = Long.parseLong(req.getParameter("projectId"));
+      Project project = ProjectManager.ins.get(longValue);
+      UploadFile uploadFile = FileUtils.uploadFile(req);
+      InputStream inputStream = uploadFile.getInputStream();
+      BatchImport.ins.doImport(inputStream, project);
+      IOUtils.closeQuietly(inputStream);
    }
 
    public String url() {

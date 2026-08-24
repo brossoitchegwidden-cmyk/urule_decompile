@@ -3,19 +3,19 @@ package com.bstek.urule.runtime.rete;
 import java.util.List;
 
 public class MutexReteInstanceUnit extends ReteInstanceUnit {
-   private String a;
-   private List<ReteInstance> b;
+   private String mutexGroupName;
+   private List<ReteInstance> reteInstances;
 
-   public MutexReteInstanceUnit(String var1, List<ReteInstance> var2) {
-      this.a = var1;
-      this.b = var2;
+   public MutexReteInstanceUnit(String mutexGroupName, List<ReteInstance> reteInstances) {
+      this.mutexGroupName = mutexGroupName;
+      this.reteInstances = reteInstances;
    }
 
    public String getMutexGroupName() {
-      return this.a;
+      return this.mutexGroupName;
    }
 
    public List<ReteInstance> getReteInstances() {
-      return this.b;
+      return this.reteInstances;
    }
 }

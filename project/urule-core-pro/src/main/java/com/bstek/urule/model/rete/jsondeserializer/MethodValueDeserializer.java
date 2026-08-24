@@ -8,21 +8,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class MethodValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      MethodValue var2 = new MethodValue();
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      var2.setBeanId(JsonUtils.getJsonValue(var1, "beanId"));
-      var2.setUuid(JsonUtils.getJsonValue(var1, "uuid"));
-      var2.setCategoryUuid(JsonUtils.getJsonValue(var1, "categoryUuid"));
-      var2.setBeanLabel(JsonUtils.getJsonValue(var1, "beanLabel"));
-      var2.setMethodLabel(JsonUtils.getJsonValue(var1, "methodLabel"));
-      var2.setMethodName(JsonUtils.getJsonValue(var1, "methodName"));
-      var2.setParameters(JsonUtils.parseParameters(var1));
-      return var2;
+   public Value deserialize(JsonNode jsonNode) {
+      MethodValue methodValue = new MethodValue();
+      methodValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      methodValue.setBeanId(JsonUtils.getJsonValue(jsonNode, "beanId"));
+      methodValue.setUuid(JsonUtils.getJsonValue(jsonNode, "uuid"));
+      methodValue.setCategoryUuid(JsonUtils.getJsonValue(jsonNode, "categoryUuid"));
+      methodValue.setBeanLabel(JsonUtils.getJsonValue(jsonNode, "beanLabel"));
+      methodValue.setMethodLabel(JsonUtils.getJsonValue(jsonNode, "methodLabel"));
+      methodValue.setMethodName(JsonUtils.getJsonValue(jsonNode, "methodName"));
+      methodValue.setParameters(JsonUtils.parseParameters(jsonNode));
+      return methodValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.Method);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.Method);
    }
 }

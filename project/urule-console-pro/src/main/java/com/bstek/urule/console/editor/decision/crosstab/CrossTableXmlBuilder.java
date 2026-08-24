@@ -28,300 +28,301 @@ import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.dom4j.Document;
 
+/** Converts imported cross-table data into the canonical crosstab XML model. */
 public class CrossTableXmlBuilder {
-   private CrossData a;
-   private ExcelSupport b;
-   private DSLRuleSetBuilder c;
-   private CrosstableDeserializer d;
+   private CrossData crossData;
+   private ExcelSupport excelSupport;
+   private DSLRuleSetBuilder dSLRuleSetBuilder;
+   private CrosstableDeserializer crosstableDeserializer;
 
-   public CrossTableXmlBuilder(CrossData var1) {
-      this.a = var1;
-      this.b = new ExcelSupport();
-      this.c = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
-      this.d = (CrosstableDeserializer)Utils.getApplicationContext().getBean("urule.crosstableDeserializer");
+   public CrossTableXmlBuilder(CrossData data) {
+      this.crossData = data;
+      this.excelSupport = new ExcelSupport();
+      this.dSLRuleSetBuilder = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
+      this.crosstableDeserializer = (CrosstableDeserializer)Utils.getApplicationContext().getBean("urule.crosstableDeserializer");
    }
 
    public CrosstabDefinition doBuild() throws Exception {
-      String var1 = this.a();
-      Document var2 = DocumentHelper.parseText(var1);
-      return this.d.deserialize(var2.getRootElement());
+      String xml = this.buildXml();
+      Document document = DocumentHelper.parseText(xml);
+      return this.crosstableDeserializer.deserialize(document.getRootElement());
    }
 
-   private String a(Variable var1, VariableCategory var2, Variable var3) {
-      StringBuilder var4 = new StringBuilder();
-      var4.append(" bundle-data-type=\"parameter\" category-uuid=\"参数\" uuid=\"" + var1.getUuid() + "\" var-category=\"" + "参数" + "\"");
-      var4.append(" var=\"" + var1.getName() + "\" var-label=\"" + var1.getLabel() + "\" dataType=\"" + var1.getDataType() + "\"");
-      var4.append(" key-category-uuid=\"" + var2.getUuid() + "\" key-uuid=\"" + var3.getUuid() + "\" key-label=\"" + var3.getLabel() + "\" key-name=\"" + var3.getName() + "\"");
-      return var4.toString();
+   private String buildNestedParameterAttributes(Variable variable, VariableCategory keyCategory, Variable keyVariable) {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append(" bundle-data-type=\"parameter\" category-uuid=\"参数\" uuid=\"" + variable.getUuid() + "\" var-category=\"" + "参数" + "\"");
+      stringBuilder.append(" var=\"" + variable.getName() + "\" var-label=\"" + variable.getLabel() + "\" dataType=\"" + variable.getDataType() + "\"");
+      stringBuilder.append(" key-category-uuid=\"" + keyCategory.getUuid() + "\" key-uuid=\"" + keyVariable.getUuid() + "\" key-label=\"" + keyVariable.getLabel() + "\" key-name=\"" + keyVariable.getName() + "\"");
+      return stringBuilder.toString();
    }
 
-   private String a(Variable var1) {
-      StringBuilder var2 = new StringBuilder();
-      var2.append(" bundle-data-type=\"parameter\" category-uuid=\"参数\" uuid=\"" + var1.getUuid() + "\" var-category=\"" + "参数" + "\"");
-      var2.append(" var=\"" + var1.getName() + "\" var-label=\"" + var1.getLabel() + "\" dataType=\"" + var1.getDataType() + "\"");
-      return var2.toString();
+   private String buildParameterAttributes(Variable variable) {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append(" bundle-data-type=\"parameter\" category-uuid=\"参数\" uuid=\"" + variable.getUuid() + "\" var-category=\"" + "参数" + "\"");
+      stringBuilder.append(" var=\"" + variable.getName() + "\" var-label=\"" + variable.getLabel() + "\" dataType=\"" + variable.getDataType() + "\"");
+      return stringBuilder.toString();
    }
 
-   private String a(String var1, String var2, Variable var3) {
-      return " bundle-data-type=\"" + var1 + "\" var-category=\"" + var2 + "\" var=\"" + var3.getName() + "\" var-label=\"" + var3.getLabel() + "\" datatype=\"" + var3.getType().name() + "\"";
+   private String buildVariableAttributes(String bundleDataType, String variableCategory, Variable variable) {
+      return " bundle-data-type=\"" + bundleDataType + "\" var-category=\"" + variableCategory + "\" var=\"" + variable.getName() + "\" var-label=\"" + variable.getLabel() + "\" datatype=\"" + variable.getType().name() + "\"";
    }
 
-   private String a(String var1, String var2) {
-      if (StringUtils.isBlank(var2)) {
-         var2 = "";
+   private String buildPredefineAttributes(String predefineUuid, String propertyUuid) {
+      if (StringUtils.isBlank(propertyUuid)) {
+         propertyUuid = "";
       }
 
-      return " bundle-data-type=\"predefine\" predefine-uuid=\"" + var1 + "\" predefine-property-uuid=\"" + var2 + "\"";
+      return " bundle-data-type=\"predefine\" predefine-uuid=\"" + predefineUuid + "\" predefine-property-uuid=\"" + propertyUuid + "\"";
    }
 
-   private String a() throws Exception {
-      StringBuilder var1 = new StringBuilder();
-      var1.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      CrossHeader var2 = this.a.getHeader();
-      var1.append("<crosstab");
-      ExcelImportUtils.builderProperties(this.b, var1, this.a.getProperties(), true);
-      var1.append(">");
-      ExcelImportUtils.builderRemark(var1, this.a.getProperties());
-      HashMap var3 = new HashMap();
-      ExcelImportUtils.builderPredefineXml(var1, ExcelImportUtils.getPredefineGroupPriority(this.a.getProperties()), this.a.getPredefineRows(), this.a.getPredefineNameMap(), this.b, var3);
-      String var4 = var2.getContent();
-      var4 = var4 == null ? "表头" : var4;
-      var1.append("<header rowspan=\"" + var2.getRowSpan() + "\" colspan=\"" + var2.getColSpan() + "\"><![CDATA[" + var4 + "]]></header>");
+   private String buildXml() throws Exception {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+      CrossHeader header = this.crossData.getHeader();
+      stringBuilder.append("<crosstab");
+      ExcelImportUtils.builderProperties(this.excelSupport, stringBuilder, this.crossData.getProperties(), true);
+      stringBuilder.append(">");
+      ExcelImportUtils.builderRemark(stringBuilder, this.crossData.getProperties());
+      HashMap valuesByKey = new HashMap();
+      ExcelImportUtils.builderPredefineXml(stringBuilder, ExcelImportUtils.getPredefineGroupPriority(this.crossData.getProperties()), this.crossData.getPredefineRows(), this.crossData.getPredefineNameMap(), this.excelSupport, valuesByKey);
+      String content = header.getContent();
+      content = content == null ? "表头" : content;
+      stringBuilder.append("<header rowspan=\"" + header.getRowSpan() + "\" colspan=\"" + header.getColSpan() + "\"><![CDATA[" + content + "]]></header>");
 
-      for(CrossRow var6 : (Iterable<CrossRow>)(Iterable<?>)(this.a.getRows())) {
-         var1.append("<row number=\"" + var6.getNumber() + "\" type=\"" + var6.getType() + "\"");
-         String var7 = var6.getContent();
-         if (StringUtils.isNotBlank(var7)) {
-            boolean var8 = var6.isPredefine();
-            if (var8) {
-               String[] var9 = var7.split("\\.");
-               PredefineRow var10 = (PredefineRow)this.a.getPredefineNameMap().get(var9[0]);
-               if (var9.length == 2) {
-                  var9[0] = var10.getType();
-                  Variable var11 = this.b.findVariable(var9);
-                  var1.append(this.a(var10.getUuid(), var11.getUuid()));
+      for(CrossRow crossRow : (Iterable<CrossRow>)(Iterable<?>)(this.crossData.getRows())) {
+         stringBuilder.append("<row number=\"" + crossRow.getNumber() + "\" type=\"" + crossRow.getType() + "\"");
+         String content2 = crossRow.getContent();
+         if (StringUtils.isNotBlank(content2)) {
+            boolean flag = crossRow.isPredefine();
+            if (flag) {
+               String[] parts = content2.split("\\.");
+               PredefineRow predefineRow = (PredefineRow)this.crossData.getPredefineNameMap().get(parts[0]);
+               if (parts.length == 2) {
+                  parts[0] = predefineRow.getType();
+                  Variable variable = this.excelSupport.findVariable(parts);
+                  stringBuilder.append(this.buildPredefineAttributes(predefineRow.getUuid(), variable.getUuid()));
                } else {
-                  var1.append(this.a(var10.getUuid(), ""));
+                  stringBuilder.append(this.buildPredefineAttributes(predefineRow.getUuid(), ""));
                }
             } else {
-               String[] var24 = this.a(var7);
-               String var28 = var24[0];
-               Variable var32 = this.b.findVariable(var24, true);
-               VariableCategory var12 = null;
-               if (ExcelSupport.isParameter(var28)) {
-                  if (var24.length > 2) {
-                     var12 = this.b.findVariableCategoryByUUID(var32.getDataType());
+               String[] values = this.splitHeaderReference(content2);
+               String text = values[0];
+               Variable variable2 = this.excelSupport.findVariable(values, true);
+               VariableCategory variableCategory = null;
+               if (ExcelSupport.isParameter(text)) {
+                  if (values.length > 2) {
+                     variableCategory = this.excelSupport.findVariableCategoryByUUID(variable2.getDataType());
                   } else {
-                     var32 = this.b.findVariable(var24, true);
+                     variable2 = this.excelSupport.findVariable(values, true);
                   }
                } else {
-                  var32 = this.b.findVariable(var24, true);
+                  variable2 = this.excelSupport.findVariable(values, true);
                }
 
-               String var13 = "variable";
-               if (ExcelSupport.isParameter(var28)) {
-                  var13 = "parameter";
-                  if (var24.length > 2 && var12 != null) {
-                     Variable var14 = (Variable)var12.getVariableLabels().get(var24[2]);
-                     var1.append(this.a(var14, var12, var32));
+               String text2 = "variable";
+               if (ExcelSupport.isParameter(text)) {
+                  text2 = "parameter";
+                  if (values.length > 2 && variableCategory != null) {
+                     Variable variable3 = (Variable)variableCategory.getVariableLabels().get(values[2]);
+                     stringBuilder.append(this.buildNestedParameterAttributes(variable3, variableCategory, variable2));
                   } else {
-                     var1.append(this.a(var32));
+                     stringBuilder.append(this.buildParameterAttributes(variable2));
                   }
                } else {
-                  var1.append(this.a(var13, var28, var32));
+                  stringBuilder.append(this.buildVariableAttributes(text2, text, variable2));
                }
             }
          }
 
-         var1.append("/>");
+         stringBuilder.append("/>");
       }
 
-      for(CrossColumn var18 : (Iterable<CrossColumn>)(Iterable<?>)(this.a.getColumns())) {
-         var1.append("<column number=\"" + var18.getNumber() + "\" type=\"" + var18.getType() + "\"");
-         String var20 = var18.getContent();
-         if (StringUtils.isNotBlank(var20)) {
-            boolean var22 = var18.isPredefine();
-            if (var22) {
-               String[] var25 = var20.split("\\.");
-               PredefineRow var29 = (PredefineRow)this.a.getPredefineNameMap().get(var25[0]);
-               if (var25.length == 2) {
-                  var25[0] = var29.getType();
-                  Variable var33 = this.b.findVariable(var25);
-                  var1.append(this.a(var29.getUuid(), var33.getUuid()));
+      for(CrossColumn crossColumn : (Iterable<CrossColumn>)(Iterable<?>)(this.crossData.getColumns())) {
+         stringBuilder.append("<column number=\"" + crossColumn.getNumber() + "\" type=\"" + crossColumn.getType() + "\"");
+         String content3 = crossColumn.getContent();
+         if (StringUtils.isNotBlank(content3)) {
+            boolean flag2 = crossColumn.isPredefine();
+            if (flag2) {
+               String[] parts2 = content3.split("\\.");
+               PredefineRow predefineRow2 = (PredefineRow)this.crossData.getPredefineNameMap().get(parts2[0]);
+               if (parts2.length == 2) {
+                  parts2[0] = predefineRow2.getType();
+                  Variable variable4 = this.excelSupport.findVariable(parts2);
+                  stringBuilder.append(this.buildPredefineAttributes(predefineRow2.getUuid(), variable4.getUuid()));
                } else {
-                  var1.append(this.a(var29.getUuid(), ""));
+                  stringBuilder.append(this.buildPredefineAttributes(predefineRow2.getUuid(), ""));
                }
             } else {
-               String[] var26 = this.a(var20);
-               String var30 = var26[0];
-               Variable var34 = this.b.findVariable(var26, true);
-               VariableCategory var36 = null;
-               if (ExcelSupport.isParameter(var30)) {
-                  if (var26.length > 2) {
-                     var36 = this.b.findVariableCategoryByUUID(var34.getDataType());
+               String[] values2 = this.splitHeaderReference(content3);
+               String text3 = values2[0];
+               Variable variable5 = this.excelSupport.findVariable(values2, true);
+               VariableCategory variableCategoryByUUID = null;
+               if (ExcelSupport.isParameter(text3)) {
+                  if (values2.length > 2) {
+                     variableCategoryByUUID = this.excelSupport.findVariableCategoryByUUID(variable5.getDataType());
                   } else {
-                     var34 = this.b.findVariable(var26, true);
+                     variable5 = this.excelSupport.findVariable(values2, true);
                   }
                } else {
-                  var34 = this.b.findVariable(var26, true);
+                  variable5 = this.excelSupport.findVariable(values2, true);
                }
 
-               String var40 = "variable";
-               if (ExcelSupport.isParameter(var30)) {
-                  var40 = "parameter";
-                  if (var26.length > 2 && var36 != null) {
-                     Variable var43 = (Variable)var36.getVariableLabels().get(var26[2]);
-                     var1.append(this.a(var43, var36, var34));
+               String text4 = "variable";
+               if (ExcelSupport.isParameter(text3)) {
+                  text4 = "parameter";
+                  if (values2.length > 2 && variableCategoryByUUID != null) {
+                     Variable variable6 = (Variable)variableCategoryByUUID.getVariableLabels().get(values2[2]);
+                     stringBuilder.append(this.buildNestedParameterAttributes(variable6, variableCategoryByUUID, variable5));
                   } else {
-                     var1.append(this.a(var34));
+                     stringBuilder.append(this.buildParameterAttributes(variable5));
                   }
                } else {
-                  var1.append(this.a(var40, var30, var34));
+                  stringBuilder.append(this.buildVariableAttributes(text4, text3, variable5));
                }
             }
          }
 
-         var1.append("/>");
+         stringBuilder.append("/>");
       }
 
-      for(CellContent var19 : (Iterable<CellContent>)(Iterable<?>)(this.a.getCells())) {
-         String var21 = var19.getType();
-         String var23 = "condition-cell";
-         if (var21.equals("value")) {
-            var23 = "value-cell";
+      for(CellContent cellContent : (Iterable<CellContent>)(Iterable<?>)(this.crossData.getCells())) {
+         String type = cellContent.getType();
+         String text5 = "condition-cell";
+         if (type.equals("value")) {
+            text5 = "value-cell";
          }
 
-         var1.append("<");
-         var1.append(var23);
-         int var27 = 1;
-         int var31 = 1;
-         boolean var35 = false;
-         if (var19.getRow() <= this.a.getHeader().getRowSpan()) {
-            var31 = var19.getSpan();
-            var35 = true;
+         stringBuilder.append("<");
+         stringBuilder.append(text5);
+         int span = 1;
+         int span2 = 1;
+         boolean flag3 = false;
+         if (cellContent.getRow() <= this.crossData.getHeader().getRowSpan()) {
+            span2 = cellContent.getSpan();
+            flag3 = true;
          }
 
-         if (var19.getCol() <= this.a.getHeader().getColSpan()) {
-            var27 = var19.getSpan();
-            var35 = true;
+         if (cellContent.getCol() <= this.crossData.getHeader().getColSpan()) {
+            span = cellContent.getSpan();
+            flag3 = true;
          }
 
-         var1.append(" row=\"" + var19.getRow() + "\" col=\"" + var19.getCol() + "\"");
-         if (var35) {
-            var1.append(" rowspan=\"" + var27 + "\" colspan=\"" + var31 + "\"");
+         stringBuilder.append(" row=\"" + cellContent.getRow() + "\" col=\"" + cellContent.getCol() + "\"");
+         if (flag3) {
+            stringBuilder.append(" rowspan=\"" + span + "\" colspan=\"" + span2 + "\"");
          }
 
-         var1.append(">");
-         String var37 = var19.getContent();
-         if (StringUtils.isNotBlank(var37)) {
-            if (var35) {
-               Criterion var42 = this.c.buildCriterion(var37);
-               var1.append(this.a(var42));
+         stringBuilder.append(">");
+         String content4 = cellContent.getContent();
+         if (StringUtils.isNotBlank(content4)) {
+            if (flag3) {
+               Criterion criterion = this.dSLRuleSetBuilder.buildCriterion(content4);
+               stringBuilder.append(this.buildCriterionXml(criterion));
             } else {
-               var37 = StringEscapeUtils.escapeXml(var37);
-               var1.append(ExcelImportUtils.buildContentXml(var37, true));
+               content4 = StringEscapeUtils.escapeXml(content4);
+               stringBuilder.append(ExcelImportUtils.buildContentXml(content4, true));
             }
          }
 
-         var1.append("");
-         var1.append("</");
-         var1.append(var23);
-         var1.append(">");
+         stringBuilder.append("");
+         stringBuilder.append("</");
+         stringBuilder.append(text5);
+         stringBuilder.append(">");
       }
 
-      ExcelImportUtils.builderLibraryXml(var1, this.b);
-      var1.append("");
-      var1.append("");
-      var1.append("");
-      var1.append("");
-      var1.append("");
-      var1.append("</crosstab>");
-      return var1.toString();
+      ExcelImportUtils.builderLibraryXml(stringBuilder, this.excelSupport);
+      stringBuilder.append("");
+      stringBuilder.append("");
+      stringBuilder.append("");
+      stringBuilder.append("");
+      stringBuilder.append("");
+      stringBuilder.append("</crosstab>");
+      return stringBuilder.toString();
    }
 
-   private String a(Criterion var1) {
-      StringBuilder var2 = new StringBuilder();
-      if (var1 instanceof Junction) {
-         Junction var3 = (Junction)var1;
-         List var4 = var3.getCriterions();
-         String var5 = "and";
-         if (var3 instanceof Or) {
-            var5 = "or";
+   private String buildCriterionXml(Criterion criterion) {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (criterion instanceof Junction) {
+         Junction junction = (Junction)criterion;
+         List criterions = junction.getCriterions();
+         String text = "and";
+         if (junction instanceof Or) {
+            text = "or";
          }
 
-         var2.append("<joint type=\"" + var5 + "\">");
-         if (var4 != null) {
-            for(Criterion var7 : (Iterable<Criterion>)(Iterable<?>)(var4)) {
-               if (var7 instanceof Criteria) {
-                  Criteria var8 = (Criteria)var7;
-                  var2.append("<condition op=\"" + var8.getOp().name() + "\">");
-                  Value var9 = var8.getValue();
-                  var2.append(this.a(var9));
-                  var2.append("</condition>");
+         stringBuilder.append("<joint type=\"" + text + "\">");
+         if (criterions != null) {
+            for(Criterion criterion2 : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+               if (criterion2 instanceof Criteria) {
+                  Criteria criteria = (Criteria)criterion2;
+                  stringBuilder.append("<condition op=\"" + criteria.getOp().name() + "\">");
+                  Value localValue = criteria.getValue();
+                  stringBuilder.append(this.buildValueXml(localValue));
+                  stringBuilder.append("</condition>");
                }
             }
          }
       } else {
-         var2.append("<joint type=\"and\">");
-         Criteria var10 = (Criteria)var1;
-         var2.append("<condition op=\"" + var10.getOp().name() + "\">");
-         Value var11 = var10.getValue();
-         String var12 = this.a(var11);
-         if (var12 != null) {
-            var2.append(var12);
+         stringBuilder.append("<joint type=\"and\">");
+         Criteria criteria2 = (Criteria)criterion;
+         stringBuilder.append("<condition op=\"" + criteria2.getOp().name() + "\">");
+         Value localValue2 = criteria2.getValue();
+         String valueXml = this.buildValueXml(localValue2);
+         if (valueXml != null) {
+            stringBuilder.append(valueXml);
          }
 
-         var2.append("</condition>");
+         stringBuilder.append("</condition>");
       }
 
-      var2.append("</joint>");
-      return var2.toString();
+      stringBuilder.append("</joint>");
+      return stringBuilder.toString();
    }
 
-   private String a(Value var1) {
-      if (var1 == null) {
+   private String buildValueXml(Value value) {
+      if (value == null) {
          return null;
       } else {
-         StringBuilder var2 = new StringBuilder();
-         if (var1 instanceof SimpleValue) {
-            SimpleValue var3 = (SimpleValue)var1;
-            String var4 = StringEscapeUtils.escapeXml(var3.getContent());
-            var2.append(ExcelImportUtils.buildContentXml(var4));
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var6 = (VariableCategoryValue)var1;
-            String var9 = var6.getVariableCategory();
-            String var5 = StringEscapeUtils.escapeXml(var9);
-            var2.append(ExcelImportUtils.buildContentXml(var5));
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var7 = (VariableValue)var1;
-            String var10 = var7.getVariableCategory() + "." + var7.getVariableLabel();
-            var10 = StringEscapeUtils.escapeXml(var10);
-            var2.append(ExcelImportUtils.buildContentXml(var10));
+         StringBuilder stringBuilder = new StringBuilder();
+         if (value instanceof SimpleValue) {
+            SimpleValue simpleValue = (SimpleValue)value;
+            String text = StringEscapeUtils.escapeXml(simpleValue.getContent());
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text));
+         } else if (value instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)value;
+            String variableCategory = variableCategoryValue.getVariableCategory();
+            String text2 = StringEscapeUtils.escapeXml(variableCategory);
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text2));
+         } else if (value instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)value;
+            String text3 = variableValue.getVariableCategory() + "." + variableValue.getVariableLabel();
+            text3 = StringEscapeUtils.escapeXml(text3);
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text3));
          } else {
-            var2.append(ExcelImportUtils.buildContentXml((String)null));
+            stringBuilder.append(ExcelImportUtils.buildContentXml((String)null));
          }
 
-         ComplexArithmetic var8 = var1.getArithmetic();
-         if (var8 == null) {
-            var2.append("</value>");
-            return var2.toString();
+         ComplexArithmetic arithmetic = value.getArithmetic();
+         if (arithmetic == null) {
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          } else {
-            ArithmeticType var12 = var8.getType();
-            var2.append("<complex-arith type=\"" + var12.name() + "\">");
-            var2.append(this.a(var8.getValue()));
-            var2.append("</complex-arith>");
-            var2.append("</value>");
-            return var2.toString();
+            ArithmeticType type = arithmetic.getType();
+            stringBuilder.append("<complex-arith type=\"" + type.name() + "\">");
+            stringBuilder.append(this.buildValueXml(arithmetic.getValue()));
+            stringBuilder.append("</complex-arith>");
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          }
       }
    }
 
-   private String[] a(String var1) {
-      String[] var2 = var1.split("\\.");
-      if (var2.length < 2) {
-         throw new InfoException("表头[" + var1 + "]不合法！");
+   private String[] splitHeaderReference(String headerText) {
+      String[] parts = headerText.split("\\.");
+      if (parts.length < 2) {
+         throw new InfoException("表头[" + headerText + "]不合法！");
       } else {
-         return var2;
+         return parts;
       }
    }
 }

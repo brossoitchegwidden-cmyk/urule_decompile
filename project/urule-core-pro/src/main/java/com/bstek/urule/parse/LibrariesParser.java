@@ -5,31 +5,31 @@ import com.bstek.urule.model.rule.LibraryType;
 import org.dom4j.Element;
 
 public abstract class LibrariesParser<T> implements Parser<T> {
-   protected Library a(Element var1) {
-      String var2 = var1.getName();
-      LibraryType var3 = null;
-      if (var2.equals("import-variable-library")) {
-         var3 = LibraryType.Variable;
-      } else if (var2.equals("import-constant-library")) {
-         var3 = LibraryType.Constant;
-      } else if (var2.equals("import-action-library")) {
-         var3 = LibraryType.Action;
-      } else if (var2.equals("import-parameter-library")) {
-         var3 = LibraryType.Parameter;
-      } else if (var2.contentEquals("condition-template-library")) {
-         var3 = LibraryType.ConditionTemplate;
-      } else if (var2.contentEquals("action-template-library")) {
-         var3 = LibraryType.ActionTemplate;
+   protected Library parseLibrary(Element ele) {
+      String name = ele.getName();
+      LibraryType libraryType = null;
+      if (name.equals("import-variable-library")) {
+         libraryType = LibraryType.Variable;
+      } else if (name.equals("import-constant-library")) {
+         libraryType = LibraryType.Constant;
+      } else if (name.equals("import-action-library")) {
+         libraryType = LibraryType.Action;
+      } else if (name.equals("import-parameter-library")) {
+         libraryType = LibraryType.Parameter;
+      } else if (name.contentEquals("condition-template-library")) {
+         libraryType = LibraryType.ConditionTemplate;
+      } else if (name.contentEquals("action-template-library")) {
+         libraryType = LibraryType.ActionTemplate;
       }
 
-      if (var3 == null) {
+      if (libraryType == null) {
          return null;
       }
 
-      String var4 = var1.attributeValue("path");
-      String var5 = var1.attributeValue("version");
-      String var6 = var1.attributeValue("id");
-      long var7 = Long.valueOf(var6);
-      return new Library(var7, var4, var5, var3);
+      String text = ele.attributeValue("path");
+      String text2 = ele.attributeValue("version");
+      String text3 = ele.attributeValue("id");
+      long longValue = Long.valueOf(text3);
+      return new Library(longValue, text, text2, libraryType);
    }
 }

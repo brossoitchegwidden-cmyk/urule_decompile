@@ -13,111 +13,111 @@ import java.util.List;
 import java.util.Map;
 
 public class MonitorManager {
-   private LogManager a;
-   private long b;
-   private FactManager c;
-   private Collection<InvokeMonitor> d;
-   private Map<String, MonitorDataImpl> e = new HashMap<>();
-   private List<KnowledgePackage> f;
+   private LogManager logManager;
+   private long totalDuration;
+   private FactManager factManager;
+   private Collection<InvokeMonitor> invokeMonitors;
+   private Map<String, MonitorDataImpl> monitorDataByPackageId = new HashMap<>();
+   private List<KnowledgePackage> knowledgePackageList;
 
-   public MonitorManager(KnowledgeSession var1) {
-      this.a = var1.getLogManager();
-      this.c = var1.getFactManager();
-      this.f = var1.getKnowledgePackageList();
-      this.d = Utils.getApplicationContext().getBeansOfType(InvokeMonitor.class).values();
+   public MonitorManager(KnowledgeSession knowledgeSession) {
+      this.logManager = knowledgeSession.getLogManager();
+      this.factManager = knowledgeSession.getFactManager();
+      this.knowledgePackageList = knowledgeSession.getKnowledgePackageList();
+      this.invokeMonitors = Utils.getApplicationContext().getBeansOfType(InvokeMonitor.class).values();
    }
 
-   public void doMonitorInputData(Map<String, Object> var1) {
-      if (this.d.size() != 0) {
-         for (KnowledgePackage var3 : this.f) {
-            if (var3.isMonitor()) {
-               MonitorDataImpl var4 = new MonitorDataImpl();
-               var4.setPackageInfo(var3.getPackageInfo());
-               List var5 = var3.getInputData();
-               List var6 = this.a(var5, var3.getVariableCateogoryMap(), var1, true);
-               var4.setInputData(var6);
-               this.e.put(var3.getId(), var4);
+   public void doMonitorInputData(Map<String, Object> sessionParameters) {
+      if (this.invokeMonitors.size() != 0) {
+         for (KnowledgePackage knowledgePackage : this.knowledgePackageList) {
+            if (knowledgePackage.isMonitor()) {
+               MonitorDataImpl monitorDataImpl = new MonitorDataImpl();
+               monitorDataImpl.setPackageInfo(knowledgePackage.getPackageInfo());
+               List inputData = knowledgePackage.getInputData();
+               List items = this.buildIoData(inputData, knowledgePackage.getVariableCateogoryMap(), sessionParameters, true);
+               monitorDataImpl.setInputData(items);
+               this.monitorDataByPackageId.put(knowledgePackage.getId(), monitorDataImpl);
             }
          }
       }
    }
 
-   public void doMonitor(Map<String, Object> var1) {
-      if (this.d.size() != 0) {
-         for (KnowledgePackage var3 : this.f) {
-            if (var3.isMonitor()) {
-               MonitorDataImpl var4 = this.e.get(var3.getId());
-               var4.addMatchedRuleList(this.a.buildMatchedRuleLog());
-               var4.addNotMatchRuleList(this.a.buildNotMatchRuleData());
-               var4.addLogs(this.a.getLogger().getLogs());
-               var4.setVersion(var3.getVersion());
-               List var5 = var3.getOutputData();
-               List var6 = this.a(var5, var3.getVariableCateogoryMap(), var1, false);
-               var4.setOutputData(var6);
-               var4.setTotalDuration(this.b);
+   public void doMonitor(Map<String, Object> sessionParameters) {
+      if (this.invokeMonitors.size() != 0) {
+         for (KnowledgePackage knowledgePackage : this.knowledgePackageList) {
+            if (knowledgePackage.isMonitor()) {
+               MonitorDataImpl monitorDataImpl = this.monitorDataByPackageId.get(knowledgePackage.getId());
+               monitorDataImpl.addMatchedRuleList(this.logManager.buildMatchedRuleLog());
+               monitorDataImpl.addNotMatchRuleList(this.logManager.buildNotMatchRuleData());
+               monitorDataImpl.addLogs(this.logManager.getLogger().getLogs());
+               monitorDataImpl.setVersion(knowledgePackage.getVersion());
+               List outputData = knowledgePackage.getOutputData();
+               List items = this.buildIoData(outputData, knowledgePackage.getVariableCateogoryMap(), sessionParameters, false);
+               monitorDataImpl.setOutputData(items);
+               monitorDataImpl.setTotalDuration(this.totalDuration);
 
-               for (InvokeMonitor var8 : this.d) {
-                  var8.doMonitor(var4);
+               for (InvokeMonitor invokeMonitor : this.invokeMonitors) {
+                  invokeMonitor.doMonitor(monitorDataImpl);
                }
             }
          }
 
-         this.e.clear();
+         this.monitorDataByPackageId.clear();
       }
    }
 
-   private List<IOData> a(List<MonitorObject> var1, Map<String, String> var2, Map<String, Object> var3, boolean var4) {
-      ArrayList var5 = new ArrayList();
-      Map var6 = this.c.getFactMap();
+   private List<IOData> buildIoData(List<MonitorObject> monitorObjects, Map<String, String> valuesByKey, Map<String, Object> valuesByKey2, boolean flag) {
+      ArrayList items = new ArrayList();
+      Map factMap = this.factManager.getFactMap();
 
-      for (MonitorObject var8 : var1) {
-         Object var9 = null;
-         String var10 = null;
-         if (var8.getName().equals("参数")) {
-            var9 = var3;
-            var10 = HashMap.class.getName();
+      for (MonitorObject monitorObject : monitorObjects) {
+         Object objectValue = null;
+         String name2 = null;
+         if (monitorObject.getName().equals("参数")) {
+            objectValue = valuesByKey2;
+            name2 = HashMap.class.getName();
          } else {
-            var10 = (String)var2.get(var8.getName());
-            if (var10 == null) {
-               if (var4) {
-                  throw new RuleException("构建监控输入数据时，对象[" + var8.getName() + "]不存在！");
+            name2 = (String)valuesByKey.get(monitorObject.getName());
+            if (name2 == null) {
+               if (flag) {
+                  throw new RuleException("构建监控输入数据时，对象[" + monitorObject.getName() + "]不存在！");
                }
 
-               throw new RuleException("构建监控输出数据时，对象[" + var8.getName() + "]不存在！");
+               throw new RuleException("构建监控输出数据时，对象[" + monitorObject.getName() + "]不存在！");
             }
 
-            var9 = var6.get(var10);
-            if (var9 == null) {
-               if (var4) {
-                  throw new RuleException("构建监控输入数据时，对象[" + var10 + "]不存在！");
+            objectValue = factMap.get(name2);
+            if (objectValue == null) {
+               if (flag) {
+                  throw new RuleException("构建监控输入数据时，对象[" + name2 + "]不存在！");
                }
 
-               throw new RuleException("构建监控输出数据时，对象[" + var10 + "]不存在！");
+               throw new RuleException("构建监控输出数据时，对象[" + name2 + "]不存在！");
             }
          }
 
-         IOData var11 = new IOData();
-         var5.add(var11);
-         var11.setName(var8.getName());
-         var11.setClazz(var10);
-         ArrayList var12 = new ArrayList();
-         var11.setFields(var12);
+         IOData iOData = new IOData();
+         items.add(iOData);
+         iOData.setName(monitorObject.getName());
+         iOData.setClazz(name2);
+         ArrayList items2 = new ArrayList();
+         iOData.setFields(items2);
 
-         for (MonitorObjectField var14 : var8.getFields()) {
-            IODataField var15 = new IODataField();
-            String var16 = var14.getName();
-            Object var17 = Utils.getObjectProperty(var9, var16);
-            var15.setName(var16);
-            var15.setLabel(var14.getLabel());
-            var15.setValue(var17);
-            var12.add(var15);
+         for (MonitorObjectField monitorObjectField : monitorObject.getFields()) {
+            IODataField iODataField = new IODataField();
+            String name = monitorObjectField.getName();
+            Object objectProperty = Utils.getObjectProperty(objectValue, name);
+            iODataField.setName(name);
+            iODataField.setLabel(monitorObjectField.getLabel());
+            iODataField.setValue(objectProperty);
+            items2.add(iODataField);
          }
       }
 
-      return var5;
+      return items;
    }
 
-   public void setTotalDuration(long var1) {
-      this.b = var1;
+   public void setTotalDuration(long totalDuration) {
+      this.totalDuration = totalDuration;
    }
 }

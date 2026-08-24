@@ -4,12 +4,12 @@ import com.bstek.urule.runtime.rete.Context;
 import java.util.Map;
 
 public class TemplateAction extends AbstractAction {
-   private String b;
-   private String c;
-   private String d;
+   private String id;
+   private String name;
+   private String path;
 
    @Override
-   public ActionValue execute(Context var1, Map<String, Object> var2) {
+   public ActionValue execute(Context context, Map<String, Object> factMap) {
       return null;
    }
 
@@ -19,26 +19,26 @@ public class TemplateAction extends AbstractAction {
    }
 
    public String getId() {
-      return this.b;
+      return this.id;
    }
 
-   public void setId(String var1) {
-      this.b = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getPath() {
-      return this.d;
+      return this.path;
    }
 
-   public void setPath(String var1) {
-      this.d = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 }

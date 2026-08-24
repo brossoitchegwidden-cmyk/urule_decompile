@@ -12,32 +12,32 @@ import java.util.List;
 import java.util.Map;
 
 public class BatchWriter implements Writer {
-   public void storeRecord(Map var1, BatchDataResolver var2, BatchDataResolverItem var3, GeneralEntity var4) throws Exception {
-      PreparedStatement var5 = (PreparedStatement)var1.get(var3.getName());
-      this.a(var3.getParams(), var4, var5);
-      var5.addBatch();
+   public void storeRecord(Map stmtMap, BatchDataResolver dataResolver, BatchDataResolverItem storeItem, GeneralEntity record) throws Exception {
+      PreparedStatement preparedStatement = (PreparedStatement)stmtMap.get(storeItem.getName());
+      this.bindStatementParameters(storeItem.getParams(), record, preparedStatement);
+      preparedStatement.addBatch();
    }
 
-   protected void a(List var1, Map var2, PreparedStatement var3) throws Exception {
-      for(DataParam var5 : (Iterable<DataParam>)(Iterable<?>)(var1)) {
-         Object var6 = var2.get(var5.getName());
-         int var7 = var5.getIndex() + 1;
-         if (var6 == null) {
-            var3.setObject(var7, (Object)null);
-         } else if (var6 instanceof String) {
-            var3.setString(var7, (String)var6);
-         } else if (var6 instanceof Integer) {
-            var3.setInt(var7, (Integer)var6);
-         } else if (var6 instanceof Long) {
-            var3.setLong(var7, (Long)var6);
-         } else if (var6 instanceof Boolean) {
-            var3.setBoolean(var7, (Boolean)var6);
-         } else if (var6 instanceof Array) {
-            var3.setArray(var7, (Array)var6);
-         } else if (var6 instanceof Date) {
-            var3.setTimestamp(var7, new Timestamp(((Date)var6).getTime()));
+   protected void bindStatementParameters(List parameters, Map valuesByName, PreparedStatement preparedStatement) throws Exception {
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(parameters)) {
+         Object objectValue = valuesByName.get(dataParam.getName());
+         int number = dataParam.getIndex() + 1;
+         if (objectValue == null) {
+            preparedStatement.setObject(number, (Object)null);
+         } else if (objectValue instanceof String) {
+            preparedStatement.setString(number, (String)objectValue);
+         } else if (objectValue instanceof Integer) {
+            preparedStatement.setInt(number, (Integer)objectValue);
+         } else if (objectValue instanceof Long) {
+            preparedStatement.setLong(number, (Long)objectValue);
+         } else if (objectValue instanceof Boolean) {
+            preparedStatement.setBoolean(number, (Boolean)objectValue);
+         } else if (objectValue instanceof Array) {
+            preparedStatement.setArray(number, (Array)objectValue);
+         } else if (objectValue instanceof Date) {
+            preparedStatement.setTimestamp(number, new Timestamp(((Date)objectValue).getTime()));
          } else {
-            var3.setObject(var7, var6);
+            preparedStatement.setObject(number, objectValue);
          }
       }
 

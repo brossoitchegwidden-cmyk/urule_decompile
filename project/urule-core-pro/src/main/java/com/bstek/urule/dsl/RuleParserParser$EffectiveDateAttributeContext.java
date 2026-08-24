@@ -9,15 +9,15 @@ public class RuleParserParser$EffectiveDateAttributeContext extends ParserRuleCo
       return this.getToken(97, 0);
    }
 
-   public RuleParserParser$EffectiveDateAttributeContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$EffectiveDateAttributeContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 23;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitEffectiveDateAttribute(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitEffectiveDateAttribute(this) : parseTreeVisitor.visitChildren(this));
    }
 }

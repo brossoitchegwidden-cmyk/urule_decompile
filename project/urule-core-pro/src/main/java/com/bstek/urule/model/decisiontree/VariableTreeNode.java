@@ -11,15 +11,15 @@ public class VariableTreeNode extends TreeNode {
       return this.left;
    }
 
-   public void setLeft(Left var1) {
-      this.left = var1;
+   public void setLeft(Left left) {
+      this.left = left;
    }
 
    public List<ConditionTreeNode> getConditionTreeNodes() {
       return this.conditionTreeNodes;
    }
 
-   public void setConditionTreeNodes(List<ConditionTreeNode> var1) {
-      this.conditionTreeNodes = var1;
+   public void setConditionTreeNodes(List<ConditionTreeNode> conditionTreeNodes) {
+      this.conditionTreeNodes = conditionTreeNodes;
    }
 }

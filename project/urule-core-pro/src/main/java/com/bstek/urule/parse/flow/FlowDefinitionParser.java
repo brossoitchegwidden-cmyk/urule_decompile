@@ -19,36 +19,36 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class FlowDefinitionParser extends LibrariesParser<FlowDefinition> implements ApplicationContextAware {
-   private RulesRebuilder a;
-   private Collection<FlowNodeParser> b;
+   private RulesRebuilder rulesRebuilder;
+   private Collection<FlowNodeParser> flowNodeParsers;
 
-   public FlowDefinition parse(Element var1) {
-      FlowDefinition var2 = new FlowDefinition();
-      var2.setId(var1.attributeValue("id"));
-      String var3 = var1.attributeValue("debug");
-      if (StringUtils.isNotBlank(var3)) {
-         var2.setDebug(Boolean.valueOf(var3));
+   public FlowDefinition parse(Element element) {
+      FlowDefinition flowDefinition = new FlowDefinition();
+      flowDefinition.setId(element.attributeValue("id"));
+      String text = element.attributeValue("debug");
+      if (StringUtils.isNotBlank(text)) {
+         flowDefinition.setDebug(Boolean.valueOf(text));
       }
 
-      ArrayList var4 = new ArrayList();
+      ArrayList items = new ArrayList();
 
-      for (Object var6 : var1.elements()) {
-         if (var6 != null && var6 instanceof Element) {
-            Element var7 = (Element)var6;
-            String var8 = var7.getName();
-            Library var9 = this.a(var7);
-            if (var9 != null) {
-               var2.addLibrary(var9);
-            } else if (var8.equals("quick-test-data")) {
-               String var13 = var7.getTextTrim();
-               var2.setQuickTestData(var13);
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            Library library = this.parseLibrary(element2);
+            if (library != null) {
+               flowDefinition.addLibrary(library);
+            } else if (name.equals("quick-test-data")) {
+               String textTrim = element2.getTextTrim();
+               flowDefinition.setQuickTestData(textTrim);
             } else {
-               for (FlowNodeParser var11 : this.b) {
-                  if (var11.support(var7.getName())) {
-                     FlowNode var12 = (FlowNode)var11.parse(var7);
-                     var4.add(var12);
-                     if (var12 instanceof StartNode) {
-                        var2.setStartNode((StartNode)var12);
+               for (FlowNodeParser flowNodeParser : this.flowNodeParsers) {
+                  if (flowNodeParser.support(element2.getName())) {
+                     FlowNode flowNode = (FlowNode)flowNodeParser.parse(element2);
+                     items.add(flowNode);
+                     if (flowNode instanceof StartNode) {
+                        flowDefinition.setStartNode((StartNode)flowNode);
                      }
                      break;
                   }
@@ -57,24 +57,24 @@ public class FlowDefinitionParser extends LibrariesParser<FlowDefinition> implem
          }
       }
 
-      var2.setNodes(var4);
-      var2.buildConnectionToNode();
-      this.a(var2);
-      return var2;
+      flowDefinition.setNodes(items);
+      flowDefinition.buildConnectionToNode();
+      this.processFlowDefinition(flowDefinition);
+      return flowDefinition;
    }
 
-   private void a(FlowDefinition var1) {
-      List var2 = var1.getLibraries();
-      if (var2 != null) {
-         ResourceLibrary var3 = this.a.getResourceLibraryBuilder().buildResourceLibrary(var2, null);
+   private void processFlowDefinition(FlowDefinition flowDefinition) {
+      List libraries = flowDefinition.getLibraries();
+      if (libraries != null) {
+         ResourceLibrary resourceLibrary = this.rulesRebuilder.getResourceLibraryBuilder().buildResourceLibrary(libraries, null);
 
-         for (FlowNode var6 : var1.getNodes()) {
-            if (var6 instanceof ScriptNode) {
-               ScriptNode var7 = (ScriptNode)var6;
-               List var8 = var7.getActionsData();
-               if (var8 != null) {
-                  for (Action var10 : (Iterable<Action>)(Iterable<?>)(var8)) {
-                     this.a.rebuildAction(var10, var3, false);
+         for (FlowNode flowNode : flowDefinition.getNodes()) {
+            if (flowNode instanceof ScriptNode) {
+               ScriptNode scriptNode = (ScriptNode)flowNode;
+               List actionsData = scriptNode.getActionsData();
+               if (actionsData != null) {
+                  for (Action action : (Iterable<Action>)(Iterable<?>)(actionsData)) {
+                     this.rulesRebuilder.rebuildAction(action, resourceLibrary, false);
                   }
                }
             }
@@ -83,15 +83,15 @@ public class FlowDefinitionParser extends LibrariesParser<FlowDefinition> implem
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("rule-flow");
+   public boolean support(String name) {
+      return name.equals("rule-flow");
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.b = var1.getBeansOfType(FlowNodeParser.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.flowNodeParsers = applicationContext.getBeansOfType(FlowNodeParser.class).values();
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.a = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 }

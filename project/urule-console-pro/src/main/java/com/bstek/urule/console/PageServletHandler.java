@@ -14,71 +14,71 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
 public class PageServletHandler extends BaseServletHandler {
-   public final void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = this.a(var1);
-      if (var3 == null) {
-         this.a("login", var1, var2);
+   public final void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String text = this.resolveRequestedMethod(req);
+      if (text == null) {
+         this.renderConsolePage("login", req, resp);
       } else {
-         User var4 = SecurityUtils.getLoginUser(var1);
-         if (var4 != null) {
-            this.b(var1);
-            String var5 = this.a(var1, var3);
-            this.a(var5, var1, var2);
+         User loginUser = SecurityUtils.getLoginUser(req);
+         if (loginUser != null) {
+            this.initializeRequestContext(req);
+            String text2 = this.resolveAuthorizedPage(req, text);
+            this.renderConsolePage(text2, req, resp);
          } else {
-            if (!var3.equals("register") && !var3.equals("invite") && !var3.equals("iforget")) {
-               this.a("login", var1, var2);
+            if (!text.equals("register") && !text.equals("invite") && !text.equals("iforget")) {
+               this.renderConsolePage("login", req, resp);
             } else {
-               this.a(var3, var1, var2);
+               this.renderConsolePage(text, req, resp);
             }
 
          }
       }
    }
 
-   private void a(String var1, HttpServletRequest var2, HttpServletResponse var3) throws IOException {
-      VelocityContext var4 = new VelocityContext();
-      var4.put("chunkName", var1);
-      var4.put("contextPath", var2.getContextPath());
-      var3.setContentType("text/html");
-      var3.setCharacterEncoding("utf-8");
-      String var5 = "template.html";
-      if ("project_summary".equals(var1) || "group_dashboard".equals(var1) || "project_dashboard".equals(var1)) {
-         var5 = "template_chart.html";
+   private void renderConsolePage(String text, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+      VelocityContext velocityContext = new VelocityContext();
+      velocityContext.put("chunkName", text);
+      velocityContext.put("contextPath", httpServletRequest.getContextPath());
+      httpServletResponse.setContentType("text/html");
+      httpServletResponse.setCharacterEncoding("utf-8");
+      String text2 = "template.html";
+      if ("project_summary".equals(text) || "group_dashboard".equals(text) || "project_dashboard".equals(text)) {
+         text2 = "template_chart.html";
       }
 
-      Template var6 = this.c.getTemplate("asserts/urule/html/" + var5, "utf-8");
-      PrintWriter var7 = var3.getWriter();
-      var6.merge(var4, var7);
-      var7.close();
+      Template template = this.velocityEngine.getTemplate("asserts/urule/html/" + text2, "utf-8");
+      PrintWriter writer = httpServletResponse.getWriter();
+      template.merge(velocityContext, writer);
+      writer.close();
    }
 
-   private String a(HttpServletRequest var1, String var2) {
-      String var3 = null;
-      boolean var4 = true;
-      User var5 = SecurityUtils.getLoginUser(var1);
+   private String resolveAuthorizedPage(HttpServletRequest httpServletRequest, String text) {
+      String replacedText = null;
+      boolean flag = true;
+      User loginUser = SecurityUtils.getLoginUser(httpServletRequest);
 
       try {
-         Module var6 = PermissionProvider.getGroupModule(var2);
-         if (var6 != null) {
-            var4 = AuthenticationManager.decide(var5, RoleCategory.group, var6.getCode(), "view");
+         Module groupModule = PermissionProvider.getGroupModule(text);
+         if (groupModule != null) {
+            flag = AuthenticationManager.decide(loginUser, RoleCategory.group, groupModule.getCode(), "view");
          } else {
-            var6 = PermissionProvider.getProjectModule(var2);
-            if (var6 != null) {
-               var4 = AuthenticationManager.decide(var5, RoleCategory.project, var6.getCode(), "view");
+            groupModule = PermissionProvider.getProjectModule(text);
+            if (groupModule != null) {
+               flag = AuthenticationManager.decide(loginUser, RoleCategory.project, groupModule.getCode(), "view");
             }
          }
 
-         if (var4) {
-            var3 = var2.replace("/", "_");
+         if (flag) {
+            replacedText = text.replace("/", "_");
          } else {
-            var3 = "login";
+            replacedText = "login";
          }
-      } catch (Exception var7) {
-         var7.printStackTrace();
-         var3 = "login";
+      } catch (Exception exception) {
+         java.util.logging.Logger.getLogger(PageServletHandler.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
+         replacedText = "login";
       }
 
-      return var3;
+      return replacedText;
    }
 
    public String url() {

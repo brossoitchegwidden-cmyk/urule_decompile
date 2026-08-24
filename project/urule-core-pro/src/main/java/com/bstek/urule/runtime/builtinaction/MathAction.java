@@ -11,99 +11,100 @@ import java.math.RoundingMode;
 public class MathAction {
    @ActionMethod(name = "求绝对值")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number abs(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return Math.abs(var2.doubleValue());
+   public Number abs(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.abs(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "求最大值")
    @ActionMethodParameter(names = {"数字1", "数字2"}, enames = {"number1", "number2"})
-   public Number max(Object var1, Object var2) {
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return Math.max(var3.doubleValue(), var4.doubleValue());
+   public Number max(Object obj, Object obj1) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(obj1);
+      return Math.max(decimalValue.doubleValue(), decimalValue2.doubleValue());
    }
 
    @ActionMethod(name = "求最小值")
    @ActionMethodParameter(names = {"数字1", "数字2"}, enames = {"number1", "number2"})
-   public Number min(Object var1, Object var2) {
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return Math.min(var3.doubleValue(), var4.doubleValue());
+   public Number min(Object obj, Object obj1) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(obj1);
+      return Math.min(decimalValue.doubleValue(), decimalValue2.doubleValue());
    }
 
    @ActionMethod(name = "求正弦")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number in(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return Math.sin(var2.doubleValue());
+   public Number in(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.sin(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "求余弦")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number cos(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return Math.cos(var2.doubleValue());
+   public Number cos(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.cos(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "求正切")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number tan(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return Math.tan(var2.doubleValue());
+   public Number tan(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.tan(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "求余切")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number cot(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return 1.0 / Math.tan(var2.doubleValue());
+   public Number cot(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return 1.0 / Math.tan(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "求e为底的对数")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number log(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return Math.log(var2.doubleValue());
+   public Number log(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.log(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "求10为底的对数")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number log10(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return Math.log10(var2.doubleValue());
+   public Number log10(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.log10(decimalValue.doubleValue());
    }
 
    @ActionMethod(name = "向下取整")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number floor(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return new BigDecimal(Math.floor(var2.doubleValue())).stripTrailingZeros();
+   public Number floor(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return new BigDecimal(Math.floor(decimalValue.doubleValue())).stripTrailingZeros();
    }
 
    @ActionMethod(name = "向上取整")
    @ActionMethodParameter(names = "数字", enames = "number")
-   public Number round(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return new BigDecimal(Math.round(var2.doubleValue())).stripTrailingZeros();
+   public Number round(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return new BigDecimal(Math.round(decimalValue.doubleValue())).stripTrailingZeros();
    }
 
-   public Number halfUp(Object var1) {
-      BigDecimal var2 = Utils.toBigDecimal(var1);
-      return new BigDecimal(Math.round(var2.doubleValue())).stripTrailingZeros();
+   /**一个为了与老版本兼容的方法，老版本中误将“向上取整”写成“四舍五入”，为了让老版本用户不产生错误，这里保留一个方法*/
+   public Number halfUp(Object obj) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return new BigDecimal(Math.round(decimalValue.doubleValue())).stripTrailingZeros();
    }
 
    @ActionMethod(name = "四舍五入")
    @ActionMethodParameter(names = {"数字", "小数位数"}, enames = {"number", "scale"})
-   public Number halfUp(Object var1, int var2) {
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      return var3.setScale(var2, RoundingMode.HALF_UP);
+   public Number halfUp(Object obj, int scale) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return decimalValue.setScale(scale, RoundingMode.HALF_UP);
    }
 
    @ActionMethod(name = "求指数")
    @ActionMethodParameter(names = {"底数", "幂"}, enames = {"number", "n"})
-   public Double exp(Object var1, double var2) {
-      BigDecimal var4 = Utils.toBigDecimal(var1);
-      return Math.pow(var4.doubleValue(), var2);
+   public Double exp(Object obj, double doubleValue) {
+      BigDecimal decimalValue = Utils.toBigDecimal(obj);
+      return Math.pow(decimalValue.doubleValue(), doubleValue);
    }
 }

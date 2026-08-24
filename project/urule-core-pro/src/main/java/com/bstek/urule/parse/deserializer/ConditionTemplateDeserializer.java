@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class ConditionTemplateDeserializer implements Deserializer<ConditionTemplate> {
    public static final String BEAN_ID = "urule.conditionTemplateDeserializer";
-   private ConditionTemplateParser a;
+   private ConditionTemplateParser conditionTemplateParser;
 
-   public ConditionTemplate deserialize(Element var1) {
-      return this.a.parse(var1);
+   public ConditionTemplate deserialize(Element root) {
+      return this.conditionTemplateParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.conditionTemplateParser.support(root.getName());
    }
 
-   public void setConditionTemplateParser(ConditionTemplateParser var1) {
-      this.a = var1;
+   public void setConditionTemplateParser(ConditionTemplateParser conditionTemplateParser) {
+      this.conditionTemplateParser = conditionTemplateParser;
    }
 }

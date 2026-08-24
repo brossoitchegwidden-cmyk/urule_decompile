@@ -25,51 +25,51 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MathValueDeserializer implements ValueDeserializer {
-   private Map<MathType, MathDeserializer> map = new HashMap<>();
+   private Map<MathType, MathDeserializer> deserializersByMathType = new HashMap<>();
 
    public MathValueDeserializer() {
-      AbsoluteMathDeserializer var1 = new AbsoluteMathDeserializer();
-      this.map.put(var1.getType(), var1);
-      FractionMathDeserializer var2 = new FractionMathDeserializer();
-      this.map.put(var2.getType(), var2);
-      LnMathDeserializer var3 = new LnMathDeserializer();
-      this.map.put(var3.getType(), var3);
-      LogMathDeserializer var4 = new LogMathDeserializer();
-      this.map.put(var4.getType(), var4);
-      NRadicalMathDeserializer var5 = new NRadicalMathDeserializer();
-      this.map.put(var5.getType(), var5);
-      RadicalMathDeserializer var6 = new RadicalMathDeserializer();
-      this.map.put(var6.getType(), var6);
-      PiMathDeserializer var7 = new PiMathDeserializer();
-      this.map.put(var7.getType(), var7);
-      PowerMathDeserializer var8 = new PowerMathDeserializer();
-      this.map.put(var8.getType(), var8);
-      SigmaMathDeserializer var9 = new SigmaMathDeserializer();
-      this.map.put(var9.getType(), var9);
-      TriangleFunctionMathDeserializer var10 = new TriangleFunctionMathDeserializer();
-      this.map.put(var10.getType(), var10);
-      ExtremumFunctionMathDeserializer var11 = new ExtremumFunctionMathDeserializer();
-      this.map.put(var11.getType(), var11);
-      UpRoundMathDeserializer var12 = new UpRoundMathDeserializer();
-      this.map.put(var12.getType(), var12);
-      DownRoundMathDeserializer var13 = new DownRoundMathDeserializer();
-      this.map.put(var13.getType(), var13);
+      AbsoluteMathDeserializer absoluteMathDeserializer = new AbsoluteMathDeserializer();
+      this.deserializersByMathType.put(absoluteMathDeserializer.getType(), absoluteMathDeserializer);
+      FractionMathDeserializer fractionMathDeserializer = new FractionMathDeserializer();
+      this.deserializersByMathType.put(fractionMathDeserializer.getType(), fractionMathDeserializer);
+      LnMathDeserializer lnMathDeserializer = new LnMathDeserializer();
+      this.deserializersByMathType.put(lnMathDeserializer.getType(), lnMathDeserializer);
+      LogMathDeserializer logMathDeserializer = new LogMathDeserializer();
+      this.deserializersByMathType.put(logMathDeserializer.getType(), logMathDeserializer);
+      NRadicalMathDeserializer nRadicalMathDeserializer = new NRadicalMathDeserializer();
+      this.deserializersByMathType.put(nRadicalMathDeserializer.getType(), nRadicalMathDeserializer);
+      RadicalMathDeserializer radicalMathDeserializer = new RadicalMathDeserializer();
+      this.deserializersByMathType.put(radicalMathDeserializer.getType(), radicalMathDeserializer);
+      PiMathDeserializer piMathDeserializer = new PiMathDeserializer();
+      this.deserializersByMathType.put(piMathDeserializer.getType(), piMathDeserializer);
+      PowerMathDeserializer powerMathDeserializer = new PowerMathDeserializer();
+      this.deserializersByMathType.put(powerMathDeserializer.getType(), powerMathDeserializer);
+      SigmaMathDeserializer sigmaMathDeserializer = new SigmaMathDeserializer();
+      this.deserializersByMathType.put(sigmaMathDeserializer.getType(), sigmaMathDeserializer);
+      TriangleFunctionMathDeserializer triangleFunctionMathDeserializer = new TriangleFunctionMathDeserializer();
+      this.deserializersByMathType.put(triangleFunctionMathDeserializer.getType(), triangleFunctionMathDeserializer);
+      ExtremumFunctionMathDeserializer extremumFunctionMathDeserializer = new ExtremumFunctionMathDeserializer();
+      this.deserializersByMathType.put(extremumFunctionMathDeserializer.getType(), extremumFunctionMathDeserializer);
+      UpRoundMathDeserializer upRoundMathDeserializer = new UpRoundMathDeserializer();
+      this.deserializersByMathType.put(upRoundMathDeserializer.getType(), upRoundMathDeserializer);
+      DownRoundMathDeserializer downRoundMathDeserializer = new DownRoundMathDeserializer();
+      this.deserializersByMathType.put(downRoundMathDeserializer.getType(), downRoundMathDeserializer);
    }
 
    @Override
-   public Value deserialize(JsonNode var1) {
-      MathValue var2 = new MathValue();
-      JsonNode var3 = var1.get("mathSign");
-      String var4 = JsonUtils.getJsonValue(var3, "type");
-      MathType var5 = MathType.valueOf(var4);
-      MathSign var6 = this.map.get(var5).deserialize(var3);
-      var2.setMathSign(var6);
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      return var2;
+   public Value deserialize(JsonNode jsonNode) {
+      MathValue mathValue = new MathValue();
+      JsonNode mathSign2 = jsonNode.get("mathSign");
+      String jsonValue = JsonUtils.getJsonValue(mathSign2, "type");
+      MathType mathType = MathType.valueOf(jsonValue);
+      MathSign mathSign = this.deserializersByMathType.get(mathType).deserialize(mathSign2);
+      mathValue.setMathSign(mathSign);
+      mathValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      return mathValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.Math);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.Math);
    }
 }

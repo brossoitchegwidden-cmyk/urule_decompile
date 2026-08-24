@@ -49,33 +49,32 @@ import org.apache.commons.logging.LogFactory;
 
 public class BatchServiceManager {
    public static final Log logger = LogFactory.getLog(BatchServiceManager.class);
-   private static final String a = ".";
-   private static final String b = "\\.";
-   private static final String c = "parameter";
+   private static final String DOT = ".";
+   private static final String PARAMETER = "parameter";
 
-   private static void a(BatchResult var0, String var1) {
-      var0.setStatus(BatchStatus.failed);
-      var0.setMsg(var1);
+   private static void failBatch(BatchResult batchResult, String text) {
+      batchResult.setStatus(BatchStatus.failed);
+      batchResult.setMsg(text);
    }
 
-   private static boolean a(BatchResult var0, Batch var1) throws ServletException, IOException {
-      Long var2 = var1.getPacketId();
-      PacketData var3 = null;
+   private static boolean validateKnowledgePackage(BatchResult batchResult, Batch batch) throws ServletException, IOException {
+      Long packetId = batch.getPacketId();
+      PacketData packetData = null;
 
       try {
-         var3 = PacketCache.ins.getPacket(var2);
-      } catch (Throwable var5) {
-         a(var0, "知识包【" + var2 + "】提取失败:" + var5.getMessage());
+         packetData = PacketCache.ins.getPacket(packetId);
+      } catch (Throwable throwable) {
+         failBatch(batchResult, "知识包【" + packetId + "】提取失败:" + throwable.getMessage());
          return false;
       }
 
-      if (var3 == null) {
-         a(var0, "知识包【" + var2 + "】不存在或未发布");
+      if (packetData == null) {
+         failBatch(batchResult, "知识包【" + packetId + "】不存在或未发布");
          return false;
       } else {
-         PacketConfig var4 = var3.getPacket();
-         if (!var4.isEnable()) {
-            a(var0, "知识包【" + var2 + "】已停用");
+         PacketConfig packet = packetData.getPacket();
+         if (!packet.isEnable()) {
+            failBatch(batchResult, "知识包【" + packetId + "】已停用");
             return false;
          } else {
             return true;
@@ -83,316 +82,316 @@ public class BatchServiceManager {
       }
    }
 
-   private static boolean b(BatchResult var0, Batch var1) throws ServletException, IOException {
-      Long var2 = var1.getId();
-      if (!var1.isEnable()) {
-         a(var0, "批处理【" + var2 + "】已停用");
+   private static boolean validateBatchEnabled(BatchResult batchResult, Batch batch) throws ServletException, IOException {
+      Long id = batch.getId();
+      if (!batch.isEnable()) {
+         failBatch(batchResult, "批处理【" + id + "】已停用");
          return false;
       } else {
          return true;
       }
    }
 
-   public static void execute(Long var0, Map var1) throws Exception {
-      execute(var0, var1, (String)null);
+   public static void execute(Long batchId, Map params) throws Exception {
+      execute(batchId, params, (String)null);
    }
 
-   public static void execute(Long var0, Map var1, String var2) throws Exception {
-      BatchResult var3 = new BatchResult();
-      Batch var4 = null;
+   public static void execute(Long batchId, Map params, String batchListener) throws Exception {
+      BatchResult batchResult = new BatchResult();
+      Batch batch = null;
 
       try {
-         logger.debug("提取批处理对象【" + var0 + "】");
-         var4 = SchemeService.ins.getBatchData(var0);
-      } catch (Exception var6) {
-         a(var3, "批处理对象【" + var0 + "】提取失败,可能是不存在或配置异常");
+         logger.debug("提取批处理对象【" + batchId + "】");
+         batch = SchemeService.ins.getBatchData(batchId);
+      } catch (Exception exception) {
+         failBatch(batchResult, "批处理对象【" + batchId + "】提取失败,可能是不存在或配置异常");
          return;
       }
 
-      execute(var4, var1, var2, var3);
+      execute(batch, params, batchListener, batchResult);
    }
 
-   public static void execute(Batch var0, Map var1, String var2, BatchResult var3) throws Exception {
-      var3.setStatus(BatchStatus.started);
-      var3.setMsg(BatchStatus.started.name());
-      var3.setBatchId(var0.getId());
-      var3.setBatchName(var0.getName());
-      var3.setStartTime(new Date());
-      if (StringUtils.isBlank(var3.getIp())) {
-         var3.setIp("0:0:0:0:0:0:0:1");
-         var3.setUserAgent("Java API");
+   public static void execute(Batch batchData, Map params, String batchListener, BatchResult batchResult) throws Exception {
+      batchResult.setStatus(BatchStatus.started);
+      batchResult.setMsg(BatchStatus.started.name());
+      batchResult.setBatchId(batchData.getId());
+      batchResult.setBatchName(batchData.getName());
+      batchResult.setStartTime(new Date());
+      if (StringUtils.isBlank(batchResult.getIp())) {
+         batchResult.setIp("0:0:0:0:0:0:0:1");
+         batchResult.setUserAgent("Java API");
       }
 
       logger.debug("Validation of URule Batch ...");
-      boolean var4 = b(var3, var0);
-      if (var4) {
+      boolean flag = validateBatchEnabled(batchResult, batchData);
+      if (flag) {
          logger.debug("Validation of KnowledgePackage ...");
-         var4 = a(var3, var0);
-         if (var4) {
-            if (StringUtils.isNotBlank(var2)) {
-               var0.setListener(var2);
+         flag = validateKnowledgePackage(batchResult, batchData);
+         if (flag) {
+            if (StringUtils.isNotBlank(batchListener)) {
+               batchData.setListener(batchListener);
             }
 
-            var3.setStatus(BatchStatus.started);
-            var3.setMsg(BatchStatus.started.name());
-            var3.setBatchId(var0.getId());
-            var3.setBatchName(var0.getName());
-            var3.setStartTime(new Date());
-            BatchLog var5 = new BatchLog();
-            var5.setIp(var3.getIp());
-            var5.setUserAgent(var3.getUserAgent());
-            KnowledgeService var6 = (KnowledgeService)Utils.getApplicationContext().getBean("urule.knowledgeService");
-            KnowledgePackage var7 = var6.getKnowledge(var0.getPacketId().toString());
-            VariableCategory var8 = null;
+            batchResult.setStatus(BatchStatus.started);
+            batchResult.setMsg(BatchStatus.started.name());
+            batchResult.setBatchId(batchData.getId());
+            batchResult.setBatchName(batchData.getName());
+            batchResult.setStartTime(new Date());
+            BatchLog batchLog = new BatchLog();
+            batchLog.setIp(batchResult.getIp());
+            batchLog.setUserAgent(batchResult.getUserAgent());
+            KnowledgeService knowledgeService = (KnowledgeService)Utils.getApplicationContext().getBean("urule.knowledgeService");
+            KnowledgePackage knowledge = knowledgeService.getKnowledge(batchData.getPacketId().toString());
+            VariableCategory variableCategory = null;
 
             try {
-               var8 = JsonBuilder.getInstance().findVariableCategory(var7.getVariableCategories(), "参数");
-            } catch (VariableCategoryNotFoundException var24) {
+               variableCategory = JsonBuilder.getInstance().findVariableCategory(knowledge.getVariableCategories(), "参数");
+            } catch (VariableCategoryNotFoundException variableCategoryNotFoundException) {
             }
 
-            VariableCategory var9 = JsonBuilder.getInstance().findVariableCategory(var7.getVariableCategories(), var0.getDataProvider().getPacketVarName());
+            VariableCategory variableCategory2 = JsonBuilder.getInstance().findVariableCategory(knowledge.getVariableCategories(), batchData.getDataProvider().getPacketVarName());
             logger.debug("Initialize batch parameters ...");
 
-            for(DataParam var11 : (Iterable<DataParam>)(Iterable<?>)(var0.getParams())) {
-               if (var1.containsKey(var11.getName())) {
-                  var11.setValue(var1.get(var11.getName()));
+            for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batchData.getParams())) {
+               if (params.containsKey(dataParam.getName())) {
+                  dataParam.setValue(params.get(dataParam.getName()));
                }
             }
 
             logger.debug("Initialize packet parameters ...");
 
-            for(DataParam var28 : (Iterable<DataParam>)(Iterable<?>)(var0.getPacketParams())) {
-               if (var1.containsKey(var28.getName())) {
-                  var28.setValue(var1.get(var28.getName()));
+            for(DataParam dataParam2 : (Iterable<DataParam>)(Iterable<?>)(batchData.getPacketParams())) {
+               if (params.containsKey(dataParam2.getName())) {
+                  dataParam2.setValue(params.get(dataParam2.getName()));
                }
             }
 
             logger.debug("Initialize dataProvider parameters ...");
-            BatchDataProvider var27 = var0.getDataProvider();
+            BatchDataProvider dataProvider = batchData.getDataProvider();
 
-            for(DataParam var12 : (Iterable<DataParam>)(Iterable<?>)(var27.getParams())) {
-               if (var1.containsKey(var12.getBatchParamName())) {
-                  var12.setValue(var1.get(var12.getBatchParamName()));
+            for(DataParam dataParam3 : (Iterable<DataParam>)(Iterable<?>)(dataProvider.getParams())) {
+               if (params.containsKey(dataParam3.getBatchParamName())) {
+                  dataParam3.setValue(params.get(dataParam3.getBatchParamName()));
                }
             }
 
             logger.debug("Initialize dataProvider dialect ...");
-            DataSource var30 = DataSourceHandlerManager.getDataSource(var0.getDataProvider().getDatasource());
-            Object var31 = null;
+            DataSource dataSource = DataSourceHandlerManager.getDataSource(batchData.getDataProvider().getDatasource());
+            Object objectValue = null;
 
             try {
-               Connection var32 = var30.getConnection();
-               Dialect var13 = DialectResolver.resolveDialect(var32);
-               var0.getDataProvider().setDialect(var13);
-               var32.close();
-            } catch (Exception var23) {
-               logger.error("close connection error:" + var23.getMessage());
-               var3.setStatus(BatchStatus.failed);
-               var3.setException(var23);
+               Connection connection = dataSource.getConnection();
+               Dialect dialect = DialectResolver.resolveDialect(connection);
+               batchData.getDataProvider().setDialect(dialect);
+               connection.close();
+            } catch (Exception exception) {
+               logger.error("close connection error:" + exception.getMessage());
+               batchResult.setStatus(BatchStatus.failed);
+               batchResult.setException(exception);
                return;
             }
 
-            BatchDataResolver var33 = var0.getDataResolver();
+            BatchDataResolver dataResolver = batchData.getDataResolver();
             logger.debug("Initialize dataResolver dialect ...");
-            DataSource var14 = DataSourceHandlerManager.getDataSource(var33.getDatasource());
-            Connection var15 = null;
+            DataSource dataSource2 = DataSourceHandlerManager.getDataSource(dataResolver.getDatasource());
+            Connection connection2 = null;
 
             try {
-               var15 = var14.getConnection();
-               Dialect var16 = DialectResolver.resolveDialect(var15);
-               var33.setDialect(var16);
-               var15.close();
-            } catch (Exception var22) {
-               logger.error("close connection error:" + var22.getMessage());
-               var3.setStatus(BatchStatus.failed);
-               var3.setException(var22);
+               connection2 = dataSource2.getConnection();
+               Dialect dialect2 = DialectResolver.resolveDialect(connection2);
+               dataResolver.setDialect(dialect2);
+               connection2.close();
+            } catch (Exception exception2) {
+               logger.error("close connection error:" + exception2.getMessage());
+               batchResult.setStatus(BatchStatus.failed);
+               batchResult.setException(exception2);
                return;
             }
 
-            for(BatchDataResolverItem var18 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var33.getItems())) {
-               BatchUpdateMode var19 = var18.getUpdateMode();
-               if (BatchUpdateMode.insert == var19 && var33.getTranScope() == TranScope.hive) {
-                  ArrayList var20 = new ArrayList();
-                  String var21 = a((List)var0.getParams(), (List)var20, (BatchDataResolverItem)var18);
-                  var18.setUpdateSql(var21);
-                  logger.info(String.format("Resolver: %s, item: %s, update sql: %s", var33.getName(), var18.getName(), var21));
-                  var18.setParams(var20);
+            for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(dataResolver.getItems())) {
+               BatchUpdateMode updateMode = batchDataResolverItem.getUpdateMode();
+               if (BatchUpdateMode.insert == updateMode && dataResolver.getTranScope() == TranScope.hive) {
+                  ArrayList items = new ArrayList();
+                  String text = buildHiveInsertSql((List)batchData.getParams(), (List)items, (BatchDataResolverItem)batchDataResolverItem);
+                  batchDataResolverItem.setUpdateSql(text);
+                  logger.info(String.format("Resolver: %s, item: %s, update sql: %s", dataResolver.getName(), batchDataResolverItem.getName(), text));
+                  batchDataResolverItem.setParams(items);
                }
             }
 
             logger.debug("Initialize BatchContext ...");
-            BatchContext var36 = new BatchContext(var0, var1, var3);
-            var36.setBatchLog(var5);
-            var36.setKnowledgePackage(var7);
-            var36.setKnowledgeService(var6);
-            var36.setParameterVariableCategory(var8);
-            var36.setProviderVariableCategory(var9);
+            BatchContext batchContext = new BatchContext(batchData, params, batchResult);
+            batchContext.setBatchLog(batchLog);
+            batchContext.setKnowledgePackage(knowledge);
+            batchContext.setKnowledgeService(knowledgeService);
+            batchContext.setParameterVariableCategory(variableCategory);
+            batchContext.setProviderVariableCategory(variableCategory2);
             logger.debug("Initialize packet provider parameters ...");
 
-            for(DataParam var39 : (Iterable<DataParam>)(Iterable<?>)(var0.getPacketParams())) {
-               if ((var39.getDataType().equals("Object") || var39.getDataType().equals("List")) && var39.getDataProviderId() != null && var39.getDataProviderId() > 0L) {
-                  a(var1, var39, var36);
+            for(DataParam dataParam4 : (Iterable<DataParam>)(Iterable<?>)(batchData.getPacketParams())) {
+               if ((dataParam4.getDataType().equals("Object") || dataParam4.getDataType().equals("List")) && dataParam4.getDataProviderId() != null && dataParam4.getDataProviderId() > 0L) {
+                  loadDataProviderValue(params, dataParam4, batchContext);
                }
             }
 
             logger.debug("Initialize packet complex parameters ...");
-            Map var38 = a(var0.getPacketParams(), var7);
-            var0.setComplexPacketParams(var38);
+            Map valuesByKey = buildComplexPacketParams(batchData.getPacketParams(), knowledge);
+            batchData.setComplexPacketParams(valuesByKey);
             logger.debug("Initialize packet out parameters ...");
-            List var40 = generateOutParamNames(var36);
-            var0.setOutParameterNameList(var40);
-            if (var0.isAsync()) {
-               BatchThread var41 = new BatchThread(var36);
-               var41.start();
+            List items2 = generateOutParamNames(batchContext);
+            batchData.setOutParameterNameList(items2);
+            if (batchData.isAsync()) {
+               BatchThread batchThread = new BatchThread(batchContext);
+               batchThread.start();
             } else {
-               BatchRunHelper.a(var36);
+               BatchRunHelper.run(batchContext);
             }
 
          }
       }
    }
 
-   protected static String a(List var0, List var1, BatchDataResolverItem var2) {
-      String var3 = var2.getTableName();
-      List var4 = var2.getFields();
-      String var5 = "insert into " + var3 + " ";
-      String var6 = var2.getPartitionName();
-      String var7 = var2.getPartitionValue();
-      if (StringUtils.isNotBlank(var6)) {
-         if (StringUtils.isNotBlank(var7)) {
-            boolean var8 = false;
+   protected static String buildHiveInsertSql(List items, List items2, BatchDataResolverItem batchDataResolverItem) {
+      String tableName = batchDataResolverItem.getTableName();
+      List fields = batchDataResolverItem.getFields();
+      String text = "insert into " + tableName + " ";
+      String partitionName = batchDataResolverItem.getPartitionName();
+      String partitionValue = batchDataResolverItem.getPartitionValue();
+      if (StringUtils.isNotBlank(partitionName)) {
+         if (StringUtils.isNotBlank(partitionValue)) {
+            boolean flag = false;
 
-            for(DataParam var10 : (Iterable<DataParam>)(Iterable<?>)(var0)) {
-               if (var7.equals(var10.getName())) {
-                  var8 = true;
-                  var5 = var5 + "partition (" + var6 + "='" + var10.getValue() + "') ";
+            for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(items)) {
+               if (partitionValue.equals(dataParam.getName())) {
+                  flag = true;
+                  text = text + "partition (" + partitionName + "='" + dataParam.getValue() + "') ";
                }
             }
 
-            if (!var8) {
-               var5 = var5 + "partition (" + var6 + "='" + var7 + "') ";
+            if (!flag) {
+               text = text + "partition (" + partitionName + "='" + partitionValue + "') ";
             }
          } else {
-            var5 = var5 + "partition (" + var6 + ") ";
+            text = text + "partition (" + partitionName + ") ";
          }
       }
 
-      String var13 = "";
+      String text2 = "";
 
-      for(BatchDataResolverItemField var15 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var4)) {
-         if (StringUtils.isNotEmpty(var13)) {
-            var13 = var13 + ", ";
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(fields)) {
+         if (StringUtils.isNotEmpty(text2)) {
+            text2 = text2 + ", ";
          }
 
-         var13 = var13 + var15.getDestProperty();
-         DataParam var11 = new DataParam();
-         var11.setDataType(var15.getDataType());
-         var11.setName(var15.getSrcProperty());
-         var11.setIndex(var1.size());
-         var1.add(var11);
+         text2 = text2 + batchDataResolverItemField.getDestProperty();
+         DataParam dataParam2 = new DataParam();
+         dataParam2.setDataType(batchDataResolverItemField.getDataType());
+         dataParam2.setName(batchDataResolverItemField.getSrcProperty());
+         dataParam2.setIndex(items2.size());
+         items2.add(dataParam2);
       }
 
-      var5 = var5 + "(" + var13 + ") ";
-      return var5;
+      text = text + "(" + text2 + ") ";
+      return text;
    }
 
-   public static List generateOutParamNames(BatchContext var0) {
-      ArrayList var1 = new ArrayList();
-      BatchDataResolver var2 = var0.getBatch().getDataResolver();
+   public static List generateOutParamNames(BatchContext batchContext) {
+      ArrayList outParamNames = new ArrayList();
+      BatchDataResolver dataResolver = batchContext.getBatch().getDataResolver();
 
-      for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var2.getItems())) {
-         for(BatchDataResolverItemField var7 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var5.getFields())) {
-            String var8 = var7.getSrcProperty();
-            if (var8.indexOf(".") != -1) {
-               List var9 = Arrays.asList(var8.split("\\."));
-               boolean var10 = "parameter".equals(var9.get(0));
-               if (var10) {
-                  String var11 = (String)var9.get(1);
-                  if (!var1.contains(var11)) {
-                     var1.add(var11);
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(dataResolver.getItems())) {
+         for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(batchDataResolverItem.getFields())) {
+            String srcProperty = batchDataResolverItemField.getSrcProperty();
+            if (srcProperty.indexOf(".") != -1) {
+               List items = Arrays.asList(srcProperty.split("\\."));
+               boolean flag = "parameter".equals(items.get(0));
+               if (flag) {
+                  String text = (String)items.get(1);
+                  if (!outParamNames.contains(text)) {
+                     outParamNames.add(text);
                   }
                }
             }
          }
       }
 
-      return var1;
+      return outParamNames;
    }
 
-   private static Map a(List var0, KnowledgePackage var1) throws Exception {
-      HashMap var2 = new HashMap();
+   private static Map buildComplexPacketParams(List items, KnowledgePackage knowledgePackage) throws Exception {
+      HashMap valuesByKey = new HashMap();
 
-      for(DataParam var4 : (Iterable<DataParam>)(Iterable<?>)(var0)) {
-         if (var4.getValue() != null) {
-            var2.put(var4.getName(), var4.getValue());
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(items)) {
+         if (dataParam.getValue() != null) {
+            valuesByKey.put(dataParam.getName(), dataParam.getValue());
          }
       }
 
-      HashMap var16 = var2;
-      Object var17 = null;
-      HashMap var5 = new HashMap();
+      HashMap valuesByKey2 = valuesByKey;
+      Object objectValue = null;
+      HashMap valuesByKey3 = new HashMap();
 
       try {
-         List var6 = var1.getVariableCategories();
-         Map var7 = JsonBuilder.getInstance().buildVariableCategoriesMap(var6);
-         VariableCategory var18 = (VariableCategory)var7.get("参数");
-         if (var18 == null) {
+         List variableCategories = knowledgePackage.getVariableCategories();
+         Map variableCategoriesMap = JsonBuilder.getInstance().buildVariableCategoriesMap(variableCategories);
+         VariableCategory variableCategory = (VariableCategory)variableCategoriesMap.get("参数");
+         if (variableCategory == null) {
             throw new VariableCategoryNotFoundException("变量对象【参数】未定义!");
          }
 
-         for(String var9 : (Iterable<String>)(Iterable<?>)(var16.keySet())) {
-            Object var10 = var16.get(var9);
-            if (var10 != null) {
-               Variable var11 = JsonBuilder.getInstance().findVariable(var18, var9);
-               Datatype var12 = var11.getType();
-               SubObject var13 = JsonBuilder.getInstance().findSubObject(var11.getName(), var5);
-               Map var14 = var13.getMap();
-               if (!var12.equals(Datatype.Object) && !var12.equals(Datatype.List)) {
-                  var14.put(var13.getName(), var12.convert(var10));
+         for(String text : (Iterable<String>)(Iterable<?>)(valuesByKey2.keySet())) {
+            Object objectValue2 = valuesByKey2.get(text);
+            if (objectValue2 != null) {
+               Variable variable = JsonBuilder.getInstance().findVariable(variableCategory, text);
+               Datatype type = variable.getType();
+               SubObject subObject = JsonBuilder.getInstance().findSubObject(variable.getName(), valuesByKey3);
+               Map map = subObject.getMap();
+               if (!type.equals(Datatype.Object) && !type.equals(Datatype.List)) {
+                  map.put(subObject.getName(), type.convert(objectValue2));
                } else {
-                  var14.put(var13.getName(), JsonBuilder.getInstance().buildComplexObject(var10, var7));
+                  map.put(subObject.getName(), JsonBuilder.getInstance().buildComplexObject(objectValue2, variableCategoriesMap));
                }
             }
          }
-      } catch (VariableCategoryNotFoundException var15) {
+      } catch (VariableCategoryNotFoundException variableCategoryNotFoundException) {
       }
 
-      return var5;
+      return valuesByKey3;
    }
 
-   private static void a(Map var0, DataParam var1, BatchContext var2) {
-      Long var3 = var1.getDataProviderId();
-      BatchDataProvider var4 = SchemeService.ins.getProviderData(var3);
-      if (var4 != null && var4.getDatasource() != null) {
-         Connection var5 = null;
+   private static void loadDataProviderValue(Map valuesByKey, DataParam dataParam, BatchContext batchContext) {
+      Long dataProviderId = dataParam.getDataProviderId();
+      BatchDataProvider providerData = SchemeService.ins.getProviderData(dataProviderId);
+      if (providerData != null && providerData.getDatasource() != null) {
+         Connection connection = null;
 
          try {
-            DataSource var6 = (DataSource)var2.getReaderDataSoruceMap().get(var4.getDatasourceId());
-            if (var6 == null) {
-               var6 = DataSourceHandlerManager.getDataSource(var4.getDatasource());
-               var2.getReaderDataSoruceMap().put(var4.getDatasourceId(), var6);
+            DataSource dataSource = (DataSource)batchContext.getReaderDataSoruceMap().get(providerData.getDatasourceId());
+            if (dataSource == null) {
+               dataSource = DataSourceHandlerManager.getDataSource(providerData.getDatasource());
+               batchContext.getReaderDataSoruceMap().put(providerData.getDatasourceId(), dataSource);
             }
 
-            var5 = var6.getConnection();
-            a(var4, var2.getParamValueMap());
-            a(var4, var0);
-            List var7 = a(var5, var4, var2.getKnowledgePackage().getVariableCategories());
-            if (var7.size() > 0) {
-               if (var1.getDataType().equals("List")) {
-                  var0.put(var1.getName(), var7);
-               } else if (var1.getDataType().equals("Object")) {
-                  var0.put(var1.getName(), var7.get(0));
+            connection = dataSource.getConnection();
+            bindProviderParameters(providerData, batchContext.getParamValueMap());
+            bindProviderParameters(providerData, valuesByKey);
+            List items = queryProviderData(connection, providerData, batchContext.getKnowledgePackage().getVariableCategories());
+            if (items.size() > 0) {
+               if (dataParam.getDataType().equals("List")) {
+                  valuesByKey.put(dataParam.getName(), items);
+               } else if (dataParam.getDataType().equals("Object")) {
+                  valuesByKey.put(dataParam.getName(), items.get(0));
                }
             }
-         } catch (Exception var10) {
-            logger.error(var10);
-            if (var5 != null) {
+         } catch (Exception exception) {
+            logger.error(exception);
+            if (connection != null) {
                try {
-                  var5.close();
-               } catch (SQLException var8) {
-                  logger.debug("Could not close JDBC Connection", var8);
-               } catch (Throwable var9) {
-                  logger.debug("Unexpected exception on closing JDBC Connection", var9);
+                  connection.close();
+               } catch (SQLException sQLException) {
+                  logger.debug("Could not close JDBC Connection", sQLException);
+               } catch (Throwable throwable) {
+                  logger.debug("Unexpected exception on closing JDBC Connection", throwable);
                }
             }
          }
@@ -400,51 +399,51 @@ public class BatchServiceManager {
 
    }
 
-   private static List a(Connection var0, BatchDataProvider var1, List var2) throws Exception {
-      VariableCategory var3 = JsonBuilder.getInstance().findVariableCategory(var2, var1.getPacketVarName());
-      Object var4 = null;
-      ArrayList var5 = new ArrayList();
+   private static List queryProviderData(Connection connection, BatchDataProvider batchDataProvider, List items) throws Exception {
+      VariableCategory variableCategory = JsonBuilder.getInstance().findVariableCategory(items, batchDataProvider.getPacketVarName());
+      Object objectValue = null;
+      ArrayList items2 = new ArrayList();
 
       try {
-         ParsedSql var6 = NamedSQLUtils.parseSql(var1.getPageSql());
-         String var7 = JdbcUtils.getOriginSql(var6.getOriginalSql());
-         PreparedStatement var8 = var0.prepareStatement(var7);
-         StmtUtils.setStmtQueryParameters(var6, var1.getParams(), var8);
-         ResultSet var9 = var8.executeQuery();
-         List var10 = var1.getFields();
+         ParsedSql sql = NamedSQLUtils.parseSql(batchDataProvider.getPageSql());
+         String originSql = JdbcUtils.getOriginSql(sql.getOriginalSql());
+         PreparedStatement preparedStatement = connection.prepareStatement(originSql);
+         StmtUtils.setStmtQueryParameters(sql, batchDataProvider.getParams(), preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List fields = batchDataProvider.getFields();
 
-         while(var9.next()) {
-            GeneralEntity var11 = null;
-            if (var1.getPacketVarName().equals("参数")) {
-               var11 = new GeneralEntity();
+         while(resultSet.next()) {
+            GeneralEntity generalEntity = null;
+            if (batchDataProvider.getPacketVarName().equals("参数")) {
+               generalEntity = new GeneralEntity();
             } else {
-               var11 = new GeneralEntity(var3.getClazz());
+               generalEntity = new GeneralEntity(variableCategory.getClazz());
             }
 
-            for(BatchDataProviderField var13 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var10)) {
-               if ("Boolean".equals(var13.getDataType())) {
-                  var11.put(var13.getDestProperty(), var9.getBoolean(var13.getSrcProperty()));
+            for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(fields)) {
+               if ("Boolean".equals(batchDataProviderField.getDataType())) {
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getBoolean(batchDataProviderField.getSrcProperty()));
                } else {
-                  var11.put(var13.getDestProperty(), var9.getObject(var13.getSrcProperty()));
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getObject(batchDataProviderField.getSrcProperty()));
                }
             }
 
-            var5.add(var11);
+            items2.add(generalEntity);
          }
 
-         var9.close();
-         var8.close();
-      } catch (Exception var14) {
-         logger.error(var14);
+         resultSet.close();
+         preparedStatement.close();
+      } catch (Exception exception) {
+         logger.error(exception);
       }
 
-      return var5;
+      return items2;
    }
 
-   private static void a(BatchDataProvider var0, Map var1) {
-      for(DataParam var3 : (Iterable<DataParam>)(Iterable<?>)(var0.getParams())) {
-         if (var1.containsKey(var3.getBatchParamName())) {
-            var3.setValue(var1.get(var3.getBatchParamName()));
+   private static void bindProviderParameters(BatchDataProvider batchDataProvider, Map valuesByKey) {
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batchDataProvider.getParams())) {
+         if (valuesByKey.containsKey(dataParam.getBatchParamName())) {
+            dataParam.setValue(valuesByKey.get(dataParam.getBatchParamName()));
          }
       }
 

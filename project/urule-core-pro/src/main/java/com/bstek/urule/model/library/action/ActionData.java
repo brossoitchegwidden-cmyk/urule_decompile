@@ -4,9 +4,9 @@ public class ActionData {
    private SpringBean bean;
    private Method method;
 
-   public ActionData(SpringBean var1, Method var2) {
-      this.bean = var1;
-      this.method = var2;
+   public ActionData(SpringBean bean, Method method) {
+      this.bean = bean;
+      this.method = method;
    }
 
    public SpringBean getBean() {

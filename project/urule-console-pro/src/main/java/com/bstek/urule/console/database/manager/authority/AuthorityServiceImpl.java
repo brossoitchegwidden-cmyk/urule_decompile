@@ -14,129 +14,124 @@ import java.sql.Connection;
 import java.util.List;
 
 public class AuthorityServiceImpl implements AuthorityService {
-   public List getAuthoritysByRole(String var1, long var2) {
-      return AuthorityManager.ins.getAuthoritysByRole(var1, var2);
+   public List getAuthoritysByRole(String roleType, long roleCode) {
+      return AuthorityManager.ins.getAuthoritysByRole(roleType, roleCode);
    }
-
-   public void add(Authority var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(Authority auth) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         AuthorityManager.ins.add(var2, var1);
-      } catch (Exception var7) {
-         throw var7;
+         AuthorityManager.ins.add(connection, auth);
+      } catch (Exception exception) {
+         throw exception;
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void remove(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void remove(long authId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         AuthorityManager.ins.remove(var3, var1);
-      } catch (Exception var8) {
-         throw var8;
+         AuthorityManager.ins.remove(connection, authId);
+      } catch (Exception exception) {
+         throw exception;
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void removeByRole(String var1, long var2) {
-      AuthorityManager.ins.removeByRole(var1, var2);
+   public void removeByRole(String roleType, long roleCode) {
+      AuthorityManager.ins.removeByRole(roleType, roleCode);
    }
-
-   public Authority get(String var1, long var2, String var4) {
-      return AuthorityManager.ins.get(var1, var2, var4);
+   public Authority get(String roleType, long roleId, String code) {
+      return AuthorityManager.ins.get(roleType, roleId, code);
    }
+   public List getGroupModels(Role role) {
+      List groupModules = PermissionProvider.getGroupModules();
 
-   public List getGroupModels(Role var1) {
-      List var2 = PermissionProvider.getGroupModules();
-
-      for(Module var4 : (Iterable<Module>)(Iterable<?>)(var2)) {
-         if (var1.getName().equals(GroupRoleEnum.Owner.name())) {
-            var4.setChecked(true);
-            var4.setDisabled(true);
+      for(Module module : (Iterable<Module>)(Iterable<?>)(groupModules)) {
+         if (role.getName().equals(GroupRoleEnum.Owner.name())) {
+            module.setChecked(true);
+            module.setDisabled(true);
          }
 
-         for(Permission var6 : (Iterable<Permission>)(Iterable<?>)(var4.getItems())) {
-            if (var1.getName().equals(GroupRoleEnum.Owner.name())) {
-               var6.setChecked(true);
-               var6.setDisabled(true);
+         for(Permission permission : (Iterable<Permission>)(Iterable<?>)(module.getItems())) {
+            if (role.getName().equals(GroupRoleEnum.Owner.name())) {
+               permission.setChecked(true);
+               permission.setDisabled(true);
             } else {
-               var6.setChecked(AuthenticationManager.decide(var1, RoleCategory.group, var4.getCode(), var6.getCode()));
+               permission.setChecked(AuthenticationManager.decide(role, RoleCategory.group, module.getCode(), permission.getCode()));
             }
          }
       }
 
-      return var2;
+      return groupModules;
    }
+   public List getProjectModels(Role role) {
+      List projectModules = PermissionProvider.getProjectModules();
 
-   public List getProjectModels(Role var1) {
-      List var2 = PermissionProvider.getProjectModules();
-
-      for(Module var4 : (Iterable<Module>)(Iterable<?>)(var2)) {
-         if (var1.getName().equals(ProjectRoleEnum.Manager.name())) {
-            var4.setChecked(true);
-            var4.setDisabled(true);
+      for(Module module : (Iterable<Module>)(Iterable<?>)(projectModules)) {
+         if (role.getName().equals(ProjectRoleEnum.Manager.name())) {
+            module.setChecked(true);
+            module.setDisabled(true);
          }
 
-         for(Permission var6 : (Iterable<Permission>)(Iterable<?>)(var4.getItems())) {
-            if (var1.getName().equals(ProjectRoleEnum.Manager.name())) {
-               var6.setChecked(true);
-               var6.setDisabled(true);
+         for(Permission permission : (Iterable<Permission>)(Iterable<?>)(module.getItems())) {
+            if (role.getName().equals(ProjectRoleEnum.Manager.name())) {
+               permission.setChecked(true);
+               permission.setDisabled(true);
             } else {
-               var6.setChecked(AuthenticationManager.decide(var1, RoleCategory.project, var4.getCode(), var6.getCode()));
+               permission.setChecked(AuthenticationManager.decide(role, RoleCategory.project, module.getCode(), permission.getCode()));
             }
          }
       }
 
-      return var2;
+      return projectModules;
    }
 
-   private void a(long var1, Module var3, Permission var4, boolean var5) {
-      Connection var6 = JdbcUtils.getConnection();
+   private void storePermission(long longValue, Module module, Permission permission, boolean flag) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         Authority var7 = new Authority();
-         var7.setAuth(1);
-         var7.setRoleId(var1);
-         var7.setRoleType(var3.getType().toString());
-         String var8 = var3.getCode() + "_" + var4.getCode();
-         var7.setResourceCode(var8);
-         var7.setResourceType(var4.getType().toString());
-         if (var4.isChecked()) {
-            AuthorityManager.ins.add(var6, var7);
-         } else if (var5) {
-            this.remove(var6, var3.getType().toString(), var1, var8, var4.getType().toString());
+         Authority authority = new Authority();
+         authority.setAuth(1);
+         authority.setRoleId(longValue);
+         authority.setRoleType(module.getType().toString());
+         String text = module.getCode() + "_" + permission.getCode();
+         authority.setResourceCode(text);
+         authority.setResourceType(permission.getType().toString());
+         if (permission.isChecked()) {
+            AuthorityManager.ins.add(connection, authority);
+         } else if (flag) {
+            this.remove(connection, module.getType().toString(), longValue, text, permission.getType().toString());
          }
-      } catch (Exception var12) {
-         throw var12;
+      } catch (Exception exception) {
+         throw exception;
       } finally {
-         JdbcUtils.closeConnection(var6);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void remove(Connection var1, String var2, long var3, String var5, String var6) {
-      AuthorityManager.ins.remove(var1, var2, var3, var5, var6);
+   /**删除资源的授权信息*/
+   public void remove(Connection conn, String roleType, long roleId, String resourceCode, String resourceType) {
+      AuthorityManager.ins.remove(conn, roleType, roleId, resourceCode, resourceType);
    }
 
-   public void storePermissions(long var1, List var3) {
-      for(Module var5 : (Iterable<Module>)(Iterable<?>)(var3)) {
-         for(Permission var7 : (Iterable<Permission>)(Iterable<?>)(var5.getItems())) {
-            this.a(var1, var5, var7, true);
+   public void storePermissions(long roleId, List models) {
+      for(Module module : (Iterable<Module>)(Iterable<?>)(models)) {
+         for(Permission permission : (Iterable<Permission>)(Iterable<?>)(module.getItems())) {
+            this.storePermission(roleId, module, permission, true);
          }
       }
 
    }
 
-   public void initPermissions(long var1, List var3) {
-      for(Module var5 : (Iterable<Module>)(Iterable<?>)(var3)) {
-         for(Permission var7 : (Iterable<Permission>)(Iterable<?>)(var5.getItems())) {
-            this.a(var1, var5, var7, false);
+   public void initPermissions(long roleId, List models) {
+      for(Module module : (Iterable<Module>)(Iterable<?>)(models)) {
+         for(Permission permission : (Iterable<Permission>)(Iterable<?>)(module.getItems())) {
+            this.storePermission(roleId, module, permission, false);
          }
       }
 

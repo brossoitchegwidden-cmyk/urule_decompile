@@ -16,32 +16,32 @@ public class Parameter {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getEname() {
       return this.ename;
    }
 
-   public void setEname(String var1) {
-      this.ename = var1;
+   public void setEname(String ename) {
+      this.ename = ename;
    }
 
    public Datatype getType() {
       return this.type;
    }
 
-   public void setType(Datatype var1) {
-      this.type = var1;
+   public void setType(Datatype type) {
+      this.type = type;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public String getId() {

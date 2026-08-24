@@ -5,10 +5,10 @@ public class ParentFile {
    private String path;
    private String version;
 
-   public ParentFile(long var1, String var3, String var4) {
-      this.id = var1;
-      this.path = var3;
-      this.version = var4;
+   public ParentFile(long id, String path, String version) {
+      this.id = id;
+      this.path = path;
+      this.version = version;
    }
 
    public long getId() {

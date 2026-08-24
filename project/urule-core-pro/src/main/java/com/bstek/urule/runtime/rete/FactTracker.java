@@ -9,70 +9,70 @@ import java.util.Map;
 import java.util.Set;
 
 public class FactTracker {
-   private Path a;
-   private Activation b;
-   private Set<Integer> c = new HashSet<>();
-   private Set<Criteria> d = new HashSet<>();
-   private Map<String, Object> e = new HashMap<>();
+   private Path currentPath;
+   private Activation activation;
+   private Set<Integer> tokens = new HashSet<>();
+   private Set<Criteria> criterias = new HashSet<>();
+   private Map<String, Object> factMap = new HashMap<>();
 
    public Activation getActivation() {
-      return this.b;
+      return this.activation;
    }
 
-   public void setActivation(Activation var1) {
-      ActivationImpl var2 = (ActivationImpl)var1;
-      var2.setCriterias(this.d);
-      var2.setFactMap(this.e);
-      this.b = var1;
+   public void setActivation(Activation activation) {
+      ActivationImpl activationImpl = (ActivationImpl)activation;
+      activationImpl.setCriterias(this.criterias);
+      activationImpl.setFactMap(this.factMap);
+      this.activation = activation;
    }
 
-   public void addFactMap(Map<String, Object> var1) {
-      this.e.putAll(var1);
+   public void addFactMap(Map<String, Object> map) {
+      this.factMap.putAll(map);
    }
 
    public Map<String, Object> getFactMap() {
-      return this.e;
+      return this.factMap;
    }
 
-   public void addCriteria(Criteria var1) {
-      this.d.add(var1);
+   public void addCriteria(Criteria criteria) {
+      this.criterias.add(criteria);
    }
 
-   public void addCriterias(Set<Criteria> var1) {
-      this.d.addAll(var1);
+   public void addCriterias(Set<Criteria> list) {
+      this.criterias.addAll(list);
    }
 
    public Set<Criteria> getCriterias() {
-      return this.d;
+      return this.criterias;
    }
 
    public Set<Integer> getTokens() {
-      return this.c;
+      return this.tokens;
    }
 
-   public void setToken(Integer var1) {
-      this.c.clear();
-      this.c.add(var1);
+   public void setToken(Integer token) {
+      this.tokens.clear();
+      this.tokens.add(token);
    }
 
-   public void setTokens(Set<Integer> var1) {
-      this.c.clear();
-      this.c.addAll(var1);
+   public void setTokens(Set<Integer> set) {
+      this.tokens.clear();
+      this.tokens.addAll(set);
    }
 
-   public void setCurrentPath(Path var1) {
-      this.a = var1;
+   public void setCurrentPath(Path currentPath) {
+      this.currentPath = currentPath;
    }
 
    public Path getCurrentPath() {
-      return this.a;
+      return this.currentPath;
    }
 
    public FactTracker newSubFactTracker() {
-      FactTracker var1 = new FactTracker();
-      var1.setTokens(this.c);
-      var1.addCriterias(this.d);
-      var1.addFactMap(this.e);
-      return var1;
+      FactTracker factTracker = new FactTracker();
+      factTracker.setTokens(this.tokens);
+      factTracker.addCriterias(this.criterias);
+      factTracker.addFactMap(this.factMap);
+      return factTracker;
    }
 }

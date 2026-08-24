@@ -9,27 +9,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultRuleProcessor implements RuleProcessor {
-   public Map fireRules(BatchContext var1, GeneralEntity var2) throws ProcessorException {
+   public Map fireRules(BatchContext batchContext, GeneralEntity data) throws ProcessorException {
       try {
-         HashMap var3 = new HashMap();
-         KnowledgePackage var4 = var1.getKnowledgePackage();
-         KnowledgeSession var5 = KnowledgeSessionFactory.newKnowledgeSession(var1.getKnowledgePackage());
-         Map var6 = var1.getBatch().getComplexPacketParams();
-         var5.insert(var2);
-         if (var4.getFlowMap().size() > 0) {
-            String var7 = (String)var4.getFlowMap().keySet().iterator().next();
-            var5.startProcess(var7, var6);
+         HashMap fireRulesResult = new HashMap();
+         KnowledgePackage knowledgePackage = batchContext.getKnowledgePackage();
+         KnowledgeSession knowledgeSession = KnowledgeSessionFactory.newKnowledgeSession(batchContext.getKnowledgePackage());
+         Map complexPacketParams = batchContext.getBatch().getComplexPacketParams();
+         knowledgeSession.insert(data);
+         if (knowledgePackage.getFlowMap().size() > 0) {
+            String text = (String)knowledgePackage.getFlowMap().keySet().iterator().next();
+            knowledgeSession.startProcess(text, complexPacketParams);
          } else {
-            var5.fireRules(var6);
+            knowledgeSession.fireRules(complexPacketParams);
          }
 
-         for(String var9 : (Iterable<String>)(Iterable<?>)(var1.getBatch().getOutParameterNameList())) {
-            var3.put(var9, var5.getParameter(var9));
+         for(String text2 : (Iterable<String>)(Iterable<?>)(batchContext.getBatch().getOutParameterNameList())) {
+            fireRulesResult.put(text2, knowledgeSession.getParameter(text2));
          }
 
-         return var3;
-      } catch (Exception var10) {
-         throw new ProcessorException(var10.getMessage(), var10, var2);
+         return fireRulesResult;
+      } catch (Exception exception) {
+         throw new ProcessorException(exception.getMessage(), exception, data);
       }
    }
 }

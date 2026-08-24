@@ -8,18 +8,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class ApplicationExtensionLoader implements ApplicationContextAware {
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      ServiceLoader var2 = ServiceLoader.load(ApplicationExtension.class);
-      Iterator var3 = var2.iterator();
+   private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(ApplicationExtensionLoader.class.getName());
+
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      ServiceLoader serviceLoader = ServiceLoader.load(ApplicationExtension.class);
+      Iterator iterator = serviceLoader.iterator();
 
       try {
-         while (var3.hasNext()) {
-            ApplicationExtension var4 = (ApplicationExtension)var3.next();
-            System.out.println(">>>加载扩展[" + var4.name() + "]......");
-            var4.loadExtension(var1);
+         while (iterator.hasNext()) {
+            ApplicationExtension applicationExtension = (ApplicationExtension)iterator.next();
+            LOGGER.info("加载扩展[" + applicationExtension.name() + "]");
+            applicationExtension.loadExtension(applicationContext);
          }
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 }

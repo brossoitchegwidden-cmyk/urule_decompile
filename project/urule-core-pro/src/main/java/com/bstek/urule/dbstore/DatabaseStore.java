@@ -6,9 +6,9 @@ import javax.sql.DataSource;
 public interface DatabaseStore {
    String TABLE_NAME = "URULE_KP_STORE";
 
-   void init(DataSource var1) throws Exception;
+   void init(DataSource ds) throws Exception;
 
-   boolean support(String var1);
+   boolean support(String dbname);
 
    DbService getDbService();
 }

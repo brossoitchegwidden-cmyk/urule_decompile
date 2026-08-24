@@ -38,71 +38,71 @@ import org.springframework.context.ApplicationContextAware;
 
 public class ReteBuilder implements ApplicationContextAware {
    public static final String BEAN_ID = "urule.reteBuilder";
-   private static Collection<CriterionBuilder> a;
+   private static Collection<CriterionBuilder> criterionBuilders;
 
-   public Rete buildRete(List<Rule> var1, ResourceLibrary var2) {
-      return this.a(var1, var2);
+   public Rete buildRete(List<Rule> rules, ResourceLibrary resourceLibrary) {
+      return this.buildReteInternal(rules, resourceLibrary);
    }
 
-   public Rete buildRete(Rule var1, ResourceLibrary var2) {
-      ArrayList var3 = new ArrayList();
-      var3.add(var1);
-      return this.a(var3, var2);
+   public Rete buildRete(Rule rule, ResourceLibrary resourceLibrary) {
+      ArrayList items = new ArrayList();
+      items.add(rule);
+      return this.buildReteInternal(items, resourceLibrary);
    }
 
-   private Rete a(List<Rule> var1, ResourceLibrary var2) {
-      ArrayList var3 = new ArrayList();
-      Rete var4 = new Rete(var3, var2);
-      BuildContextImpl var5 = new BuildContextImpl(var2, var3);
-      HashMap var6 = new HashMap();
-      HashMap var7 = new HashMap();
-      ArrayList var8 = new ArrayList();
-      var4.setAllRuleData(var8);
+   private Rete buildReteInternal(List<Rule> rules, ResourceLibrary resourceLibrary) {
+      ArrayList items = new ArrayList();
+      Rete rete = new Rete(items, resourceLibrary);
+      BuildContextImpl buildContextImpl = new BuildContextImpl(resourceLibrary, items);
+      HashMap valuesByKey = new HashMap();
+      HashMap valuesByKey2 = new HashMap();
+      ArrayList items2 = new ArrayList();
+      rete.setAllRuleData(items2);
 
-      for (Rule var10 : var1) {
-         if (!this.a(var10)) {
-            if (StringUtils.isNotBlank(var10.getPendedGroup())) {
-               List var11 = (List)var7.get(var10.getPendedGroup());
-               if (var11 == null) {
-                  var11 = new ArrayList();
-                  var7.put(var10.getPendedGroup(), var11);
+      for (Rule rule : rules) {
+         if (!this.shouldSkipRule(rule)) {
+            if (StringUtils.isNotBlank(rule.getPendedGroup())) {
+               List items3 = (List)valuesByKey2.get(rule.getPendedGroup());
+               if (items3 == null) {
+                  items3 = new ArrayList();
+                  valuesByKey2.put(rule.getPendedGroup(), items3);
                }
 
-               var11.add(var10);
-            } else if (StringUtils.isNotBlank(var10.getMutexGroup())) {
-               List var12 = (List)var6.get(var10.getMutexGroup());
-               if (var12 == null) {
-                  var12 = new ArrayList();
-                  var6.put(var10.getMutexGroup(), var12);
+               items3.add(rule);
+            } else if (StringUtils.isNotBlank(rule.getMutexGroup())) {
+               List items4 = (List)valuesByKey.get(rule.getMutexGroup());
+               if (items4 == null) {
+                  items4 = new ArrayList();
+                  valuesByKey.put(rule.getMutexGroup(), items4);
                }
 
-               var12.add(var10);
+               items4.add(rule);
             } else {
-               if (!var10.isTargetResource(ResourceType.Flow)) {
-                  var8.add(new RuleData(var10));
+               if (!rule.isTargetResource(ResourceType.Flow)) {
+                  items2.add(new RuleData(rule));
                }
 
-               TerminalNode var13 = new TerminalNode(var10, var5.nextId());
-               this.a(var10, var5, var13);
-               var10.setLhs(null);
+               TerminalNode terminalNode = new TerminalNode(rule, buildContextImpl.nextId());
+               this.buildBranch(rule, buildContextImpl, terminalNode);
+               rule.setLhs(null);
             }
          }
       }
 
-      var4.setPendedGroupRetesMap(this.a(var7, var5, true));
-      var4.setMutexGroupRetesMap(this.a(var6, var5, false));
-      return var4;
+      rete.setPendedGroupRetesMap(this.buildGroupedRetes(valuesByKey2, buildContextImpl, true));
+      rete.setMutexGroupRetesMap(this.buildGroupedRetes(valuesByKey, buildContextImpl, false));
+      return rete;
    }
 
-   private boolean a(Rule var1) {
-      if (var1.getEnabled() != null && !var1.getEnabled()) {
+   private boolean shouldSkipRule(Rule rule) {
+      if (rule.getEnabled() != null && !rule.getEnabled()) {
          return true;
       }
 
-      Date var2 = var1.getExpiresDate();
-      if (var2 != null) {
-         Date var3 = new Date();
-         if (var2.compareTo(var3) < 0) {
+      Date expiresDate = rule.getExpiresDate();
+      if (expiresDate != null) {
+         Date date = new Date();
+         if (expiresDate.compareTo(date) < 0) {
             return true;
          }
       }
@@ -110,148 +110,148 @@ public class ReteBuilder implements ApplicationContextAware {
       return false;
    }
 
-   private Map<String, List<ReteUnit>> a(Map<String, List<Rule>> var1, BuildContext var2, boolean var3) {
-      if (var1.size() == 0) {
+   private Map<String, List<ReteUnit>> buildGroupedRetes(Map<String, List<Rule>> valuesByKey, BuildContext buildContext, boolean pendedGroup) {
+      if (valuesByKey.size() == 0) {
          return null;
       }
 
-      ResourceLibrary var4 = var2.getResourceLibrary();
-      HashMap var5 = new HashMap();
+      ResourceLibrary resourceLibrary = buildContext.getResourceLibrary();
+      HashMap groupedRetes = new HashMap();
 
-      for (String var7 : var1.keySet()) {
-         List var8 = (List)var1.get(var7);
-         this.a(var8);
-         HashMap var9 = new HashMap();
+      for (String text : valuesByKey.keySet()) {
+         List items = (List)valuesByKey.get(text);
+         this.sortRules(items);
+         HashMap valuesByKey2 = new HashMap();
 
-         for (Rule var11 : (Iterable<Rule>)(Iterable<?>)(var8)) {
-            String var12 = var11.getMutexGroup();
-            if (var3 && StringUtils.isNotBlank(var12)) {
-               List var22 = (List)var9.get(var12);
-               if (var22 == null) {
-                  var22 = new ArrayList();
-                  var9.put(var12, var22);
+         for (Rule rule : (Iterable<Rule>)(Iterable<?>)(items)) {
+            String mutexGroup = rule.getMutexGroup();
+            if (pendedGroup && StringUtils.isNotBlank(mutexGroup)) {
+               List items2 = (List)valuesByKey2.get(mutexGroup);
+               if (items2 == null) {
+                  items2 = new ArrayList();
+                  valuesByKey2.put(mutexGroup, items2);
                }
 
-               var22.add(var11);
+               items2.add(rule);
             } else {
-               List var13 = (List)var5.get(var7);
-               if (var13 == null) {
-                  var13 = new ArrayList();
-                  var5.put(var7, var13);
+               List items3 = (List)groupedRetes.get(text);
+               if (items3 == null) {
+                  items3 = new ArrayList();
+                  groupedRetes.put(text, items3);
                }
 
-               ArrayList var14 = new ArrayList();
-               Rete var15 = new Rete(var14, var4);
-               BuildContextImpl var16 = new BuildContextImpl(var14, var2);
-               TerminalNode var17 = new TerminalNode(var11, var16.nextId());
-               this.a(var11, var16, var17);
-               ReteUnit var18 = new ReteUnit(var15, var11.getName());
-               var18.setEffectiveDate(var11.getEffectiveDate());
-               var18.setExpiresDate(var11.getExpiresDate());
-               var13.add(var18);
-               var11.setLhs(null);
-               var2 = var16;
+               ArrayList items4 = new ArrayList();
+               Rete rete = new Rete(items4, resourceLibrary);
+               BuildContextImpl buildContextImpl = new BuildContextImpl(items4, buildContext);
+               TerminalNode terminalNode = new TerminalNode(rule, buildContextImpl.nextId());
+               this.buildBranch(rule, buildContextImpl, terminalNode);
+               ReteUnit reteUnit = new ReteUnit(rete, rule.getName());
+               reteUnit.setEffectiveDate(rule.getEffectiveDate());
+               reteUnit.setExpiresDate(rule.getExpiresDate());
+               items3.add(reteUnit);
+               rule.setLhs(null);
+               buildContext = buildContextImpl;
             }
          }
 
-         Map var19 = this.a(var2, var4, var9);
-         List var20 = (List)var5.get(var7);
-         if (var20 == null) {
-            var20 = new ArrayList();
-            var5.put(var7, var20);
+         Map mutexRetes = this.buildMutexRetes(buildContext, resourceLibrary, valuesByKey2);
+         List items5 = (List)groupedRetes.get(text);
+         if (items5 == null) {
+            items5 = new ArrayList();
+            groupedRetes.put(text, items5);
          }
 
-         for (String var23 : (Iterable<String>)(Iterable<?>)(var19.keySet())) {
-            List var24 = (List)var19.get(var23);
-            var20.add(new MutexReteUnit(var23, var24));
-         }
-      }
-
-      return var5;
-   }
-
-   private Map<String, List<ReteUnit>> a(BuildContext var1, ResourceLibrary var2, Map<String, List<Rule>> var3) {
-      HashMap var4 = new HashMap();
-
-      for (String var6 : var3.keySet()) {
-         List var7 = (List)var4.get(var6);
-         if (var7 == null) {
-            var7 = new ArrayList();
-            var4.put(var6, var7);
-         }
-
-         for (Rule var10 : (Iterable<Rule>)(Iterable<?>)((List)var3.get(var6))) {
-            ArrayList var11 = new ArrayList();
-            Rete var12 = new Rete(var11, var2);
-            BuildContextImpl var13 = new BuildContextImpl(var11, var1);
-            TerminalNode var14 = new TerminalNode(var10, var13.nextId());
-            this.a(var10, var13, var14);
-            ReteUnit var15 = new ReteUnit(var12, var10.getName());
-            var7.add(var15);
-            var10.setLhs(null);
-            var1 = var13;
+         for (String text2 : (Iterable<String>)(Iterable<?>)(mutexRetes.keySet())) {
+            List items6 = (List)mutexRetes.get(text2);
+            items5.add(new MutexReteUnit(text2, items6));
          }
       }
 
-      return var4;
+      return groupedRetes;
    }
 
-   private void a(List<Rule> var1) {
-      Collections.sort(var1, new ReteBuilder$1(this));
+   private Map<String, List<ReteUnit>> buildMutexRetes(BuildContext buildContext, ResourceLibrary resourceLibrary, Map<String, List<Rule>> valuesByKey) {
+      HashMap mutexRetes = new HashMap();
+
+      for (String text : valuesByKey.keySet()) {
+         List items = (List)mutexRetes.get(text);
+         if (items == null) {
+            items = new ArrayList();
+            mutexRetes.put(text, items);
+         }
+
+         for (Rule rule : (Iterable<Rule>)(Iterable<?>)((List)valuesByKey.get(text))) {
+            ArrayList items2 = new ArrayList();
+            Rete rete = new Rete(items2, resourceLibrary);
+            BuildContextImpl buildContextImpl = new BuildContextImpl(items2, buildContext);
+            TerminalNode terminalNode = new TerminalNode(rule, buildContextImpl.nextId());
+            this.buildBranch(rule, buildContextImpl, terminalNode);
+            ReteUnit reteUnit = new ReteUnit(rete, rule.getName());
+            items.add(reteUnit);
+            rule.setLhs(null);
+            buildContext = buildContextImpl;
+         }
+      }
+
+      return mutexRetes;
    }
 
-   private void a(Rule var1, BuildContext var2, TerminalNode var3) {
-      var2.setCurrentRule(var1);
-      Lhs var4 = var1.getLhs();
-      if (!(var1 instanceof LoopRule) && var4 != null && var4.getCriterion() != null) {
-         Criterion var14 = var4.getCriterion();
+   private void sortRules(List<Rule> rules) {
+      Collections.sort(rules, new RuleSalienceComparator());
+   }
 
-         for (BaseReteNode var8 : buildCriterion(var2, var14)) {
-            if (var8 instanceof AndNode || var8 instanceof OrNode) {
-               JunctionNode var9 = (JunctionNode)var8;
-               List var10 = var9.getToConnections();
-               if (var10.size() == 1) {
-                  Line var11 = (Line)var10.get(0);
-                  Node var12 = var11.getFrom();
-                  if (var12 instanceof CriteriaNode) {
-                     CriteriaNode var13 = (CriteriaNode)var12;
-                     var13.getLines().remove(var11);
-                     var8 = var13;
+   private void buildBranch(Rule rule, BuildContext buildContext, TerminalNode terminalNode) {
+      buildContext.setCurrentRule(rule);
+      Lhs lhs = rule.getLhs();
+      if (!(rule instanceof LoopRule) && lhs != null && lhs.getCriterion() != null) {
+         Criterion criterion = lhs.getCriterion();
+
+         for (BaseReteNode baseReteNode : buildCriterion(buildContext, criterion)) {
+            if (baseReteNode instanceof AndNode || baseReteNode instanceof OrNode) {
+               JunctionNode junctionNode = (JunctionNode)baseReteNode;
+               List toConnections = junctionNode.getToConnections();
+               if (toConnections.size() == 1) {
+                  Line line = (Line)toConnections.get(0);
+                  Node from = line.getFrom();
+                  if (from instanceof CriteriaNode) {
+                     CriteriaNode criteriaNode = (CriteriaNode)from;
+                     criteriaNode.getLines().remove(line);
+                     baseReteNode = criteriaNode;
                   }
                }
             }
 
-            var8.addLine(var3);
+            baseReteNode.addLine(terminalNode);
          }
 
-         Other var15 = var1.getOther();
-         if (var15 != null && var15.getActions() != null && var15.getActions().size() > 0) {
-            var1.setWithElse(true);
-            Utils.buildElseRule(var1);
-            ObjectTypeNode var16 = var2.buildObjectTypeNode("__*__");
-            var16.addLine(var3);
+         Other other = rule.getOther();
+         if (other != null && other.getActions() != null && other.getActions().size() > 0) {
+            rule.setWithElse(true);
+            Utils.buildElseRule(rule);
+            ObjectTypeNode objectTypeNode = buildContext.buildObjectTypeNode("__*__");
+            objectTypeNode.addLine(terminalNode);
          }
       } else {
-         ObjectTypeNode var5 = var2.buildObjectTypeNode("__*__");
-         var5.addLine(var3);
+         ObjectTypeNode objectTypeNode2 = buildContext.buildObjectTypeNode("__*__");
+         objectTypeNode2.addLine(terminalNode);
       }
    }
 
-   public static List<BaseReteNode> buildCriterion(BuildContext var0, Criterion var1) {
-      if (var1 instanceof Met) {
-         return MetBuilder.ins.buildCriterion((BaseCriterion)var1, null, var0);
+   public static List<BaseReteNode> buildCriterion(BuildContext context, Criterion criterion) {
+      if (criterion instanceof Met) {
+         return MetBuilder.ins.buildCriterion((BaseCriterion)criterion, null, context);
       }
 
-      for (CriterionBuilder var3 : a) {
-         if (var3.support(var1)) {
-            return var3.buildCriterion((BaseCriterion)var1, var0);
+      for (CriterionBuilder criterionBuilder : ReteBuilder.criterionBuilders) {
+         if (criterionBuilder.support(criterion)) {
+            return criterionBuilder.buildCriterion((BaseCriterion)criterion, context);
          }
       }
 
-      throw new RuleException("Unknow criterion : " + var1);
+      throw new RuleException("Unknow criterion : " + criterion);
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      a = var1.getBeansOfType(CriterionBuilder.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      ReteBuilder.criterionBuilders = applicationContext.getBeansOfType(CriterionBuilder.class).values();
    }
 }

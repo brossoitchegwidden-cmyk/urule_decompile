@@ -7,20 +7,20 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 public class BigDecimalJsonSerializer extends StdSerializer<BigDecimal> {
-   private static final long a = 3075284108960107323L;
+   private static final long serialVersionUID = 3075284108960107323L;
 
    public BigDecimalJsonSerializer() {
       this(BigDecimal.class);
    }
 
-   public BigDecimalJsonSerializer(Class<BigDecimal> var1) {
-      super(var1);
+   public BigDecimalJsonSerializer(Class<BigDecimal> valueType) {
+      super(valueType);
    }
 
-   public void serialize(BigDecimal var1, JsonGenerator var2, SerializerProvider var3) throws IOException {
-      if (var1 != null) {
-         String var4 = var1.stripTrailingZeros().toPlainString();
-         var2.writeString(var4);
+   public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+      if (value != null) {
+         String text = value.stripTrailingZeros().toPlainString();
+         gen.writeString(text);
       }
    }
 }

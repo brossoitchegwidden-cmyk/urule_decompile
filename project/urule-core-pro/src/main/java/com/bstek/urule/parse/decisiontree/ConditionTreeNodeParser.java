@@ -12,68 +12,68 @@ import java.util.ArrayList;
 import org.dom4j.Element;
 
 public class ConditionTreeNodeParser implements Parser<ConditionTreeNode> {
-   private ValueParser a;
-   private VariableTreeNodeParser b;
-   private ActionTreeNodeParser c;
+   private ValueParser valueParser;
+   private VariableTreeNodeParser variableTreeNodeParser;
+   private ActionTreeNodeParser actionTreeNodeParser;
 
-   public ConditionTreeNode parse(Element var1) {
-      ConditionTreeNode var2 = new ConditionTreeNode();
-      var2.setNodeType(TreeNodeType.condition);
-      var2.setOp(Op.valueOf(var1.attributeValue("op")));
-      ArrayList var3 = new ArrayList();
-      ArrayList var4 = new ArrayList();
-      ArrayList var5 = new ArrayList();
-      if (this.b == null) {
-         this.b = (VariableTreeNodeParser)Utils.getApplicationContext().getBean("urule.variableTreeNodeParser");
+   public ConditionTreeNode parse(Element element) {
+      ConditionTreeNode conditionTreeNode = new ConditionTreeNode();
+      conditionTreeNode.setNodeType(TreeNodeType.condition);
+      conditionTreeNode.setOp(Op.valueOf(element.attributeValue("op")));
+      ArrayList items = new ArrayList();
+      ArrayList items2 = new ArrayList();
+      ArrayList items3 = new ArrayList();
+      if (this.variableTreeNodeParser == null) {
+         this.variableTreeNodeParser = (VariableTreeNodeParser)Utils.getApplicationContext().getBean("urule.variableTreeNodeParser");
       }
 
-      for (Object var7 : var1.elements()) {
-         if (var7 != null && var7 instanceof Element) {
-            Element var8 = (Element)var7;
-            String var9 = var8.getName();
-            if (this.a.support(var9)) {
-               var2.setValue(this.a.parse(var8));
-            } else if (this.support(var9)) {
-               ConditionTreeNode var10 = this.parse(var8);
-               var10.setParentNode(var2);
-               var3.add(var10);
-            } else if (this.b.support(var9)) {
-               VariableTreeNode var11 = this.b.parse(var8);
-               var11.setParentNode(var2);
-               var5.add(var11);
-            } else if (this.c.support(var9)) {
-               ActionTreeNode var12 = this.c.parse(var8);
-               var12.setParentNode(var2);
-               var4.add(var12);
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.valueParser.support(name)) {
+               conditionTreeNode.setValue(this.valueParser.parse(element2));
+            } else if (this.support(name)) {
+               ConditionTreeNode conditionTreeNode2 = this.parse(element2);
+               conditionTreeNode2.setParentNode(conditionTreeNode);
+               items.add(conditionTreeNode2);
+            } else if (this.variableTreeNodeParser.support(name)) {
+               VariableTreeNode variableTreeNode = this.variableTreeNodeParser.parse(element2);
+               variableTreeNode.setParentNode(conditionTreeNode);
+               items3.add(variableTreeNode);
+            } else if (this.actionTreeNodeParser.support(name)) {
+               ActionTreeNode actionTreeNode = this.actionTreeNodeParser.parse(element2);
+               actionTreeNode.setParentNode(conditionTreeNode);
+               items2.add(actionTreeNode);
             }
          }
       }
 
-      if (var3.size() > 0) {
-         var2.setConditionTreeNodes(var3);
+      if (items.size() > 0) {
+         conditionTreeNode.setConditionTreeNodes(items);
       }
 
-      if (var4.size() > 0) {
-         var2.setActionTreeNodes(var4);
+      if (items2.size() > 0) {
+         conditionTreeNode.setActionTreeNodes(items2);
       }
 
-      if (var5.size() > 0) {
-         var2.setVariableTreeNodes(var5);
+      if (items3.size() > 0) {
+         conditionTreeNode.setVariableTreeNodes(items3);
       }
 
-      return var2;
+      return conditionTreeNode;
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.a = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 
-   public void setActionTreeNodeParser(ActionTreeNodeParser var1) {
-      this.c = var1;
+   public void setActionTreeNodeParser(ActionTreeNodeParser actionTreeNodeParser) {
+      this.actionTreeNodeParser = actionTreeNodeParser;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("condition-tree-node");
+   public boolean support(String name) {
+      return name.equals("condition-tree-node");
    }
 }

@@ -71,7 +71,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       result.put("issuer", issuer);
       result.put("restartRequired", requiresRestart(installed));
       result.put("csrfToken", csrfToken(request.getSession(true)));
-      this.a(response, result);
+      this.writeObjectToJson(response, result);
    }
 
    public void install(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -94,7 +94,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       byte[] bytes;
       try {
          bytes = readBounded(request.getInputStream(), MAX_LICENSE_BYTES);
-      } catch (IllegalArgumentException var5) {
+      } catch (IllegalArgumentException illegalArgumentException) {
          error(response, 413, "license_too_large", "License exceeds 65536 bytes.", false);
          return;
       }
@@ -127,15 +127,15 @@ public class LicenseServletHandler extends ApiServletHandler {
       byte[] requestBytes;
       try {
          requestBytes = readBounded(request.getInputStream(), 4096);
-      } catch (IllegalArgumentException var13) {
+      } catch (IllegalArgumentException illegalArgumentException) {
          error(response, 413, "issue_request_too_large", "Issue request exceeds 4096 bytes.", false);
          return;
       }
 
       Map requestData;
       try {
-         requestData = (Map)this.a().readValue(requestBytes, Map.class);
-      } catch (Exception var12) {
+         requestData = (Map)this.createObjectMapper().readValue(requestBytes, Map.class);
+      } catch (Exception exception) {
          error(response, 400, "issue_request_invalid", "Issue request must be a JSON object.", false);
          return;
       }
@@ -156,7 +156,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       long limit;
       try {
          limit = Long.parseLong(limitValue.toString());
-      } catch (NumberFormatException var11) {
+      } catch (NumberFormatException numberFormatException) {
          error(response, 400, "limit_invalid", "limit must be -1 or a non-negative epoch millisecond value.", false);
          return;
       }
@@ -172,7 +172,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       byte[] licenseBytes;
       try {
          licenseBytes = LicenseIssuer.issue(licensee, limit);
-      } catch (Exception var10) {
+      } catch (Exception exception2) {
          error(response, 500, "issuer_failed", "The local issuer could not generate a license.", false);
          return;
       }
@@ -210,7 +210,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       long limit;
       try {
          limit = Long.parseLong(limitText);
-      } catch (NumberFormatException var9) {
+      } catch (NumberFormatException numberFormatException) {
          error(response, 503, "issuer_default_invalid", "Configured default limit is invalid.", false);
          return;
       }
@@ -222,7 +222,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       byte[] licenseBytes;
       try {
          licenseBytes = LicenseIssuer.issue(licensee, limit, portable);
-      } catch (Exception var8) {
+      } catch (Exception exception) {
          error(response, 500, "issuer_failed", "The local issuer could not generate a license.", false);
          return;
       }
@@ -268,18 +268,18 @@ public class LicenseServletHandler extends ApiServletHandler {
             try {
                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
                temporary = null;
-            } catch (AtomicMoveNotSupportedException var10) {
+            } catch (AtomicMoveNotSupportedException atomicMoveNotSupportedException) {
                error(response, 500, "atomic_move_unsupported", "The filesystem does not support atomic license installation.", false);
                return;
             }
-         } catch (IOException var12) {
+         } catch (IOException iOException) {
             error(response, 500, "license_install_failed", "License could not be persisted safely.", false);
             return;
          } finally {
             if (temporary != null) {
                try {
                   Files.deleteIfExists(temporary);
-               } catch (IOException var9) {
+               } catch (IOException iOException2) {
                }
             }
          }
@@ -302,7 +302,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       result.put("sha256", sha256(bytes));
       result.put("restartRequired", true);
       response.setStatus(201);
-      this.a(response, result);
+      this.writeObjectToJson(response, result);
    }
 
    public void reload(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -332,7 +332,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       result.put("installed", installed);
       result.put("restartRequired", true);
       response.setStatus(409);
-      this.a(response, result);
+      this.writeObjectToJson(response, result);
    }
 
    private Map<String, Object> activeStatus() {
@@ -389,7 +389,7 @@ public class LicenseServletHandler extends ApiServletHandler {
          } else {
             installed.put("error", "license_invalid");
          }
-      } catch (IOException var6) {
+      } catch (IOException iOException) {
          installed.put("valid", false);
          installed.put("error", "license_unreadable");
       }
@@ -444,7 +444,7 @@ public class LicenseServletHandler extends ApiServletHandler {
    private boolean isLoopback(String address) {
       try {
          return address != null && InetAddress.getByName(address).isLoopbackAddress();
-      } catch (Exception var3) {
+      } catch (Exception exception) {
          return false;
       }
    }
@@ -531,8 +531,8 @@ public class LicenseServletHandler extends ApiServletHandler {
             result.append(String.format("%02x", value & 255));
          }
          return result.toString();
-      } catch (NoSuchAlgorithmException var5) {
-         throw new IllegalStateException(var5);
+      } catch (NoSuchAlgorithmException noSuchAlgorithmException) {
+         throw new IllegalStateException(noSuchAlgorithmException);
       }
    }
 
@@ -543,7 +543,7 @@ public class LicenseServletHandler extends ApiServletHandler {
       result.put("message", message);
       result.put("restartRequired", restartRequired);
       response.setStatus(status);
-      this.a(response, result);
+      this.writeObjectToJson(response, result);
    }
 
    private void noStore(HttpServletResponse response) {

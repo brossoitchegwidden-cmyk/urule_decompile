@@ -7,125 +7,125 @@ import java.util.Date;
    ignoreUnknown = true
 )
 public class Project {
-   private Long a;
-   private String b;
-   private String c;
-   private ProjectViewModel d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private String k;
-   private Date l;
-   private Date m;
+   private Long id;
+   private String name;
+   private String type;
+   private ProjectViewModel viewModel;
+   private String desc;
+   private String groupId;
+   private String enableApproveUser;
+   private String disableApproveUser;
+   private String deployApproveUser;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
 
    public Project() {
-      this.d = ProjectViewModel.category;
+      this.viewModel = ProjectViewModel.category;
    }
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getType() {
-      return this.c;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.c = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public ProjectViewModel getViewModel() {
-      return this.d;
+      return this.viewModel;
    }
 
-   public void setViewModel(ProjectViewModel var1) {
-      this.d = var1;
+   public void setViewModel(ProjectViewModel viewModel) {
+      this.viewModel = viewModel;
    }
 
    public String getDesc() {
-      return this.e;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.e = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getGroupId() {
-      return this.f;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.f = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public String getUpdateUser() {
-      return this.k;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.k = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.l;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.l = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.m;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.m = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getEnableApproveUser() {
-      return this.g;
+      return this.enableApproveUser;
    }
 
-   public void setEnableApproveUser(String var1) {
-      this.g = var1;
+   public void setEnableApproveUser(String enableApproveUser) {
+      this.enableApproveUser = enableApproveUser;
    }
 
    public String getDisableApproveUser() {
-      return this.h;
+      return this.disableApproveUser;
    }
 
-   public void setDisableApproveUser(String var1) {
-      this.h = var1;
+   public void setDisableApproveUser(String disableApproveUser) {
+      this.disableApproveUser = disableApproveUser;
    }
 
    public String getDeployApproveUser() {
-      return this.i;
+      return this.deployApproveUser;
    }
 
-   public void setDeployApproveUser(String var1) {
-      this.i = var1;
+   public void setDeployApproveUser(String deployApproveUser) {
+      this.deployApproveUser = deployApproveUser;
    }
 }

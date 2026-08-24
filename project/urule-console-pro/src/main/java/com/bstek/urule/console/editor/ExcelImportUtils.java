@@ -35,701 +35,702 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+/** Converts Excel workbook rows into URule model objects and XML fragments. */
 public class ExcelImportUtils {
-   private static final String a = "predefineGroupPriority";
+   private static final String PREDEFINEGROUPPRIORITY = "predefineGroupPriority";
 
-   public static List parseSheets(InputStream var0) throws IOException {
-      XSSFWorkbook var1 = new XSSFWorkbook(var0);
-      ArrayList var2 = new ArrayList();
+   public static List parseSheets(InputStream stream) throws IOException {
+      XSSFWorkbook xSSFWorkbook = new XSSFWorkbook(stream);
+      ArrayList sheets = new ArrayList();
 
-      for(int var3 = 0; var3 < var1.getNumberOfSheets(); ++var3) {
-         XSSFSheet var4 = var1.getSheetAt(var3);
-         if (var1.getSheetVisibility(var3) == SheetVisibility.VISIBLE) {
-            var2.add(var4);
+      for(int number = 0; number < xSSFWorkbook.getNumberOfSheets(); ++number) {
+         XSSFSheet sheetAt = xSSFWorkbook.getSheetAt(number);
+         if (xSSFWorkbook.getSheetVisibility(number) == SheetVisibility.VISIBLE) {
+            sheets.add(sheetAt);
          }
       }
 
-      if (var2.size() == 0) {
-         var1.close();
+      if (sheets.size() == 0) {
+         xSSFWorkbook.close();
          throw new InfoException("导入Excel没有合法的Sheet！");
       } else {
-         return var2;
+         return sheets;
       }
    }
 
-   public static XSSFSheet findDataSheet(XSSFWorkbook var0) {
-      XSSFSheet var1 = var0.getSheetAt(var0.getActiveSheetIndex());
-      if ("predefine".equals(var1.getSheetName()) || "property".equals(var1.getSheetName())) {
-         for(int var2 = 0; var2 < var0.getNumberOfSheets(); ++var2) {
-            XSSFSheet var3 = var0.getSheetAt(var2);
-            String var4 = var3.getSheetName();
-            if (!"predefine".equals(var4) && !"property".equals(var4)) {
-               var1 = var3;
+   public static XSSFSheet findDataSheet(XSSFWorkbook wb) {
+      XSSFSheet sheetAt = wb.getSheetAt(wb.getActiveSheetIndex());
+      if ("predefine".equals(sheetAt.getSheetName()) || "property".equals(sheetAt.getSheetName())) {
+         for(int number = 0; number < wb.getNumberOfSheets(); ++number) {
+            XSSFSheet sheetAt2 = wb.getSheetAt(number);
+            String sheetName = sheetAt2.getSheetName();
+            if (!"predefine".equals(sheetName) && !"property".equals(sheetName)) {
+               sheetAt = sheetAt2;
                break;
             }
          }
       }
 
-      return var1;
+      return sheetAt;
    }
 
-   public static Map parseVariables(List var0) {
-      HashMap var1 = new HashMap();
+   public static Map parseVariables(List sheets) {
+      HashMap variables = new HashMap();
 
-      for(XSSFSheet var3 : (Iterable<XSSFSheet>)(Iterable<?>)(var0)) {
-         ArrayList var4 = new ArrayList();
-         int var5 = var3.getLastRowNum();
+      for(XSSFSheet xSSFSheet : (Iterable<XSSFSheet>)(Iterable<?>)(sheets)) {
+         ArrayList items = new ArrayList();
+         int lastRowNum = xSSFSheet.getLastRowNum();
 
-         for(int var6 = 0; var6 <= var5; ++var6) {
-            XSSFRow var7 = var3.getRow(var6);
-            PropertyItem var8 = new PropertyItem();
-            var4.add(var8);
-            XSSFCell var9 = var7.getCell(0);
-            String var10 = a(var9, true);
-            var8.setName(var10);
-            if (var7.getLastCellNum() > 1) {
-               var9 = var7.getCell(1);
-               var8.setLabel(a(var9));
+         for(int number = 0; number <= lastRowNum; ++number) {
+            XSSFRow row = xSSFSheet.getRow(number);
+            PropertyItem propertyItem = new PropertyItem();
+            items.add(propertyItem);
+            XSSFCell cell = row.getCell(0);
+            String text = getCellText(cell, true);
+            propertyItem.setName(text);
+            if (row.getLastCellNum() > 1) {
+               cell = row.getCell(1);
+               propertyItem.setLabel(getCellText(cell));
             }
 
-            if (var7.getLastCellNum() > 2) {
-               var9 = var7.getCell(2);
-               var8.setDataType(a(a(var9)));
+            if (row.getLastCellNum() > 2) {
+               cell = row.getCell(2);
+               propertyItem.setDataType(parseFieldType(getCellText(cell)));
             }
 
-            if (var7.getLastCellNum() > 3) {
-               var9 = var7.getCell(3);
-               var8.setAct(b(a(var9)));
+            if (row.getLastCellNum() > 3) {
+               cell = row.getCell(3);
+               propertyItem.setAct(parseAct(getCellText(cell)));
             }
          }
 
-         var1.put(var3.getSheetName(), var4);
+         variables.put(xSSFSheet.getSheetName(), items);
       }
 
-      return var1;
+      return variables;
    }
 
-   private static FieldType a(String var0) {
-      if (StringUtils.isBlank(var0)) {
+   private static FieldType parseFieldType(String text) {
+      if (StringUtils.isBlank(text)) {
          return FieldType.String;
       } else {
-         String var1 = var0.trim().toUpperCase();
-         if (FieldType.Integer.name().toUpperCase().equals(var1)) {
+         String uppercaseText = text.trim().toUpperCase();
+         if (FieldType.Integer.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.Integer;
-         } else if (FieldType.Double.name().toUpperCase().equals(var1)) {
+         } else if (FieldType.Double.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.Double;
-         } else if (FieldType.Long.name().toUpperCase().equals(var1)) {
+         } else if (FieldType.Long.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.Long;
-         } else if (FieldType.Float.name().toUpperCase().equals(var1)) {
+         } else if (FieldType.Float.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.Float;
-         } else if (FieldType.BigDecimal.name().toUpperCase().equals(var1)) {
+         } else if (FieldType.BigDecimal.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.BigDecimal;
-         } else if (FieldType.Short.name().toUpperCase().equals(var1)) {
+         } else if (FieldType.Short.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.Short;
-         } else if (FieldType.Boolean.name().toUpperCase().equals(var1)) {
+         } else if (FieldType.Boolean.name().toUpperCase().equals(uppercaseText)) {
             return FieldType.Boolean;
          } else {
-            return FieldType.Date.name().toUpperCase().equals(var1) ? FieldType.Date : FieldType.String;
+            return FieldType.Date.name().toUpperCase().equals(uppercaseText) ? FieldType.Date : FieldType.String;
          }
       }
    }
 
-   private static Act b(String var0) {
-      if (StringUtils.isBlank(var0)) {
+   private static Act parseAct(String text) {
+      if (StringUtils.isBlank(text)) {
          return Act.InOut;
       } else {
-         String var1 = var0.trim().toUpperCase();
-         if (Act.In.name().toUpperCase().equals(var1)) {
+         String uppercaseText = text.trim().toUpperCase();
+         if (Act.In.name().toUpperCase().equals(uppercaseText)) {
             return Act.In;
          } else {
-            return Act.Out.name().toUpperCase().equals(var1) ? Act.Out : Act.InOut;
+            return Act.Out.name().toUpperCase().equals(uppercaseText) ? Act.Out : Act.InOut;
          }
       }
    }
 
-   public static List parseParameters(List var0) {
-      ArrayList var1 = new ArrayList();
-      ArrayList var2 = new ArrayList();
+   public static List parseParameters(List sheets) {
+      ArrayList parameters = new ArrayList();
+      ArrayList items = new ArrayList();
 
-      for(XSSFSheet var4 : (Iterable<XSSFSheet>)(Iterable<?>)(var0)) {
-         int var5 = var4.getLastRowNum();
+      for(XSSFSheet xSSFSheet : (Iterable<XSSFSheet>)(Iterable<?>)(sheets)) {
+         int lastRowNum = xSSFSheet.getLastRowNum();
 
-         for(int var6 = 0; var6 <= var5; ++var6) {
-            XSSFRow var7 = var4.getRow(var6);
-            PropertyItem var8 = new PropertyItem();
-            XSSFCell var9 = var7.getCell(0);
-            String var10 = a(var9, true);
-            var8.setName(var10);
-            if (!var2.contains(var10)) {
-               var1.add(var8);
-               var2.add(var10);
-               if (var7.getLastCellNum() > 1) {
-                  var9 = var7.getCell(1);
-                  var8.setLabel(a(var9));
+         for(int number = 0; number <= lastRowNum; ++number) {
+            XSSFRow row = xSSFSheet.getRow(number);
+            PropertyItem propertyItem = new PropertyItem();
+            XSSFCell cell = row.getCell(0);
+            String text = getCellText(cell, true);
+            propertyItem.setName(text);
+            if (!items.contains(text)) {
+               parameters.add(propertyItem);
+               items.add(text);
+               if (row.getLastCellNum() > 1) {
+                  cell = row.getCell(1);
+                  propertyItem.setLabel(getCellText(cell));
                }
 
-               if (var7.getLastCellNum() > 2) {
-                  var9 = var7.getCell(2);
-                  var8.setDataType(a(a(var9)));
+               if (row.getLastCellNum() > 2) {
+                  cell = row.getCell(2);
+                  propertyItem.setDataType(parseFieldType(getCellText(cell)));
                }
 
-               if (var7.getLastCellNum() > 3) {
-                  var9 = var7.getCell(3);
-                  var8.setAct(b(a(var9)));
+               if (row.getLastCellNum() > 3) {
+                  cell = row.getCell(3);
+                  propertyItem.setAct(parseAct(getCellText(cell)));
                }
             }
          }
       }
 
-      return var1;
+      return parameters;
    }
 
-   private static String a(XSSFCell var0) {
-      return a(var0, false);
+   private static String getCellText(XSSFCell cell) {
+      return getCellText(cell, false);
    }
 
-   private static String a(XSSFCell var0, boolean var1) {
-      String var2 = "";
-      if (CellType.NUMERIC == var0.getCellTypeEnum()) {
-         if (var1) {
-            Double var3 = var0.getNumericCellValue();
-            var2 = var3.intValue() + "";
+   private static String getCellText(XSSFCell xSSFCell, boolean integerOnly) {
+      String text = "";
+      if (CellType.NUMERIC == xSSFCell.getCellTypeEnum()) {
+         if (integerOnly) {
+            Double numericCellValue = xSSFCell.getNumericCellValue();
+            text = numericCellValue.intValue() + "";
          } else {
-            var2 = var0.getNumericCellValue() + "";
+            text = xSSFCell.getNumericCellValue() + "";
          }
-      } else if (CellType.BOOLEAN == var0.getCellTypeEnum()) {
-         var2 = var0.getBooleanCellValue() + "";
-      } else if (CellType._NONE == var0.getCellTypeEnum()) {
-         var2 = "";
-      } else if (CellType.ERROR == var0.getCellTypeEnum()) {
-         var2 = "ERROR";
+      } else if (CellType.BOOLEAN == xSSFCell.getCellTypeEnum()) {
+         text = xSSFCell.getBooleanCellValue() + "";
+      } else if (CellType._NONE == xSSFCell.getCellTypeEnum()) {
+         text = "";
+      } else if (CellType.ERROR == xSSFCell.getCellTypeEnum()) {
+         text = "ERROR";
       } else {
-         var2 = var0.getStringCellValue();
+         text = xSSFCell.getStringCellValue();
       }
 
-      return var2;
+      return text;
    }
 
-   public static List parsePredefines(XSSFWorkbook var0) {
-      ArrayList var1 = new ArrayList();
-      XSSFSheet var2 = var0.getSheet("predefine");
-      if (var2 == null) {
-         return var1;
+   public static List parsePredefines(XSSFWorkbook workbook) {
+      ArrayList predefines = new ArrayList();
+      XSSFSheet sheet = workbook.getSheet("predefine");
+      if (sheet == null) {
+         return predefines;
       } else {
-         int var3 = var2.getLastRowNum();
+         int lastRowNum = sheet.getLastRowNum();
 
-         for(int var4 = 1; var4 <= var3; ++var4) {
-            PredefineRow var5 = new PredefineRow();
-            XSSFRow var6 = var2.getRow(var4);
-            var5.setUuid(UUID.randomUUID().toString());
-            var5.setName(var6.getCell(0).getStringCellValue());
-            var5.setFromOrIn(var6.getCell(1).getStringCellValue());
-            var5.setType(var6.getCell(2).getStringCellValue());
-            var5.setFromType(var6.getCell(3).getStringCellValue());
-            var5.setFromCategory(var6.getCell(4).getStringCellValue());
-            var5.setFromValue(var6.getCell(5).getStringCellValue());
-            var5.setParams(var6.getCell(6).getStringCellValue());
-            var5.setCondition(var6.getCell(7).getStringCellValue());
-            var1.add(var5);
+         for(int number = 1; number <= lastRowNum; ++number) {
+            PredefineRow predefineRow = new PredefineRow();
+            XSSFRow row = sheet.getRow(number);
+            predefineRow.setUuid(UUID.randomUUID().toString());
+            predefineRow.setName(row.getCell(0).getStringCellValue());
+            predefineRow.setFromOrIn(row.getCell(1).getStringCellValue());
+            predefineRow.setType(row.getCell(2).getStringCellValue());
+            predefineRow.setFromType(row.getCell(3).getStringCellValue());
+            predefineRow.setFromCategory(row.getCell(4).getStringCellValue());
+            predefineRow.setFromValue(row.getCell(5).getStringCellValue());
+            predefineRow.setParams(row.getCell(6).getStringCellValue());
+            predefineRow.setCondition(row.getCell(7).getStringCellValue());
+            predefines.add(predefineRow);
          }
 
-         return var1;
+         return predefines;
       }
    }
 
-   public static Integer getPredefineGroupPriority(Map var0) {
-      Integer var1 = null;
-      if (var0.containsKey("predefineGroupPriority")) {
-         var1 = (Integer)var0.get("predefineGroupPriority");
+   public static Integer getPredefineGroupPriority(Map properties) {
+      Integer predefineGroupPriority = null;
+      if (properties.containsKey("predefineGroupPriority")) {
+         predefineGroupPriority = (Integer)properties.get("predefineGroupPriority");
       }
 
-      return var1;
+      return predefineGroupPriority;
    }
 
-   public static ScoringType getScoringType(Map var0) {
-      String var1 = null;
-      if (var0.containsKey("scoringType")) {
-         var1 = (String)var0.get("scoringType");
-         return ScoringType.valueOf(var1);
+   public static ScoringType getScoringType(Map properties) {
+      String text = null;
+      if (properties.containsKey("scoringType")) {
+         text = (String)properties.get("scoringType");
+         return ScoringType.valueOf(text);
       } else {
          return ScoringType.sum;
       }
    }
 
-   public static String getScoringBean(Map var0) {
-      String var1 = null;
-      if (var0.containsKey("scoringBean")) {
-         var1 = (String)var0.get("scoringBean");
+   public static String getScoringBean(Map properties) {
+      String scoringBean = null;
+      if (properties.containsKey("scoringBean")) {
+         scoringBean = (String)properties.get("scoringBean");
       }
 
-      return var1;
+      return scoringBean;
    }
 
-   public static Map parseProperties(XSSFWorkbook var0) {
-      HashMap var1 = new HashMap();
-      XSSFSheet var2 = var0.getSheet("property");
-      if (var2 == null) {
-         return var1;
+   public static Map parseProperties(XSSFWorkbook workbook) {
+      HashMap properties = new HashMap();
+      XSSFSheet sheet = workbook.getSheet("property");
+      if (sheet == null) {
+         return properties;
       } else {
-         int var3 = var2.getLastRowNum();
+         int lastRowNum = sheet.getLastRowNum();
 
-         for(int var4 = 1; var4 <= var3; ++var4) {
-            XSSFRow var5 = var2.getRow(var4);
-            String var6 = var5.getCell(0).getStringCellValue();
-            if (!StringUtils.isBlank(var6)) {
-               var6 = var6.trim().toLowerCase();
-               if ("debug".equals(var6) || "允许调试信息输出".equals(var6)) {
-                  Boolean var7 = var5.getCell(1).getBooleanCellValue();
-                  var1.put("debug", var7);
+         for(int number = 1; number <= lastRowNum; ++number) {
+            XSSFRow row = sheet.getRow(number);
+            String stringCellValue = row.getCell(0).getStringCellValue();
+            if (!StringUtils.isBlank(stringCellValue)) {
+               stringCellValue = stringCellValue.trim().toLowerCase();
+               if ("debug".equals(stringCellValue) || "允许调试信息输出".equals(stringCellValue)) {
+                  Boolean booleanCellValue = row.getCell(1).getBooleanCellValue();
+                  properties.put("debug", booleanCellValue);
                }
 
-               if ("enable".equals(var6) || "是否启用".equals(var6)) {
-                  Boolean var14 = var5.getCell(1).getBooleanCellValue();
-                  var1.put("enable", var14);
+               if ("enable".equals(stringCellValue) || "是否启用".equals(stringCellValue)) {
+                  Boolean booleanCellValue2 = row.getCell(1).getBooleanCellValue();
+                  properties.put("enable", booleanCellValue2);
                }
 
-               if ("salience".equals(var6) || "优先级".equals(var6)) {
+               if ("salience".equals(stringCellValue) || "优先级".equals(stringCellValue)) {
                   try {
-                     Double var15 = var5.getCell(1).getNumericCellValue();
-                     Integer var8 = var15.intValue();
-                     var1.put("salience", var8);
-                  } catch (Exception var12) {
+                     Double numericCellValue = row.getCell(1).getNumericCellValue();
+                     Integer number2 = numericCellValue.intValue();
+                     properties.put("salience", number2);
+                  } catch (Exception exception) {
                   }
                }
 
-               SimpleDateFormat var16 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-               if ("effectiveDate".toLowerCase().equals(var6) || "生效时间".equals(var6)) {
+               SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+               if ("effectiveDate".toLowerCase().equals(stringCellValue) || "生效时间".equals(stringCellValue)) {
                   try {
-                     String var17 = var5.getCell(1).getStringCellValue();
-                     Date var9 = var16.parse(var17);
-                     var1.put("effectiveDate", var9);
-                  } catch (Exception var11) {
+                     String stringCellValue2 = row.getCell(1).getStringCellValue();
+                     Date dateValue = simpleDateFormat.parse(stringCellValue2);
+                     properties.put("effectiveDate", dateValue);
+                  } catch (Exception exception2) {
                   }
                }
 
-               if ("expiresDate".toLowerCase().equals(var6) || "失效时间".equals(var6)) {
+               if ("expiresDate".toLowerCase().equals(stringCellValue) || "失效时间".equals(stringCellValue)) {
                   try {
-                     String var18 = var5.getCell(1).getStringCellValue();
-                     Date var28 = var16.parse(var18);
-                     var1.put("expiresDate", var28);
-                  } catch (Exception var10) {
+                     String stringCellValue3 = row.getCell(1).getStringCellValue();
+                     Date dateValue2 = simpleDateFormat.parse(stringCellValue3);
+                     properties.put("expiresDate", dateValue2);
+                  } catch (Exception exception3) {
                   }
                }
 
-               if ("mutexGroup".toLowerCase().equals(var6) || "互斥组".equals(var6)) {
-                  String var19 = var5.getCell(1).getStringCellValue();
-                  var1.put("mutexGroup", var19);
+               if ("mutexGroup".toLowerCase().equals(stringCellValue) || "互斥组".equals(stringCellValue)) {
+                  String stringCellValue4 = row.getCell(1).getStringCellValue();
+                  properties.put("mutexGroup", stringCellValue4);
                }
 
-               if ("remark".equals(var6) || "备注".equals(var6)) {
-                  String var20 = var5.getCell(1).getStringCellValue();
-                  var1.put("remark", var20);
+               if ("remark".equals(stringCellValue) || "备注".equals(stringCellValue)) {
+                  String stringCellValue5 = row.getCell(1).getStringCellValue();
+                  properties.put("remark", stringCellValue5);
                }
 
-               if ("name".equals(var6) || "名称".equals(var6)) {
-                  String var21 = var5.getCell(1).getStringCellValue();
-                  var1.put("name", var21);
+               if ("name".equals(stringCellValue) || "名称".equals(stringCellValue)) {
+                  String stringCellValue6 = row.getCell(1).getStringCellValue();
+                  properties.put("name", stringCellValue6);
                }
 
-               if ("predefineGroupPriority".toLowerCase().equals(var6) || "预定义值优先级".equals(var6)) {
-                  Double var22 = var5.getCell(1).getNumericCellValue();
-                  var1.put("predefineGroupPriority", var22.intValue());
+               if ("predefineGroupPriority".toLowerCase().equals(stringCellValue) || "预定义值优先级".equals(stringCellValue)) {
+                  Double numericCellValue2 = row.getCell(1).getNumericCellValue();
+                  properties.put("predefineGroupPriority", numericCellValue2.intValue());
                }
 
-               if ("assignTargetType".toLowerCase().equals(var6) || "赋值目标类型".equals(var6)) {
-                  String var23 = var5.getCell(1).getStringCellValue();
-                  if (ExcelSupport.isParameter(var23)) {
-                     var23 = "parameter";
-                  } else if ("变量".equals(var23)) {
-                     var23 = "variable";
+               if ("assignTargetType".toLowerCase().equals(stringCellValue) || "赋值目标类型".equals(stringCellValue)) {
+                  String stringCellValue7 = row.getCell(1).getStringCellValue();
+                  if (ExcelSupport.isParameter(stringCellValue7)) {
+                     stringCellValue7 = "parameter";
+                  } else if ("变量".equals(stringCellValue7)) {
+                     stringCellValue7 = "variable";
                   }
 
-                  var1.put("assignTargetType", var23);
+                  properties.put("assignTargetType", stringCellValue7);
                }
 
-               if ("assignTargetCategory".toLowerCase().equals(var6) || "赋值对象类型".equals(var6)) {
-                  String var24 = var5.getCell(1).getStringCellValue();
-                  var1.put("assignTargetCategory", var24);
+               if ("assignTargetCategory".toLowerCase().equals(stringCellValue) || "赋值对象类型".equals(stringCellValue)) {
+                  String stringCellValue8 = row.getCell(1).getStringCellValue();
+                  properties.put("assignTargetCategory", stringCellValue8);
                }
 
-               if ("assignTargetVariable".toLowerCase().equals(var6) || "赋值属性类型".equals(var6)) {
-                  String var25 = var5.getCell(1).getStringCellValue();
-                  var1.put("assignTargetVariable", var25);
+               if ("assignTargetVariable".toLowerCase().equals(stringCellValue) || "赋值属性类型".equals(stringCellValue)) {
+                  String stringCellValue9 = row.getCell(1).getStringCellValue();
+                  properties.put("assignTargetVariable", stringCellValue9);
                }
 
-               if ("scoringType".toLowerCase().equals(var6) || "得分计算方式".equals(var6)) {
-                  String var26 = var5.getCell(1).getStringCellValue();
-                  var1.put("scoringType", var26);
+               if ("scoringType".toLowerCase().equals(stringCellValue) || "得分计算方式".equals(stringCellValue)) {
+                  String stringCellValue10 = row.getCell(1).getStringCellValue();
+                  properties.put("scoringType", stringCellValue10);
                }
 
-               if ("scoringBean".toLowerCase().equals(var6) || "自定义计算得分的Bean ID".toLowerCase().equals(var6)) {
-                  String var27 = var5.getCell(1).getStringCellValue();
-                  var1.put("scoringBean", var27);
+               if ("scoringBean".toLowerCase().equals(stringCellValue) || "自定义计算得分的Bean ID".toLowerCase().equals(stringCellValue)) {
+                  String stringCellValue11 = row.getCell(1).getStringCellValue();
+                  properties.put("scoringBean", stringCellValue11);
                }
             }
          }
 
-         return var1;
+         return properties;
       }
    }
 
-   public static void builderProperties(ExcelSupport var0, StringBuilder var1, Map var2, boolean var3) {
-      Boolean var4 = false;
-      if (var2.containsKey("debug")) {
-         var4 = (Boolean)var2.get("debug");
+   public static void builderProperties(ExcelSupport excelSupport, StringBuilder sb, Map properties, boolean isCrossTable) {
+      Boolean debug = false;
+      if (properties.containsKey("debug")) {
+         debug = (Boolean)properties.get("debug");
       }
 
-      Boolean var5 = false;
-      if (var2.containsKey("enable")) {
-         var5 = (Boolean)var2.get("enable");
+      Boolean enabled = false;
+      if (properties.containsKey("enable")) {
+         enabled = (Boolean)properties.get("enable");
       }
 
-      Integer var6 = null;
-      if (var2.containsKey("salience")) {
-         var6 = (Integer)var2.get("salience");
+      Integer salience = null;
+      if (properties.containsKey("salience")) {
+         salience = (Integer)properties.get("salience");
       }
 
-      Date var7 = null;
-      if (var2.containsKey("effectiveDate")) {
-         var7 = (Date)var2.get("effectiveDate");
+      Date effectiveDate = null;
+      if (properties.containsKey("effectiveDate")) {
+         effectiveDate = (Date)properties.get("effectiveDate");
       }
 
-      Date var8 = null;
-      if (var2.containsKey("expiresDate")) {
-         var8 = (Date)var2.get("expiresDate");
+      Date expiresDate = null;
+      if (properties.containsKey("expiresDate")) {
+         expiresDate = (Date)properties.get("expiresDate");
       }
 
-      String var9 = null;
-      if (var2.containsKey("mutexGroup")) {
-         var9 = (String)var2.get("mutexGroup");
+      String mutexGroup = null;
+      if (properties.containsKey("mutexGroup")) {
+         mutexGroup = (String)properties.get("mutexGroup");
       }
 
-      a(var1, var4, var5, var6, var7, var8, var9);
-      if (var3) {
-         String var10 = null;
-         if (var2.containsKey("assignTargetType")) {
-            var10 = (String)var2.get("assignTargetType");
+      appendRuleAttributes(sb, debug, enabled, salience, effectiveDate, expiresDate, mutexGroup);
+      if (isCrossTable) {
+         String assignTargetType = null;
+         if (properties.containsKey("assignTargetType")) {
+            assignTargetType = (String)properties.get("assignTargetType");
          }
 
-         String var11 = null;
-         if (var2.containsKey("assignTargetCategory")) {
-            var11 = (String)var2.get("assignTargetCategory");
+         String assignTargetCategory = null;
+         if (properties.containsKey("assignTargetCategory")) {
+            assignTargetCategory = (String)properties.get("assignTargetCategory");
          }
 
-         String var12 = null;
-         if (var2.containsKey("assignTargetVariable")) {
-            var12 = (String)var2.get("assignTargetVariable");
+         String assignTargetVariable = null;
+         if (properties.containsKey("assignTargetVariable")) {
+            assignTargetVariable = (String)properties.get("assignTargetVariable");
          }
 
-         a(var0, var1, var10, var11, var12);
-      }
-
-   }
-
-   private static void a(StringBuilder var0, boolean var1, boolean var2, Integer var3, Date var4, Date var5, String var6) {
-      if (var1) {
-         var0.append(" debug=\"" + var1 + "\"");
-      }
-
-      if (!var2) {
-         var0.append(" enabled=\"" + var2 + "\"");
-      }
-
-      if (null != var3 && var3 != 10) {
-         var0.append(" salience=\"" + var3 + "\"");
-      }
-
-      SimpleDateFormat var7 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      if (null != var4) {
-         var0.append(" effective-date=\"" + var7.format(var4) + "\"");
-      }
-
-      if (null != var5) {
-         var0.append(" expires-date=\"" + var7.format(var5) + "\"");
-      }
-
-      if (StringUtils.isNotBlank(var6)) {
-         var0.append(" mutex-group=\"" + var6 + "\"");
+         appendAssignmentTarget(excelSupport, sb, assignTargetType, assignTargetCategory, assignTargetVariable);
       }
 
    }
 
-   private static void a(ExcelSupport var0, StringBuilder var1, String var2, String var3, String var4) {
-      StringBuilder var5 = new StringBuilder("");
-      if ("variable".equals(var2)) {
-         VariableCategory var6 = var0.findVariableCategory(var3, var4);
-         if (null == var6) {
+   private static void appendRuleAttributes(StringBuilder stringBuilder, boolean debug, boolean enabled, Integer salience, Date effectiveDate, Date expiresDate, String mutexGroup) {
+      if (debug) {
+         stringBuilder.append(" debug=\"" + debug + "\"");
+      }
+
+      if (!enabled) {
+         stringBuilder.append(" enabled=\"" + enabled + "\"");
+      }
+
+      if (null != salience && salience != 10) {
+         stringBuilder.append(" salience=\"" + salience + "\"");
+      }
+
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      if (null != effectiveDate) {
+         stringBuilder.append(" effective-date=\"" + simpleDateFormat.format(effectiveDate) + "\"");
+      }
+
+      if (null != expiresDate) {
+         stringBuilder.append(" expires-date=\"" + simpleDateFormat.format(expiresDate) + "\"");
+      }
+
+      if (StringUtils.isNotBlank(mutexGroup)) {
+         stringBuilder.append(" mutex-group=\"" + mutexGroup + "\"");
+      }
+
+   }
+
+   private static void appendAssignmentTarget(ExcelSupport excelSupport, StringBuilder stringBuilder, String targetType, String targetCategory, String targetVariable) {
+      StringBuilder attributes = new StringBuilder("");
+      if ("variable".equals(targetType)) {
+         VariableCategory variableCategory = excelSupport.findVariableCategory(targetCategory, targetVariable);
+         if (null == variableCategory) {
             return;
          }
 
-         Variable var7 = (Variable)var6.getVariableLabels().get(var4);
-         var5.append(" assign-target-type=\"variable\" category-uuid=\"" + var6.getUuid() + "\" var-category=\"" + var6.getName() + "\" var=\"" + var7.getName() + "\" var-label=\"" + var7.getLabel() + "\" datatype=\"" + var7.getType() + "\" uuid=\"" + var7.getUuid() + "\"");
+         Variable variable = (Variable)variableCategory.getVariableLabels().get(targetVariable);
+         attributes.append(" assign-target-type=\"variable\" category-uuid=\"" + variableCategory.getUuid() + "\" var-category=\"" + variableCategory.getName() + "\" var=\"" + variable.getName() + "\" var-label=\"" + variable.getLabel() + "\" datatype=\"" + variable.getType() + "\" uuid=\"" + variable.getUuid() + "\"");
       } else {
-         if (!"parameter".equals(var2)) {
+         if (!"parameter".equals(targetType)) {
             return;
          }
 
-         var5.append(" assign-target-type=\"parameter\" category-uuid=\"参数\" ");
-         if (StringUtils.isBlank(var3)) {
-            Variable var9 = var0.findSimpleParameterByLabel(var4);
-            if (var9 == null) {
+         attributes.append(" assign-target-type=\"parameter\" category-uuid=\"参数\" ");
+         if (StringUtils.isBlank(targetCategory)) {
+            Variable simpleParameterByLabel = excelSupport.findSimpleParameterByLabel(targetVariable);
+            if (simpleParameterByLabel == null) {
                return;
             }
 
-            var5.append(" uuid=\"" + var9.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + var9.getName() + "\" var-label=\"" + var9.getLabel() + "\" datatype=\"" + var9.getType() + "\"");
+            attributes.append(" uuid=\"" + simpleParameterByLabel.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + simpleParameterByLabel.getName() + "\" var-label=\"" + simpleParameterByLabel.getLabel() + "\" datatype=\"" + simpleParameterByLabel.getType() + "\"");
          } else {
-            Variable var10 = var0.findParameterByLabel(var3, var4);
-            if (var10 == null) {
+            Variable parameterByLabel = excelSupport.findParameterByLabel(targetCategory, targetVariable);
+            if (parameterByLabel == null) {
                return;
             }
 
-            Variable var11 = null;
-            VariableCategory var8 = null;
-            var8 = var0.findVariableCategoryByUUID(var10.getDataType());
-            var11 = (Variable)var8.getVariableLabels().get(var4);
-            if (null == var11) {
+            Variable targetProperty = null;
+            VariableCategory variableCategoryByUUID = null;
+            variableCategoryByUUID = excelSupport.findVariableCategoryByUUID(parameterByLabel.getDataType());
+            targetProperty = (Variable)variableCategoryByUUID.getVariableLabels().get(targetVariable);
+            if (null == targetProperty) {
                return;
             }
 
-            var5.append(" uuid=\"" + var10.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + var11.getName() + "\" var-label=\"" + var11.getLabel() + "\" datatype=\"" + var11.getType() + "\"  key-category-uuid=\"" + var8.getUuid() + "\" key-uuid=\"" + var11.getUuid() + "\" key-label=\"" + var10.getLabel() + "\" key-name=\"" + var10.getName() + "\"");
+            attributes.append(" uuid=\"" + parameterByLabel.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + targetProperty.getName() + "\" var-label=\"" + targetProperty.getLabel() + "\" datatype=\"" + targetProperty.getType() + "\"  key-category-uuid=\"" + variableCategoryByUUID.getUuid() + "\" key-uuid=\"" + targetProperty.getUuid() + "\" key-label=\"" + parameterByLabel.getLabel() + "\" key-name=\"" + parameterByLabel.getName() + "\"");
          }
       }
 
-      var1.append(var5.toString());
+      stringBuilder.append(attributes.toString());
    }
 
-   public static void builderRemark(StringBuilder var0, Map var1) {
-      if (var1.containsKey("remark")) {
-         String var2 = (String)var1.get("remark");
-         var0.append("<remark><![CDATA[" + var2 + "]]></remark>");
+   public static void builderRemark(StringBuilder sb, Map properties) {
+      if (properties.containsKey("remark")) {
+         String text = (String)properties.get("remark");
+         sb.append("<remark><![CDATA[" + text + "]]></remark>");
       }
 
    }
 
-   public static void builderPredefineXml(StringBuilder var0, Integer var1, List var2, Map var3, ExcelSupport var4, Map var5) {
-      if (var2.size() != 0) {
-         for(PredefineRow var7 : (Iterable<PredefineRow>)(Iterable<?>)(var2)) {
-            if ("Predefine".equals(var7.getFromType()) && Datatype.isType(var7.getType()) && StringUtils.isNotBlank(var7.getFromCategory()) && StringUtils.isNotBlank(var7.getFromValue())) {
-               String[] var8 = new String[2];
-               PredefineRow var9 = (PredefineRow)var3.get(var7.getFromCategory());
-               if (var9 != null && ExcelSupport.isParameter(var9.getFromType())) {
-                  var8[0] = var9.getType();
-                  var8[1] = var7.getFromValue();
-                  VariableCategory var10 = var4.findVariableCategory(var8);
-                  if (var10 != null) {
-                     var5.put(var9.getType(), var10);
+   public static void builderPredefineXml(StringBuilder sb, Integer predefineGroupPriority, List predefineRows, Map predefineNameMap, ExcelSupport excelSupport, Map parameterVarMap) {
+      if (predefineRows.size() != 0) {
+         for(PredefineRow predefineRow : (Iterable<PredefineRow>)(Iterable<?>)(predefineRows)) {
+            if ("Predefine".equals(predefineRow.getFromType()) && Datatype.isType(predefineRow.getType()) && StringUtils.isNotBlank(predefineRow.getFromCategory()) && StringUtils.isNotBlank(predefineRow.getFromValue())) {
+               String[] text = new String[2];
+               PredefineRow predefineRow2 = (PredefineRow)predefineNameMap.get(predefineRow.getFromCategory());
+               if (predefineRow2 != null && ExcelSupport.isParameter(predefineRow2.getFromType())) {
+                  text[0] = predefineRow2.getType();
+                  text[1] = predefineRow.getFromValue();
+                  VariableCategory variableCategory = excelSupport.findVariableCategory(text);
+                  if (variableCategory != null) {
+                     parameterVarMap.put(predefineRow2.getType(), variableCategory);
                   }
                }
             }
          }
 
-         if (var1 == null) {
-            var1 = 1;
+         if (predefineGroupPriority == null) {
+            predefineGroupPriority = 1;
          }
 
-         var0.append("<predefine-group priority=\"" + var1 + "\">");
+         sb.append("<predefine-group priority=\"" + predefineGroupPriority + "\">");
 
-         for(PredefineRow var20 : (Iterable<PredefineRow>)(Iterable<?>)(var2)) {
-            String var21 = var20.getFromType();
-            var0.append("<predefine uuid=\"" + var20.getUuid() + "\" name=\"" + var20.getName() + "\" ");
-            if (StringUtils.isNotBlank(var20.getCondition())) {
+         for(PredefineRow predefineRow3 : (Iterable<PredefineRow>)(Iterable<?>)(predefineRows)) {
+            String fromType = predefineRow3.getFromType();
+            sb.append("<predefine uuid=\"" + predefineRow3.getUuid() + "\" name=\"" + predefineRow3.getName() + "\" ");
+            if (StringUtils.isNotBlank(predefineRow3.getCondition())) {
             }
 
-            if ("Variable".equals(var21)) {
-               String[] var28 = new String[]{var20.getFromCategory(), var20.getFromValue()};
-               Variable var34 = var4.findVariable(var28);
-               VariableCategory var40 = var4.findVariableCategory(var28);
-               VariableCategory var44 = var4.findVariableCategory(var20.getType());
-               if (var44 == null) {
-                  var0.append(" type=\"" + var20.getType() + "\"");
+            if ("Variable".equals(fromType)) {
+               String[] values = new String[]{predefineRow3.getFromCategory(), predefineRow3.getFromValue()};
+               Variable variable = excelSupport.findVariable(values);
+               VariableCategory variableCategory2 = excelSupport.findVariableCategory(values);
+               VariableCategory variableCategory3 = excelSupport.findVariableCategory(predefineRow3.getType());
+               if (variableCategory3 == null) {
+                  sb.append(" type=\"" + predefineRow3.getType() + "\"");
                } else {
-                  var0.append(" type=\"" + var44.getUuid() + "\"");
+                  sb.append(" type=\"" + variableCategory3.getUuid() + "\"");
                }
 
-               var0.append(" value-type=\"" + var20.getFromOrIn() + "\">");
-               var0.append("<value category-uuid=\"" + var40.getUuid() + "\" var-category=\"" + var40.getName() + "\" var=\"" + var34.getName() + "\" var-label=\"" + var20.getFromValue() + "\" datatype=\"" + var34.getDataType() + "\" uuid=\"" + var34.getUuid() + "\" type=\"Variable\"/>");
-            } else if ("VariableCategory".equals(var21)) {
-               VariableCategory var27 = var4.findVariableCategory(var20.getType());
-               if (var27 != null) {
-                  var0.append(" type=\"" + var27.getUuid() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-                  var0.append("<value category-uuid=\"" + var27.getUuid() + "\" var-category=\"" + var27.getName() + "\" type=\"VariableCategory\"/>");
+               sb.append(" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+               sb.append("<value category-uuid=\"" + variableCategory2.getUuid() + "\" var-category=\"" + variableCategory2.getName() + "\" var=\"" + variable.getName() + "\" var-label=\"" + predefineRow3.getFromValue() + "\" datatype=\"" + variable.getDataType() + "\" uuid=\"" + variable.getUuid() + "\" type=\"Variable\"/>");
+            } else if ("VariableCategory".equals(fromType)) {
+               VariableCategory variableCategory4 = excelSupport.findVariableCategory(predefineRow3.getType());
+               if (variableCategory4 != null) {
+                  sb.append(" type=\"" + variableCategory4.getUuid() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+                  sb.append("<value category-uuid=\"" + variableCategory4.getUuid() + "\" var-category=\"" + variableCategory4.getName() + "\" type=\"VariableCategory\"/>");
                } else {
-                  var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
+                  sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
                }
-            } else if ("Constant".equals(var21)) {
-               String[] var26 = new String[]{var20.getFromCategory(), var20.getFromValue()};
-               Constant var33 = var4.findConstant(var26, false);
-               ConstantCategory var39 = var4.findConstantCategory(var26);
-               var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-               var0.append("<value category-uuid=\"" + var39.getUuid() + "\" uuid=\"" + var33.getUuid() + "\" const-category=\"" + var39.getLabel() + "\" const=\"" + var33.getName() + "\" const-label=\"" + var33.getLabel() + "\" data-type=\"" + var33.getType() + "\" type=\"Constant\"/>");
-            } else if (!"Method".equals(var21)) {
-               if ("CommonFunction".equals(var21)) {
-                  var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-                  FunctionDescriptor var25 = var4.getFunction(var20.getFromValue());
-                  if (var25 == null) {
-                     var0.append("<value content=\"函数:" + var20.getFromValue() + "\" type=\"Input\">");
+            } else if ("Constant".equals(fromType)) {
+               String[] values2 = new String[]{predefineRow3.getFromCategory(), predefineRow3.getFromValue()};
+               Constant constant = excelSupport.findConstant(values2, false);
+               ConstantCategory constantCategory = excelSupport.findConstantCategory(values2);
+               sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+               sb.append("<value category-uuid=\"" + constantCategory.getUuid() + "\" uuid=\"" + constant.getUuid() + "\" const-category=\"" + constantCategory.getLabel() + "\" const=\"" + constant.getName() + "\" const-label=\"" + constant.getLabel() + "\" data-type=\"" + constant.getType() + "\" type=\"Constant\"/>");
+            } else if (!"Method".equals(fromType)) {
+               if ("CommonFunction".equals(fromType)) {
+                  sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+                  FunctionDescriptor function = excelSupport.getFunction(predefineRow3.getFromValue());
+                  if (function == null) {
+                     sb.append("<value content=\"函数:" + predefineRow3.getFromValue() + "\" type=\"Input\">");
                   } else {
-                     var0.append("<value function-label=\"" + var25.getLabel() + "\" function-name=\"" + var25.getName() + "\" type=\"CommonFunction\">");
-                     String var32 = var20.getParams();
-                     if (StringUtils.isNotBlank(var32)) {
-                        String[] var38 = var32.split("\\.");
-                        if (var38.length < 2) {
-                           var0.append("<function-parameter name=\"对象\" property-name=\"" + var32 + "\" property-label=\"" + var32 + "\">");
-                           var0.append("<value content=\"" + var32 + "\" type=\"Input\"></value>");
-                           var0.append("</function-parameter>");
+                     sb.append("<value function-label=\"" + function.getLabel() + "\" function-name=\"" + function.getName() + "\" type=\"CommonFunction\">");
+                     String params = predefineRow3.getParams();
+                     if (StringUtils.isNotBlank(params)) {
+                        String[] parts = params.split("\\.");
+                        if (parts.length < 2) {
+                           sb.append("<function-parameter name=\"对象\" property-name=\"" + params + "\" property-label=\"" + params + "\">");
+                           sb.append("<value content=\"" + params + "\" type=\"Input\"></value>");
+                           sb.append("</function-parameter>");
                         } else {
-                           String[] var43 = new String[]{var38[0], var38[1]};
-                           VariableCategory var46 = var4.findVariableCategory(var43);
-                           var0.append("<function-parameter name=\"对象\" property-name=\"" + var38[0] + "\" property-label=\"" + var38[1] + "\">");
-                           var0.append("<value category-uuid=\"" + var46.getUuid() + "\" var-category=\"" + var32 + "\" type=\"VariableCategory\"></value>");
-                           var0.append("</function-parameter>");
+                           String[] values3 = new String[]{parts[0], parts[1]};
+                           VariableCategory variableCategory5 = excelSupport.findVariableCategory(values3);
+                           sb.append("<function-parameter name=\"对象\" property-name=\"" + parts[0] + "\" property-label=\"" + parts[1] + "\">");
+                           sb.append("<value category-uuid=\"" + variableCategory5.getUuid() + "\" var-category=\"" + params + "\" type=\"VariableCategory\"></value>");
+                           sb.append("</function-parameter>");
                         }
                      }
                   }
 
-                  var0.append("</value>");
-               } else if ("Parameter".equals(var21)) {
-                  String[] var24 = new String[]{"参数", StringUtils.isBlank(var20.getFromCategory()) ? var20.getFromValue() : var20.getFromCategory()};
-                  Variable var31 = var4.findVariable(var24);
-                  if (Datatype.isType(var20.getType())) {
-                     var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-                  } else if (var5.containsKey(var20.getType())) {
-                     var0.append(" type=\"" + ((VariableCategory)var5.get(var20.getType())).getUuid() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
+                  sb.append("</value>");
+               } else if ("Parameter".equals(fromType)) {
+                  String[] values4 = new String[]{"参数", StringUtils.isBlank(predefineRow3.getFromCategory()) ? predefineRow3.getFromValue() : predefineRow3.getFromCategory()};
+                  Variable variable2 = excelSupport.findVariable(values4);
+                  if (Datatype.isType(predefineRow3.getType())) {
+                     sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+                  } else if (parameterVarMap.containsKey(predefineRow3.getType())) {
+                     sb.append(" type=\"" + ((VariableCategory)parameterVarMap.get(predefineRow3.getType())).getUuid() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
                   } else {
-                     VariableCategory var36 = var4.findVariableCategory(var20.getType());
-                     if (var36 != null) {
-                        var0.append(" type=\"" + var36.getUuid() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
+                     VariableCategory variableCategory6 = excelSupport.findVariableCategory(predefineRow3.getType());
+                     if (variableCategory6 != null) {
+                        sb.append(" type=\"" + variableCategory6.getUuid() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
                      } else {
-                        var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
+                        sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
                      }
                   }
 
-                  String var37 = "<value category-uuid=\"参数\" uuid=\"" + var31.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + var31.getName() + "\" var-label=\"" + var31.getLabel() + "\" datatype=\"" + var31.getType() + "\" type=\"Parameter\"/>";
-                  if (Datatype.Object.name().equals(var31.getType().name()) && StringUtils.isNotBlank(var20.getFromValue())) {
-                     VariableCategory var42 = var4.findVariableCategoryByUUID(var31.getDataType());
-                     if (var42 != null) {
-                        Variable var45 = (Variable)var42.getVariableLabels().get(var20.getFromValue());
-                        if (var45 != null) {
-                           var0.append("<value category-uuid=\"参数\" uuid=\"" + var31.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + var31.getName() + "\" var-label=\"" + var31.getLabel() + "\" datatype=\"" + var31.getType() + "\" key-category-uuid=\"" + var42.getUuid() + "\" key-uuid=\"" + var45.getUuid() + "\" key-label=\"" + var45.getLabel() + "\" key-name=\"" + var45.getName() + "\" type=\"Parameter\"/>");
+                  String text2 = "<value category-uuid=\"参数\" uuid=\"" + variable2.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + variable2.getName() + "\" var-label=\"" + variable2.getLabel() + "\" datatype=\"" + variable2.getType() + "\" type=\"Parameter\"/>";
+                  if (Datatype.Object.name().equals(variable2.getType().name()) && StringUtils.isNotBlank(predefineRow3.getFromValue())) {
+                     VariableCategory variableCategoryByUUID = excelSupport.findVariableCategoryByUUID(variable2.getDataType());
+                     if (variableCategoryByUUID != null) {
+                        Variable variable3 = (Variable)variableCategoryByUUID.getVariableLabels().get(predefineRow3.getFromValue());
+                        if (variable3 != null) {
+                           sb.append("<value category-uuid=\"参数\" uuid=\"" + variable2.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + variable2.getName() + "\" var-label=\"" + variable2.getLabel() + "\" datatype=\"" + variable2.getType() + "\" key-category-uuid=\"" + variableCategoryByUUID.getUuid() + "\" key-uuid=\"" + variable3.getUuid() + "\" key-label=\"" + variable3.getLabel() + "\" key-name=\"" + variable3.getName() + "\" type=\"Parameter\"/>");
                         }
                      } else {
-                        var0.append(var37);
+                        sb.append(text2);
                      }
                   } else {
-                     var0.append(var37);
+                     sb.append(text2);
                   }
-               } else if ("Predefine".equals(var21)) {
-                  PredefineRow var23 = (PredefineRow)var3.get(var20.getFromCategory());
-                  VariableCategory var30 = var4.findVariableCategory(var20.getType());
-                  if (StringUtils.isEmpty(var20.getFromValue())) {
-                     if (var30 != null) {
-                        var0.append(" type=\"" + var30.getUuid() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-                        var0.append("<value uuid=\"" + var23.getUuid() + "\" type=\"Predefine\"/>");
+               } else if ("Predefine".equals(fromType)) {
+                  PredefineRow predefineRow4 = (PredefineRow)predefineNameMap.get(predefineRow3.getFromCategory());
+                  VariableCategory variableCategory7 = excelSupport.findVariableCategory(predefineRow3.getType());
+                  if (StringUtils.isEmpty(predefineRow3.getFromValue())) {
+                     if (variableCategory7 != null) {
+                        sb.append(" type=\"" + variableCategory7.getUuid() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+                        sb.append("<value uuid=\"" + predefineRow4.getUuid() + "\" type=\"Predefine\"/>");
                      } else {
-                        var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-                        var0.append("<value uuid=\"" + var23.getUuid() + "\" type=\"Predefine\"/>");
+                        sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+                        sb.append("<value uuid=\"" + predefineRow4.getUuid() + "\" type=\"Predefine\"/>");
                      }
                   } else {
-                     String[] var35 = new String[]{var23.getType(), var20.getFromValue()};
-                     Variable var41 = var4.findVariable(var35);
-                     if (var30 != null) {
-                        var0.append(" type=\"" + var30.getUuid() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
+                     String[] values5 = new String[]{predefineRow4.getType(), predefineRow3.getFromValue()};
+                     Variable variable4 = excelSupport.findVariable(values5);
+                     if (variableCategory7 != null) {
+                        sb.append(" type=\"" + variableCategory7.getUuid() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
                      } else {
-                        var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
+                        sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
                      }
 
-                     var0.append("<value uuid=\"" + var23.getUuid() + "\" property-uuid=\"" + var41.getUuid() + "\" type=\"Predefine\"/>");
+                     sb.append("<value uuid=\"" + predefineRow4.getUuid() + "\" property-uuid=\"" + variable4.getUuid() + "\" type=\"Predefine\"/>");
                   }
-               } else if ("Input".equals(var21)) {
-                  var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-                  var0.append("<value content=\"" + var20.getFromValue() + "\" type=\"Input\"/>");
+               } else if ("Input".equals(fromType)) {
+                  sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+                  sb.append("<value content=\"" + predefineRow3.getFromValue() + "\" type=\"Input\"/>");
                }
             } else {
-               var0.append(" type=\"" + var20.getType() + "\" value-type=\"" + var20.getFromOrIn() + "\">");
-               SpringBean var22 = var4.getAction(var20.getFromCategory(), var20.getFromValue());
-               Method var29 = var4.getActionMethod(var20.getFromCategory(), var20.getFromValue());
-               if (var22 != null && var29 != null) {
-                  var0.append("<value bean-name=\"" + var22.getId() + "\" bean-label=\"" + var22.getName() + "\" method-name=\"" + var29.getMethodName() + "\" method-label=\"" + var29.getName() + "\" type=\"Method\">");
-                  String var11 = var20.getParams();
-                  if (StringUtils.isNotBlank(var11)) {
-                     String[] var12 = var11.split(",");
-                     int var13 = 0;
+               sb.append(" type=\"" + predefineRow3.getType() + "\" value-type=\"" + predefineRow3.getFromOrIn() + "\">");
+               SpringBean action = excelSupport.getAction(predefineRow3.getFromCategory(), predefineRow3.getFromValue());
+               Method actionMethod = excelSupport.getActionMethod(predefineRow3.getFromCategory(), predefineRow3.getFromValue());
+               if (action != null && actionMethod != null) {
+                  sb.append("<value bean-name=\"" + action.getId() + "\" bean-label=\"" + action.getName() + "\" method-name=\"" + actionMethod.getMethodName() + "\" method-label=\"" + actionMethod.getName() + "\" type=\"Method\">");
+                  String params2 = predefineRow3.getParams();
+                  if (StringUtils.isNotBlank(params2)) {
+                     String[] parts2 = params2.split(",");
+                     int number = 0;
 
-                     for(String var17 : var12) {
-                        Parameter var18 = (Parameter)var29.getParameters().get(var13);
-                        var0.append("<parameter name=\"" + var18.getName() + "\" type=\"" + var18.getType().name() + "\">");
-                        var0.append("<value content=\"" + var17 + "\" type=\"Input\"></value>");
-                        var0.append("</parameter>");
-                        ++var13;
+                     for(String text3 : parts2) {
+                        Parameter parameter = (Parameter)actionMethod.getParameters().get(number);
+                        sb.append("<parameter name=\"" + parameter.getName() + "\" type=\"" + parameter.getType().name() + "\">");
+                        sb.append("<value content=\"" + text3 + "\" type=\"Input\"></value>");
+                        sb.append("</parameter>");
+                        ++number;
                      }
                   }
                } else {
-                  var0.append("<value content=\"" + var20.getFromCategory() + "." + var20.getFromValue() + "\" type=\"Input\">");
+                  sb.append("<value content=\"" + predefineRow3.getFromCategory() + "." + predefineRow3.getFromValue() + "\" type=\"Input\">");
                }
 
-               var0.append("</value>");
+               sb.append("</value>");
             }
 
-            var0.append("</predefine>");
+            sb.append("</predefine>");
          }
 
-         var0.append("</predefine-group>");
+         sb.append("</predefine-group>");
       }
    }
 
-   public static void builderLibraryXml(StringBuilder var0, ExcelSupport var1) {
-      for(VariableInfo var3 : (Iterable<VariableInfo>)(Iterable<?>)(var1.getVarLibraries().values())) {
-         if (var3.getType().endsWith(ResourceType.VariableLibrary.name())) {
-            var0.append("<import-variable-library id=\"" + var3.getId() + "\" path=\"" + var3.getPath() + "\"/>");
+   public static void builderLibraryXml(StringBuilder sb, ExcelSupport excelSupport) {
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(excelSupport.getVarLibraries().values())) {
+         if (variableInfo.getType().endsWith(ResourceType.VariableLibrary.name())) {
+            sb.append("<import-variable-library id=\"" + variableInfo.getId() + "\" path=\"" + variableInfo.getPath() + "\"/>");
          } else {
-            var0.append("<import-parameter-library id=\"" + var3.getId() + "\" path=\"" + var3.getPath() + "\"/>");
+            sb.append("<import-parameter-library id=\"" + variableInfo.getId() + "\" path=\"" + variableInfo.getPath() + "\"/>");
          }
       }
 
-      for(ConstantInfo var5 : (Iterable<ConstantInfo>)(Iterable<?>)(var1.getContLibraries().values())) {
-         var0.append("<import-constant-library id=\"" + var5.getId() + "\" path=\"" + var5.getPath() + "\"/>");
+      for(ConstantInfo constantInfo : (Iterable<ConstantInfo>)(Iterable<?>)(excelSupport.getContLibraries().values())) {
+         sb.append("<import-constant-library id=\"" + constantInfo.getId() + "\" path=\"" + constantInfo.getPath() + "\"/>");
       }
 
    }
 
-   public static String buildParameterXml(Variable var0) {
-      return " var-category=\"参数\" var-label=\"" + var0.getLabel() + "\" var=\"" + var0.getName() + "\" datatype=\"" + var0.getType().name() + "\" category-uuid=\"" + "参数" + "\" uuid=\"" + var0.getUuid() + "\"";
+   public static String buildParameterXml(Variable variable) {
+      return " var-category=\"参数\" var-label=\"" + variable.getLabel() + "\" var=\"" + variable.getName() + "\" datatype=\"" + variable.getType().name() + "\" category-uuid=\"" + "参数" + "\" uuid=\"" + variable.getUuid() + "\"";
    }
 
-   public static String buildParameterXml(Variable var0, VariableCategory var1, Variable var2) {
-      return " var-category=\"参数\" var-label=\"" + var2.getLabel() + "\" var=\"" + var2.getName() + "\" datatype=\"" + var2.getType().name() + "\" category-uuid=\"" + "参数" + "\" uuid=\"" + var0.getUuid() + "\" key-uuid=\"" + var2.getUuid() + "\" key-category-uuid=\"" + var1.getUuid() + "\" key-label=\"" + var0.getLabel() + "\" key-name=\"" + var0.getName() + "\"";
+   public static String buildParameterXml(Variable parameter, VariableCategory category, Variable variable) {
+      return " var-category=\"参数\" var-label=\"" + variable.getLabel() + "\" var=\"" + variable.getName() + "\" datatype=\"" + variable.getType().name() + "\" category-uuid=\"" + "参数" + "\" uuid=\"" + parameter.getUuid() + "\" key-uuid=\"" + variable.getUuid() + "\" key-category-uuid=\"" + category.getUuid() + "\" key-label=\"" + parameter.getLabel() + "\" key-name=\"" + parameter.getName() + "\"";
    }
 
-   public static String buildVariableXml(VariableCategory var0, Variable var1) {
-      return " var-category=\"" + var0.getName() + "\" var-label=\"" + var1.getLabel() + "\" var=\"" + var1.getName() + "\" datatype=\"" + var1.getType().name() + "\" category-uuid=\"" + var0.getUuid() + "\" uuid=\"" + var1.getUuid() + "\"";
+   public static String buildVariableXml(VariableCategory category, Variable variable) {
+      return " var-category=\"" + category.getName() + "\" var-label=\"" + variable.getLabel() + "\" var=\"" + variable.getName() + "\" datatype=\"" + variable.getType().name() + "\" category-uuid=\"" + category.getUuid() + "\" uuid=\"" + variable.getUuid() + "\"";
    }
 
-   public static String buildParameterValueXml(ParameterValue var0, Variable var1) {
-      return "<value category-uuid=\"参数\" uuid=\"" + var1.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + var0.getVariableName() + "\" var-label=\"" + var1.getLabel() + "\" datatype=\"" + var1.getType() + "\" type=\"Parameter\"/>>";
+   public static String buildParameterValueXml(ParameterValue parameter, Variable variable) {
+      return "<value category-uuid=\"参数\" uuid=\"" + variable.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + parameter.getVariableName() + "\" var-label=\"" + variable.getLabel() + "\" datatype=\"" + variable.getType() + "\" type=\"Parameter\"/>>";
    }
 
-   public static String buildParameterValueXml(ParameterValue var0, VariableCategory var1, Variable var2) {
-      return "<value category-uuid=\"参数\" uuid=\"" + var0.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + var0.getVariableName() + "\" var-label=\"" + var0.getVariableLabel() + "\" datatype=\"" + var2.getType() + "\" key-category-uuid=\"" + var1.getUuid() + "\" key-uuid=\"" + var2.getUuid() + "\" key-label=\"" + var2.getName() + "\" key-name=\"" + var2.getLabel() + "\" type=\"Parameter\"/>>";
+   public static String buildParameterValueXml(ParameterValue parameter, VariableCategory category, Variable variable) {
+      return "<value category-uuid=\"参数\" uuid=\"" + parameter.getUuid() + "\" var-category=\"" + "参数" + "\" var=\"" + parameter.getVariableName() + "\" var-label=\"" + parameter.getVariableLabel() + "\" datatype=\"" + variable.getType() + "\" key-category-uuid=\"" + category.getUuid() + "\" key-uuid=\"" + variable.getUuid() + "\" key-label=\"" + variable.getName() + "\" key-name=\"" + variable.getLabel() + "\" type=\"Parameter\"/>>";
    }
 
-   public static String buildPredefineXml(String var0, String var1) {
-      return " predefine=\"true\" uuid=\"" + var0 + "\" property-uuid=\"" + var1 + "\"";
+   public static String buildPredefineXml(String categoryUUid, String variableUuid) {
+      return " predefine=\"true\" uuid=\"" + categoryUUid + "\" property-uuid=\"" + variableUuid + "\"";
    }
 
-   public static String buildContentXml(String var0) {
-      return buildContentXml(var0, false);
+   public static String buildContentXml(String data) {
+      return buildContentXml(data, false);
    }
 
-   public static String buildContentXml(String var0, boolean var1) {
-      if (StringUtils.isBlank(var0)) {
-         var0 = "";
+   public static String buildContentXml(String data, boolean withEndFlag) {
+      if (StringUtils.isBlank(data)) {
+         data = "";
       }
 
-      String var2 = "<value content=\"" + var0 + "\" type=\"Input\"";
-      if (var1) {
-         var2 = var2 + "/";
+      String text = "<value content=\"" + data + "\" type=\"Input\"";
+      if (withEndFlag) {
+         text = text + "/";
       }
 
-      return var2 + ">";
+      return text + ">";
    }
 }

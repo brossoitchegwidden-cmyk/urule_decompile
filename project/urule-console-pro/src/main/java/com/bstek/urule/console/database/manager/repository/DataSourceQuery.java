@@ -4,17 +4,17 @@ import com.bstek.urule.console.database.model.Page;
 import java.util.List;
 
 public interface DataSourceQuery {
-   DataSourceQuery id(Long var1);
+   DataSourceQuery id(Long id);
 
-   DataSourceQuery nameLike(String var1);
+   DataSourceQuery nameLike(String nameLike);
 
-   DataSourceQuery createUserLike(String var1);
+   DataSourceQuery createUserLike(String createUser);
 
-   DataSourceQuery type(String var1);
+   DataSourceQuery type(String type);
 
-   DataSourceQuery groupId(String var1);
+   DataSourceQuery groupId(String groupId);
 
    List list();
 
-   void page(Page var1);
+   void page(Page page);
 }

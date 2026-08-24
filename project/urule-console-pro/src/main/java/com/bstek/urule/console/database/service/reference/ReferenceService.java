@@ -5,7 +5,9 @@ import java.util.List;
 public interface ReferenceService {
    ReferenceService ins = new ReferenceServiceImpl();
 
-   List uuid(long var1, long var3, String var5);
+   /**查看文件引用*/
+   List uuid(long projectId, long id, String uuid);
 
-   List packet(long var1, long var3, String var5);
+   /**查看知识包引用*/
+   List packet(long projectId, long id, String code);
 }

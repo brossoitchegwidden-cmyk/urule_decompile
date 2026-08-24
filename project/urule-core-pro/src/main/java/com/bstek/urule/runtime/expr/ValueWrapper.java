@@ -4,60 +4,60 @@ import com.bstek.urule.Utils;
 import java.math.BigDecimal;
 
 public class ValueWrapper {
-   private BigDecimal a;
-   private Object b;
-   private String c;
+   private BigDecimal bigDecimalValue;
+   private Object originalValue;
+   private String valueId;
 
-   public ValueWrapper(Object var1, String var2) {
-      this.b = var1;
-      this.c = var2;
+   public ValueWrapper(Object originalValue, String valueId) {
+      this.originalValue = originalValue;
+      this.valueId = valueId;
    }
 
-   public ValueWrapper(Object var1, BigDecimal var2, String var3) {
-      this.b = var1;
-      this.a = var2;
-      this.c = var3;
+   public ValueWrapper(Object originalValue, BigDecimal bigDecimalValue, String valueId) {
+      this.originalValue = originalValue;
+      this.bigDecimalValue = bigDecimalValue;
+      this.valueId = valueId;
    }
 
    public BigDecimal getBigDecimalValue() {
-      if (this.a != null) {
-         return this.a;
+      if (this.bigDecimalValue != null) {
+         return this.bigDecimalValue;
       }
 
-      if (this.b != null && !this.b.equals("")) {
+      if (this.originalValue != null && !this.originalValue.equals("")) {
          try {
-            this.a = Utils.toBigDecimal(this.b);
-         } catch (Exception var2) {
+            this.bigDecimalValue = Utils.toBigDecimal(this.originalValue);
+         } catch (Exception exception) {
          }
       }
 
-      if (Utils.isSpaceToZero() && this.b != null && this.b.equals("")) {
-         this.a = BigDecimal.valueOf(0L);
+      if (Utils.isSpaceToZero() && this.originalValue != null && this.originalValue.equals("")) {
+         this.bigDecimalValue = BigDecimal.valueOf(0L);
       }
 
-      return this.a;
+      return this.bigDecimalValue;
    }
 
    public Object getData() {
-      return this.a != null ? this.a : this.b;
+      return this.bigDecimalValue != null ? this.bigDecimalValue : this.originalValue;
    }
 
    public Object getOriginalValue() {
-      return this.b;
+      return this.originalValue;
    }
 
    public String originalValueToString() {
-      if (this.b == null) {
+      if (this.originalValue == null) {
          return "null";
-      } else if (this.b instanceof Number) {
-         BigDecimal var1 = Utils.toBigDecimal(this.b);
-         return var1.toPlainString();
+      } else if (this.originalValue instanceof Number) {
+         BigDecimal decimalValue = Utils.toBigDecimal(this.originalValue);
+         return decimalValue.toPlainString();
       } else {
-         return this.b.toString();
+         return this.originalValue.toString();
       }
    }
 
    public String getValueId() {
-      return this.c;
+      return this.valueId;
    }
 }

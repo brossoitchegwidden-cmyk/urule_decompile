@@ -4,36 +4,36 @@ import java.util.List;
 import java.util.Map;
 
 public class ScoreTableData {
-   private Map a;
-   private List b;
-   private List c;
+   private Map properties;
+   private List headers;
+   private List rows;
 
-   public ScoreTableData(List var1, List var2) {
-      this.b = var1;
-      this.c = var2;
+   public ScoreTableData(List headers, List rows) {
+      this.headers = headers;
+      this.rows = rows;
    }
 
    public List getHeaders() {
-      return this.b;
+      return this.headers;
    }
 
-   public void setHeaders(List var1) {
-      this.b = var1;
+   public void setHeaders(List headers) {
+      this.headers = headers;
    }
 
    public List getRows() {
-      return this.c;
+      return this.rows;
    }
 
-   public void setRows(List var1) {
-      this.c = var1;
+   public void setRows(List rows) {
+      this.rows = rows;
    }
 
    public Map getProperties() {
-      return this.a;
+      return this.properties;
    }
 
-   public void setProperties(Map var1) {
-      this.a = var1;
+   public void setProperties(Map properties) {
+      this.properties = properties;
    }
 }

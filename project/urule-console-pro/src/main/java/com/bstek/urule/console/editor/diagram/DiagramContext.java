@@ -4,33 +4,33 @@ import java.util.List;
 import java.util.Map;
 
 public class DiagramContext {
-   private int a;
-   private List b;
-   private Map c;
+   private int lastNodeId;
+   private List edges;
+   private Map nodeMap;
 
-   public DiagramContext(List var1, Map var2) {
-      this.b = var1;
-      this.c = var2;
+   public DiagramContext(List edges, Map nodeMap) {
+      this.edges = edges;
+      this.nodeMap = nodeMap;
    }
 
    public List getEdges() {
-      return this.b;
+      return this.edges;
    }
 
-   public void addEdge(Edge var1) {
-      this.b.add(var1);
+   public void addEdge(Edge edge) {
+      this.edges.add(edge);
    }
 
    public Map getNodeMap() {
-      return this.c;
+      return this.nodeMap;
    }
 
-   public void setNodeMap(Map var1) {
-      this.c = var1;
+   public void setNodeMap(Map nodeMap) {
+      this.nodeMap = nodeMap;
    }
 
    public int nextId() {
-      ++this.a;
-      return this.a;
+      ++this.lastNodeId;
+      return this.lastNodeId;
    }
 }

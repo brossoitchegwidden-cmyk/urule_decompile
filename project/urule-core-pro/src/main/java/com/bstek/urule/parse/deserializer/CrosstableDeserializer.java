@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class CrosstableDeserializer implements Deserializer<CrosstabDefinition> {
    public static final String BEAN_ID = "urule.crosstableDeserializer";
-   private CrosstabParser a;
+   private CrosstabParser crosstabParser;
 
-   public CrosstabDefinition deserialize(Element var1) {
-      return this.a.parse(var1);
+   public CrosstabDefinition deserialize(Element root) {
+      return this.crosstabParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return "crosstab".equals(var1.getName());
+   public boolean support(Element root) {
+      return "crosstab".equals(root.getName());
    }
 
-   public void setCrosstabParser(CrosstabParser var1) {
-      this.a = var1;
+   public void setCrosstabParser(CrosstabParser crosstabParser) {
+      this.crosstabParser = crosstabParser;
    }
 }

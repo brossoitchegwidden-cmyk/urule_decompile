@@ -6,5 +6,5 @@ import com.bstek.urule.model.GeneralEntity;
 import java.util.Map;
 
 public interface WriterFilter {
-   boolean filter(BatchContext var1, BatchDataResolverItem var2, GeneralEntity var3, Map var4, Object var5);
+   boolean filter(BatchContext batchContext, BatchDataResolverItem resolverItem, GeneralEntity data, Map outParams, Object resultData);
 }

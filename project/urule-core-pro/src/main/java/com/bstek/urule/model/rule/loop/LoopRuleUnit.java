@@ -14,31 +14,31 @@ public class LoopRuleUnit {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Lhs getLhs() {
       return this.lhs;
    }
 
-   public void setLhs(Lhs var1) {
-      this.lhs = var1;
+   public void setLhs(Lhs lhs) {
+      this.lhs = lhs;
    }
 
    public Rhs getRhs() {
       return this.rhs;
    }
 
-   public void setRhs(Rhs var1) {
-      this.rhs = var1;
+   public void setRhs(Rhs rhs) {
+      this.rhs = rhs;
    }
 
    public Other getOther() {
       return this.other;
    }
 
-   public void setOther(Other var1) {
-      this.other = var1;
+   public void setOther(Other other) {
+      this.other = other;
    }
 }

@@ -5,18 +5,18 @@ public class BindingFile {
    private String path;
    private String version;
 
-   public BindingFile(long var1, String var3, String var4) {
-      this.id = var1;
-      this.path = var3;
-      this.version = var4;
+   public BindingFile(long id, String path, String version) {
+      this.id = id;
+      this.path = path;
+      this.version = version;
    }
 
    public long getId() {
       return this.id;
    }
 
-   public void setPath(String var1) {
-      this.path = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public String getPath() {

@@ -3,58 +3,58 @@ package com.bstek.urule.console.database.model;
 import java.util.Date;
 
 public class PacketApplyDetail {
-   private long a;
-   private long b;
-   private long c;
-   private String d;
-   private String e;
-   private Date f;
+   private long id;
+   private long applyId;
+   private long projectId;
+   private String desc;
+   private String createUser;
+   private Date createDate;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getApplyId() {
-      return this.b;
+      return this.applyId;
    }
 
-   public void setApplyId(long var1) {
-      this.b = var1;
+   public void setApplyId(long applyId) {
+      this.applyId = applyId;
    }
 
    public long getProjectId() {
-      return this.c;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.c = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDesc() {
-      return this.d;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.d = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getCreateUser() {
-      return this.e;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.e = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.f;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.f = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 }

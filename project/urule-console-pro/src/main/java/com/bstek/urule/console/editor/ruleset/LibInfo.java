@@ -3,19 +3,19 @@ package com.bstek.urule.console.editor.ruleset;
 import java.util.Map;
 
 class LibInfo {
-   private String a;
-   private Map b;
+   private String type;
+   private Map libraryDefinition;
 
-   public LibInfo(String var1, Map var2) {
-      this.a = var1;
-      this.b = var2;
+   public LibInfo(String text, Map valuesByKey) {
+      this.type = text;
+      this.libraryDefinition = valuesByKey;
    }
 
    public String getType() {
-      return this.a;
+      return this.type;
    }
 
    public Map getMap() {
-      return this.b;
+      return this.libraryDefinition;
    }
 }

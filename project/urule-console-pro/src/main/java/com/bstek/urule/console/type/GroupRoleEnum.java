@@ -5,13 +5,13 @@ public enum GroupRoleEnum {
    Manager("团队管理员"),
    User("团队普通成员");
 
-   private String a;
+   private String name;
 
-   private GroupRoleEnum(String var3) {
-      this.a = var3;
+   private GroupRoleEnum(String text) {
+      this.name = text;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 }

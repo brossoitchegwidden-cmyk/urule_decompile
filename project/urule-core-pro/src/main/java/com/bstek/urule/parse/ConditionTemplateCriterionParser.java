@@ -6,14 +6,14 @@ import org.dom4j.Element;
 
 public class ConditionTemplateCriterionParser extends CriterionParser {
    @Override
-   public boolean support(String var1) {
-      return var1.equals("template");
+   public boolean support(String name) {
+      return name.equals("template");
    }
 
-   public Criterion parse(Element var1) {
-      ConditionTemplateCriterion var2 = new ConditionTemplateCriterion();
-      var2.setId(var1.attributeValue("id"));
-      var2.setName(var1.attributeValue("name"));
-      return var2;
+   public Criterion parse(Element element) {
+      ConditionTemplateCriterion conditionTemplateCriterion = new ConditionTemplateCriterion();
+      conditionTemplateCriterion.setId(element.attributeValue("id"));
+      conditionTemplateCriterion.setName(element.attributeValue("name"));
+      return conditionTemplateCriterion;
    }
 }

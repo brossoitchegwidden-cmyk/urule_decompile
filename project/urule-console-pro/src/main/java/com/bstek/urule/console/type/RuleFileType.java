@@ -19,42 +19,42 @@ public enum RuleFileType {
    ActionTemplate("动作模版", "rule_actiontemplate", "动作模版管理员"),
    General("通用目录", "rule_generaldir", "自定义目录管理员");
 
-   private String a;
-   private String b;
-   private String c;
+   private String label;
+   private String model;
+   private String role;
 
-   private RuleFileType(String var3, String var4, String var5) {
-      this.a = var3;
-      this.b = var4;
-      this.c = var5;
+   private RuleFileType(String text, String text2, String text3) {
+      this.label = text;
+      this.model = text2;
+      this.role = text3;
    }
 
    public String getLabel() {
-      return this.a;
+      return this.label;
    }
 
    public String getModel() {
-      return this.b;
+      return this.model;
    }
 
    public String getRole() {
-      return this.c;
+      return this.role;
    }
 
-   public static RuleFileType getRuleFileType(String var0) {
-      for(RuleFileType var4 : values()) {
-         if (var4.name().toLowerCase().equals(var0.toLowerCase())) {
-            return var4;
+   public static RuleFileType getRuleFileType(String type) {
+      for(RuleFileType ruleFileType : values()) {
+         if (ruleFileType.name().toLowerCase().equals(type.toLowerCase())) {
+            return ruleFileType;
          }
       }
 
       return null;
    }
 
-   public static String getModel(String var0) {
-      for(RuleFileType var4 : values()) {
-         if (var4.name().toLowerCase().equals(var0.toLowerCase())) {
-            return var4.b;
+   public static String getModel(String fileType) {
+      for(RuleFileType ruleFileType : values()) {
+         if (ruleFileType.name().toLowerCase().equals(fileType.toLowerCase())) {
+            return ruleFileType.model;
          }
       }
 

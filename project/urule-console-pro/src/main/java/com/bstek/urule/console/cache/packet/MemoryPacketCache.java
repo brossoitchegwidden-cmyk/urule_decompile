@@ -15,72 +15,72 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryPacketCache {
-   private Map a = new ConcurrentHashMap();
-   private Map b = new ConcurrentHashMap();
-   private Map c = new ConcurrentHashMap();
+   private Map packetsById = new ConcurrentHashMap();
+   private Map packetsByCode = new ConcurrentHashMap();
+   private Map serializedKnowledgeByPacketId = new ConcurrentHashMap();
 
-   public PacketData getPacket(long var1) {
-      return (PacketData)this.a.get(var1);
+   public PacketData getPacket(long id) {
+      return (PacketData)this.packetsById.get(id);
    }
 
-   public PacketData getPacket(String var1) {
-      return (PacketData)this.b.get(var1);
+   public PacketData getPacket(String code) {
+      return (PacketData)this.packetsByCode.get(code);
    }
 
-   public byte[] getKnowledgeWrapper(long var1) {
-      return (byte[])this.c.get(var1);
+   public byte[] getKnowledgeWrapper(long id) {
+      return (byte[])this.serializedKnowledgeByPacketId.get(id);
    }
 
-   public void putPacket(long var1, PacketData var3) {
-      this.a.put(var1, var3);
-      byte[] var4 = this.a(var3.getKnowledgePackageWrapper());
-      this.c.put(var1, var4);
+   public void putPacket(long id, PacketData pd) {
+      this.packetsById.put(id, pd);
+      byte[] bytes = this.resolveByte(pd.getKnowledgePackageWrapper());
+      this.serializedKnowledgeByPacketId.put(id, bytes);
    }
 
-   private byte[] a(KnowledgePackageWrapper var1) {
-      JsonMapper.Builder var2 = JsonMapper.builder();
-      var2.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-      ObjectMapper var3 = var2.build();
-      var3.setSerializationInclusion(Include.NON_NULL);
-      var3.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
+   private byte[] resolveByte(KnowledgePackageWrapper knowledgePackageWrapper) {
+      JsonMapper.Builder builder = JsonMapper.builder();
+      builder.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+      ObjectMapper objectMapper = builder.build();
+      objectMapper.setSerializationInclusion(Include.NON_NULL);
+      objectMapper.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
 
       try {
-         String var4 = var3.writeValueAsString(var1);
-         return Utils.compress(var4);
-      } catch (JsonProcessingException var6) {
-         var6.printStackTrace();
-         throw new InfoException("尝试将知识包序列化并缓存出错:" + var6.getMessage());
+         String text = objectMapper.writeValueAsString(knowledgePackageWrapper);
+         return Utils.compress(text);
+      } catch (JsonProcessingException jsonProcessingException) {
+         java.util.logging.Logger.getLogger(MemoryPacketCache.class.getName()).log(java.util.logging.Level.SEVERE, jsonProcessingException.getMessage(), jsonProcessingException);
+         throw new InfoException("尝试将知识包序列化并缓存出错:" + jsonProcessingException.getMessage());
       }
    }
 
    public void clear() {
-      this.a.clear();
-      this.b.clear();
-      this.c.clear();
+      this.packetsById.clear();
+      this.packetsByCode.clear();
+      this.serializedKnowledgeByPacketId.clear();
    }
 
-   public void remove(long var1) {
-      this.a.remove(var1);
-      this.c.remove(var1);
+   public void remove(long id) {
+      this.packetsById.remove(id);
+      this.serializedKnowledgeByPacketId.remove(id);
    }
 
-   public void remove(String var1) {
-      this.b.remove(var1);
+   public void remove(String code) {
+      this.packetsByCode.remove(code);
    }
 
    public Map getPacketIdMap() {
-      HashMap var1 = new HashMap();
-      var1.putAll(this.a);
-      return var1;
+      HashMap packetIdMap = new HashMap();
+      packetIdMap.putAll(this.packetsById);
+      return packetIdMap;
    }
 
    public Map getPacketCodeMap() {
-      HashMap var1 = new HashMap();
-      var1.putAll(this.b);
-      return var1;
+      HashMap packetCodeMap = new HashMap();
+      packetCodeMap.putAll(this.packetsByCode);
+      return packetCodeMap;
    }
 
-   public void putPacket(String var1, PacketData var2) {
-      this.b.put(var2.getPacket().getCode(), var2);
+   public void putPacket(String code, PacketData pd) {
+      this.packetsByCode.put(pd.getPacket().getCode(), pd);
    }
 }

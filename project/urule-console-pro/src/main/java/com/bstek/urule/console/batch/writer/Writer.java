@@ -6,5 +6,5 @@ import com.bstek.urule.model.GeneralEntity;
 import java.util.Map;
 
 public interface Writer {
-   void storeRecord(Map var1, BatchDataResolver var2, BatchDataResolverItem var3, GeneralEntity var4) throws Exception;
+   void storeRecord(Map stmtMap, BatchDataResolver dataResolver, BatchDataResolverItem storeItem, GeneralEntity record) throws Exception;
 }

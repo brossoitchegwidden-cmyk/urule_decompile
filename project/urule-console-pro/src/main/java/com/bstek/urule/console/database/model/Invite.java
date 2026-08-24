@@ -3,71 +3,71 @@ package com.bstek.urule.console.database.model;
 import java.util.Date;
 
 public class Invite {
-   private long a;
-   private String b;
-   private String c;
-   private String d;
-   private Date e;
-   private String f;
-   private Date g;
+   private long id;
+   private String groupId;
+   private String type;
+   private String secretKey;
+   private Date expirDate;
+   private String createUser;
+   private Date createDate;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public String getGroupId() {
-      return this.b;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.b = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public String getType() {
-      return this.c;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.c = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String getSecretKey() {
-      return this.d;
+      return this.secretKey;
    }
 
-   public void setSecretKey(String var1) {
-      this.d = var1;
+   public void setSecretKey(String secretKey) {
+      this.secretKey = secretKey;
    }
 
    public Date getExpirDate() {
-      return this.e;
+      return this.expirDate;
    }
 
-   public void setExpirDate(Date var1) {
-      this.e = var1;
+   public void setExpirDate(Date expirDate) {
+      this.expirDate = expirDate;
    }
 
    public String getCreateUser() {
-      return this.f;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.f = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.g;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.g = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public String toString() {
-      return "groupId:" + this.b + ",secretKey:" + this.d;
+      return "groupId:" + this.groupId + ",secretKey:" + this.secretKey;
    }
 }

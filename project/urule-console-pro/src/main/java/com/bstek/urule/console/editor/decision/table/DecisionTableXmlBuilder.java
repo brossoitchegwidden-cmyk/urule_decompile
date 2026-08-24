@@ -38,409 +38,410 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 
+/** Builds a decision-table model by converting imported table data to XML. */
 public class DecisionTableXmlBuilder {
-   private ExcelSupport a;
-   private TableData b;
-   private DSLRuleSetBuilder c;
-   private DecisionTableDeserializer d;
+   private ExcelSupport excelSupport;
+   private TableData tableData;
+   private DSLRuleSetBuilder dSLRuleSetBuilder;
+   private DecisionTableDeserializer decisionTableDeserializer;
 
-   public DecisionTableXmlBuilder(TableData var1) {
-      this.b = var1;
-      this.a = new ExcelSupport();
-      this.c = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
-      this.d = (DecisionTableDeserializer)Utils.getApplicationContext().getBean("urule.decisionTableDeserializer");
+   public DecisionTableXmlBuilder(TableData data) {
+      this.tableData = data;
+      this.excelSupport = new ExcelSupport();
+      this.dSLRuleSetBuilder = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
+      this.decisionTableDeserializer = (DecisionTableDeserializer)Utils.getApplicationContext().getBean("urule.decisionTableDeserializer");
    }
 
    public DecisionTable buildTable() {
       try {
-         String var1 = this.a();
-         Document var2 = DocumentHelper.parseText(var1);
-         return this.d.deserialize(var2.getRootElement());
-      } catch (Exception var3) {
-         throw new InfoException(var3);
+         String xml = this.buildXml();
+         Document text = DocumentHelper.parseText(xml);
+         return this.decisionTableDeserializer.deserialize(text.getRootElement());
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
 
-   private String a(int var1, String var2, String var3) {
-      if (StringUtils.isBlank(var3)) {
-         var3 = "";
+   private String buildColumnXml(int number, String text, String text2) {
+      if (StringUtils.isBlank(text2)) {
+         text2 = "";
       }
 
-      return "<col num=\"" + var1 + "\" width=\"180\" type=\"" + var2 + "\"" + var3 + "/>";
+      return "<col num=\"" + number + "\" width=\"180\" type=\"" + text + "\"" + text2 + "/>";
    }
 
-   private String a() throws IOException {
-      StringBuilder var1 = new StringBuilder();
-      var1.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      var1.append("<decision-table");
-      ExcelImportUtils.builderProperties(this.a, var1, this.b.getProperties(), false);
-      var1.append(">");
-      ExcelImportUtils.builderRemark(var1, this.b.getProperties());
-      HashMap var2 = new HashMap();
-      List var3 = this.b.getHeaders();
+   private String buildXml() throws IOException {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+      stringBuilder.append("<decision-table");
+      ExcelImportUtils.builderProperties(this.excelSupport, stringBuilder, this.tableData.getProperties(), false);
+      stringBuilder.append(">");
+      ExcelImportUtils.builderRemark(stringBuilder, this.tableData.getProperties());
+      HashMap valuesByKey = new HashMap();
+      List headers = this.tableData.getHeaders();
 
-      for(int var4 = 0; var4 < var3.size(); ++var4) {
-         Header var5 = (Header)var3.get(var4);
-         HeaderType var6 = var5.getType();
-         String var7 = var5.getName();
-         if ((var6.equals(HeaderType.assign) || var6.equals(HeaderType.condition)) && var5.isPredefine()) {
-            PredefineRow var8 = (PredefineRow)this.b.getPredefineNameMap().get(var7.split("\\.")[0]);
-            if (ExcelSupport.isParameter(var8.getFromType())) {
-               String[] var9 = var7.split("\\.");
-               var9[0] = var8.getFromValue();
-               Variable var10 = this.a.findParameterByLabel(var9[0], var9[1]);
-               if (var10 == null) {
-                  var9[0] = var8.getType();
-                  VariableCategory var11 = this.a.findVariableCategory(var9);
-                  if (var11 != null) {
-                     var2.put(var8.getType(), var11);
+      for(int index = 0; index < headers.size(); ++index) {
+         Header header = (Header)headers.get(index);
+         HeaderType type = header.getType();
+         String name = header.getName();
+         if ((type.equals(HeaderType.assign) || type.equals(HeaderType.condition)) && header.isPredefine()) {
+            PredefineRow predefineRow = (PredefineRow)this.tableData.getPredefineNameMap().get(name.split("\\.")[0]);
+            if (ExcelSupport.isParameter(predefineRow.getFromType())) {
+               String[] parts = name.split("\\.");
+               parts[0] = predefineRow.getFromValue();
+               Variable parameterByLabel = this.excelSupport.findParameterByLabel(parts[0], parts[1]);
+               if (parameterByLabel == null) {
+                  parts[0] = predefineRow.getType();
+                  VariableCategory variableCategory = this.excelSupport.findVariableCategory(parts);
+                  if (variableCategory != null) {
+                     valuesByKey.put(predefineRow.getType(), variableCategory);
                   }
                }
             }
          }
       }
 
-      ExcelImportUtils.builderPredefineXml(var1, ExcelImportUtils.getPredefineGroupPriority(this.b.getProperties()), this.b.getPredefineRows(), this.b.getPredefineNameMap(), this.a, var2);
+      ExcelImportUtils.builderPredefineXml(stringBuilder, ExcelImportUtils.getPredefineGroupPriority(this.tableData.getProperties()), this.tableData.getPredefineRows(), this.tableData.getPredefineNameMap(), this.excelSupport, valuesByKey);
 
-      for(int var15 = 0; var15 < var3.size(); ++var15) {
-         Header var17 = (Header)var3.get(var15);
-         HeaderType var20 = var17.getType();
-         String var22 = var17.getName();
-         if (var20.equals(HeaderType.assign)) {
-            if (var17.isPredefine()) {
-               PredefineRow var24 = (PredefineRow)this.b.getPredefineNameMap().get(var22.split("\\.")[0]);
-               String var29 = "";
-               if ("Variable".equals(var24.getFromType())) {
-                  String[] var39 = new String[]{var24.getType(), this.a(var22)[1]};
-                  Variable var54 = this.a.findVariable(var39);
-                  var29 = ExcelImportUtils.buildPredefineXml(var24.getUuid(), var54.getUuid());
-               } else if ("VariableCategory".equals(var24.getFromType())) {
-                  String[] var40 = new String[]{var24.getType(), this.a(var22)[1]};
-                  Variable var55 = this.a.findVariable(var40);
-                  var29 = ExcelImportUtils.buildPredefineXml(var24.getUuid(), var55.getUuid());
-               } else if ("Input".equals(var24.getFromType())) {
-                  var29 = ExcelImportUtils.buildPredefineXml(var24.getUuid(), "");
+      for(int index2 = 0; index2 < headers.size(); ++index2) {
+         Header header2 = (Header)headers.get(index2);
+         HeaderType type2 = header2.getType();
+         String name2 = header2.getName();
+         if (type2.equals(HeaderType.assign)) {
+            if (header2.isPredefine()) {
+               PredefineRow predefineRow2 = (PredefineRow)this.tableData.getPredefineNameMap().get(name2.split("\\.")[0]);
+               String predefineXml = "";
+               if ("Variable".equals(predefineRow2.getFromType())) {
+                  String[] values = new String[]{predefineRow2.getType(), this.splitHeaderName(name2)[1]};
+                  Variable variable = this.excelSupport.findVariable(values);
+                  predefineXml = ExcelImportUtils.buildPredefineXml(predefineRow2.getUuid(), variable.getUuid());
+               } else if ("VariableCategory".equals(predefineRow2.getFromType())) {
+                  String[] values2 = new String[]{predefineRow2.getType(), this.splitHeaderName(name2)[1]};
+                  Variable variable2 = this.excelSupport.findVariable(values2);
+                  predefineXml = ExcelImportUtils.buildPredefineXml(predefineRow2.getUuid(), variable2.getUuid());
+               } else if ("Input".equals(predefineRow2.getFromType())) {
+                  predefineXml = ExcelImportUtils.buildPredefineXml(predefineRow2.getUuid(), "");
                } else {
-                  String[] var41 = new String[]{var24.getFromCategory(), var24.getFromValue()};
-                  Variable var56 = this.a.findVariable(var41);
-                  VariableCategory var12 = this.a.findVariableCategory(var41);
-                  var29 = ExcelImportUtils.buildPredefineXml(var12.getUuid(), var56.getUuid());
+                  String[] values3 = new String[]{predefineRow2.getFromCategory(), predefineRow2.getFromValue()};
+                  Variable variable3 = this.excelSupport.findVariable(values3);
+                  VariableCategory variableCategory2 = this.excelSupport.findVariableCategory(values3);
+                  predefineXml = ExcelImportUtils.buildPredefineXml(variableCategory2.getUuid(), variable3.getUuid());
                }
 
-               var1.append(this.a(var15, "Assignment", var29));
+               stringBuilder.append(this.buildColumnXml(index2, "Assignment", predefineXml));
             } else {
-               String[] var25 = var22.split("\\.");
-               if (ExcelSupport.isParameter(var25[0])) {
-                  String var31 = "";
-                  if (var25.length == 2) {
-                     Variable var42 = this.a.findVariable(var25);
-                     var31 = ExcelImportUtils.buildParameterXml(var42);
+               String[] parts2 = name2.split("\\.");
+               if (ExcelSupport.isParameter(parts2[0])) {
+                  String parameterXml = "";
+                  if (parts2.length == 2) {
+                     Variable variable4 = this.excelSupport.findVariable(parts2);
+                     parameterXml = ExcelImportUtils.buildParameterXml(variable4);
                   } else {
-                     Variable var43 = this.a.findParameterByLabel(var25[1], var25[2]);
-                     if (var43 == null) {
-                        var43 = this.a.findVariable(var25);
-                        var31 = ExcelImportUtils.buildParameterXml(var43);
+                     Variable variable5 = this.excelSupport.findParameterByLabel(parts2[1], parts2[2]);
+                     if (variable5 == null) {
+                        variable5 = this.excelSupport.findVariable(parts2);
+                        parameterXml = ExcelImportUtils.buildParameterXml(variable5);
                      } else {
-                        VariableCategory var57 = this.a.findVariableCategoryByUUID(var43.getDataType());
-                        Variable var65 = (Variable)var57.getVariableLabels().get(var25[2]);
-                        var31 = ExcelImportUtils.buildParameterXml(var43, var57, var65);
+                        VariableCategory variableCategoryByUUID = this.excelSupport.findVariableCategoryByUUID(variable5.getDataType());
+                        Variable variable6 = (Variable)variableCategoryByUUID.getVariableLabels().get(parts2[2]);
+                        parameterXml = ExcelImportUtils.buildParameterXml(variable5, variableCategoryByUUID, variable6);
                      }
                   }
 
-                  var1.append(this.a(var15, "Assignment", var31));
+                  stringBuilder.append(this.buildColumnXml(index2, "Assignment", parameterXml));
                } else {
-                  Variable var33 = this.a.findVariable(var25);
-                  VariableCategory var45 = this.a.findVariableCategory(var25);
-                  String var58 = ExcelImportUtils.buildVariableXml(var45, var33);
-                  var1.append(this.a(var15, "Assignment", var58));
+                  Variable variable7 = this.excelSupport.findVariable(parts2);
+                  VariableCategory variableCategory3 = this.excelSupport.findVariableCategory(parts2);
+                  String variableXml = ExcelImportUtils.buildVariableXml(variableCategory3, variable7);
+                  stringBuilder.append(this.buildColumnXml(index2, "Assignment", variableXml));
                }
             }
-         } else if (var20.equals(HeaderType.condition)) {
-            if (var17.isPredefine()) {
-               PredefineRow var26 = (PredefineRow)this.b.getPredefineNameMap().get(var22.split("\\.")[0]);
-               String var34 = "";
-               if ("Input".equals(var26.getFromType())) {
-                  var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), "");
-               } else if (ExcelSupport.isParameter(var26.getFromType())) {
-                  String[] var48 = var22.split("\\.");
-                  var48[0] = var26.getFromValue();
-                  Variable var61 = this.a.findParameterByLabel(var48[0], var48[1]);
-                  if (var61 == null) {
-                     var48[0] = var26.getType();
-                     Variable var67 = this.a.findVariable(var48);
-                     if (null != var67) {
-                        var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), var67.getUuid());
+         } else if (type2.equals(HeaderType.condition)) {
+            if (header2.isPredefine()) {
+               PredefineRow predefineRow3 = (PredefineRow)this.tableData.getPredefineNameMap().get(name2.split("\\.")[0]);
+               String predefineXml2 = "";
+               if ("Input".equals(predefineRow3.getFromType())) {
+                  predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), "");
+               } else if (ExcelSupport.isParameter(predefineRow3.getFromType())) {
+                  String[] parts3 = name2.split("\\.");
+                  parts3[0] = predefineRow3.getFromValue();
+                  Variable parameterByLabel2 = this.excelSupport.findParameterByLabel(parts3[0], parts3[1]);
+                  if (parameterByLabel2 == null) {
+                     parts3[0] = predefineRow3.getType();
+                     Variable variable8 = this.excelSupport.findVariable(parts3);
+                     if (null != variable8) {
+                        predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), variable8.getUuid());
                      } else {
-                        var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), "");
+                        predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), "");
                      }
                   } else {
-                     VariableCategory var68 = this.a.findVariableCategoryByUUID(var61.getDataType());
-                     Variable var13 = (Variable)var68.getVariableLabels().get(var48[2]);
-                     var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), var13.getUuid());
+                     VariableCategory variableCategoryByUUID2 = this.excelSupport.findVariableCategoryByUUID(parameterByLabel2.getDataType());
+                     Variable variable9 = (Variable)variableCategoryByUUID2.getVariableLabels().get(parts3[2]);
+                     predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), variable9.getUuid());
                   }
-               } else if (!"Variable".equals(var26.getFromType()) && !"Predefine".equals(var26.getFromType())) {
-                  if ("VariableCategory".equals(var26.getFromType())) {
-                     VariableCategory var47 = this.a.findVariableCategory(var26.getType());
-                     String[] var60 = new String[]{var47.getName(), this.a(var22)[1]};
-                     Variable var66 = this.a.findVariable(var60);
-                     var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), var66.getUuid());
-                  } else if ("Method".equals(var26.getFromType()) || "CommonFunction".equals(var26.getFromType())) {
-                     var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), "");
+               } else if (!"Variable".equals(predefineRow3.getFromType()) && !"Predefine".equals(predefineRow3.getFromType())) {
+                  if ("VariableCategory".equals(predefineRow3.getFromType())) {
+                     VariableCategory variableCategory4 = this.excelSupport.findVariableCategory(predefineRow3.getType());
+                     String[] values4 = new String[]{variableCategory4.getName(), this.splitHeaderName(name2)[1]};
+                     Variable variable10 = this.excelSupport.findVariable(values4);
+                     predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), variable10.getUuid());
+                  } else if ("Method".equals(predefineRow3.getFromType()) || "CommonFunction".equals(predefineRow3.getFromType())) {
+                     predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), "");
                   }
                } else {
-                  String[] var46 = new String[]{var26.getType(), this.a(var22)[1]};
-                  Variable var59 = this.a.findVariable(var46);
-                  var34 = ExcelImportUtils.buildPredefineXml(var26.getUuid(), var59.getUuid());
+                  String[] values5 = new String[]{predefineRow3.getType(), this.splitHeaderName(name2)[1]};
+                  Variable variable11 = this.excelSupport.findVariable(values5);
+                  predefineXml2 = ExcelImportUtils.buildPredefineXml(predefineRow3.getUuid(), variable11.getUuid());
                }
 
-               var1.append(this.a(var15, "Criteria", var34));
+               stringBuilder.append(this.buildColumnXml(index2, "Criteria", predefineXml2));
             } else {
-               String[] var27 = var22.split("\\.");
-               if (ExcelSupport.isParameter(var27[0])) {
-                  String var35 = "";
-                  if (var27.length == 2) {
-                     Variable var49 = this.a.findVariable(var27);
-                     var35 = ExcelImportUtils.buildParameterXml(var49);
+               String[] parts4 = name2.split("\\.");
+               if (ExcelSupport.isParameter(parts4[0])) {
+                  String parameterXml2 = "";
+                  if (parts4.length == 2) {
+                     Variable variable12 = this.excelSupport.findVariable(parts4);
+                     parameterXml2 = ExcelImportUtils.buildParameterXml(variable12);
                   } else {
-                     Variable var50 = this.a.findParameterByLabel(var27[1], var27[2]);
-                     if (var50 == null) {
-                        var50 = this.a.findVariable(var27);
-                        var35 = ExcelImportUtils.buildParameterXml(var50);
+                     Variable variable13 = this.excelSupport.findParameterByLabel(parts4[1], parts4[2]);
+                     if (variable13 == null) {
+                        variable13 = this.excelSupport.findVariable(parts4);
+                        parameterXml2 = ExcelImportUtils.buildParameterXml(variable13);
                      } else {
-                        VariableCategory var62 = this.a.findVariableCategoryByUUID(var50.getDataType());
-                        Variable var69 = (Variable)var62.getVariableLabels().get(var27[2]);
-                        var35 = ExcelImportUtils.buildParameterXml(var50, var62, var69);
+                        VariableCategory variableCategoryByUUID3 = this.excelSupport.findVariableCategoryByUUID(variable13.getDataType());
+                        Variable variable14 = (Variable)variableCategoryByUUID3.getVariableLabels().get(parts4[2]);
+                        parameterXml2 = ExcelImportUtils.buildParameterXml(variable13, variableCategoryByUUID3, variable14);
                      }
                   }
 
-                  var1.append(this.a(var15, "Criteria", var35));
+                  stringBuilder.append(this.buildColumnXml(index2, "Criteria", parameterXml2));
                } else {
-                  Variable var37 = this.a.findVariable(var27);
-                  VariableCategory var52 = this.a.findVariableCategory(var27);
-                  String var63 = ExcelImportUtils.buildVariableXml(var52, var37);
-                  var1.append(this.a(var15, "Criteria", var63));
+                  Variable variable15 = this.excelSupport.findVariable(parts4);
+                  VariableCategory variableCategory5 = this.excelSupport.findVariableCategory(parts4);
+                  String variableXml2 = ExcelImportUtils.buildVariableXml(variableCategory5, variable15);
+                  stringBuilder.append(this.buildColumnXml(index2, "Criteria", variableXml2));
                }
             }
-         } else if (var20.equals(HeaderType.out)) {
-            var1.append(this.a(var15, "ConsolePrint", ""));
-         } else if (var20.equals(HeaderType.execute)) {
-            var1.append(this.a(var15, "ExecuteMethod", ""));
+         } else if (type2.equals(HeaderType.out)) {
+            stringBuilder.append(this.buildColumnXml(index2, "ConsolePrint", ""));
+         } else if (type2.equals(HeaderType.execute)) {
+            stringBuilder.append(this.buildColumnXml(index2, "ExecuteMethod", ""));
          }
       }
 
-      List var16 = this.b.getRows();
+      List rows = this.tableData.getRows();
 
-      for(int var18 = 0; var18 < var16.size(); ++var18) {
-         var1.append("<row num=\"" + var18 + "\" height=\"40\"/>");
+      for(int index3 = 0; index3 < rows.size(); ++index3) {
+         stringBuilder.append("<row num=\"" + index3 + "\" height=\"40\"/>");
       }
 
-      for(int var19 = 0; var19 < var16.size(); ++var19) {
-         ContentRow var21 = (ContentRow)var16.get(var19);
+      for(int index4 = 0; index4 < rows.size(); ++index4) {
+         ContentRow contentRow = (ContentRow)rows.get(index4);
 
-         for(CellContent var38 : (Iterable<CellContent>)(Iterable<?>)(var21.getContents())) {
-            Header var53 = var38.getHeader();
-            HeaderType var64 = var53.getType();
-            String var70 = var38.getContent();
-            int var73 = var38.getSpan();
-            if (var73 == 0) {
-               var73 = 1;
+         for(CellContent cellContent : (Iterable<CellContent>)(Iterable<?>)(contentRow.getContents())) {
+            Header header3 = cellContent.getHeader();
+            HeaderType type3 = header3.getType();
+            String content = cellContent.getContent();
+            int span = cellContent.getSpan();
+            if (span == 0) {
+               span = 1;
             }
 
-            var1.append("<cell row=\"" + var38.getRow() + "\" col=\"" + var38.getCol() + "\" rowspan=\"" + var73 + "\">");
-            if (StringUtils.isNotBlank(var70)) {
-               if (var64.equals(HeaderType.condition)) {
-                  Criterion var14 = this.c.buildCriterion(var70);
-                  var1.append(this.a(var14));
-               } else if (var64.equals(HeaderType.assign)) {
-                  AbstractValue var74 = this.c.buildValue(var70);
-                  if (var74.getArithmetic() != null) {
-                     var70 = StringEscapeUtils.escapeXml(var70);
-                     var1.append("<value content=\"" + var70 + "\" type=\"Input\"/>");
+            stringBuilder.append("<cell row=\"" + cellContent.getRow() + "\" col=\"" + cellContent.getCol() + "\" rowspan=\"" + span + "\">");
+            if (StringUtils.isNotBlank(content)) {
+               if (type3.equals(HeaderType.condition)) {
+                  Criterion criterion = this.dSLRuleSetBuilder.buildCriterion(content);
+                  stringBuilder.append(this.buildCriterionXml(criterion));
+               } else if (type3.equals(HeaderType.assign)) {
+                  AbstractValue abstractValue = this.dSLRuleSetBuilder.buildValue(content);
+                  if (abstractValue.getArithmetic() != null) {
+                     content = StringEscapeUtils.escapeXml(content);
+                     stringBuilder.append("<value content=\"" + content + "\" type=\"Input\"/>");
                   } else {
-                     var1.append(this.a((Value)var74));
+                     stringBuilder.append(this.buildValueXml((Value)abstractValue));
                   }
                } else {
-                  var70 = StringEscapeUtils.escapeXml(var70);
-                  var1.append("<value content=\"" + var70 + "\" type=\"Input\"/>");
+                  content = StringEscapeUtils.escapeXml(content);
+                  stringBuilder.append("<value content=\"" + content + "\" type=\"Input\"/>");
                }
             }
 
-            var1.append("</cell>");
+            stringBuilder.append("</cell>");
          }
       }
 
-      ExcelImportUtils.builderLibraryXml(var1, this.a);
-      var1.append("</decision-table>");
-      return var1.toString();
+      ExcelImportUtils.builderLibraryXml(stringBuilder, this.excelSupport);
+      stringBuilder.append("</decision-table>");
+      return stringBuilder.toString();
    }
 
-   private String a(Criterion var1) {
-      StringBuilder var2 = new StringBuilder();
-      if (var1 instanceof Junction) {
-         Junction var3 = (Junction)var1;
-         List var4 = var3.getCriterions();
-         String var5 = "and";
-         if (var3 instanceof Or) {
-            var5 = "or";
+   private String buildCriterionXml(Criterion criterion) {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (criterion instanceof Junction) {
+         Junction junction = (Junction)criterion;
+         List criterions = junction.getCriterions();
+         String text = "and";
+         if (junction instanceof Or) {
+            text = "or";
          }
 
-         var2.append("<joint type=\"" + var5 + "\">");
-         if (var4 != null) {
-            for(Criterion var7 : (Iterable<Criterion>)(Iterable<?>)(var4)) {
-               if (var7 instanceof Criteria) {
-                  Criteria var8 = (Criteria)var7;
-                  var2.append("<condition op=\"" + var8.getOp().name() + "\">");
-                  Value var9 = var8.getValue();
-                  String var10 = this.a(var9);
-                  if (var10 != null) {
-                     var2.append(var10);
+         stringBuilder.append("<joint type=\"" + text + "\">");
+         if (criterions != null) {
+            for(Criterion criterion2 : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+               if (criterion2 instanceof Criteria) {
+                  Criteria criteria = (Criteria)criterion2;
+                  stringBuilder.append("<condition op=\"" + criteria.getOp().name() + "\">");
+                  Value localValue = criteria.getValue();
+                  String valueXml = this.buildValueXml(localValue);
+                  if (valueXml != null) {
+                     stringBuilder.append(valueXml);
                   }
 
-                  var2.append("</condition>");
+                  stringBuilder.append("</condition>");
                }
             }
          }
       } else {
-         var2.append("<joint type=\"and\">");
-         Criteria var11 = (Criteria)var1;
-         var2.append("<condition op=\"" + var11.getOp().name() + "\">");
-         Value var12 = var11.getValue();
-         var2.append(this.a(var12));
-         var2.append("</condition>");
+         stringBuilder.append("<joint type=\"and\">");
+         Criteria criteria2 = (Criteria)criterion;
+         stringBuilder.append("<condition op=\"" + criteria2.getOp().name() + "\">");
+         Value localValue2 = criteria2.getValue();
+         stringBuilder.append(this.buildValueXml(localValue2));
+         stringBuilder.append("</condition>");
       }
 
-      var2.append("</joint>");
-      return var2.toString();
+      stringBuilder.append("</joint>");
+      return stringBuilder.toString();
    }
 
-   private String a(Value var1) {
-      if (var1 == null) {
+   private String buildValueXml(Value localValue) {
+      if (localValue == null) {
          return null;
       } else {
-         StringBuilder var2 = new StringBuilder();
-         if (var1 instanceof SimpleValue) {
-            SimpleValue var3 = (SimpleValue)var1;
-            String var4 = StringEscapeUtils.escapeXml(var3.getContent());
-            var2.append("<value content=\"" + var4 + "\" type=\"Input\">");
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var11 = (VariableCategoryValue)var1;
-            String var17 = var11.getVariableCategory();
-            String var5 = StringEscapeUtils.escapeXml(var17);
-            var2.append("<value content=\"" + var5 + "\" type=\"Input\">");
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var12 = (VariableValue)var1;
-            PredefineRow var18 = (PredefineRow)this.b.getPredefineNameMap().get(var12.getVariableCategory());
-            if (var18 != null) {
-               String[] var24 = new String[]{var18.getType(), var12.getVariableLabel()};
-               VariableCategory var6 = this.a.findVariableCategory(var24);
-               if (var6 != null) {
-                  Variable var7 = this.a.findVariable(var24);
-                  var2.append("<value uuid=\"" + var18.getUuid() + "\" property-uuid=\"" + var7.getUuid() + "\" type=\"Predefine\">");
+         StringBuilder stringBuilder = new StringBuilder();
+         if (localValue instanceof SimpleValue) {
+            SimpleValue simpleValue = (SimpleValue)localValue;
+            String text = StringEscapeUtils.escapeXml(simpleValue.getContent());
+            stringBuilder.append("<value content=\"" + text + "\" type=\"Input\">");
+         } else if (localValue instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)localValue;
+            String variableCategory = variableCategoryValue.getVariableCategory();
+            String text2 = StringEscapeUtils.escapeXml(variableCategory);
+            stringBuilder.append("<value content=\"" + text2 + "\" type=\"Input\">");
+         } else if (localValue instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)localValue;
+            PredefineRow predefineRow = (PredefineRow)this.tableData.getPredefineNameMap().get(variableValue.getVariableCategory());
+            if (predefineRow != null) {
+               String[] values = new String[]{predefineRow.getType(), variableValue.getVariableLabel()};
+               VariableCategory variableCategory2 = this.excelSupport.findVariableCategory(values);
+               if (variableCategory2 != null) {
+                  Variable variable = this.excelSupport.findVariable(values);
+                  stringBuilder.append("<value uuid=\"" + predefineRow.getUuid() + "\" property-uuid=\"" + variable.getUuid() + "\" type=\"Predefine\">");
                } else {
-                  String var32 = var12.getVariableCategory() + "." + var12.getVariableLabel();
-                  var32 = StringEscapeUtils.escapeXml(var32);
-                  var2.append(ExcelImportUtils.buildContentXml(var32));
+                  String text3 = variableValue.getVariableCategory() + "." + variableValue.getVariableLabel();
+                  text3 = StringEscapeUtils.escapeXml(text3);
+                  stringBuilder.append(ExcelImportUtils.buildContentXml(text3));
                }
             } else {
-               String[] var25 = new String[]{var12.getVariableCategory(), var12.getVariableLabel()};
-               Variable var30 = this.a.findVariable(var25, true);
-               Constant var34 = this.a.findConstant(var25, true);
-               if (var30 != null) {
-                  VariableCategory var8 = this.a.findVariableCategory(var25);
-                  var2.append("<value category-uuid=\"" + var8.getUuid() + "\" var-category=\"" + var12.getVariableCategory() + "\" var=\"" + var30.getName() + "\" var-label=\"" + var12.getVariableLabel() + "\" datatype=\"" + var30.getDataType() + "\" uuid=\"" + var30.getUuid());
-                  String var9 = var8.getName().toLowerCase();
-                  if (ExcelSupport.isParameter(var9)) {
-                     var2.append("\" type=\"Parameter\">");
+               String[] values2 = new String[]{variableValue.getVariableCategory(), variableValue.getVariableLabel()};
+               Variable variable2 = this.excelSupport.findVariable(values2, true);
+               Constant constant = this.excelSupport.findConstant(values2, true);
+               if (variable2 != null) {
+                  VariableCategory variableCategory3 = this.excelSupport.findVariableCategory(values2);
+                  stringBuilder.append("<value category-uuid=\"" + variableCategory3.getUuid() + "\" var-category=\"" + variableValue.getVariableCategory() + "\" var=\"" + variable2.getName() + "\" var-label=\"" + variableValue.getVariableLabel() + "\" datatype=\"" + variable2.getDataType() + "\" uuid=\"" + variable2.getUuid());
+                  String lowercaseText = variableCategory3.getName().toLowerCase();
+                  if (ExcelSupport.isParameter(lowercaseText)) {
+                     stringBuilder.append("\" type=\"Parameter\">");
                   } else {
-                     var2.append("\" type=\"Variable\">");
+                     stringBuilder.append("\" type=\"Variable\">");
                   }
-               } else if (var34 != null) {
-                  ConstantCategory var36 = this.a.findConstantCategory(var25);
-                  var2.append("<value category-uuid=\"" + var36.getUuid() + "\" uuid=\"" + var34.getUuid() + "\" const-category=\"" + var36.getLabel() + "\" const=\"" + var34.getLabel() + "\" datatype=\"" + var34.getType().name() + "\" type=\"Constant\">");
+               } else if (constant != null) {
+                  ConstantCategory constantCategory = this.excelSupport.findConstantCategory(values2);
+                  stringBuilder.append("<value category-uuid=\"" + constantCategory.getUuid() + "\" uuid=\"" + constant.getUuid() + "\" const-category=\"" + constantCategory.getLabel() + "\" const=\"" + constant.getLabel() + "\" datatype=\"" + constant.getType().name() + "\" type=\"Constant\">");
                } else {
-                  String var37 = var12.getVariableCategory() + "." + var12.getVariableLabel();
-                  var37 = StringEscapeUtils.escapeXml(var37);
-                  var2.append(ExcelImportUtils.buildContentXml(var37));
+                  String text4 = variableValue.getVariableCategory() + "." + variableValue.getVariableLabel();
+                  text4 = StringEscapeUtils.escapeXml(text4);
+                  stringBuilder.append(ExcelImportUtils.buildContentXml(text4));
                }
             }
-         } else if (var1 instanceof MethodValue) {
-            MethodValue var13 = (MethodValue)var1;
-            SpringBean var19 = this.a.getAction(var13.getBeanLabel(), var13.getMethodLabel());
-            Method var26 = this.a.getActionMethod(var13.getBeanLabel(), var13.getMethodLabel());
-            if (var19 != null && var26 != null) {
-               var2.append("<value bean-name=\"" + var19.getId() + "\" bean-label=\"" + var13.getBeanLabel() + "\" method-name=\"" + var26.getMethodName() + "\" method-label=\"" + var13.getMethodLabel() + "\" type=\"Method\">");
-               int var31 = 0;
+         } else if (localValue instanceof MethodValue) {
+            MethodValue methodValue = (MethodValue)localValue;
+            SpringBean action = this.excelSupport.getAction(methodValue.getBeanLabel(), methodValue.getMethodLabel());
+            Method actionMethod = this.excelSupport.getActionMethod(methodValue.getBeanLabel(), methodValue.getMethodLabel());
+            if (action != null && actionMethod != null) {
+               stringBuilder.append("<value bean-name=\"" + action.getId() + "\" bean-label=\"" + methodValue.getBeanLabel() + "\" method-name=\"" + actionMethod.getMethodName() + "\" method-label=\"" + methodValue.getMethodLabel() + "\" type=\"Method\">");
+               int number = 0;
 
-               for(Parameter var39 : var13.getParameters()) {
-                  com.bstek.urule.model.library.action.Parameter var40 = (com.bstek.urule.model.library.action.Parameter)var26.getParameters().get(var31);
-                  var2.append("<parameter name=\"" + var40.getName() + "\" type=\"" + var40.getType().name() + "\">");
-                  Value var10 = var39.getValue();
-                  var2.append(this.a(var10));
-                  var2.append("</parameter>");
-                  ++var31;
+               for(Parameter parameter : methodValue.getParameters()) {
+                  com.bstek.urule.model.library.action.Parameter parameter2 = (com.bstek.urule.model.library.action.Parameter)actionMethod.getParameters().get(number);
+                  stringBuilder.append("<parameter name=\"" + parameter2.getName() + "\" type=\"" + parameter2.getType().name() + "\">");
+                  Value localValue2 = parameter.getValue();
+                  stringBuilder.append(this.buildValueXml(localValue2));
+                  stringBuilder.append("</parameter>");
+                  ++number;
                }
             } else {
-               var2.append("<value content=\"" + var13.getBeanLabel() + "." + var13.getMethodLabel() + "\" type=\"Input\">");
+               stringBuilder.append("<value content=\"" + methodValue.getBeanLabel() + "." + methodValue.getMethodLabel() + "\" type=\"Input\">");
             }
-         } else if (var1 instanceof ParenValue) {
-            ParenValue var14 = (ParenValue)var1;
-            var2.append("<paren>");
-            var2.append(this.a(var14.getValue()));
-            ComplexArithmetic var20 = var14.getArithmetic();
-            ArithmeticType var27 = var20.getType();
-            var2.append("<complex-arith type=\"" + var27.name() + "\">");
-            var2.append(this.a(var20.getValue()));
-            var2.append("</complex-arith>");
-            var2.append("</paren>");
-         } else if (var1 instanceof ParameterValue) {
-            ParameterValue var15 = (ParameterValue)var1;
-            if (StringUtils.isNotBlank(var15.getKeyCategoryUuid())) {
-               Variable var21 = null;
-               VariableCategory var28 = this.a.findVariableCategoryByUUID(var15.getKeyCategoryUuid());
-               if (var28 != null) {
-                  var21 = (Variable)var28.getVariableNames().get(var15.getVariableName());
+         } else if (localValue instanceof ParenValue) {
+            ParenValue parenValue = (ParenValue)localValue;
+            stringBuilder.append("<paren>");
+            stringBuilder.append(this.buildValueXml(parenValue.getValue()));
+            ComplexArithmetic arithmetic = parenValue.getArithmetic();
+            ArithmeticType type = arithmetic.getType();
+            stringBuilder.append("<complex-arith type=\"" + type.name() + "\">");
+            stringBuilder.append(this.buildValueXml(arithmetic.getValue()));
+            stringBuilder.append("</complex-arith>");
+            stringBuilder.append("</paren>");
+         } else if (localValue instanceof ParameterValue) {
+            ParameterValue parameterValue = (ParameterValue)localValue;
+            if (StringUtils.isNotBlank(parameterValue.getKeyCategoryUuid())) {
+               Variable variable3 = null;
+               VariableCategory variableCategoryByUUID = this.excelSupport.findVariableCategoryByUUID(parameterValue.getKeyCategoryUuid());
+               if (variableCategoryByUUID != null) {
+                  variable3 = (Variable)variableCategoryByUUID.getVariableNames().get(parameterValue.getVariableName());
                }
 
-               if (var21 != null) {
-                  var2.append(ExcelImportUtils.buildParameterValueXml(var15, var28, var21));
+               if (variable3 != null) {
+                  stringBuilder.append(ExcelImportUtils.buildParameterValueXml(parameterValue, variableCategoryByUUID, variable3));
                } else {
-                  var2.append(ExcelImportUtils.buildContentXml(var15.getKeyName() + "." + var15.getVariableLabel()));
+                  stringBuilder.append(ExcelImportUtils.buildContentXml(parameterValue.getKeyName() + "." + parameterValue.getVariableLabel()));
                }
             } else {
-               String[] var22 = new String[]{"参数", var15.getVariableLabel()};
-               Variable var29 = this.a.findVariable(var22, true);
-               if (var29 != null) {
-                  var2.append(ExcelImportUtils.buildParameterValueXml(var15, var29));
+               String[] values3 = new String[]{"参数", parameterValue.getVariableLabel()};
+               Variable variable4 = this.excelSupport.findVariable(values3, true);
+               if (variable4 != null) {
+                  stringBuilder.append(ExcelImportUtils.buildParameterValueXml(parameterValue, variable4));
                } else {
-                  var2.append(ExcelImportUtils.buildContentXml("参数." + var15.getVariableLabel()));
+                  stringBuilder.append(ExcelImportUtils.buildContentXml("参数." + parameterValue.getVariableLabel()));
                }
             }
          } else {
-            var2.append(ExcelImportUtils.buildContentXml((String)null));
+            stringBuilder.append(ExcelImportUtils.buildContentXml((String)null));
          }
 
-         ComplexArithmetic var16 = var1.getArithmetic();
-         if (var16 == null) {
-            var2.append("</value>");
-            return var2.toString();
+         ComplexArithmetic arithmetic2 = localValue.getArithmetic();
+         if (arithmetic2 == null) {
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          } else {
-            ArithmeticType var23 = var16.getType();
-            var2.append("<complex-arith type=\"" + var23.name() + "\">");
-            var2.append(this.a(var16.getValue()));
-            var2.append("</complex-arith>");
-            var2.append("</value>");
-            return var2.toString();
+            ArithmeticType type2 = arithmetic2.getType();
+            stringBuilder.append("<complex-arith type=\"" + type2.name() + "\">");
+            stringBuilder.append(this.buildValueXml(arithmetic2.getValue()));
+            stringBuilder.append("</complex-arith>");
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          }
       }
    }
 
-   private String[] a(String var1) {
-      String[] var2 = var1.split("\\.");
-      if (var2.length < 2) {
-         throw new InfoException("表头[" + var1 + "]不合法！");
+   private String[] splitHeaderName(String text) {
+      String[] parts = text.split("\\.");
+      if (parts.length < 2) {
+         throw new InfoException("表头[" + text + "]不合法！");
       } else {
-         String[] var3 = new String[]{var2[0], var1.substring(var2[0].length() + 1)};
-         return var3;
+         String[] values = new String[]{parts[0], text.substring(parts[0].length() + 1)};
+         return values;
       }
    }
 }

@@ -8,18 +8,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class CommonFunctionValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      CommonFunctionValue var2 = new CommonFunctionValue();
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      var2.setLabel(JsonUtils.getJsonValue(var1, "label"));
-      var2.setName(JsonUtils.getJsonValue(var1, "name"));
-      var2.setParameter(JsonUtils.parseCommonFunctionParameter(var1));
-      var2.setValueType(ValueType.CommonFunction);
-      return var2;
+   public Value deserialize(JsonNode jsonNode) {
+      CommonFunctionValue commonFunctionValue = new CommonFunctionValue();
+      commonFunctionValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      commonFunctionValue.setLabel(JsonUtils.getJsonValue(jsonNode, "label"));
+      commonFunctionValue.setName(JsonUtils.getJsonValue(jsonNode, "name"));
+      commonFunctionValue.setParameter(JsonUtils.parseCommonFunctionParameter(jsonNode));
+      commonFunctionValue.setValueType(ValueType.CommonFunction);
+      return commonFunctionValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.CommonFunction);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.CommonFunction);
    }
 }

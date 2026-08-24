@@ -11,97 +11,97 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class Module {
-   private String a;
-   private String b;
-   private ModuleType c;
-   private RoleCategory d;
-   private List e;
-   private boolean f;
-   private boolean g;
-   private List h;
+   private String code;
+   private String name;
+   private ModuleType category;
+   private RoleCategory type;
+   private List urls;
+   private boolean checked;
+   private boolean disabled;
+   private List childModules;
 
    public Module() {
-      this.h = new ArrayList();
+      this.childModules = new ArrayList();
    }
 
-   public Module(String var1, String var2, RoleCategory var3) {
-      this.a = var1;
-      this.b = var2;
-      this.c = ModuleType.basic;
-      this.d = var3;
-      this.h = new ArrayList();
+   public Module(String code, String name, RoleCategory roleType) {
+      this.code = code;
+      this.name = name;
+      this.category = ModuleType.basic;
+      this.type = roleType;
+      this.childModules = new ArrayList();
    }
 
-   public Module(String var1, String var2, String var3, RoleCategory var4) {
-      this.a = var1;
-      this.b = var2;
-      this.e = new ArrayList(Arrays.asList(var3.split(",")));
-      this.c = ModuleType.basic;
-      this.d = var4;
-      this.h = new ArrayList();
+   public Module(String code, String name, String urls, RoleCategory roleType) {
+      this.code = code;
+      this.name = name;
+      this.urls = new ArrayList(Arrays.asList(urls.split(",")));
+      this.category = ModuleType.basic;
+      this.type = roleType;
+      this.childModules = new ArrayList();
    }
 
    public String getCode() {
-      return this.a;
+      return this.code;
    }
 
-   public void setCode(String var1) {
-      this.a = var1;
+   public void setCode(String code) {
+      this.code = code;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public List getItems() {
-      return this.h;
+      return this.childModules;
    }
 
-   public void setItems(List var1) {
-      this.h = var1;
+   public void setItems(List items) {
+      this.childModules = items;
    }
 
    public RoleCategory getType() {
-      return this.d;
+      return this.type;
    }
 
-   public void setType(RoleCategory var1) {
-      this.d = var1;
+   public void setType(RoleCategory type) {
+      this.type = type;
    }
 
    public boolean isChecked() {
-      return this.f;
+      return this.checked;
    }
 
-   public void setChecked(boolean var1) {
-      this.f = var1;
+   public void setChecked(boolean checked) {
+      this.checked = checked;
    }
 
    public boolean isDisabled() {
-      return this.g;
+      return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.g = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
 
    public ModuleType getCategory() {
-      return this.c;
+      return this.category;
    }
 
-   public void setCategory(ModuleType var1) {
-      this.c = var1;
+   public void setCategory(ModuleType category) {
+      this.category = category;
    }
 
    public List getUrls() {
-      return this.e;
+      return this.urls;
    }
 
-   public void setUrls(List var1) {
-      this.e = var1;
+   public void setUrls(List urls) {
+      this.urls = urls;
    }
 }

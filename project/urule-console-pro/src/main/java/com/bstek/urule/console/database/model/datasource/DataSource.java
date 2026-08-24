@@ -8,184 +8,184 @@ import java.util.Date;
    ignoreUnknown = true
 )
 public class DataSource {
-   private Long a;
-   private String b;
-   private String c;
-   private DataSourceType d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private String k;
-   private int l;
-   private int m;
-   private int n;
-   private int o;
-   private String p;
-   private String q;
-   private String r;
-   private Date s;
-   private Date t;
+   private Long id;
+   private String name;
+   private String groupId;
+   private DataSourceType type;
+   private String dbJndiName;
+   private String dataSourceBean;
+   private String dbDriver;
+   private String dbUrl;
+   private String dbUser;
+   private String dbPwd;
+   private String dbValidationQuery;
+   private int dbInitialsize;
+   private int dbMaxIdle;
+   private int dbMaxTotal;
+   private int dbMinIdle;
+   private String desc;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
 
    public String getDesc() {
-      return this.p;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.p = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getCreateUser() {
-      return this.q;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.q = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.r;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.r = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.s;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.s = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.t;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.t = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getGroupId() {
-      return this.c;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.c = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public DataSourceType getType() {
-      return this.d;
+      return this.type;
    }
 
-   public void setType(DataSourceType var1) {
-      this.d = var1;
+   public void setType(DataSourceType type) {
+      this.type = type;
    }
 
    public String getDbJndiName() {
-      return this.e;
+      return this.dbJndiName;
    }
 
-   public void setDbJndiName(String var1) {
-      this.e = var1;
+   public void setDbJndiName(String dbJndiName) {
+      this.dbJndiName = dbJndiName;
    }
 
    public String getDataSourceBean() {
-      return this.f;
+      return this.dataSourceBean;
    }
 
-   public void setDataSourceBean(String var1) {
-      this.f = var1;
+   public void setDataSourceBean(String dataSourceBean) {
+      this.dataSourceBean = dataSourceBean;
    }
 
    public String getDbDriver() {
-      return this.g;
+      return this.dbDriver;
    }
 
-   public void setDbDriver(String var1) {
-      this.g = var1;
+   public void setDbDriver(String dbDriver) {
+      this.dbDriver = dbDriver;
    }
 
    public String getDbUrl() {
-      return this.h;
+      return this.dbUrl;
    }
 
-   public void setDbUrl(String var1) {
-      this.h = var1;
+   public void setDbUrl(String dbUrl) {
+      this.dbUrl = dbUrl;
    }
 
    public String getDbUser() {
-      return this.i;
+      return this.dbUser;
    }
 
-   public void setDbUser(String var1) {
-      this.i = var1;
+   public void setDbUser(String dbUser) {
+      this.dbUser = dbUser;
    }
 
    public String getDbPwd() {
-      return this.j;
+      return this.dbPwd;
    }
 
-   public void setDbPwd(String var1) {
-      this.j = var1;
+   public void setDbPwd(String dbPwd) {
+      this.dbPwd = dbPwd;
    }
 
    public String getDbValidationQuery() {
-      return this.k;
+      return this.dbValidationQuery;
    }
 
-   public void setDbValidationQuery(String var1) {
-      this.k = var1;
+   public void setDbValidationQuery(String dbValidationQuery) {
+      this.dbValidationQuery = dbValidationQuery;
    }
 
    public int getDbInitialsize() {
-      return this.l;
+      return this.dbInitialsize;
    }
 
-   public void setDbInitialsize(int var1) {
-      this.l = var1;
+   public void setDbInitialsize(int dbInitialsize) {
+      this.dbInitialsize = dbInitialsize;
    }
 
    public int getDbMaxIdle() {
-      return this.m;
+      return this.dbMaxIdle;
    }
 
-   public void setDbMaxIdle(int var1) {
-      this.m = var1;
+   public void setDbMaxIdle(int dbMaxIdle) {
+      this.dbMaxIdle = dbMaxIdle;
    }
 
    public int getDbMaxTotal() {
-      return this.n;
+      return this.dbMaxTotal;
    }
 
-   public void setDbMaxTotal(int var1) {
-      this.n = var1;
+   public void setDbMaxTotal(int dbMaxTotal) {
+      this.dbMaxTotal = dbMaxTotal;
    }
 
    public int getDbMinIdle() {
-      return this.o;
+      return this.dbMinIdle;
    }
 
-   public void setDbMinIdle(int var1) {
-      this.o = var1;
+   public void setDbMinIdle(int dbMinIdle) {
+      this.dbMinIdle = dbMinIdle;
    }
 }

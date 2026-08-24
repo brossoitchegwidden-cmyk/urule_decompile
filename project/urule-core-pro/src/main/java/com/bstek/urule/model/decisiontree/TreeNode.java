@@ -7,8 +7,8 @@ public abstract class TreeNode {
    private TreeNode parentNode;
    private TreeNodeType nodeType;
 
-   public void setParentNode(TreeNode var1) {
-      this.parentNode = var1;
+   public void setParentNode(TreeNode parentNode) {
+      this.parentNode = parentNode;
    }
 
    public TreeNode getParentNode() {
@@ -19,7 +19,7 @@ public abstract class TreeNode {
       return this.nodeType;
    }
 
-   public void setNodeType(TreeNodeType var1) {
-      this.nodeType = var1;
+   public void setNodeType(TreeNodeType nodeType) {
+      this.nodeType = nodeType;
    }
 }

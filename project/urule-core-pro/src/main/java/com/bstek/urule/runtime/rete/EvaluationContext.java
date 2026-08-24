@@ -9,17 +9,17 @@ public interface EvaluationContext extends Context {
 
    void resetActivitiesState();
 
-   void addPassedOrActivity(OrActivity var1);
+   void addPassedOrActivity(OrActivity or);
 
-   void addPassedMetActivity(MetActivity var1);
+   void addPassedMetActivity(MetActivity met);
 
-   boolean orActivityIsPassed(OrActivity var1);
+   boolean orActivityIsPassed(OrActivity or);
 
-   boolean metActivityIsPassed(MetActivity var1);
+   boolean metActivityIsPassed(MetActivity met);
 
-   CriteriaActivityState getActivityState(String var1);
+   CriteriaActivityState getActivityState(String id);
 
-   AndActivityState getAndActivityState(String var1);
+   AndActivityState getAndActivityState(String id);
 
    Set<String> getPathPassedSet();
 }

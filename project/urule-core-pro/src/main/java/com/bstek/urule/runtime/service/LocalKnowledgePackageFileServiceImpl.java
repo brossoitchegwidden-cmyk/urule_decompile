@@ -12,96 +12,95 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 public class LocalKnowledgePackageFileServiceImpl implements KnowledgePackageFileService {
-   private String a;
+   private String knowledgePackageFileStorePath;
 
    @Override
-   public KnowledgePackage loadKnowledgePackage(String var1) {
+   public KnowledgePackage loadKnowledgePackage(String packageId) {
       if (!this.isEnable()) {
          return null;
       } else {
-         File var2 = this.a(var1);
-         if (!var2.exists()) {
-            throw new RuleException("本地配置的知识包文件存储目录【" + this.a + "】中，知识包【" + var1 + "】对应的文件不存在!");
+         File file = this.executeServiceOperation(packageId);
+         if (!file.exists()) {
+            throw new RuleException("本地配置的知识包文件存储目录【" + this.knowledgePackageFileStorePath + "】中，知识包【" + packageId + "】对应的文件不存在!");
          } else {
-            return this.a(var2, var1);
+            return this.executeServiceOperation(file, packageId);
          }
       }
    }
-
    @Override
-   public KnowledgePackage verifyKnowledgePackage(String var1, long var2) {
+   public KnowledgePackage verifyKnowledgePackage(String packageId, long fileModifyDate) {
       if (!this.isEnable()) {
          return null;
       }
 
-      File var4 = this.a(var1);
-      if (!var4.exists()) {
+      File file = this.executeServiceOperation(packageId);
+      if (!file.exists()) {
          return null;
       }
 
-      long var5 = var4.lastModified();
-      return var5 == var2 ? null : this.a(var4, var1);
+      long longValue = file.lastModified();
+      return longValue == fileModifyDate ? null : this.executeServiceOperation(file, packageId);
    }
 
    @Override
    public boolean isEnable() {
-      return this.a != null;
+      return this.knowledgePackageFileStorePath != null;
    }
 
-   private File a(String var1) {
-      String var2 = var1 + ".data";
-      String var3 = this.a + "/" + var2;
-      return new File(var3);
+   private File executeServiceOperation(String text) {
+      String text2 = text + ".data";
+      String text3 = this.knowledgePackageFileStorePath + "/" + text2;
+      return new File(text3);
    }
 
-   private KnowledgePackage a(File var1, String var2) {
-      FileInputStream var3 = null;
+   private KnowledgePackage executeServiceOperation(File file, String text) {
+      FileInputStream fileInputStream = null;
 
       try {
-         var3 = new FileInputStream(var1);
-         String var4 = Utils.uncompress(IOUtils.toByteArray(var3));
-         KnowledgePackage var5 = Utils.stringToKnowledgePackage(var4);
-         KnowledgePackageImpl var6 = (KnowledgePackageImpl)var5;
-         var6.setPackageInfo(var2);
-         long var7 = var1.lastModified();
-         var6.setTimestamp(var7);
-         return var6;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         fileInputStream = new FileInputStream(file);
+         String text2 = Utils.uncompress(IOUtils.toByteArray(fileInputStream));
+         KnowledgePackage knowledgePackage = Utils.stringToKnowledgePackage(text2);
+         KnowledgePackageImpl knowledgePackageImpl = (KnowledgePackageImpl)knowledgePackage;
+         knowledgePackageImpl.setPackageInfo(text);
+         long longValue = file.lastModified();
+         knowledgePackageImpl.setTimestamp(longValue);
+         return knowledgePackageImpl;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         IOUtils.closeQuietly(var3);
+         IOUtils.closeQuietly(fileInputStream);
       }
    }
 
-   public void setKnowledgePackageFileStorePath(String var1) {
-      System.out.println("[URULE-CORE]urule.knowledgePackageFileStorePath:" + var1);
-      if (!StringUtils.isBlank(var1)) {
-         if (var1.startsWith("${")) {
-            this.a = null;
+   public void setKnowledgePackageFileStorePath(String knowledgePackageFileStorePath) {
+      System.out.println("[URULE-CORE]urule.knowledgePackageFileStorePath:" + knowledgePackageFileStorePath);
+      if (!StringUtils.isBlank(knowledgePackageFileStorePath)) {
+         if (knowledgePackageFileStorePath.startsWith("${")) {
+            this.knowledgePackageFileStorePath = null;
          } else {
-            this.a = var1;
-            File var2 = new File(var1);
-            if (var2.exists()) {
+            this.knowledgePackageFileStorePath = knowledgePackageFileStorePath;
+            File file = new File(knowledgePackageFileStorePath);
+            if (file.exists()) {
                return;
             }
 
-            SpringBootHome var3 = new SpringBootHome();
-            File var4 = var3.findSpringbootJarHomeDir(this.getClass());
-            String var5 = var4.getAbsolutePath();
-            if (this.a.startsWith("/")) {
-               this.a = var5 + this.a;
+            SpringBootHome springBootHome = new SpringBootHome();
+            File springbootJarHomeDir = springBootHome.findSpringbootJarHomeDir(this.getClass());
+            String absolutePath = springbootJarHomeDir.getAbsolutePath();
+            if (this.knowledgePackageFileStorePath.startsWith("/")) {
+               this.knowledgePackageFileStorePath = absolutePath + this.knowledgePackageFileStorePath;
             } else {
-               this.a = var5 + "/" + this.a;
+               this.knowledgePackageFileStorePath = absolutePath + "/" + this.knowledgePackageFileStorePath;
             }
 
-            File var6 = new File(this.a);
-            if (!var6.exists()) {
-               var6.mkdirs();
+            File file2 = new File(this.knowledgePackageFileStorePath);
+            if (!file2.exists()) {
+               file2.mkdirs();
             }
 
             try {
-               this.a = var6.getCanonicalPath();
-            } catch (IOException var8) {
+               this.knowledgePackageFileStorePath = file2.getCanonicalPath();
+            } catch (IOException iOException) {
             }
          }
       }

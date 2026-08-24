@@ -9,19 +9,19 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 public class CellScriptDSLBuilder {
-   public String buildCriteriaScript(String var1, String var2) {
-      RuleParserLexer var3 = new RuleParserLexer(CharStreams.fromString(var1));
-      CommonTokenStream var4 = new CommonTokenStream(var3);
-      RuleParserParser var5 = new RuleParserParser(var4);
-      ScriptDecisionTableErrorListener var6 = new ScriptDecisionTableErrorListener();
-      var5.addErrorListener(var6);
-      CellScriptRuleParserBaseVisitor var7 = new CellScriptRuleParserBaseVisitor(var2);
-      String var8 = (String)var7.visit(var5.decisionTableCellCondition());
-      String var9 = var6.getErrorMessage();
-      if (var9 != null) {
-         throw new RuleException("Script Parse error:" + var9);
+   public String buildCriteriaScript(String script, String propertyName) {
+      RuleParserLexer ruleParserLexer = new RuleParserLexer(CharStreams.fromString(script));
+      CommonTokenStream commonTokenStream = new CommonTokenStream(ruleParserLexer);
+      RuleParserParser ruleParserParser = new RuleParserParser(commonTokenStream);
+      ScriptDecisionTableErrorListener scriptDecisionTableErrorListener = new ScriptDecisionTableErrorListener();
+      ruleParserParser.addErrorListener(scriptDecisionTableErrorListener);
+      CellScriptRuleParserBaseVisitor cellScriptRuleParserBaseVisitor = new CellScriptRuleParserBaseVisitor(propertyName);
+      String criteriaScript = (String)cellScriptRuleParserBaseVisitor.visit(ruleParserParser.decisionTableCellCondition());
+      String errorMessage = scriptDecisionTableErrorListener.getErrorMessage();
+      if (errorMessage != null) {
+         throw new RuleException("Script Parse error:" + errorMessage);
       } else {
-         return var8;
+         return criteriaScript;
       }
    }
 }

@@ -11,84 +11,82 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupQueryImpl implements GroupQuery {
-   private String a;
+   private String name;
+   public List list(String userId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List list(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      ArrayList var13;
+      ArrayList listResult;
       try {
-         String var3 = "SELECT URULE_GROUP.ID_, URULE_GROUP.NAME_, URULE_GROUP.DESC_, URULE_GROUP.CREATE_USER_, URULE_GROUP.CREATE_DATE_ FROM URULE_GROUP  LEFT JOIN URULE_GROUP_USER on URULE_GROUP.ID_=URULE_GROUP_USER.GROUP_ID_ WHERE URULE_GROUP_USER.USER_ID_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         String text = "SELECT URULE_GROUP.ID_, URULE_GROUP.NAME_, URULE_GROUP.DESC_, URULE_GROUP.CREATE_USER_, URULE_GROUP.CREATE_DATE_ FROM URULE_GROUP  LEFT JOIN URULE_GROUP_USER on URULE_GROUP.ID_=URULE_GROUP_USER.GROUP_ID_ WHERE URULE_GROUP_USER.USER_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, userId);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            Group var7 = new Group();
-            var7.setId(var6.getString(1));
-            var7.setName(var6.getString(2));
-            var7.setDesc(var6.getString(3));
-            var7.setCreateUser(var6.getString(4));
-            var7.setCreateDate(var6.getTimestamp(5));
-            var5.add(var7);
+         while(resultSet.next()) {
+            Group group = new Group();
+            group.setId(resultSet.getString(1));
+            group.setName(resultSet.getString(2));
+            group.setDesc(resultSet.getString(3));
+            group.setCreateUser(resultSet.getString(4));
+            group.setCreateDate(resultSet.getTimestamp(5));
+            items.add(group);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return listResult;
    }
-
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var13;
+      ArrayList listResult;
       try {
-         String var2 = "SELECT URULE_GROUP.ID_, URULE_GROUP.NAME_, URULE_GROUP.DESC_, URULE_GROUP.CREATE_USER_, URULE_GROUP.CREATE_DATE_ FROM URULE_GROUP ";
-         String var3 = "";
-         if (StringUtils.isNotBlank(this.a)) {
-            var3 = " WHERE NAME_=?";
+         String text = "SELECT URULE_GROUP.ID_, URULE_GROUP.NAME_, URULE_GROUP.DESC_, URULE_GROUP.CREATE_USER_, URULE_GROUP.CREATE_DATE_ FROM URULE_GROUP ";
+         String text2 = "";
+         if (StringUtils.isNotBlank(this.name)) {
+            text2 = " WHERE NAME_=?";
          }
 
-         PreparedStatement var4 = var1.prepareStatement(var2 + var3);
-         if (StringUtils.isNotBlank(var3)) {
-            var4.setString(1, this.a);
+         PreparedStatement preparedStatement = connection.prepareStatement(text + text2);
+         if (StringUtils.isNotBlank(text2)) {
+            preparedStatement.setString(1, this.name);
          }
 
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            Group var7 = new Group();
-            var7.setId(var6.getString(1));
-            var7.setName(var6.getString(2));
-            var7.setDesc(var6.getString(3));
-            var7.setCreateUser(var6.getString(4));
-            var7.setCreateDate(var6.getTimestamp(5));
-            var5.add(var7);
+         while(resultSet.next()) {
+            Group group = new Group();
+            group.setId(resultSet.getString(1));
+            group.setName(resultSet.getString(2));
+            group.setDesc(resultSet.getString(3));
+            group.setCreateUser(resultSet.getString(4));
+            group.setCreateDate(resultSet.getTimestamp(5));
+            items.add(group);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return listResult;
    }
 
-   public GroupQuery name(String var1) {
-      this.a = var1;
+   public GroupQuery name(String name) {
+      this.name = name;
       return this;
    }
 }

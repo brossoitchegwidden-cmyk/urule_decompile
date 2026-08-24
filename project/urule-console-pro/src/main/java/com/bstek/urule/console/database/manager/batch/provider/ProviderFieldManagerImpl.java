@@ -9,114 +9,114 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class ProviderFieldManagerImpl implements ProviderFieldManager {
-   public BatchDataProviderField get(Long var1) {
-      List var2 = this.createQuery().id(var1).list();
-      return var2.size() > 0 ? (BatchDataProviderField)var2.get(0) : null;
+   public BatchDataProviderField get(Long id) {
+      List items = this.createQuery().id(id).list();
+      return items.size() > 0 ? (BatchDataProviderField)items.get(0) : null;
    }
 
-   public void add(BatchDataProviderField var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(BatchDataProviderField field) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_BATCH_PROVIDER_FIELD (SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CLAZZ_PATH_, DATA_PROVIDER_ID_, CREATE_USER_, CREATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, PROVIDER_ID_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-         var3.setString(1, var1.getSrcProperty());
-         var3.setString(2, var1.getDataType());
-         var3.setString(3, var1.getDestProperty());
-         var3.setString(4, var1.getClassPath());
-         if (var1.getDataProviderId() == null) {
-            var3.setObject(5, (Object)null);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_BATCH_PROVIDER_FIELD (SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CLAZZ_PATH_, DATA_PROVIDER_ID_, CREATE_USER_, CREATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, PROVIDER_ID_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+         preparedStatement.setString(1, field.getSrcProperty());
+         preparedStatement.setString(2, field.getDataType());
+         preparedStatement.setString(3, field.getDestProperty());
+         preparedStatement.setString(4, field.getClassPath());
+         if (field.getDataProviderId() == null) {
+            preparedStatement.setObject(5, (Object)null);
          } else {
-            var3.setLong(5, var1.getDataProviderId());
+            preparedStatement.setLong(5, field.getDataProviderId());
          }
 
-         var3.setString(6, var1.getCreateUser());
-         var3.setTimestamp(7, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setLong(8, var1.getId());
-         var3.setLong(9, var1.getProjectId());
-         var3.setLong(10, var1.getBatchId());
-         var3.setLong(11, var1.getProviderId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         preparedStatement.setString(6, field.getCreateUser());
+         preparedStatement.setTimestamp(7, new Timestamp(field.getCreateDate().getTime()));
+         preparedStatement.setLong(8, field.getId());
+         preparedStatement.setLong(9, field.getProjectId());
+         preparedStatement.setLong(10, field.getBatchId());
+         preparedStatement.setLong(11, field.getProviderId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void update(BatchDataProviderField var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(BatchDataProviderField field) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("update URULE_BATCH_PROVIDER_FIELD set SRC_PROPERTY_=?, DATA_TYPE_=?, DEST_PROPERTY_=?, CLAZZ_PATH_=?, DATA_PROVIDER_ID_=?, UPDATE_DATE_=? , UPDATE_USER_=? where ID_=?");
-         var3.setString(1, var1.getSrcProperty());
-         var3.setString(2, var1.getDataType());
-         var3.setString(3, var1.getDestProperty());
-         var3.setString(4, var1.getClassPath());
-         if (var1.getDataProviderId() == null) {
-            var3.setObject(5, (Object)null);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_BATCH_PROVIDER_FIELD set SRC_PROPERTY_=?, DATA_TYPE_=?, DEST_PROPERTY_=?, CLAZZ_PATH_=?, DATA_PROVIDER_ID_=?, UPDATE_DATE_=? , UPDATE_USER_=? where ID_=?");
+         preparedStatement.setString(1, field.getSrcProperty());
+         preparedStatement.setString(2, field.getDataType());
+         preparedStatement.setString(3, field.getDestProperty());
+         preparedStatement.setString(4, field.getClassPath());
+         if (field.getDataProviderId() == null) {
+            preparedStatement.setObject(5, (Object)null);
          } else {
-            var3.setLong(5, var1.getDataProviderId());
+            preparedStatement.setLong(5, field.getDataProviderId());
          }
 
-         var3.setTimestamp(6, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setString(7, var1.getUpdateUser());
-         var3.setLong(8, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         preparedStatement.setTimestamp(6, new Timestamp(field.getUpdateDate().getTime()));
+         preparedStatement.setString(7, field.getUpdateUser());
+         preparedStatement.setLong(8, field.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void remove(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void remove(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByProviderId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByProviderId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where PROVIDER_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where PROVIDER_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByBatchId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByBatchId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where BATCH_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where BATCH_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -125,34 +125,34 @@ public class ProviderFieldManagerImpl implements ProviderFieldManager {
       return new ProviderFieldQueryImpl();
    }
 
-   public void removeByProjectId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByProjectId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where PROJECT_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where PROJECT_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByGroupId(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByGroupId(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_PROVIDER_FIELD where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

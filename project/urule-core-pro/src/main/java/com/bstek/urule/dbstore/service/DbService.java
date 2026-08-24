@@ -15,109 +15,109 @@ import javax.sql.DataSource;
 import org.apache.commons.io.IOUtils;
 
 public abstract class DbService {
-   private DataSource a;
+   private DataSource dataSource;
 
-   public DbService(DataSource var1) {
-      this.a = var1;
+   public DbService(DataSource ds) {
+      this.dataSource = ds;
    }
 
    public DataSource getDataSource() {
-      return this.a;
+      return this.dataSource;
    }
 
-   public KnowledgePackage loadKnowledgePackage(String var1) {
-      Connection var2 = null;
+   public KnowledgePackage loadKnowledgePackage(String packageId) {
+      Connection connection = null;
 
       try {
-         var2 = this.a();
-         return this.a(var1, var2);
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         connection = this.acquireConnection();
+         return this.queryKnowledgePackage(packageId, connection);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
          try {
-            if (var2 != null) {
-               var2.close();
+            if (connection != null) {
+               connection.close();
             }
-         } catch (SQLException var11) {
+         } catch (SQLException sQLException) {
          }
       }
    }
 
-   public KnowledgePackage verifyKnowledgePackage(String var1, long var2) {
-      String var4 = "SELECT count(*) FROM URULE_KP_STORE WHERE ID_=? AND UPDATE_DATE_=?";
-      Connection var5 = null;
-      ResultSet var6 = null;
-      PreparedStatement var7 = null;
+   public KnowledgePackage verifyKnowledgePackage(String packageId, long fileModifyDate) {
+      String text = "SELECT count(*) FROM URULE_KP_STORE WHERE ID_=? AND UPDATE_DATE_=?";
+      Connection connection = null;
+      ResultSet resultSet = null;
+      PreparedStatement preparedStatement = null;
 
       try {
-         var5 = this.a();
-         var7 = var5.prepareStatement(var4);
-         var7.setString(1, var1);
-         var7.setLong(2, var2);
-         var6 = var7.executeQuery();
-         int var8 = 0;
-         if (var6.next()) {
-            var8 = var6.getInt(1);
+         connection = this.acquireConnection();
+         preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, packageId);
+         preparedStatement.setLong(2, fileModifyDate);
+         resultSet = preparedStatement.executeQuery();
+         int number = 0;
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         return var8 > 0 ? null : this.a(var1, var5);
-      } catch (Exception var19) {
-         throw new RuleException(var19);
+         return number > 0 ? null : this.queryKnowledgePackage(packageId, connection);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
          try {
-            if (var7 != null) {
-               var7.close();
+            if (preparedStatement != null) {
+               preparedStatement.close();
             }
 
-            if (var6 != null) {
-               var6.close();
+            if (resultSet != null) {
+               resultSet.close();
             }
 
-            if (var5 != null) {
-               var5.close();
+            if (connection != null) {
+               connection.close();
             }
-         } catch (SQLException var18) {
+         } catch (SQLException sQLException) {
          }
       }
    }
 
-   protected Connection a() throws SQLException {
-      return this.a.getConnection();
+   protected Connection acquireConnection() throws SQLException {
+      return this.dataSource.getConnection();
    }
 
-   protected KnowledgePackage a(String var1, Connection var2) throws SQLException, IOException {
-      String var3 = "select DATA_,UPDATE_DATE_ from URULE_KP_STORE where ID_=?";
-      ResultSet var4 = null;
-      PreparedStatement var5 = null;
-      InputStream var6 = null;
+   protected KnowledgePackage queryKnowledgePackage(String packageId, Connection conn) throws SQLException, IOException {
+      String text = "select DATA_,UPDATE_DATE_ from URULE_KP_STORE where ID_=?";
+      ResultSet resultSet = null;
+      PreparedStatement preparedStatement = null;
+      InputStream inputStream = null;
 
       try {
-         var5 = var2.prepareStatement(var3);
-         var5.setString(1, var1);
-         var4 = var5.executeQuery();
-         if (var4.next()) {
-            Blob var7 = var4.getBlob(1);
-            var6 = var7.getBinaryStream();
-            String var8 = Utils.uncompress(IOUtils.toByteArray(var6));
-            KnowledgePackage var9 = Utils.stringToKnowledgePackage(var8);
-            KnowledgePackageImpl var10 = (KnowledgePackageImpl)var9;
-            var10.setPackageInfo(var1);
-            long var11 = var4.getLong(2);
-            var10.setTimestamp(var11);
-            return var10;
+         preparedStatement = conn.prepareStatement(text);
+         preparedStatement.setString(1, packageId);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            Blob blob = resultSet.getBlob(1);
+            inputStream = blob.getBinaryStream();
+            String text2 = Utils.uncompress(IOUtils.toByteArray(inputStream));
+            KnowledgePackage knowledgePackage = Utils.stringToKnowledgePackage(text2);
+            KnowledgePackageImpl knowledgePackageImpl = (KnowledgePackageImpl)knowledgePackage;
+            knowledgePackageImpl.setPackageInfo(packageId);
+            long timestamp = resultSet.getLong(2);
+            knowledgePackageImpl.setTimestamp(timestamp);
+            return knowledgePackageImpl;
          } else {
-            throw new RuleException("未在数据库中找到存储的知识包【" + var1 + "】");
+            throw new RuleException("未在数据库中找到存储的知识包【" + packageId + "】");
          }
       } finally {
-         if (var5 != null) {
-            var5.close();
+         if (preparedStatement != null) {
+            preparedStatement.close();
          }
 
-         if (var4 != null) {
-            var4.close();
+         if (resultSet != null) {
+            resultSet.close();
          }
 
-         IOUtils.closeQuietly(var6);
+         IOUtils.closeQuietly(inputStream);
       }
    }
 }

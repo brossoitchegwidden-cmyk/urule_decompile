@@ -8,8 +8,8 @@ public enum NodeType {
    objectType,
    terminal;
 
-   public static ReteNode newReteNodeInstance(NodeType var0) {
-      switch (var0) {
+   public static ReteNode newReteNodeInstance(NodeType type) {
+      switch (type) {
          case and:
             return new AndNode();
          case or:

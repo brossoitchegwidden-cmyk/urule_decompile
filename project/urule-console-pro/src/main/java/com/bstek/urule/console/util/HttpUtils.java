@@ -11,59 +11,59 @@ import java.net.URLEncoder;
 import org.apache.commons.io.IOUtils;
 
 public class HttpUtils {
-   public static final String sendPostRequest(String var0, byte[] var1) throws Exception {
-      HttpURLConnection var2 = null;
+   public static final String sendPostRequest(String targetUrl, byte[] bytes) throws Exception {
+      HttpURLConnection httpURLConnection = null;
 
-      String var8;
+      String sendPostRequestResult;
       try {
-         URL var3 = new URL(var0);
-         var2 = (HttpURLConnection)var3.openConnection();
-         var2.setRequestMethod("POST");
-         var2.setRequestProperty("Charset", "UTF-8");
-         var2.setRequestProperty("Accept-Charset", "utf-8");
-         var2.setRequestProperty("Content-Type", "text/json");
-         var2.setUseCaches(false);
-         var2.setDoOutput(true);
-         var2.setDoInput(true);
-         var2.connect();
-         OutputStream var4 = var2.getOutputStream();
-         DataOutputStream var5 = new DataOutputStream(var2.getOutputStream());
-         if (var1 != null) {
-            var5.write(var1);
+         URL uRL = new URL(targetUrl);
+         httpURLConnection = (HttpURLConnection)uRL.openConnection();
+         httpURLConnection.setRequestMethod("POST");
+         httpURLConnection.setRequestProperty("Charset", "UTF-8");
+         httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
+         httpURLConnection.setRequestProperty("Content-Type", "text/json");
+         httpURLConnection.setUseCaches(false);
+         httpURLConnection.setDoOutput(true);
+         httpURLConnection.setDoInput(true);
+         httpURLConnection.connect();
+         OutputStream outputStream = httpURLConnection.getOutputStream();
+         DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
+         if (bytes != null) {
+            dataOutputStream.write(bytes);
          }
 
-         var5.flush();
-         var5.close();
-         String var6 = null;
-         InputStream var7 = var2.getInputStream();
-         if (var7 != null) {
-            var6 = IOUtils.toString(var7, "UTF-8");
+         dataOutputStream.flush();
+         dataOutputStream.close();
+         String text = null;
+         InputStream inputStream = httpURLConnection.getInputStream();
+         if (inputStream != null) {
+            text = IOUtils.toString(inputStream, "UTF-8");
          }
 
-         var4.close();
-         if (var7 != null) {
-            var7.close();
+         outputStream.close();
+         if (inputStream != null) {
+            inputStream.close();
          }
 
-         var8 = var6;
-      } catch (Exception var12) {
-         throw var12;
+         sendPostRequestResult = text;
+      } catch (Exception exception) {
+         throw exception;
       } finally {
-         if (var2 != null) {
-            var2.disconnect();
+         if (httpURLConnection != null) {
+            httpURLConnection.disconnect();
          }
 
       }
 
-      return var8;
+      return sendPostRequestResult;
    }
 
    public static final String buildRequestValidator() throws UnsupportedEncodingException {
-      RemoteDynamicJarsBuilder var0 = ServiceUtils.getRemoteDynamicJarsBuilder();
-      String var1 = var0.getUser();
-      String var2 = var0.getPwd();
-      String var3 = "_u=" + URLEncoder.encode(var1, "utf-8");
-      var3 = var3 + "&_p=" + URLEncoder.encode(var2, "utf-8");
-      return var3;
+      RemoteDynamicJarsBuilder remoteDynamicJarsBuilder = ServiceUtils.getRemoteDynamicJarsBuilder();
+      String user = remoteDynamicJarsBuilder.getUser();
+      String pwd = remoteDynamicJarsBuilder.getPwd();
+      String requestValidator = "_u=" + URLEncoder.encode(user, "utf-8");
+      requestValidator = requestValidator + "&_p=" + URLEncoder.encode(pwd, "utf-8");
+      return requestValidator;
    }
 }

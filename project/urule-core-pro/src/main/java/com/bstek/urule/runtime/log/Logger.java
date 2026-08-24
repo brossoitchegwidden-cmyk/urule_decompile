@@ -15,139 +15,139 @@ import java.util.List;
 import java.util.Set;
 
 public class Logger {
-   private UnitLog a;
-   private List<Log> b = new ArrayList<>();
+   private UnitLog logUnit;
+   private List<Log> logs = new ArrayList<>();
 
-   public Logger(KnowledgeSession var1) {
-      if (var1 != null) {
-         Logger var2 = var1.getLogManager().getLogger();
-         this.a = new UnitLog();
-         var2.a(this.a);
+   public Logger(KnowledgeSession parentSession) {
+      if (parentSession != null) {
+         Logger logger = parentSession.getLogManager().getLogger();
+         this.logUnit = new UnitLog();
+         logger.appendLog(this.logUnit);
       }
    }
 
-   public void logMet(int var1, int var2, boolean var3) {
+   public void logMet(int met, int matchedCount, boolean only) {
       if (Utils.isDebug()) {
-         this.a(new MetLog(var1, var2, var3));
+         this.appendLog(new MetLog(met, matchedCount, only));
       }
    }
 
-   public void logCriteria(Criteria var1, EvaluateResponse var2) {
+   public void logCriteria(Criteria criteria, EvaluateResponse response) {
       if (Utils.isDebug()) {
-         this.a(new CriteriaLog(var1, var2));
+         this.appendLog(new CriteriaLog(criteria, response));
       }
    }
 
-   public void logMatchRule(Rule var1, Set<Criteria> var2) {
+   public void logMatchRule(Rule rule, Set<Criteria> criterias) {
       if (Utils.isDebug()) {
-         if (!var1.isTargetResource(ResourceType.Flow)) {
-            this.a(new MatchedRuleLog(var1, var2));
+         if (!rule.isTargetResource(ResourceType.Flow)) {
+            this.appendLog(new MatchedRuleLog(rule, criterias));
          }
       }
    }
 
-   public void logExecuteRule(Rule var1) {
+   public void logExecuteRule(Rule rule) {
       if (Utils.isDebug()) {
-         this.a(new ExecuteRuleLog(var1));
+         this.appendLog(new ExecuteRuleLog(rule));
       }
    }
 
-   public void logIFErrorLog(Parameter var1, Exception var2) {
+   public void logIFErrorLog(Parameter param, Exception ex) {
       if (Utils.isDebug()) {
-         this.a(new IFErrorLog(var1, var2));
+         this.appendLog(new IFErrorLog(param, ex));
       }
    }
 
-   public void logDecisionNodeMatch(DecisionNode var1, String var2, String var3) {
+   public void logDecisionNodeMatch(DecisionNode node, String file, String to) {
       if (Utils.isDebug()) {
-         this.a(new DecisionNodeMatchLog(var1, var2, var3));
+         this.appendLog(new DecisionNodeMatchLog(node, file, to));
       }
    }
 
-   public void logExceptionNode(ExceptionNode var1, Exception var2, String var3) {
+   public void logExceptionNode(ExceptionNode node, Exception ex, String file) {
       if (Utils.isDebug()) {
-         this.a(new ExceptionFlowNodeLog(var1, var3, var2));
+         this.appendLog(new ExceptionFlowNodeLog(node, file, ex));
       }
    }
 
-   public void logFlowNode(FlowNode var1, String var2, boolean var3) {
+   public void logFlowNode(FlowNode node, String file, boolean enter) {
       if (Utils.isDebug()) {
-         this.a(new FlowNodeLog(var1, var2, var3));
+         this.appendLog(new FlowNodeLog(node, file, enter));
       }
    }
 
-   public void logConsoleOutput(Object var1) {
+   public void logConsoleOutput(Object obj) {
       if (Utils.isDebug()) {
-         this.a(new ConsoleOutputLog(var1));
+         this.appendLog(new ConsoleOutputLog(obj));
       }
    }
 
-   public void logMessage(String var1) {
+   public void logMessage(String msg) {
       if (Utils.isDebug()) {
-         this.a(new MessageLog(var1));
+         this.appendLog(new MessageLog(msg));
       }
    }
 
-   public void logAddRuleToExecuteQueue(Rule var1, boolean var2) {
+   public void logAddRuleToExecuteQueue(Rule rule, boolean add) {
       if (Utils.isDebug()) {
-         this.a(new AddRuleToExecuteQueueLog(var1, var2));
+         this.appendLog(new AddRuleToExecuteQueueLog(rule, add));
       }
    }
 
-   public void logExecuteFunction(String var1, Object var2) {
+   public void logExecuteFunction(String functionName, Object object) {
       if (Utils.isDebug()) {
-         this.a(new ExecuteFunctionLog(var1, var2));
+         this.appendLog(new ExecuteFunctionLog(functionName, object));
       }
    }
 
-   public void logExecuteBeanMethod(String var1, String var2) {
+   public void logExecuteBeanMethod(String methodInfo, String parameterInfo) {
       if (Utils.isDebug()) {
-         this.a(new ExecuteBeanMethodLog(var1, var2));
+         this.appendLog(new ExecuteBeanMethodLog(methodInfo, parameterInfo));
       }
    }
 
-   public void logValueAssign(String var1, Object var2) {
+   public void logValueAssign(String left, Object right) {
       if (Utils.isDebug()) {
-         this.a(new ValueAssignLog(var1, var2));
+         this.appendLog(new ValueAssignLog(left, right));
       }
    }
 
-   public void logScoreCard(String var1, String var2) {
+   public void logScoreCard(String name, String path) {
       if (Utils.isDebug()) {
-         this.a(new ScoreCardLog(var1, var2));
+         this.appendLog(new ScoreCardLog(name, path));
       }
    }
 
-   public void logExecuteScoreCard(int var1, Object var2) {
+   public void logExecuteScoreCard(int rowNumber, Object value) {
       if (Utils.isDebug()) {
-         this.a(new ExcecuteScoreCardLog(var1, var2));
+         this.appendLog(new ExcecuteScoreCardLog(rowNumber, value));
       }
    }
 
-   public void logScoreCardSum(String var1, Object var2) {
+   public void logScoreCardSum(String cardName, Object value) {
       if (Utils.isDebug()) {
-         this.a(new ScoreCardSumLog(var1, var2));
+         this.appendLog(new ScoreCardSumLog(cardName, value));
       }
    }
 
-   public void logScoreCardBean(String var1) {
+   public void logScoreCardBean(String bean) {
       if (Utils.isDebug()) {
-         this.a(new ScoreCardBean(var1));
+         this.appendLog(new ScoreCardBean(bean));
       }
    }
 
-   private void a(Log var1) {
-      this.b.add(var1);
-      if (this.a != null) {
-         this.a.addLog(var1);
+   private void appendLog(Log log) {
+      this.logs.add(log);
+      if (this.logUnit != null) {
+         this.logUnit.addLog(log);
       }
    }
 
    public UnitLog getLogUnit() {
-      return this.a;
+      return this.logUnit;
    }
 
    public List<Log> getLogs() {
-      return this.b;
+      return this.logs;
    }
 }

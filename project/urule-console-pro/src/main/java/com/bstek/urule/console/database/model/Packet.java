@@ -5,244 +5,244 @@ import java.util.Date;
 import java.util.List;
 
 public class Packet {
-   private long a;
-   private long b;
-   private String c;
-   private String d;
-   private PacketType e;
-   private String f;
-   private String g;
-   private String h;
-   private boolean i;
-   private boolean j;
-   private boolean k;
-   private String l;
-   private String m;
-   private boolean n;
-   private boolean o;
-   private String p;
-   private String q;
-   private String r;
-   private String s;
-   private String t;
-   private String u;
-   private Date v;
-   private Date w;
-   private long x;
-   private PacketPackage y;
-   private List z;
+   private long id;
+   private long projectId;
+   private String code;
+   private String name;
+   private PacketType type;
+   private String desc;
+   private String inputData;
+   private String outputData;
+   private boolean deleteEnable;
+   private boolean enable;
+   private boolean auditEnable;
+   private String auditInput;
+   private String auditOutput;
+   private boolean restEnable;
+   private boolean restSecurityEnable;
+   private String restSecurityUser;
+   private String restSecurityPassword;
+   private String restInput;
+   private String restOutput;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private long deployedCount;
+   private PacketPackage packetPackage;
+   private List files;
 
    public Packet() {
-      this.e = PacketType.file;
-      this.i = true;
-      this.z = new ArrayList();
+      this.type = PacketType.file;
+      this.deleteEnable = true;
+      this.files = new ArrayList();
    }
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getProjectId() {
-      return this.b;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.b = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getCode() {
-      return this.c;
+      return this.code;
    }
 
-   public void setCode(String var1) {
-      this.c = var1;
+   public void setCode(String code) {
+      this.code = code;
    }
 
    public String getName() {
-      return this.d;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.d = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public PacketType getType() {
-      return this.e;
+      return this.type;
    }
 
-   public void setType(PacketType var1) {
-      this.e = var1;
+   public void setType(PacketType type) {
+      this.type = type;
    }
 
    public String getDesc() {
-      return this.f;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.f = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getInputData() {
-      return this.g;
+      return this.inputData;
    }
 
-   public void setInputData(String var1) {
-      this.g = var1;
+   public void setInputData(String inputData) {
+      this.inputData = inputData;
    }
 
    public String getOutputData() {
-      return this.h;
+      return this.outputData;
    }
 
-   public void setOutputData(String var1) {
-      this.h = var1;
+   public void setOutputData(String outputData) {
+      this.outputData = outputData;
    }
 
    public boolean isEnable() {
-      return this.j;
+      return this.enable;
    }
 
-   public void setEnable(boolean var1) {
-      this.j = var1;
+   public void setEnable(boolean enable) {
+      this.enable = enable;
    }
 
    public boolean isDeleteEnable() {
-      return this.i;
+      return this.deleteEnable;
    }
 
-   public void setDeleteEnable(boolean var1) {
-      this.i = var1;
+   public void setDeleteEnable(boolean deleteEnable) {
+      this.deleteEnable = deleteEnable;
    }
 
    public boolean isAuditEnable() {
-      return this.k;
+      return this.auditEnable;
    }
 
-   public void setAuditEnable(boolean var1) {
-      this.k = var1;
+   public void setAuditEnable(boolean auditEnable) {
+      this.auditEnable = auditEnable;
    }
 
    public boolean isRestEnable() {
-      return this.n;
+      return this.restEnable;
    }
 
-   public void setRestEnable(boolean var1) {
-      this.n = var1;
+   public void setRestEnable(boolean restEnable) {
+      this.restEnable = restEnable;
    }
 
    public boolean isRestSecurityEnable() {
-      return this.o;
+      return this.restSecurityEnable;
    }
 
-   public void setRestSecurityEnable(boolean var1) {
-      this.o = var1;
+   public void setRestSecurityEnable(boolean restSecurityEnable) {
+      this.restSecurityEnable = restSecurityEnable;
    }
 
    public String getRestSecurityUser() {
-      return this.p;
+      return this.restSecurityUser;
    }
 
-   public void setRestSecurityUser(String var1) {
-      this.p = var1;
+   public void setRestSecurityUser(String restSecurityUser) {
+      this.restSecurityUser = restSecurityUser;
    }
 
    public String getRestSecurityPassword() {
-      return this.q;
+      return this.restSecurityPassword;
    }
 
-   public void setRestSecurityPassword(String var1) {
-      this.q = var1;
+   public void setRestSecurityPassword(String restSecurityPassword) {
+      this.restSecurityPassword = restSecurityPassword;
    }
 
    public String getRestInput() {
-      return this.r;
+      return this.restInput;
    }
 
-   public void setRestInput(String var1) {
-      this.r = var1;
+   public void setRestInput(String restInput) {
+      this.restInput = restInput;
    }
 
    public String getRestOutput() {
-      return this.s;
+      return this.restOutput;
    }
 
-   public void setRestOutput(String var1) {
-      this.s = var1;
+   public void setRestOutput(String restOutput) {
+      this.restOutput = restOutput;
    }
 
    public String getAuditInput() {
-      return this.l;
+      return this.auditInput;
    }
 
-   public void setAuditInput(String var1) {
-      this.l = var1;
+   public void setAuditInput(String auditInput) {
+      this.auditInput = auditInput;
    }
 
    public String getAuditOutput() {
-      return this.m;
+      return this.auditOutput;
    }
 
-   public void setAuditOutput(String var1) {
-      this.m = var1;
+   public void setAuditOutput(String auditOutput) {
+      this.auditOutput = auditOutput;
    }
 
    public String getCreateUser() {
-      return this.t;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.t = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.u;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.u = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.v;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.v = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.w;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.w = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public long getDeployedCount() {
-      return this.x;
+      return this.deployedCount;
    }
 
-   public void setDeployedCount(long var1) {
-      this.x = var1;
+   public void setDeployedCount(long deployedCount) {
+      this.deployedCount = deployedCount;
    }
 
    public PacketPackage getPacketPackage() {
-      return this.y;
+      return this.packetPackage;
    }
 
-   public void setPacketPackage(PacketPackage var1) {
-      this.y = var1;
+   public void setPacketPackage(PacketPackage packetPackage) {
+      this.packetPackage = packetPackage;
    }
 
    public List getFiles() {
-      return this.z;
+      return this.files;
    }
 
-   public void setFiles(List var1) {
-      this.z = var1;
+   public void setFiles(List files) {
+      this.files = files;
    }
 }

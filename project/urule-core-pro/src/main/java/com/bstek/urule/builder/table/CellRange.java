@@ -7,207 +7,207 @@ import java.util.ArrayList;
 import java.util.List;
 
 class CellRange {
-   private int a;
-   private int b;
-   private boolean c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private Datatype k;
-   private String l;
-   private String m;
-   private Datatype n;
-   private String o;
-   private String p;
-   private String q;
-   private String r;
-   private String s;
-   private CellRange t;
-   private CrossCell u;
-   private List<CellRange> v = new ArrayList<>();
+   private int start;
+   private int end;
+   private boolean valueCell;
+   private String keyName;
+   private String keyLabel;
+   private String variableCategory;
+   private String variableName;
+   private String variableLabel;
+   private String categoryUuid;
+   private String uuid;
+   private Datatype datatype;
+   private String predefineUuid;
+   private String predefineName;
+   private Datatype predefineDatatype;
+   private String predefineVariableCategory;
+   private String predefineVariableCategoryUuid;
+   private String predefinePropertyName;
+   private String predefinePropertyLabel;
+   private String predefinePropertyUuid;
+   private CellRange parentRange;
+   private CrossCell cell;
+   private List<CellRange> children = new ArrayList<>();
 
    public String getKeyName() {
-      return this.d;
+      return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.d = var1;
+   public void setKeyName(String text) {
+      this.keyName = text;
    }
 
    public String getKeyLabel() {
-      return this.e;
+      return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.e = var1;
+   public void setKeyLabel(String text) {
+      this.keyLabel = text;
    }
 
    public int getStart() {
-      return this.a;
+      return this.start;
    }
 
-   public void setStart(int var1) {
-      this.a = var1;
+   public void setStart(int number) {
+      this.start = number;
    }
 
    public int getEnd() {
-      return this.b;
+      return this.end;
    }
 
-   public void setEnd(int var1) {
-      this.b = var1;
+   public void setEnd(int number) {
+      this.end = number;
    }
 
    public String getVariableCategory() {
-      return this.f;
+      return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.f = var1;
+   public void setVariableCategory(String text) {
+      this.variableCategory = text;
    }
 
    public String getVariableName() {
-      return this.g;
+      return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.g = var1;
+   public void setVariableName(String text) {
+      this.variableName = text;
    }
 
    public String getVariableLabel() {
-      return this.h;
+      return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.h = var1;
+   public void setVariableLabel(String text) {
+      this.variableLabel = text;
    }
 
    public String getCategoryUuid() {
-      return this.i;
+      return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.i = var1;
+   public void setCategoryUuid(String text) {
+      this.categoryUuid = text;
    }
 
    public String getUuid() {
-      return this.j;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.j = var1;
+   public void setUuid(String text) {
+      this.uuid = text;
    }
 
    public Datatype getDatatype() {
-      return this.k;
+      return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.k = var1;
+   public void setDatatype(Datatype datatype2) {
+      this.datatype = datatype2;
    }
 
    public String getPredefineUuid() {
-      return this.l;
+      return this.predefineUuid;
    }
 
-   public void setPredefineUuid(String var1) {
-      this.l = var1;
+   public void setPredefineUuid(String text) {
+      this.predefineUuid = text;
    }
 
    public String getPredefineName() {
-      return this.m;
+      return this.predefineName;
    }
 
-   public void setPredefineName(String var1) {
-      this.m = var1;
+   public void setPredefineName(String text) {
+      this.predefineName = text;
    }
 
    public Datatype getPredefineDatatype() {
-      return this.n;
+      return this.predefineDatatype;
    }
 
-   public void setPredefineDatatype(Datatype var1) {
-      this.n = var1;
+   public void setPredefineDatatype(Datatype datatype2) {
+      this.predefineDatatype = datatype2;
    }
 
    public String getPredefineVariableCategory() {
-      return this.o;
+      return this.predefineVariableCategory;
    }
 
-   public void setPredefineVariableCategory(String var1) {
-      this.o = var1;
+   public void setPredefineVariableCategory(String text) {
+      this.predefineVariableCategory = text;
    }
 
    public String getPredefineVariableCategoryUuid() {
-      return this.p;
+      return this.predefineVariableCategoryUuid;
    }
 
-   public void setPredefineVariableCategoryUuid(String var1) {
-      this.p = var1;
+   public void setPredefineVariableCategoryUuid(String text) {
+      this.predefineVariableCategoryUuid = text;
    }
 
    public String getPredefinePropertyName() {
-      return this.q;
+      return this.predefinePropertyName;
    }
 
-   public void setPredefinePropertyName(String var1) {
-      this.q = var1;
+   public void setPredefinePropertyName(String text) {
+      this.predefinePropertyName = text;
    }
 
    public String getPredefinePropertyLabel() {
-      return this.r;
+      return this.predefinePropertyLabel;
    }
 
-   public void setPredefinePropertyLabel(String var1) {
-      this.r = var1;
+   public void setPredefinePropertyLabel(String text) {
+      this.predefinePropertyLabel = text;
    }
 
    public String getPredefinePropertyUuid() {
-      return this.s;
+      return this.predefinePropertyUuid;
    }
 
-   public void setPredefinePropertyUuid(String var1) {
-      this.s = var1;
+   public void setPredefinePropertyUuid(String text) {
+      this.predefinePropertyUuid = text;
    }
 
    public boolean isValueCell() {
-      return this.c;
+      return this.valueCell;
    }
 
-   public void setValueCell(boolean var1) {
-      this.c = var1;
+   public void setValueCell(boolean flag) {
+      this.valueCell = flag;
    }
 
    public CellRange getParentRange() {
-      return this.t;
+      return this.parentRange;
    }
 
-   public void setParentRange(CellRange var1) {
-      this.t = var1;
+   public void setParentRange(CellRange cellRange) {
+      this.parentRange = cellRange;
    }
 
    public CrossCell getCell() {
-      return this.u;
+      return this.cell;
    }
 
-   public void setCell(CrossCell var1) {
-      if (var1 instanceof ValueCrossCell) {
+   public void setCell(CrossCell crossCell) {
+      if (crossCell instanceof ValueCrossCell) {
          this.setValueCell(true);
       }
 
-      this.u = var1;
+      this.cell = crossCell;
    }
 
    public List<CellRange> getChildren() {
-      return this.v;
+      return this.children;
    }
 
-   public void addChildRange(CellRange var1) {
-      var1.setParentRange(this);
-      this.v.add(var1);
+   public void addChildRange(CellRange cellRange) {
+      cellRange.setParentRange(this);
+      this.children.add(cellRange);
    }
 }

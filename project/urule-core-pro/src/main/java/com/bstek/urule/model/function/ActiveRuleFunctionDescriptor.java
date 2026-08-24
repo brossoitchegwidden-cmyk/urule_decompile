@@ -7,35 +7,32 @@ import com.bstek.urule.runtime.rete.ExecutionContext;
 public class ActiveRuleFunctionDescriptor implements FunctionDescriptor {
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("规则名");
-      var1.setEname("ruleName");
-      var1.setNeedProperty(false);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("规则名");
+      argument.setEname("ruleName");
+      argument.setNeedProperty(false);
+      return argument;
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      ExecutionContext var4 = (ExecutionContext)var3.getContext();
-      Rule var5 = var4.getCurrentRule();
-      if (var5 == null) {
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      ExecutionContext context = (ExecutionContext)workingMemory.getContext();
+      Rule currentRule = context.getCurrentRule();
+      if (currentRule == null) {
          return null;
       }
 
-      if (var1 == null) {
+      if (object == null) {
          return null;
       }
 
-      String var6 = var1.toString();
-      var3.activeRule(var5.getMutexGroup(), var6);
+      String text = object.toString();
+      workingMemory.activeRule(currentRule.getMutexGroup(), text);
       return null;
    }
-
    @Override
    public String getName() {
       return "ActiveRule";
    }
-
    @Override
    public String getLabel() {
       return "激活当前互斥组规则";

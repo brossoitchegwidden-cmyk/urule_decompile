@@ -7,11 +7,11 @@ public class ScoreRuntimeValue {
    private String weight;
    private Object value;
 
-   public ScoreRuntimeValue(int var1, String var2, String var3, Object var4) {
-      this.rowNumber = var1;
-      this.name = var2;
-      this.weight = var3;
-      this.value = var4;
+   public ScoreRuntimeValue(int rowNumber, String name, String weight, Object value) {
+      this.rowNumber = rowNumber;
+      this.name = name;
+      this.weight = weight;
+      this.value = value;
    }
 
    public int getRowNumber() {

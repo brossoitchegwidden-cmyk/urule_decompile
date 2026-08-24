@@ -8,8 +8,8 @@ public class TopColumn implements CrossColumn {
       return this.columnNumber;
    }
 
-   public void setColumnNumber(int var1) {
-      this.columnNumber = var1;
+   public void setColumnNumber(int columnNumber) {
+      this.columnNumber = columnNumber;
    }
 
    @Override

@@ -13,20 +13,20 @@ public class ConditionTemplateCriterion extends BaseCriterion {
       return this.id;
    }
 
-   public void setId(String var1) {
-      this.id = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    @Override
-   public boolean doEval(EvaluationContext var1, boolean var2) {
+   public boolean doEval(EvaluationContext context, boolean debug) {
       throw new RuleException("条件模版不能在N个条件成立节点中使用");
    }
 
@@ -34,8 +34,8 @@ public class ConditionTemplateCriterion extends BaseCriterion {
       return this.path;
    }
 
-   public void setPath(String var1) {
-      this.path = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public boolean isTemplate() {

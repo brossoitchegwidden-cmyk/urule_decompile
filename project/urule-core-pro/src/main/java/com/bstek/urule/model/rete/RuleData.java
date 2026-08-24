@@ -14,16 +14,16 @@ public class RuleData {
    private String mutexGroup;
    private String pendedGroup;
 
-   public RuleData(Rule var1) {
-      this.name = var1.getName();
-      this.file = var1.getFile();
-      this.salience = var1.getSalience();
-      this.effectiveDate = var1.getEffectiveDate();
-      this.expiresDate = var1.getExpiresDate();
-      this.enabled = var1.getEnabled();
-      this.debug = var1.getDebug();
-      this.mutexGroup = var1.getMutexGroup();
-      this.pendedGroup = var1.getPendedGroup();
+   public RuleData(Rule rule) {
+      this.name = rule.getName();
+      this.file = rule.getFile();
+      this.salience = rule.getSalience();
+      this.effectiveDate = rule.getEffectiveDate();
+      this.expiresDate = rule.getExpiresDate();
+      this.enabled = rule.getEnabled();
+      this.debug = rule.getDebug();
+      this.mutexGroup = rule.getMutexGroup();
+      this.pendedGroup = rule.getPendedGroup();
    }
 
    public String getName() {

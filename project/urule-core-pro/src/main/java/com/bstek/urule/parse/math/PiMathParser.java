@@ -6,16 +6,16 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class PiMathParser extends MathParser {
-   public PiMathParser(ValueParser var1) {
-      super(var1);
+   public PiMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("pi-sign");
+   public boolean support(String name) {
+      return name.equals("pi-sign");
    }
 
-   public MathSign parse(Element var1) {
+   public MathSign parse(Element element) {
       return new PiMath();
    }
 }

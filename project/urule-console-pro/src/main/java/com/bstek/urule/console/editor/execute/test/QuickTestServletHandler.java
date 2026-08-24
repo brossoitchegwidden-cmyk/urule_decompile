@@ -44,121 +44,121 @@ public class QuickTestServletHandler extends ApiServletHandler {
       super.init();
    }
 
-   public void doQuickTest(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("input");
-      String var4 = var1.getParameter("output");
-      String var5 = var1.getParameter("language");
-      if ("zh".equals(var5)) {
+   public void doQuickTest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("input");
+      String parameter2 = req.getParameter("output");
+      String parameter3 = req.getParameter("language");
+      if ("zh".equals(parameter3)) {
          LocaleHolder.set(Locale.SIMPLIFIED_CHINESE);
-      } else if ("en".equals(var5)) {
+      } else if ("en".equals(parameter3)) {
          LocaleHolder.set(Locale.ENGLISH);
       }
 
-      ObjectMapper var6 = new ObjectMapper();
-      SimpleDateFormat var7 = new SimpleDateFormat(Configure.getDateFormat());
-      var6.setDateFormat(var7);
-      var6.setDateFormat(var7);
-      List var8 = null;
-      Map var9 = null;
-      KnowledgePackage var10 = this.c(var1);
-      if (var10 != null) {
-         var9 = var10.getFlowMap();
-         var8 = var10.getVariableCategories();
+      ObjectMapper objectMapper = new ObjectMapper();
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      objectMapper.setDateFormat(simpleDateFormat);
+      objectMapper.setDateFormat(simpleDateFormat);
+      List variableCategories = null;
+      Map flowMap = null;
+      KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(req);
+      if (knowledgePackage != null) {
+         flowMap = knowledgePackage.getFlowMap();
+         variableCategories = knowledgePackage.getVariableCategories();
       } else {
-         KnowledgeBase var11 = this.d(var1);
-         var9 = var11.getFlowMap();
-         var10 = var11.getKnowledgePackage();
-         var8 = var11.getResourceLibrary().getVariableCategories();
+         KnowledgeBase knowledgeBase = this.resolveKnowledgeBase(req);
+         flowMap = knowledgeBase.getFlowMap();
+         knowledgePackage = knowledgeBase.getKnowledgePackage();
+         variableCategories = knowledgeBase.getResourceLibrary().getVariableCategories();
       }
 
-      Map var24 = JsonBuilder.getInstance().buildVariableCategoriesMap(var8);
-      List var12 = (List)var6.readValue(var3, ArrayList.class);
-      List var13 = (List)var6.readValue(var4, ArrayList.class);
-      List var14 = this.a(var12, var24);
-      KnowledgeSession var15 = KnowledgeSessionFactory.newKnowledgeSession(var10);
-      Map var16 = null;
+      Map variableCategoriesMap = JsonBuilder.getInstance().buildVariableCategoriesMap(variableCategories);
+      List items = (List)objectMapper.readValue(parameter, ArrayList.class);
+      List items2 = (List)objectMapper.readValue(parameter2, ArrayList.class);
+      List items3 = this.buildInputFacts(items, variableCategoriesMap);
+      KnowledgeSession knowledgeSession = KnowledgeSessionFactory.newKnowledgeSession(knowledgePackage);
+      Map valuesByKey = null;
 
-      for(Map var18 : (Iterable<Map>)(Iterable<?>)(var14)) {
-         if (var18 instanceof GeneralEntity) {
-            var15.insert(var18);
-         } else if (var16 == null) {
-            var16 = var18;
+      for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)(items3)) {
+         if (valuesByKey2 instanceof GeneralEntity) {
+            knowledgeSession.insert(valuesByKey2);
+         } else if (valuesByKey == null) {
+            valuesByKey = valuesByKey2;
          } else {
-            var16.putAll(var18);
+            valuesByKey.putAll(valuesByKey2);
          }
       }
 
-      Object var25 = null;
-      if (var9 != null && var9.size() > 0) {
-         String var27 = (String)var9.keySet().iterator().next();
-         if (var16 != null) {
-            var25 = var15.startProcess(var27, var16);
+      Object objectValue = null;
+      if (flowMap != null && flowMap.size() > 0) {
+         String text = (String)flowMap.keySet().iterator().next();
+         if (valuesByKey != null) {
+            objectValue = knowledgeSession.startProcess(text, valuesByKey);
          } else {
-            var25 = var15.startProcess(var27);
+            objectValue = knowledgeSession.startProcess(text);
          }
-      } else if (var16 != null) {
-         var25 = var15.fireRules(var16);
+      } else if (valuesByKey != null) {
+         objectValue = knowledgeSession.fireRules(valuesByKey);
       } else {
-         var25 = var15.fireRules();
+         objectValue = knowledgeSession.fireRules();
       }
 
-      ConsoleLogWriter var28 = new ConsoleLogWriter();
-      List var19 = var15.getLogManager().getLogger().getLogs();
-      var28.write(var19);
-      List var20 = this.a(var13, var14, var15.getParameters());
-      HashMap var21 = new HashMap();
-      var21.put("output", var20);
-      var21.put("time", ((ExecutionResponse)var25).getDuration());
-      var21.put("logs", var28.getLogMsg().toString());
-      this.a(var2, var21);
+      ConsoleLogWriter consoleLogWriter = new ConsoleLogWriter();
+      List logs = knowledgeSession.getLogManager().getLogger().getLogs();
+      consoleLogWriter.write(logs);
+      List items4 = this.buildOutputValues(items2, items3, knowledgeSession.getParameters());
+      HashMap valuesByKey3 = new HashMap();
+      valuesByKey3.put("output", items4);
+      valuesByKey3.put("time", ((ExecutionResponse)objectValue).getDuration());
+      valuesByKey3.put("logs", consoleLogWriter.getLogMsg().toString());
+      this.writeObjectToJson(resp, valuesByKey3);
    }
 
-   private List a(List var1, List var2, Map var3) throws Exception {
-      ArrayList var4 = new ArrayList();
+   private List buildOutputValues(List items, List items2, Map valuesByKey) throws Exception {
+      ArrayList items3 = new ArrayList();
 
-      for(Map var6 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         List var7 = (List)var6.get("fields");
-         if (var7 != null && var7.size() != 0) {
-            String var8 = (String)var6.get("categoryName");
-            if (var8.equals("参数")) {
-               HashMap var20 = new HashMap();
-               var4.add(var20);
+      for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)(items)) {
+         List fields = (List)valuesByKey2.get("fields");
+         if (fields != null && fields.size() != 0) {
+            String categoryName = (String)valuesByKey2.get("categoryName");
+            if (categoryName.equals("参数")) {
+               HashMap valuesByKey3 = new HashMap();
+               items3.add(valuesByKey3);
                if (LocaleHolder.get() == Locale.ENGLISH) {
-                  var8 = "Parameter";
+                  categoryName = "Parameter";
                }
 
-               var20.put("name", var8);
-               ArrayList var21 = new ArrayList();
-               var20.put("fields", var21);
+               valuesByKey3.put("name", categoryName);
+               ArrayList items4 = new ArrayList();
+               valuesByKey3.put("fields", items4);
 
-               for(Map var23 : (Iterable<Map>)(Iterable<?>)(var7)) {
-                  HashMap var24 = new HashMap();
-                  var21.add(var24);
-                  String var25 = (String)var23.get("name");
-                  Object var26 = Utils.getObjectProperty(var3, var25);
-                  var24.put("name", (String)var23.get("label"));
-                  var24.put("value", var26);
+               for(Map valuesByKey4 : (Iterable<Map>)(Iterable<?>)(fields)) {
+                  HashMap valuesByKey5 = new HashMap();
+                  items4.add(valuesByKey5);
+                  String name = (String)valuesByKey4.get("name");
+                  Object objectProperty = Utils.getObjectProperty(valuesByKey, name);
+                  valuesByKey5.put("name", (String)valuesByKey4.get("label"));
+                  valuesByKey5.put("value", objectProperty);
                }
             } else {
-               String var9 = (String)var6.get("categoryClass");
+               String categoryClass = (String)valuesByKey2.get("categoryClass");
 
-               for(Map var11 : (Iterable<Map>)(Iterable<?>)(var2)) {
-                  if (var11 instanceof GeneralEntity) {
-                     String var12 = ((GeneralEntity)var11).getTargetClass();
-                     if (var9.equals(var12)) {
-                        HashMap var13 = new HashMap();
-                        var4.add(var13);
-                        var13.put("name", var8);
-                        ArrayList var14 = new ArrayList();
-                        var13.put("fields", var14);
+               for(Map valuesByKey6 : (Iterable<Map>)(Iterable<?>)(items2)) {
+                  if (valuesByKey6 instanceof GeneralEntity) {
+                     String targetClass = ((GeneralEntity)valuesByKey6).getTargetClass();
+                     if (categoryClass.equals(targetClass)) {
+                        HashMap valuesByKey7 = new HashMap();
+                        items3.add(valuesByKey7);
+                        valuesByKey7.put("name", categoryName);
+                        ArrayList items5 = new ArrayList();
+                        valuesByKey7.put("fields", items5);
 
-                        for(Map var16 : (Iterable<Map>)(Iterable<?>)(var7)) {
-                           HashMap var17 = new HashMap();
-                           var14.add(var17);
-                           String var18 = (String)var16.get("name");
-                           Object var19 = Utils.getObjectProperty(var11, var18);
-                           var17.put("name", (String)var16.get("label"));
-                           var17.put("value", var19);
+                        for(Map valuesByKey8 : (Iterable<Map>)(Iterable<?>)(fields)) {
+                           HashMap valuesByKey9 = new HashMap();
+                           items5.add(valuesByKey9);
+                           String name2 = (String)valuesByKey8.get("name");
+                           Object objectProperty2 = Utils.getObjectProperty(valuesByKey6, name2);
+                           valuesByKey9.put("name", (String)valuesByKey8.get("label"));
+                           valuesByKey9.put("value", objectProperty2);
                         }
                      }
                   }
@@ -167,99 +167,99 @@ public class QuickTestServletHandler extends ApiServletHandler {
          }
       }
 
-      return var4;
+      return items3;
    }
 
-   private List a(List var1, Map var2) throws Exception {
-      HashSet var3 = new HashSet();
-      ArrayList var4 = new ArrayList();
+   private List buildInputFacts(List items, Map valuesByKey) throws Exception {
+      HashSet uniqueItems = new HashSet();
+      ArrayList items2 = new ArrayList();
 
-      for(Map var6 : (Iterable<Map>)(Iterable<?>)(var1)) {
-         Object var7 = null;
-         String var8 = (String)var6.get("categoryName");
-         if (var8.equals("参数")) {
-            var7 = new HashMap();
-            var3.add(var8);
+      for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)(items)) {
+         Object generalEntity = null;
+         String categoryName = (String)valuesByKey2.get("categoryName");
+         if (categoryName.equals("参数")) {
+            generalEntity = new HashMap();
+            uniqueItems.add(categoryName);
          } else {
-            String var9 = (String)var6.get("categoryClass");
-            var7 = new GeneralEntity(var9);
-            var3.add(var9);
+            String categoryClass = (String)valuesByKey2.get("categoryClass");
+            generalEntity = new GeneralEntity(categoryClass);
+            uniqueItems.add(categoryClass);
          }
 
-         var4.add(var7);
-         List var11 = (List)var6.get("fields");
-         this.a(var8, var11, (Map)var7, var2);
+         items2.add(generalEntity);
+         List fields = (List)valuesByKey2.get("fields");
+         this.populateFactFields(categoryName, fields, (Map)generalEntity, valuesByKey);
       }
 
-      return var4;
+      return items2;
    }
 
-   private void a(String var1, List var2, Map var3, Map var4) throws Exception {
-      if (var2 != null) {
-         HashSet var5 = new HashSet();
+   private void populateFactFields(String text, List items, Map valuesByKey, Map valuesByKey2) throws Exception {
+      if (items != null) {
+         HashSet uniqueItems = new HashSet();
 
-         for(Map var7 : (Iterable<Map>)(Iterable<?>)(var2)) {
-            String var8 = (String)var7.get("name");
-            String var9 = (String)var7.get("value");
-            var5.add(var8);
-            if (var9 != null) {
-               Object var10 = null;
-               String var11 = (String)var7.get("type");
-               Datatype var12 = Datatype.parse(var11);
-               if (var12.equals(Datatype.String)) {
-                  if (StringUtils.isNotEmpty(var9)) {
-                     var10 = var12.convert(var9);
+         for(Map valuesByKey3 : (Iterable<Map>)(Iterable<?>)(items)) {
+            String name2 = (String)valuesByKey3.get("name");
+            String text2 = (String)valuesByKey3.get("value");
+            uniqueItems.add(name2);
+            if (text2 != null) {
+               Object complexObject = null;
+               String type2 = (String)valuesByKey3.get("type");
+               Datatype datatype = Datatype.parse(type2);
+               if (datatype.equals(Datatype.String)) {
+                  if (StringUtils.isNotEmpty(text2)) {
+                     complexObject = datatype.convert(text2);
                   }
-               } else if (!var12.equals(Datatype.List) && !var12.equals(Datatype.Object) && !var12.equals(Datatype.Set) && !var12.equals(Datatype.Map)) {
-                  if (StringUtils.isNotBlank(var9)) {
-                     var10 = var12.convert(var9);
+               } else if (!datatype.equals(Datatype.List) && !datatype.equals(Datatype.Object) && !datatype.equals(Datatype.Set) && !datatype.equals(Datatype.Map)) {
+                  if (StringUtils.isNotBlank(text2)) {
+                     complexObject = datatype.convert(text2);
                   }
                } else {
-                  var10 = JsonBuilder.getInstance().buildComplexObject(var9, var4);
-                  var3.put(var8, var10);
+                  complexObject = JsonBuilder.getInstance().buildComplexObject(text2, valuesByKey2);
+                  valuesByKey.put(name2, complexObject);
                }
 
-               String[] var13 = var8.split("\\.");
-               Object var14 = var3;
+               String[] parts = name2.split("\\.");
+               Object objectProperty2 = valuesByKey;
 
-               for(int var15 = 0; var15 < var13.length; ++var15) {
-                  String var16 = var13[var15];
-                  if (var15 == var13.length - 1) {
-                     Utils.setObjectProperty(var14, var16, var10);
+               for(int index = 0; index < parts.length; ++index) {
+                  String text3 = parts[index];
+                  if (index == parts.length - 1) {
+                     Utils.setObjectProperty(objectProperty2, text3, complexObject);
                      break;
                   }
 
-                  Object var17 = Utils.getObjectProperty(var14, var16);
-                  if (var17 == null) {
-                     var17 = new HashMap();
-                     Utils.setObjectProperty(var14, var16, var17);
+                  Object objectProperty = Utils.getObjectProperty(objectProperty2, text3);
+                  if (objectProperty == null) {
+                     objectProperty = new HashMap();
+                     Utils.setObjectProperty(objectProperty2, text3, objectProperty);
                   }
 
-                  var14 = var17;
+                  objectProperty2 = objectProperty;
                }
             }
          }
 
-         VariableCategory var18 = (VariableCategory)var4.get(var1);
-         if (var18 == null) {
-            throw new VariableCategoryNotFoundException("变量对象【" + var1 + "】未定义!");
+         VariableCategory variableCategory = (VariableCategory)valuesByKey2.get(text);
+         if (variableCategory == null) {
+            throw new VariableCategoryNotFoundException("变量对象【" + text + "】未定义!");
          } else {
-            for(Variable var20 : var18.getVariables()) {
-               String var21 = var20.getName();
-               if (!var5.contains(var21)) {
-                  String var22 = var20.getDefaultValue();
-                  if (var22 != null) {
-                     Datatype var24 = var20.getType();
-                     Object var23;
-                     if (var24.equals(Datatype.String)) {
-                        var23 = var24.convert(var22);
-                     } else if (!var24.equals(Datatype.List) && !var24.equals(Datatype.Object) && !var24.equals(Datatype.Set) && !var24.equals(Datatype.Map)) {
-                        var23 = var24.convert(var22);
+            for(Variable variable : variableCategory.getVariables()) {
+               String name = variable.getName();
+               if (!uniqueItems.contains(name)) {
+                  String defaultValue = variable.getDefaultValue();
+                  if (defaultValue != null) {
+                     Datatype type = variable.getType();
+                     Object complexObject2;
+                     if (type.equals(Datatype.String)) {
+                        complexObject2 = type.convert(defaultValue);
+                     } else if (!type.equals(Datatype.List) && !type.equals(Datatype.Object) && !type.equals(Datatype.Set) && !type.equals(Datatype.Map)) {
+                        complexObject2 = type.convert(defaultValue);
                      } else {
-                        var23 = JsonBuilder.getInstance().buildComplexObject(var22, var4);
+                        complexObject2 = JsonBuilder.getInstance().buildComplexObject(defaultValue, valuesByKey2);
                      }
 
-                     var3.put(var21, var23);
+                     valuesByKey.put(name, complexObject2);
                   }
                }
             }
@@ -268,32 +268,32 @@ public class QuickTestServletHandler extends ApiServletHandler {
       }
    }
 
-   public void loadTestVariableCategories(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      KnowledgePackage var3 = this.c(var1);
-      if (var3 != null) {
-         List var6 = var3.getVariableCategories();
-         this.a(var2, var6);
+   public void loadTestVariableCategories(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(req);
+      if (knowledgePackage != null) {
+         List variableCategories = knowledgePackage.getVariableCategories();
+         this.writeObjectToJson(resp, variableCategories);
       } else {
-         KnowledgeBase var4 = this.d(var1);
-         List var5 = var4.getResourceLibrary().getVariableCategories();
-         this.a(var2, var5);
+         KnowledgeBase knowledgeBase = this.resolveKnowledgeBase(req);
+         List variableCategories2 = knowledgeBase.getResourceLibrary().getVariableCategories();
+         this.writeObjectToJson(resp, variableCategories2);
       }
    }
 
-   private KnowledgePackage c(HttpServletRequest var1) throws ServletException, IOException {
-      String var2 = var1.getParameter("packetId");
-      if (StringUtils.isNotBlank(var2)) {
-         Packet var3 = PacketManager.ins.load(Long.valueOf(var2));
-         if (var3.getType().equals(PacketType.upload)) {
-            PacketPackage var4 = var3.getPacketPackage();
-            if (var4 != null && var4.getId() != 0L) {
-               String var5 = PacketPackageManager.ins.loadContent(var4.getId());
-               if (StringUtils.isBlank(var5)) {
+   private KnowledgePackage resolveKnowledgePackage(HttpServletRequest httpServletRequest) throws ServletException, IOException {
+      String parameter = httpServletRequest.getParameter("packetId");
+      if (StringUtils.isNotBlank(parameter)) {
+         Packet packet = PacketManager.ins.load(Long.valueOf(parameter));
+         if (packet.getType().equals(PacketType.upload)) {
+            PacketPackage packetPackage = packet.getPacketPackage();
+            if (packetPackage != null && packetPackage.getId() != 0L) {
+               String content = PacketPackageManager.ins.loadContent(packetPackage.getId());
+               if (StringUtils.isBlank(content)) {
                   throw new InfoException("请先上传知识包");
                }
 
-               KnowledgePackage var6 = Utils.stringToKnowledgePackage(var5);
-               return var6;
+               KnowledgePackage knowledgePackage = Utils.stringToKnowledgePackage(content);
+               return knowledgePackage;
             }
 
             throw new InfoException("请先上传知识包");
@@ -303,18 +303,18 @@ public class QuickTestServletHandler extends ApiServletHandler {
       return null;
    }
 
-   private KnowledgeBase d(HttpServletRequest var1) throws IOException {
-      String var2 = var1.getParameter("files");
-      var2 = Utils.decodeURL(var2);
-      ResourceBase var3 = ServiceUtils.getKnowledgeBuilder().newResourceBase();
-      String[] var4 = var2.split(";");
+   private KnowledgeBase resolveKnowledgeBase(HttpServletRequest httpServletRequest) throws IOException {
+      String parameter = httpServletRequest.getParameter("files");
+      parameter = Utils.decodeURL(parameter);
+      ResourceBase resourceBase = ServiceUtils.getKnowledgeBuilder().newResourceBase();
+      String[] parts = parameter.split(";");
 
-      for(String var8 : var4) {
-         var3.addResource(var8);
+      for(String text : parts) {
+         resourceBase.addResource(text);
       }
 
-      KnowledgeBase var10 = ServiceUtils.getKnowledgeBuilder().buildKnowledgeBase(var3);
-      return var10;
+      KnowledgeBase knowledgeBase = ServiceUtils.getKnowledgeBuilder().buildKnowledgeBase(resourceBase);
+      return knowledgeBase;
    }
 
    public String url() {

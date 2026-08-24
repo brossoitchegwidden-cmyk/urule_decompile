@@ -8,35 +8,35 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 public class PropertyConfigurer implements ApplicationContextAware {
-   private static Properties a = new Properties();
-   private static Boolean b = null;
+   private static Properties properties = new Properties();
+   private static Boolean activeElseRuleEnabled;
 
-   public static String getProperty(String var0) {
-      return a.getProperty(var0);
+   public static String getProperty(String key) {
+      return PropertyConfigurer.properties.getProperty(key);
    }
 
    public static boolean isEnabledActiveElseRule() {
-      if (b == null) {
-         b = Boolean.valueOf(getProperty("urule.enabledActiveElseRule"));
+      if (activeElseRuleEnabled == null) {
+         activeElseRuleEnabled = Boolean.valueOf(getProperty("urule.enabledActiveElseRule"));
       }
 
-      return b;
+      return activeElseRuleEnabled;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      for (PropertiesLoaderSupport var4 : var1.getBeansOfType(PropertiesLoaderSupport.class).values()) {
-         this.a(var4);
+   public void setApplicationContext(ApplicationContext context) throws BeansException {
+      for (PropertiesLoaderSupport propertiesLoaderSupport : context.getBeansOfType(PropertiesLoaderSupport.class).values()) {
+         this.processPropertiesLoaderSupport(propertiesLoaderSupport);
       }
    }
 
-   private void a(PropertiesLoaderSupport var1) {
+   private void processPropertiesLoaderSupport(PropertiesLoaderSupport propertiesLoaderSupport) {
       try {
-         Method var2 = PropertiesLoaderSupport.class.getDeclaredMethod("mergeProperties");
-         var2.setAccessible(true);
-         Object var3 = var2.invoke(var1);
-         a.putAll((Properties)var3);
-      } catch (Exception var4) {
-         throw new RuntimeException(var4);
+         Method declaredMethod = PropertiesLoaderSupport.class.getDeclaredMethod("mergeProperties");
+         declaredMethod.setAccessible(true);
+         Object objectValue = declaredMethod.invoke(propertiesLoaderSupport);
+         PropertyConfigurer.properties.putAll((Properties)objectValue);
+      } catch (Exception exception) {
+         throw new RuntimeException(exception);
       }
    }
 }

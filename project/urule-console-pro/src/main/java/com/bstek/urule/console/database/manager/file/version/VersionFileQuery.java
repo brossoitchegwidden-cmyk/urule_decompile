@@ -4,19 +4,19 @@ import com.bstek.urule.console.database.model.Page;
 import java.util.List;
 
 public interface VersionFileQuery {
-   VersionFileQuery id(long var1);
+   VersionFileQuery id(long id);
 
-   VersionFileQuery fileId(long var1);
+   VersionFileQuery fileId(long fileId);
 
-   VersionFileQuery projectId(long var1);
+   VersionFileQuery projectId(long projectId);
 
-   VersionFileQuery version(String var1);
+   VersionFileQuery version(String version);
 
-   VersionFileQuery versionLike(String var1);
+   VersionFileQuery versionLike(String version);
 
-   VersionFileQuery noteLike(String var1);
+   VersionFileQuery noteLike(String note);
 
    List list();
 
-   Page paging(int var1, int var2);
+   Page paging(int pageIndex, int pageSize);
 }

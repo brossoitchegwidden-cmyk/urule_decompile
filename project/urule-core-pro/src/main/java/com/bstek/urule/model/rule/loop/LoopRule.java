@@ -28,188 +28,188 @@ public class LoopRule extends Rule {
       this.setLoopRule(true);
    }
 
-   public void execute(Context var1, Map<String, Object> var2) {
-      Object var3 = this.buildLoopTarget(var1, var2);
-      if (var3 == null) {
+   public void execute(Context context, Map<String, Object> factMap) {
+      Object loopTarget = this.buildLoopTarget(context, factMap);
+      if (loopTarget == null) {
          this.log.warning("Loop rule [" + this.getName() + "] target value is null,cannot be executed.");
       } else {
-         KnowledgeSession var4 = (KnowledgeSession)var1.getWorkingMemory();
-         Map var5 = var4.getParameters();
+         KnowledgeSession workingMemory = (KnowledgeSession)context.getWorkingMemory();
+         Map parameters = workingMemory.getParameters();
          if (this.loopStart != null) {
-            this.doActions(this.loopStart.getActions(), var1, var2, true);
+            this.doActions(this.loopStart.getActions(), context, factMap, true);
          }
 
-         boolean var6 = true;
-         KnowledgeSession var7 = KnowledgeSessionFactory.newKnowledgeSession(this.knowledgePackageWrapper, var1, var4);
-         List var8 = var4.getFactList();
-         if (var3 instanceof Collection) {
-            for (Object var11 : (Collection)var3) {
-               var5 = this.doLoop(var7, var5, var11, var8, var6);
-               if (this.breakLoop(var5)) {
+         boolean flag = true;
+         KnowledgeSession knowledgeSession = KnowledgeSessionFactory.newKnowledgeSession(this.knowledgePackageWrapper, context, workingMemory);
+         List factList = workingMemory.getFactList();
+         if (loopTarget instanceof Collection) {
+            for (Object objectValue : (Collection)loopTarget) {
+               parameters = this.doLoop(knowledgeSession, parameters, objectValue, factList, flag);
+               if (this.breakLoop(parameters)) {
                   break;
                }
 
-               var6 = false;
+               flag = false;
             }
-         } else if (var3 instanceof Object[]) {
-            Object[] var14 = (Object[])var3;
+         } else if (loopTarget instanceof Object[]) {
+            Object[] loopTarget2 = (Object[])loopTarget;
 
-            for (Object var13 : var14) {
-               var5 = this.doLoop(var7, var5, var13, var8, var6);
-               if (this.breakLoop(var5)) {
+            for (Object objectValue2 : loopTarget2) {
+               parameters = this.doLoop(knowledgeSession, parameters, objectValue2, factList, flag);
+               if (this.breakLoop(parameters)) {
                   break;
                }
 
-               var6 = false;
+               flag = false;
             }
          }
 
-         var4.getParameters().putAll(var5);
+         workingMemory.getParameters().putAll(parameters);
          if (this.loopEnd != null) {
-            this.doActions(this.loopEnd.getActions(), var1, var2, false);
+            this.doActions(this.loopEnd.getActions(), context, factMap, false);
          }
       }
    }
 
-   private Map<String, Object> doLoop(KnowledgeSession var1, Map<String, Object> var2, Object var3, List<Object> var4, boolean var5) {
-      FactManager var6 = var1.getFactManager();
-      String var7 = this.getClass(var3);
-      if (var5) {
-         var6.clean();
+   private Map<String, Object> doLoop(KnowledgeSession knowledgeSession, Map<String, Object> valuesByKey, Object objectValue, List<Object> objects, boolean flag) {
+      FactManager factManager = knowledgeSession.getFactManager();
+      String className = this.getClass(objectValue);
+      if (flag) {
+         factManager.clean();
       }
 
       LoopObjectThreadLocal.clean();
 
-      for (Object var9 : var4) {
-         String var10 = this.getClass(var9);
-         if (!var10.equals(HashMap.class.getName()) && !var10.equals(var7)) {
-            var6.insertLoopFact(var9);
+      for (Object objectValue2 : objects) {
+         String text = this.getClass(objectValue2);
+         if (!text.equals(HashMap.class.getName()) && !text.equals(className)) {
+            factManager.insertLoopFact(objectValue2);
          }
       }
 
-      LoopObjectThreadLocal.setLoopObject(var3);
-      var6.insertLoopFact(var3);
-      var1.fireRules(var2);
-      Map var12 = var1.getParameters();
-      var2 = new HashMap();
-      var2.putAll(var12);
+      LoopObjectThreadLocal.setLoopObject(objectValue);
+      factManager.insertLoopFact(objectValue);
+      knowledgeSession.fireRules(valuesByKey);
+      Map parameters = knowledgeSession.getParameters();
+      valuesByKey = new HashMap();
+      valuesByKey.putAll(parameters);
       LoopObjectThreadLocal.clean();
-      return var2;
+      return valuesByKey;
    }
 
-   private boolean breakLoop(Map<String, Object> var1) {
-      boolean var2 = false;
-      if (var1.containsKey("_loop_rule_break_tag__")) {
-         var1.remove("_loop_rule_break_tag__");
-         var2 = true;
+   private boolean breakLoop(Map<String, Object> valuesByKey) {
+      boolean breakLoopResult = false;
+      if (valuesByKey.containsKey("_loop_rule_break_tag__")) {
+         valuesByKey.remove("_loop_rule_break_tag__");
+         breakLoopResult = true;
       }
 
-      return var2;
+      return breakLoopResult;
    }
 
-   private void doActions(List<Action> var1, Context var2, Map<String, Object> var3, boolean var4) {
-      if (var1 != null && var1.size() != 0) {
-         if (var4) {
-            var2.addTipMsg("执行【" + this.getName() + "】开始前动作");
-            var2.getLogger().logMessage("==执行循环规则规则【" + this.getName() + "】的开始前动作==");
+   private void doActions(List<Action> actions, Context context, Map<String, Object> valuesByKey, boolean flag) {
+      if (actions != null && actions.size() != 0) {
+         if (flag) {
+            context.addTipMsg("执行【" + this.getName() + "】开始前动作");
+            context.getLogger().logMessage("==执行循环规则规则【" + this.getName() + "】的开始前动作==");
          } else {
-            var2.addTipMsg("执行【" + this.getName() + "】结束后动作");
-            var2.getLogger().logMessage("==执行循环规则规则【" + this.getName() + "】的结束后动作==");
+            context.addTipMsg("执行【" + this.getName() + "】结束后动作");
+            context.getLogger().logMessage("==执行循环规则规则【" + this.getName() + "】的结束后动作==");
          }
 
-         for (Action var6 : var1) {
+         for (Action action : actions) {
             if (this.getDebug() != null) {
-               var6.setDebug(this.getDebug());
+               action.setDebug(this.getDebug());
             }
 
-            var6.execute(var2, var3);
+            action.execute(context, valuesByKey);
          }
 
-         var2.cleanTipMsg();
+         context.cleanTipMsg();
       }
    }
 
-   private Object buildLoopTarget(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.loopTarget.getValue(), var1, var2);
+   private Object buildLoopTarget(Context context, Map<String, Object> valuesByKey) {
+      Object loopTarget = context.getValueCompute().complexValueCompute(this.loopTarget.getValue(), context, valuesByKey);
       if (this.loopTargetType.equals(LoopTargetType.list)) {
-         if (var3 != null && !(var3 instanceof Collection) && !(var3 instanceof Object[])) {
-            throw new RuntimeException("循环对象必须是一个Collection类型的集合对象或一个数组对象，当前对象为：" + var3 + ".");
+         if (loopTarget != null && !(loopTarget instanceof Collection) && !(loopTarget instanceof Object[])) {
+            throw new RuntimeException("循环对象必须是一个Collection类型的集合对象或一个数组对象，当前对象为：" + loopTarget + ".");
          } else {
-            return var3;
+            return loopTarget;
          }
       } else {
-         KnowledgeSession var4 = (KnowledgeSession)var1.getWorkingMemory();
-         List var5 = var4.getFactList();
-         String var6 = this.getClass(var3);
-         ArrayList var7 = new ArrayList();
+         KnowledgeSession workingMemory = (KnowledgeSession)context.getWorkingMemory();
+         List factList = workingMemory.getFactList();
+         String className = this.getClass(loopTarget);
+         ArrayList loopTarget2 = new ArrayList();
 
-         for (Object var9 : var5) {
-            String var10 = this.getClass(var9);
-            if (var10.equals(var6)) {
-               var7.add(var9);
+         for (Object objectValue : factList) {
+            String text = this.getClass(objectValue);
+            if (text.equals(className)) {
+               loopTarget2.add(objectValue);
             }
          }
 
-         return var7;
+         return loopTarget2;
       }
    }
 
-   private String getClass(Object var1) {
-      String var2 = null;
-      if (var1 instanceof GeneralEntity) {
-         var2 = ((GeneralEntity)var1).getTargetClass();
+   private String getClass(Object objectValue) {
+      String text = null;
+      if (objectValue instanceof GeneralEntity) {
+         text = ((GeneralEntity)objectValue).getTargetClass();
       } else {
-         var2 = var1.getClass().getName();
+         text = objectValue.getClass().getName();
       }
 
-      return var2;
+      return text;
    }
 
    public List<LoopRuleUnit> getUnits() {
       return this.units;
    }
 
-   public void setUnits(List<LoopRuleUnit> var1) {
-      this.units = var1;
+   public void setUnits(List<LoopRuleUnit> units) {
+      this.units = units;
    }
 
    public LoopStart getLoopStart() {
       return this.loopStart;
    }
 
-   public void setLoopStart(LoopStart var1) {
-      this.loopStart = var1;
+   public void setLoopStart(LoopStart loopStart) {
+      this.loopStart = loopStart;
    }
 
    public LoopEnd getLoopEnd() {
       return this.loopEnd;
    }
 
-   public void setLoopEnd(LoopEnd var1) {
-      this.loopEnd = var1;
+   public void setLoopEnd(LoopEnd loopEnd) {
+      this.loopEnd = loopEnd;
    }
 
    public LoopTargetType getLoopTargetType() {
       return this.loopTargetType;
    }
 
-   public void setLoopTargetType(LoopTargetType var1) {
-      this.loopTargetType = var1;
+   public void setLoopTargetType(LoopTargetType loopTargetType) {
+      this.loopTargetType = loopTargetType;
    }
 
    public LoopTarget getLoopTarget() {
       return this.loopTarget;
    }
 
-   public void setLoopTarget(LoopTarget var1) {
-      this.loopTarget = var1;
+   public void setLoopTarget(LoopTarget loopTarget) {
+      this.loopTarget = loopTarget;
    }
 
    public KnowledgePackageWrapper getKnowledgePackageWrapper() {
       return this.knowledgePackageWrapper;
    }
 
-   public void setKnowledgePackageWrapper(KnowledgePackageWrapper var1) {
-      this.knowledgePackageWrapper = var1;
+   public void setKnowledgePackageWrapper(KnowledgePackageWrapper knowledgePackageWrapper) {
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
    }
 }

@@ -4,42 +4,42 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class URuleLog implements Serializable {
-   private static final long a = 1L;
-   private Long b;
-   private String c;
-   private String d;
-   private Date e;
+   private static final long serialVersionUID = 1L;
+   private Long id;
+   private String userId;
+   private String username;
+   private Date createDate;
 
    public Long getId() {
-      return this.b;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.b = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getUserId() {
-      return this.c;
+      return this.userId;
    }
 
-   public void setUserId(String var1) {
-      this.c = var1;
+   public void setUserId(String userId) {
+      this.userId = userId;
    }
 
    public String getUsername() {
-      return this.d;
+      return this.username;
    }
 
-   public void setUsername(String var1) {
-      this.d = var1;
+   public void setUsername(String username) {
+      this.username = username;
    }
 
    public Date getCreateDate() {
-      return this.e;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.e = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public static long getSerialversionuid() {

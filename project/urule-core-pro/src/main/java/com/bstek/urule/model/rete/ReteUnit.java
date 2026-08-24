@@ -20,40 +20,40 @@ public class ReteUnit {
    public ReteUnit() {
    }
 
-   public ReteUnit(Rete var1, String var2) {
-      this.rete = var1;
-      this.ruleName = var2;
+   public ReteUnit(Rete rete, String ruleName) {
+      this.rete = rete;
+      this.ruleName = ruleName;
    }
 
    public String getRuleName() {
       return this.ruleName;
    }
 
-   public void setRuleName(String var1) {
-      this.ruleName = var1;
+   public void setRuleName(String ruleName) {
+      this.ruleName = ruleName;
    }
 
    public Date getEffectiveDate() {
       return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public Rete getRete() {
       return this.rete;
    }
 
-   public void setRete(Rete var1) {
-      this.rete = var1;
+   public void setRete(Rete rete) {
+      this.rete = rete;
    }
 }

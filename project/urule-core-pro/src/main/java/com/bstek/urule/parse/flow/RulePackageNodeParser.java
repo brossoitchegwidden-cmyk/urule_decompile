@@ -4,27 +4,27 @@ import com.bstek.urule.model.flow.RulePackageNode;
 import org.dom4j.Element;
 
 public class RulePackageNodeParser extends FlowNodeParser<RulePackageNode> {
-   public RulePackageNode parse(Element var1) {
-      RulePackageNode var2 = new RulePackageNode(var1.attributeValue("name"));
-      var2.setConnections(this.a(var1));
-      var2.setProject(var1.attributeValue("project"));
-      var2.setPackageId(var1.attributeValue("package-id"));
-      String var3 = var1.attributeValue("code");
-      if (var3 == null) {
-         var3 = var2.getPackageId();
+   public RulePackageNode parse(Element element) {
+      RulePackageNode rulePackageNode = new RulePackageNode(element.attributeValue("name"));
+      rulePackageNode.setConnections(this.parseConnections(element));
+      rulePackageNode.setProject(element.attributeValue("project"));
+      rulePackageNode.setPackageId(element.attributeValue("package-id"));
+      String packageId = element.attributeValue("code");
+      if (packageId == null) {
+         packageId = rulePackageNode.getPackageId();
       }
 
-      var2.setCode(var3);
-      var2.setEventBean(var1.attributeValue("event-bean"));
-      var2.setX(var1.attributeValue("x"));
-      var2.setY(var1.attributeValue("y"));
-      var2.setWidth(var1.attributeValue("width"));
-      var2.setHeight(var1.attributeValue("height"));
-      return var2;
+      rulePackageNode.setCode(packageId);
+      rulePackageNode.setEventBean(element.attributeValue("event-bean"));
+      rulePackageNode.setX(element.attributeValue("x"));
+      rulePackageNode.setY(element.attributeValue("y"));
+      rulePackageNode.setWidth(element.attributeValue("width"));
+      rulePackageNode.setHeight(element.attributeValue("height"));
+      return rulePackageNode;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("rule-package");
+   public boolean support(String name) {
+      return name.equals("rule-package");
    }
 }

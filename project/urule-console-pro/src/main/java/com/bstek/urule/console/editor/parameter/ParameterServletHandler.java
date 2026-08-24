@@ -22,42 +22,42 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 public class ParameterServletHandler extends ApiServletHandler {
-   private VariableLibraryDeserializer e = (VariableLibraryDeserializer)Utils.getApplicationContext().getBean("urule.variableLibraryDeserializer");
+   private VariableLibraryDeserializer variableLibraryDeserializer = (VariableLibraryDeserializer)Utils.getApplicationContext().getBean("urule.variableLibraryDeserializer");
 
-   public void excel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      InputStream var3 = FileUtils.uploadFile(var1).getInputStream();
-      List var4 = ExcelImportUtils.parseSheets(var3);
-      List var5 = ExcelImportUtils.parseParameters(var4);
-      var3.close();
-      this.a(var2, var5);
+   public void excel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      InputStream inputStream = FileUtils.uploadFile(req).getInputStream();
+      List sheets = ExcelImportUtils.parseSheets(inputStream);
+      List parameters = ExcelImportUtils.parseParameters(sheets);
+      inputStream.close();
+      this.writeObjectToJson(resp, parameters);
    }
 
-   public void variables(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("projectId"));
-      List var5 = FileManager.ins.newQuery().type(ResourceType.VariableLibrary.name()).deleted(false).asc("NAME_").list(var3);
-      ArrayList var6 = new ArrayList();
+   public void variables(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      List items = FileManager.ins.newQuery().type(ResourceType.VariableLibrary.name()).deleted(false).asc("NAME_").list(longValue);
+      ArrayList items2 = new ArrayList();
 
-      for(RuleFile var8 : (Iterable<RuleFile>)(Iterable<?>)(var5)) {
-         String var9 = FileManager.ins.loadContent(var8.getId());
-         ByteArrayInputStream var10 = new ByteArrayInputStream(var9.getBytes("utf-8"));
-         Element var11 = this.a(var10);
-         List var12 = this.e.deserialize(var11);
-         var6.addAll(var12);
-         ((InputStream)var10).close();
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+         String content = FileManager.ins.loadContent(ruleFile.getId());
+         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes("utf-8"));
+         Element element = this.parseXml(byteArrayInputStream);
+         List items3 = this.variableLibraryDeserializer.deserialize(element);
+         items2.addAll(items3);
+         ((InputStream)byteArrayInputStream).close();
       }
 
-      this.a(var2, var6);
+      this.writeObjectToJson(resp, items2);
    }
 
-   protected Element a(InputStream var1) {
-      XXESAXReader var2 = new XXESAXReader();
+   protected Element parseXml(InputStream stream) {
+      XXESAXReader xXESAXReader = new XXESAXReader();
 
       try {
-         Document var3 = ((SAXReader)var2).read(var1);
-         Element var4 = var3.getRootElement();
-         return var4;
-      } catch (DocumentException var5) {
-         throw new RuleException(var5);
+         Document document = ((SAXReader)xXESAXReader).read(stream);
+         Element rootElement = document.getRootElement();
+         return rootElement;
+      } catch (DocumentException documentException) {
+         throw new RuleException(documentException);
       }
    }
 

@@ -5,27 +5,28 @@ import com.bstek.urule.console.database.model.batch.BatchLog;
 import java.util.Date;
 
 public interface BatchLogQuery {
-   BatchLogQuery groupId(String var1);
+   BatchLogQuery groupId(String groupId);
 
-   BatchLogQuery projectId(Long var1);
+   BatchLogQuery projectId(Long projectId);
 
-   BatchLogQuery batchId(Long var1);
+   BatchLogQuery batchId(Long batchId);
 
-   BatchLogQuery user(String var1);
+   BatchLogQuery user(String user);
 
-   BatchLogQuery batchNameLike(String var1);
+   BatchLogQuery batchNameLike(String batchName);
 
    BatchLogQuery orderTime();
 
-   BatchLogQuery dateBegin(Date var1);
+   BatchLogQuery dateBegin(Date date);
 
-   BatchLogQuery dateEnd(Date var1);
+   BatchLogQuery dateEnd(Date date);
 
-   BatchLogQuery ip(String var1);
+   BatchLogQuery ip(String ip);
 
-   BatchLogQuery status(String var1);
+   BatchLogQuery status(String status);
 
-   Page paging(int var1, int var2);
+   Page paging(int pageIndex, int pageSize);
 
-   BatchLog details(Long var1);
+   /**获取日志详情*/
+   BatchLog details(Long id);
 }

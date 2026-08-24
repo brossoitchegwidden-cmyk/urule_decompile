@@ -5,36 +5,36 @@ import com.bstek.urule.model.rule.ParenValue;
 import org.dom4j.Element;
 
 public class ParenParser implements Parser<ParenValue> {
-   private ValueParser a;
-   private ComplexArithmeticParser b;
+   private ValueParser valueParser;
+   private ComplexArithmeticParser complexArithmeticParser;
 
-   public ParenValue parse(Element var1) {
-      if (this.b == null) {
-         this.b = (ComplexArithmeticParser)Utils.getApplicationContext().getBean("urule.complexArithmeticParser");
+   public ParenValue parse(Element element) {
+      if (this.complexArithmeticParser == null) {
+         this.complexArithmeticParser = (ComplexArithmeticParser)Utils.getApplicationContext().getBean("urule.complexArithmeticParser");
       }
 
-      ParenValue var2 = new ParenValue();
+      ParenValue parenValue = new ParenValue();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (this.a.support(var5.getName())) {
-               var2.setValue(this.a.parse(var5));
-            } else if (this.b.support(var5.getName())) {
-               var2.setArithmetic(this.b.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               parenValue.setValue(this.valueParser.parse(element2));
+            } else if (this.complexArithmeticParser.support(element2.getName())) {
+               parenValue.setArithmetic(this.complexArithmeticParser.parse(element2));
             }
          }
       }
 
-      return var2;
+      return parenValue;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("paren");
+   public boolean support(String name) {
+      return name.equals("paren");
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.a = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 }

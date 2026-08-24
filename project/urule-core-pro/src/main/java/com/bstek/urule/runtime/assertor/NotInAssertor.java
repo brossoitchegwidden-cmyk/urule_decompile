@@ -5,8 +5,8 @@ import com.bstek.urule.model.rule.Op;
 
 public class NotInAssertor extends InAssertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      return !super.eval(var1, var2, var3);
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      return !super.eval(left, right, datatype);
    }
 
    @Override

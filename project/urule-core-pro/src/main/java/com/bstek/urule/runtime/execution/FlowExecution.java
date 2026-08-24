@@ -11,51 +11,51 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FlowExecution extends AbstractExecution {
-   private FlowContextImpl g;
+   private FlowContextImpl flowContextImpl;
 
-   public FlowExecution(KnowledgeSession var1, Map<String, String> var2) {
-      super(var1, var2);
-      this.g = new FlowContextImpl(var1, var2);
+   public FlowExecution(KnowledgeSession knowledgeSession, Map<String, String> allVariableCateogoryMap) {
+      super(knowledgeSession, allVariableCateogoryMap);
+      this.flowContextImpl = new FlowContextImpl(knowledgeSession, allVariableCateogoryMap);
    }
 
-   public FlowExecutionResponse startProcess(String var1, Map<String, Object> var2) {
-      FlowDefinition var3 = null;
+   public FlowExecutionResponse startProcess(String processId, Map<String, Object> parameters) {
+      FlowDefinition flowDefinition = null;
 
-      for (KnowledgePackage var5 : this.d.getKnowledgePackageList()) {
-         Map var6 = var5.getFlowMap();
-         if (var6 != null && var6.containsKey(var1)) {
-            var3 = (FlowDefinition)var6.get(var1);
+      for (KnowledgePackage knowledgePackage : this.knowledgeSession.getKnowledgePackageList()) {
+         Map flowMap = knowledgePackage.getFlowMap();
+         if (flowMap != null && flowMap.containsKey(processId)) {
+            flowDefinition = (FlowDefinition)flowMap.get(processId);
             break;
          }
       }
 
-      if (var3 == null) {
-         throw new RuleException("Rule flow [" + var1 + "] not exist.");
+      if (flowDefinition == null) {
+         throw new RuleException("Rule flow [" + processId + "] not exist.");
       }
 
-      this.d.getLogManager().clean();
-      Map var12 = this.b.buildRuntimeParameters(var2);
+      this.knowledgeSession.getLogManager().clean();
+      Map runtimeParameters = this.factManager.buildRuntimeParameters(parameters);
 
       try {
-         HashMap var13 = new HashMap(var12.size());
+         HashMap valuesByKey = new HashMap(runtimeParameters.size());
 
-         for (String var7 : (Iterable<String>)(Iterable<?>)(var12.keySet())) {
-            Object var8 = var12.get(var7);
-            if (var8 != null) {
-               var13.put(var7, var8);
+         for (String text : (Iterable<String>)(Iterable<?>)(runtimeParameters.keySet())) {
+            Object objectValue = runtimeParameters.get(text);
+            if (objectValue != null) {
+               valuesByKey.put(text, objectValue);
             }
          }
 
-         WorkingMemoryHolderAdapter.set(this.d);
-         this.c.doMonitorInputData(var13);
-         this.g.setVariableMap(var13);
-         var3.newInstance(this.g);
-         FlowExecutionResponse var15 = this.g.getResponse();
-         this.c.setTotalDuration(var15.getDuration());
-         this.c.doMonitor(var13);
-         var12.putAll(var13);
-         this.a();
-         return var15;
+         WorkingMemoryHolderAdapter.set(this.knowledgeSession);
+         this.monitorManager.doMonitorInputData(valuesByKey);
+         this.flowContextImpl.setVariableMap(valuesByKey);
+         flowDefinition.newInstance(this.flowContextImpl);
+         FlowExecutionResponse response = this.flowContextImpl.getResponse();
+         this.monitorManager.setTotalDuration(response.getDuration());
+         this.monitorManager.doMonitor(valuesByKey);
+         runtimeParameters.putAll(valuesByKey);
+         this.reset();
+         return response;
       } finally {
          WorkingMemoryHolderAdapter.clean();
       }

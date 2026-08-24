@@ -12,17 +12,17 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RulesJsonDeserializer extends AbstractJsonDeserializer<List<Rule>> {
-   public List<Rule> deserialize(JsonParser var1, DeserializationContext var2) throws IOException, JsonProcessingException {
-      ObjectCodec var3 = var1.getCodec();
-      JsonNode var4 = (JsonNode)var3.readTree(var1);
-      Iterator var5 = var4.elements();
-      ArrayList var6 = new ArrayList();
+   public List<Rule> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+      ObjectCodec codec = jp.getCodec();
+      JsonNode tree = (JsonNode)codec.readTree(jp);
+      Iterator iterator = tree.elements();
+      ArrayList deserializeResult = new ArrayList();
 
-      while (var5.hasNext()) {
-         JsonNode var7 = (JsonNode)var5.next();
-         var6.add(this.parseRule(var1, var7));
+      while (iterator.hasNext()) {
+         JsonNode jsonNode = (JsonNode)iterator.next();
+         deserializeResult.add(this.parseRule(jp, jsonNode));
       }
 
-      return var6;
+      return deserializeResult;
    }
 }

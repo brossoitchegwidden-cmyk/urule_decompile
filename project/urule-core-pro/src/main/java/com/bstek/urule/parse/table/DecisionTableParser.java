@@ -26,207 +26,207 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class DecisionTableParser extends LibrariesParser<DecisionTable> {
-   private RowParser a;
-   private ColumnParser b;
-   private CellParser c;
-   private RulesRebuilder d;
-   private PredefinesParser e;
+   private RowParser rowParser;
+   private ColumnParser columnParser;
+   private CellParser cellParser;
+   private RulesRebuilder rulesRebuilder;
+   private PredefinesParser predefinesParser;
 
-   public DecisionTable parse(Element var1) {
-      DecisionTable var2 = new DecisionTable();
-      String var3 = var1.attributeValue("salience");
-      if (StringUtils.isNotEmpty(var3)) {
-         var2.setSalience(Integer.valueOf(var3));
+   public DecisionTable parse(Element element) {
+      DecisionTable decisionTable = new DecisionTable();
+      String text = element.attributeValue("salience");
+      if (StringUtils.isNotEmpty(text)) {
+         decisionTable.setSalience(Integer.valueOf(text));
       }
 
-      var2.setMutexGroup(var1.attributeValue("mutex-group"));
-      String var4 = var1.attributeValue("effective-date");
-      SimpleDateFormat var5 = new SimpleDateFormat(Configure.getDateFormat());
-      if (StringUtils.isNotEmpty(var4)) {
+      decisionTable.setMutexGroup(element.attributeValue("mutex-group"));
+      String text2 = element.attributeValue("effective-date");
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      if (StringUtils.isNotEmpty(text2)) {
          try {
-            var2.setEffectiveDate(var5.parse(var4));
-         } catch (ParseException var16) {
-            throw new RuleException(var16);
+            decisionTable.setEffectiveDate(simpleDateFormat.parse(text2));
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       }
 
-      String var6 = var1.attributeValue("expires-date");
-      if (StringUtils.isNotEmpty(var6)) {
+      String text3 = element.attributeValue("expires-date");
+      if (StringUtils.isNotEmpty(text3)) {
          try {
-            var2.setExpiresDate(var5.parse(var6));
-         } catch (ParseException var15) {
-            throw new RuleException(var15);
+            decisionTable.setExpiresDate(simpleDateFormat.parse(text3));
+         } catch (ParseException parseException2) {
+            throw new RuleException(parseException2);
          }
       }
 
-      String var7 = var1.attributeValue("enabled");
-      if (StringUtils.isNotEmpty(var7)) {
-         var2.setEnabled(Boolean.valueOf(var7));
+      String text4 = element.attributeValue("enabled");
+      if (StringUtils.isNotEmpty(text4)) {
+         decisionTable.setEnabled(Boolean.valueOf(text4));
       }
 
-      String var8 = var1.attributeValue("debug");
-      if (StringUtils.isNotEmpty(var8)) {
-         var2.setDebug(Boolean.valueOf(var8));
+      String text5 = element.attributeValue("debug");
+      if (StringUtils.isNotEmpty(text5)) {
+         decisionTable.setDebug(Boolean.valueOf(text5));
       }
 
-      for (Object var10 : var1.elements()) {
-         if (var10 != null && var10 instanceof Element) {
-            Element var11 = (Element)var10;
-            String var12 = var11.getName();
-            if (this.a.support(var12)) {
-               var2.addRow(this.a.parse(var11));
-            } else if (var12.equals("quick-test-data")) {
-               String var13 = var11.getTextTrim();
-               var2.setQuickTestData(var13);
-            } else if (this.b.support(var12)) {
-               var2.addColumn(this.b.parse(var11));
-            } else if (this.c.support(var12)) {
-               var2.addCell(this.c.parse(var11));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.rowParser.support(name)) {
+               decisionTable.addRow(this.rowParser.parse(element2));
+            } else if (name.equals("quick-test-data")) {
+               String textTrim = element2.getTextTrim();
+               decisionTable.setQuickTestData(textTrim);
+            } else if (this.columnParser.support(name)) {
+               decisionTable.addColumn(this.columnParser.parse(element2));
+            } else if (this.cellParser.support(name)) {
+               decisionTable.addCell(this.cellParser.parse(element2));
             }
 
-            Library var17 = this.a(var11);
-            if (var17 != null) {
-               var2.addLibrary(var17);
-            } else if (this.e.support(var12)) {
-               PredefineGroupDefinition var14 = this.e.parse(var11);
-               var2.setPredefineGroup(var14);
-            } else if (var12.equals("remark")) {
-               var2.setRemark(var11.getText());
+            Library library = this.parseLibrary(element2);
+            if (library != null) {
+               decisionTable.addLibrary(library);
+            } else if (this.predefinesParser.support(name)) {
+               PredefineGroupDefinition predefineGroupDefinition = this.predefinesParser.parse(element2);
+               decisionTable.setPredefineGroup(predefineGroupDefinition);
+            } else if (name.equals("remark")) {
+               decisionTable.setRemark(element2.getText());
             }
          }
       }
 
-      this.a(var2);
-      return var2;
+      this.processDecisionTable(decisionTable);
+      return decisionTable;
    }
 
-   private void a(DecisionTable var1) {
-      List var2 = var1.getLibraries();
-      List var3 = null;
-      PredefineGroupDefinition var4 = var1.getPredefineGroup();
-      if (var4 != null) {
-         var3 = var4.getPredefines();
+   private void processDecisionTable(DecisionTable decisionTable) {
+      List libraries = decisionTable.getLibraries();
+      List predefines = null;
+      PredefineGroupDefinition predefineGroup = decisionTable.getPredefineGroup();
+      if (predefineGroup != null) {
+         predefines = predefineGroup.getPredefines();
       }
 
-      ResourceLibrary var5 = this.d.getResourceLibraryBuilder().buildResourceLibrary(var2, var3);
-      if (var4 != null && var4.getPredefines() != null) {
-         for (Predefine var7 : var4.getPredefines()) {
-            Junction var8 = var7.getJunction();
-            if (var8 != null) {
-               this.d.rebuildCriterion(var8, var5, false);
+      ResourceLibrary resourceLibrary = this.rulesRebuilder.getResourceLibraryBuilder().buildResourceLibrary(libraries, predefines);
+      if (predefineGroup != null && predefineGroup.getPredefines() != null) {
+         for (Predefine predefine : predefineGroup.getPredefines()) {
+            Junction junction = predefine.getJunction();
+            if (junction != null) {
+               this.rulesRebuilder.rebuildCriterion(junction, resourceLibrary, false);
             }
 
-            Value var9 = var7.getValue();
-            if (var9 != null) {
-               this.d.rebuildValue(var9, var5, false);
+            Value localValue = predefine.getValue();
+            if (localValue != null) {
+               this.rulesRebuilder.rebuildValue(localValue, resourceLibrary, false);
             }
          }
       }
 
-      for (Cell var14 : var1.getCellMap().values()) {
-         if (var14.getAction() != null) {
-            this.d.rebuildAction(var14.getAction(), var5, false);
-         } else if (var14.getValue() != null) {
-            this.d.rebuildValue(var14.getValue(), var5, false);
-         } else if (var14.getJoint() != null && var14.getJoint() != null && var14.getJoint().getJunction() != null) {
-            List var16 = var14.getJoint().getConditions();
-            if (var16 != null) {
-               for (Condition var10 : (Iterable<Condition>)(Iterable<?>)(var16)) {
-                  Value var11 = var10.getValue();
-                  if (var11 != null) {
-                     this.d.rebuildValue(var11, var5, false);
+      for (Cell cell : decisionTable.getCellMap().values()) {
+         if (cell.getAction() != null) {
+            this.rulesRebuilder.rebuildAction(cell.getAction(), resourceLibrary, false);
+         } else if (cell.getValue() != null) {
+            this.rulesRebuilder.rebuildValue(cell.getValue(), resourceLibrary, false);
+         } else if (cell.getJoint() != null && cell.getJoint() != null && cell.getJoint().getJunction() != null) {
+            List conditions = cell.getJoint().getConditions();
+            if (conditions != null) {
+               for (Condition condition : (Iterable<Condition>)(Iterable<?>)(conditions)) {
+                  Value localValue2 = condition.getValue();
+                  if (localValue2 != null) {
+                     this.rulesRebuilder.rebuildValue(localValue2, resourceLibrary, false);
                   }
                }
             }
          }
       }
 
-      for (Column var15 : var1.getColumns()) {
-         if (var15.isPredefine()) {
-            Predefine var17 = var5.getPredefine(var15.getUuid());
-            if (var17 != null) {
-               var15.setPredefineName(var17.getName());
-               String var20 = var17.getType();
-               if (Datatype.isType(var20)) {
-                  var15.setPredefineDatatype(Datatype.valueOf(var20));
+      for (Column column : decisionTable.getColumns()) {
+         if (column.isPredefine()) {
+            Predefine predefine2 = resourceLibrary.getPredefine(column.getUuid());
+            if (predefine2 != null) {
+               column.setPredefineName(predefine2.getName());
+               String type = predefine2.getType();
+               if (Datatype.isType(type)) {
+                  column.setPredefineDatatype(Datatype.valueOf(type));
                } else {
-                  String var22 = var15.getPredefinePropertyUuid();
-                  if (var22 != null) {
-                     VariableData var25 = var5.getVariableByUuid(var20, var22);
-                     var15.setPredefineVariableCategory(var25.getCategory().getName());
-                     var15.setPredefinePropertyName(var25.getVariable().getName());
-                     var15.setPredefinePropertyDatatype(var25.getVariable().getType());
-                     var15.setPredefinePropertyLabel(var25.getVariable().getLabel());
-                     var15.setPredefineVariableCategoryUuid(var25.getCategory().getUuid());
+                  String predefinePropertyUuid = column.getPredefinePropertyUuid();
+                  if (predefinePropertyUuid != null) {
+                     VariableData variableByUuid = resourceLibrary.getVariableByUuid(type, predefinePropertyUuid);
+                     column.setPredefineVariableCategory(variableByUuid.getCategory().getName());
+                     column.setPredefinePropertyName(variableByUuid.getVariable().getName());
+                     column.setPredefinePropertyDatatype(variableByUuid.getVariable().getType());
+                     column.setPredefinePropertyLabel(variableByUuid.getVariable().getLabel());
+                     column.setPredefineVariableCategoryUuid(variableByUuid.getCategory().getUuid());
                   } else {
-                     VariableCategory var26 = var5.getVariableCategoryByUuid(var20);
-                     var15.setPredefineVariableCategory(var26.getName());
-                     var15.setPredefineVariableCategoryUuid(var26.getUuid());
+                     VariableCategory variableCategoryByUuid = resourceLibrary.getVariableCategoryByUuid(type);
+                     column.setPredefineVariableCategory(variableCategoryByUuid.getName());
+                     column.setPredefineVariableCategoryUuid(variableCategoryByUuid.getUuid());
                   }
                }
             }
          }
 
-         String var18 = var15.getVariableCategory();
-         String var21 = var15.getVariableName();
-         if (!StringUtils.isBlank(var18) && !StringUtils.isBlank(var21)) {
-            VariableData var23 = var5.getVariableByUuid(var15.getCategoryUuid(), var15.getUuid());
-            if (var23 == null) {
-               var23 = var5.getVariableByName(var15.getVariableCategory(), var15.getVariableName());
+         String variableCategory = column.getVariableCategory();
+         String variableName = column.getVariableName();
+         if (!StringUtils.isBlank(variableCategory) && !StringUtils.isBlank(variableName)) {
+            VariableData variableByUuid2 = resourceLibrary.getVariableByUuid(column.getCategoryUuid(), column.getUuid());
+            if (variableByUuid2 == null) {
+               variableByUuid2 = resourceLibrary.getVariableByName(column.getVariableCategory(), column.getVariableName());
             }
 
-            if (var23 == null) {
-               throw new RuleException("决策表条件列头变量【" + var15.getVariableCategory() + "." + var15.getVariableLabel() + "】未在库文件中定义.");
+            if (variableByUuid2 == null) {
+               throw new RuleException("决策表条件列头变量【" + column.getVariableCategory() + "." + column.getVariableLabel() + "】未在库文件中定义.");
             }
 
-            if (var15.getKeyUuid() == null) {
-               var15.setDatatype(var23.getVariable().getType());
-               var15.setVariableName(var23.getVariable().getName());
-               var15.setVariableLabel(var23.getVariable().getLabel());
-               var15.setVariableCategory(var23.getCategory().getName());
-               if (var15.getCategoryUuid() == null) {
-                  var15.setCategoryUuid(var23.getCategory().getUuid());
-                  var15.setUuid(var23.getVariable().getUuid());
+            if (column.getKeyUuid() == null) {
+               column.setDatatype(variableByUuid2.getVariable().getType());
+               column.setVariableName(variableByUuid2.getVariable().getName());
+               column.setVariableLabel(variableByUuid2.getVariable().getLabel());
+               column.setVariableCategory(variableByUuid2.getCategory().getName());
+               if (column.getCategoryUuid() == null) {
+                  column.setCategoryUuid(variableByUuid2.getCategory().getUuid());
+                  column.setUuid(variableByUuid2.getVariable().getUuid());
                }
             } else {
-               var15.setKeyLabel(var23.getVariable().getLabel());
-               var15.setKeyName(var23.getVariable().getName());
-               var23 = var5.getVariableByUuid(var15.getKeyCategoryUuid(), var15.getKeyUuid());
-               if (var23 != null) {
-                  var15.setVariableName(var23.getVariable().getName());
-                  var15.setVariableLabel(var23.getVariable().getLabel());
-                  var15.setDatatype(var23.getVariable().getType());
+               column.setKeyLabel(variableByUuid2.getVariable().getLabel());
+               column.setKeyName(variableByUuid2.getVariable().getName());
+               variableByUuid2 = resourceLibrary.getVariableByUuid(column.getKeyCategoryUuid(), column.getKeyUuid());
+               if (variableByUuid2 != null) {
+                  column.setVariableName(variableByUuid2.getVariable().getName());
+                  column.setVariableLabel(variableByUuid2.getVariable().getLabel());
+                  column.setDatatype(variableByUuid2.getVariable().getType());
                }
             }
          }
       }
 
-      Collections.sort(var1.getColumns(), new DecisionTableParser$1(this));
-      Collections.sort(var1.getRows(), new DecisionTableParser$2(this));
+      Collections.sort(decisionTable.getColumns(), new DecisionTableColumnComparator());
+      Collections.sort(decisionTable.getRows(), new DecisionTableRowComparator());
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("decision-table");
+   public boolean support(String name) {
+      return name.equals("decision-table");
    }
 
-   public void setColumnParser(ColumnParser var1) {
-      this.b = var1;
+   public void setColumnParser(ColumnParser columnParser) {
+      this.columnParser = columnParser;
    }
 
-   public void setRowParser(RowParser var1) {
-      this.a = var1;
+   public void setRowParser(RowParser rowParser) {
+      this.rowParser = rowParser;
    }
 
-   public void setCellParser(CellParser var1) {
-      this.c = var1;
+   public void setCellParser(CellParser cellParser) {
+      this.cellParser = cellParser;
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.d = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 
-   public void setPredefinesParser(PredefinesParser var1) {
-      this.e = var1;
+   public void setPredefinesParser(PredefinesParser predefinesParser) {
+      this.predefinesParser = predefinesParser;
    }
 }

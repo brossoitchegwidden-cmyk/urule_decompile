@@ -4,10 +4,10 @@ import com.bstek.urule.runtime.KnowledgePackage;
 import com.bstek.urule.runtime.service.KnowledgePackageFileService;
 
 public class DatabaseKnowledgePackageFileService implements KnowledgePackageFileService {
-   private DbService a;
+   private DbService dbService;
 
-   public DatabaseKnowledgePackageFileService(DbService var1) {
-      this.a = var1;
+   public DatabaseKnowledgePackageFileService(DbService dbService) {
+      this.dbService = dbService;
    }
 
    @Override
@@ -16,22 +16,21 @@ public class DatabaseKnowledgePackageFileService implements KnowledgePackageFile
    }
 
    @Override
-   public KnowledgePackage loadKnowledgePackage(String var1) {
-      int var2 = var1.lastIndexOf("/");
-      if (var2 > 0) {
-         var1 = var1.replaceFirst("/", "#");
+   public KnowledgePackage loadKnowledgePackage(String packageId) {
+      int number = packageId.lastIndexOf("/");
+      if (number > 0) {
+         packageId = packageId.replaceFirst("/", "#");
       }
 
-      return this.a.loadKnowledgePackage(var1);
+      return this.dbService.loadKnowledgePackage(packageId);
    }
-
    @Override
-   public KnowledgePackage verifyKnowledgePackage(String var1, long var2) {
-      int var4 = var1.lastIndexOf("/");
-      if (var4 > 0) {
-         var1 = var1.replaceFirst("/", "#");
+   public KnowledgePackage verifyKnowledgePackage(String packageId, long fileModifyDate) {
+      int number = packageId.lastIndexOf("/");
+      if (number > 0) {
+         packageId = packageId.replaceFirst("/", "#");
       }
 
-      return this.a.verifyKnowledgePackage(var1, var2);
+      return this.dbService.verifyKnowledgePackage(packageId, fileModifyDate);
    }
 }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class DecisionNode extends BindingNode {
-   private List<DecisionItem> items;
+   private List<DecisionItem> decisionNodeItems;
    private FlowNodeType type = FlowNodeType.Decision;
    private DecisionType decisionType = DecisionType.Criteria;
    private PercentScope percentScope;
@@ -28,145 +28,145 @@ public class DecisionNode extends BindingNode {
    public DecisionNode() {
    }
 
-   public DecisionNode(String var1) {
-      super(var1);
+   public DecisionNode(String name) {
+      super(name);
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      var3.setCurrentNode(this);
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      instance.setCurrentNode(this);
       if (this.decisionType.equals(DecisionType.Criteria)) {
-         this.doCriteria(var2, var3);
+         this.doCriteria(context, instance);
       } else {
-         this.doPercent(var2, var3);
+         this.doPercent(context, instance);
       }
 
-      this.executeNodeEvent(EventType.enter, var2, var3);
+      this.executeNodeEvent(EventType.enter, context, instance);
    }
 
-   private void doPercent(FlowContext var1, FlowInstance var2) {
+   private void doPercent(FlowContext flowContext, FlowInstance flowInstance) {
       if (this.percentScope != null && !this.percentScope.equals(PercentScope.batch)) {
-         this.doGlobalScope(var1, var2);
+         this.doGlobalScope(flowContext, flowInstance);
       } else {
-         this.doBatchScope(var1, var2);
+         this.doBatchScope(flowContext, flowInstance);
       }
    }
 
-   private void doBatchScope(FlowContext var1, FlowInstance var2) {
-      Exception var3 = null;
-      PercentItem var4 = null;
+   private void doBatchScope(FlowContext flowContext, FlowInstance flowInstance) {
+      Exception exception2 = null;
+      PercentItem percentItem = null;
 
       try {
-         String var5 = var2.getProcessDefinition().getId() + "_" + this.name;
-         long var6 = this.getAmount(var5, var1) + 1L;
-         ArrayList var8 = new ArrayList();
+         String text = flowInstance.getProcessDefinition().getId() + "_" + this.name;
+         long longValue = this.getAmount(text, flowContext) + 1L;
+         ArrayList items = new ArrayList();
 
-         for (DecisionItem var10 : this.items) {
-            PercentItem var11 = new PercentItem();
-            var11.setName(var10.getTo());
-            var11.setPercent(var10.getPercent());
-            String var12 = var5 + "." + var10.getTo();
-            long var13 = this.getAmount(var12, var1);
-            var11.setTotal(var13);
-            var8.add(var11);
+         for (DecisionItem decisionItem : this.decisionNodeItems) {
+            PercentItem percentItem2 = new PercentItem();
+            percentItem2.setName(decisionItem.getTo());
+            percentItem2.setPercent(decisionItem.getPercent());
+            String text2 = text + "." + decisionItem.getTo();
+            long amount = this.getAmount(text2, flowContext);
+            percentItem2.setTotal(amount);
+            items.add(percentItem2);
          }
 
-         var4 = this.computePercent(var8, var6);
-         this.setAmount(var5, var6, var1);
-         this.setAmount(var5 + "." + var4.getName(), var4.getTotal() + 1L, var1);
-         this.executeNodeEvent(EventType.leave, var1, var2);
-      } catch (Exception var18) {
-         var3 = var18;
+         percentItem = this.computePercent(items, longValue);
+         this.setAmount(text, longValue, flowContext);
+         this.setAmount(text + "." + percentItem.getName(), percentItem.getTotal() + 1L, flowContext);
+         this.executeNodeEvent(EventType.leave, flowContext, flowInstance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         if (!Objects.isNull(var4)) {
-            this.leave(var4.getName(), var1, var2, var3);
+         if (!Objects.isNull(percentItem)) {
+            this.leave(percentItem.getName(), flowContext, flowInstance, exception2);
          }
       }
    }
 
-   private void doGlobalScope(FlowContext var1, FlowInstance var2) {
-      Exception var3 = null;
-      PercentItem var4 = null;
+   private void doGlobalScope(FlowContext flowContext, FlowInstance flowInstance) {
+      Exception exception2 = null;
+      PercentItem percentItem = null;
 
       try {
-         PercentDataStore var5 = (PercentDataStore)Utils.getApplicationContext().getBean("urule.percentDataStore");
-         PercentUnit var6 = var5.getDecisionNodePercent(var2.getProcessDefinition(), this.items, this.name);
-         ArrayList var7 = new ArrayList();
+         PercentDataStore percentDataStore = (PercentDataStore)Utils.getApplicationContext().getBean("urule.percentDataStore");
+         PercentUnit decisionNodePercent = percentDataStore.getDecisionNodePercent(flowInstance.getProcessDefinition(), this.decisionNodeItems, this.name);
+         ArrayList items = new ArrayList();
 
-         for (DecisionItem var9 : this.items) {
-            PercentItem var10 = new PercentItem();
-            var10.setName(var9.getTo());
-            var10.setPercent(var9.getPercent());
-            long var11 = var6.getBranch(var9).getTotal();
-            var10.setTotal(var11);
-            var10.setItem(var9);
-            var7.add(var10);
+         for (DecisionItem decisionItem : this.decisionNodeItems) {
+            PercentItem percentItem2 = new PercentItem();
+            percentItem2.setName(decisionItem.getTo());
+            percentItem2.setPercent(decisionItem.getPercent());
+            long total = decisionNodePercent.getBranch(decisionItem).getTotal();
+            percentItem2.setTotal(total);
+            percentItem2.setItem(decisionItem);
+            items.add(percentItem2);
          }
 
-         long var18 = var6.getTotal() + 1L;
-         var4 = this.computePercent(var7, var18);
-         var6.setTotal(var18);
-         Branch var19 = var6.getBranch(var4.getItem());
-         var19.setTotal(var4.getTotal() + 1L);
-         this.executeNodeEvent(EventType.leave, var1, var2);
-      } catch (Exception var16) {
-         var3 = var16;
+         long longValue = decisionNodePercent.getTotal() + 1L;
+         percentItem = this.computePercent(items, longValue);
+         decisionNodePercent.setTotal(longValue);
+         Branch branch = decisionNodePercent.getBranch(percentItem.getItem());
+         branch.setTotal(percentItem.getTotal() + 1L);
+         this.executeNodeEvent(EventType.leave, flowContext, flowInstance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         if (!Objects.isNull(var4)) {
-            this.leave(var4.getName(), var1, var2, var3);
+         if (!Objects.isNull(percentItem)) {
+            this.leave(percentItem.getName(), flowContext, flowInstance, exception2);
          }
       }
    }
 
-   private long getAmount(String var1, FlowContext var2) {
-      Object var3 = var2.getWorkingMemory().getSessionValue(var1);
-      return var3 == null ? 0L : (Long)var3;
+   private long getAmount(String text, FlowContext flowContext) {
+      Object sessionValue = flowContext.getWorkingMemory().getSessionValue(text);
+      return sessionValue == null ? 0L : (Long)sessionValue;
    }
 
-   private void setAmount(String var1, long var2, FlowContext var4) {
-      var4.getWorkingMemory().setSessionValue(var1, var2);
+   private void setAmount(String text, long longValue, FlowContext flowContext) {
+      flowContext.getWorkingMemory().setSessionValue(text, longValue);
    }
 
-   private void doCriteria(FlowContext var1, FlowInstance var2) {
-      Object var3 = null;
-      Exception var4 = null;
+   private void doCriteria(FlowContext flowContext, FlowInstance flowInstance) {
+      Object parameter = null;
+      Exception exception2 = null;
 
       try {
-         KnowledgeSession var5 = this.executeKnowledgePackage(var1, var2);
-         this.executeNodeEvent(EventType.leave, var1, var2);
-         var3 = var5.getParameter("return_to__");
-         String var6 = var2.getProcessDefinition().getFile();
-         if (var3 != null) {
-            var1.getLogger().logDecisionNodeMatch(this, var6, var3.toString());
-            var5.getParameters().remove("return_to__");
+         KnowledgeSession knowledgeSession = this.executeKnowledgePackage(flowContext, flowInstance);
+         this.executeNodeEvent(EventType.leave, flowContext, flowInstance);
+         parameter = knowledgeSession.getParameter("return_to__");
+         String file = flowInstance.getProcessDefinition().getFile();
+         if (parameter != null) {
+            flowContext.getLogger().logDecisionNodeMatch(this, file, parameter.toString());
+            knowledgeSession.getParameters().remove("return_to__");
             return;
          }
 
-         var1.getLogger().logDecisionNodeMatch(this, var6, null);
-      } catch (Exception var10) {
-         var4 = var10;
+         flowContext.getLogger().logDecisionNodeMatch(this, file, null);
+      } catch (Exception exception) {
+         exception2 = exception;
          return;
       } finally {
-         this.leave(var3 != null ? var3.toString() : null, var1, var2, var4);
+         this.leave(parameter != null ? parameter.toString() : null, flowContext, flowInstance, exception2);
       }
    }
 
-   private PercentItem computePercent(List<PercentItem> var1, long var2) {
-      BigDecimal var4 = new BigDecimal(var2);
+   private PercentItem computePercent(List<PercentItem> percentItems, long longValue) {
+      BigDecimal bigDecimal = new BigDecimal(longValue);
 
-      for (PercentItem var6 : var1) {
-         long var7 = var6.getTotal();
-         BigDecimal var9 = new BigDecimal(var7);
-         BigDecimal var10 = var9.divide(var4, 20, 6);
-         BigDecimal var11 = new BigDecimal(var6.getPercent());
-         var11 = var11.divide(new BigDecimal(100), 2, 6);
-         int var12 = var10.compareTo(var11);
-         if (var12 == -1) {
-            return var6;
+      for (PercentItem percentItem : percentItems) {
+         long total = percentItem.getTotal();
+         BigDecimal bigDecimal2 = new BigDecimal(total);
+         BigDecimal decimalValue = bigDecimal2.divide(bigDecimal, 20, 6);
+         BigDecimal bigDecimal3 = new BigDecimal(percentItem.getPercent());
+         bigDecimal3 = bigDecimal3.divide(new BigDecimal(100), 2, 6);
+         int number = decimalValue.compareTo(bigDecimal3);
+         if (number == -1) {
+            return percentItem;
          }
       }
 
-      return (PercentItem)var1.get(0);
+      return (PercentItem)percentItems.get(0);
    }
 
    @Override
@@ -175,64 +175,64 @@ public class DecisionNode extends BindingNode {
    }
 
    public List<DecisionItem> getItems() {
-      return this.items;
+      return this.decisionNodeItems;
    }
 
-   public void setItems(List<DecisionItem> var1) {
-      this.items = var1;
+   public void setItems(List<DecisionItem> items) {
+      this.decisionNodeItems = items;
    }
 
-   public RuleSet buildRuleSet(List<Library> var1, FlowDefinition var2) {
-      RuleSet var3 = new RuleSet();
-      var3.setLibraries(var1);
-      ArrayList var4 = new ArrayList();
-      var3.setRules(var4);
-      int var5 = 0;
+   public RuleSet buildRuleSet(List<Library> libraries, FlowDefinition fd) {
+      RuleSet ruleSet = new RuleSet();
+      ruleSet.setLibraries(libraries);
+      ArrayList items = new ArrayList();
+      ruleSet.setRules(items);
+      int number = 0;
 
-      for (DecisionItem var7 : this.items) {
-         var5++;
-         if (var7.getConditionType() != null && !var7.getConditionType().equals("script")) {
-            Rule var8 = new Rule();
-            var4.add(var8);
-            var8.setFile(var2.getFile());
-            var8.setLhs(var7.getLhs());
-            var8.setDebug(var2.isDebug());
-            var8.setName("决策节点[" + this.getName() + "]-" + var5);
-            Rhs var9 = new Rhs();
-            var8.setRhs(var9);
-            ArrayList var10 = new ArrayList();
-            var9.setActions(var10);
-            VariableAssignAction var11 = new VariableAssignAction();
-            var10.add(var11);
-            var11.setDatatype(Datatype.String);
-            var11.setDebug(var2.isDebug());
-            var11.setCategoryUuid("参数");
-            var11.setVariableCategory("parameter");
-            var11.setVariableLabel("return_to__");
-            var11.setVariableName("return_to__");
-            var11.setType(LeftType.variable);
-            SimpleValue var12 = new SimpleValue();
-            var12.setContent(var7.getTo());
-            var11.setValue(var12);
+      for (DecisionItem decisionItem : this.decisionNodeItems) {
+         number++;
+         if (decisionItem.getConditionType() != null && !decisionItem.getConditionType().equals("script")) {
+            Rule rule = new Rule();
+            items.add(rule);
+            rule.setFile(fd.getFile());
+            rule.setLhs(decisionItem.getLhs());
+            rule.setDebug(fd.isDebug());
+            rule.setName("决策节点[" + this.getName() + "]-" + number);
+            Rhs rhs = new Rhs();
+            rule.setRhs(rhs);
+            ArrayList items2 = new ArrayList();
+            rhs.setActions(items2);
+            VariableAssignAction variableAssignAction = new VariableAssignAction();
+            items2.add(variableAssignAction);
+            variableAssignAction.setDatatype(Datatype.String);
+            variableAssignAction.setDebug(fd.isDebug());
+            variableAssignAction.setCategoryUuid("参数");
+            variableAssignAction.setVariableCategory("parameter");
+            variableAssignAction.setVariableLabel("return_to__");
+            variableAssignAction.setVariableName("return_to__");
+            variableAssignAction.setType(LeftType.variable);
+            SimpleValue simpleValue = new SimpleValue();
+            simpleValue.setContent(decisionItem.getTo());
+            variableAssignAction.setValue(simpleValue);
          }
       }
 
-      return var3;
+      return ruleSet;
    }
 
    public PercentScope getPercentScope() {
       return this.percentScope;
    }
 
-   public void setPercentScope(PercentScope var1) {
-      this.percentScope = var1;
+   public void setPercentScope(PercentScope percentScope) {
+      this.percentScope = percentScope;
    }
 
    public DecisionType getDecisionType() {
       return this.decisionType;
    }
 
-   public void setDecisionType(DecisionType var1) {
-      this.decisionType = var1;
+   public void setDecisionType(DecisionType decisionType) {
+      this.decisionType = decisionType;
    }
 }

@@ -13,247 +13,247 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BatchQueryImpl implements BatchQuery {
-   private Long a;
-   private String b;
-   private String c;
-   private String d;
-   private Boolean e;
-   private Boolean f;
-   private BatchStatus g;
-   private Long h;
-   private Long i;
-   private List j = new ArrayList();
+   private Long id;
+   private String nameLike;
+   private String descLike;
+   private String createUser;
+   private Boolean enable;
+   private Boolean async;
+   private BatchStatus status;
+   private Long packetId;
+   private Long projectId;
+   private List queryParameters = new ArrayList();
 
-   public BatchQuery id(Long var1) {
-      this.a = var1;
+   public BatchQuery id(Long id) {
+      this.id = id;
       return this;
    }
 
-   public BatchQuery nameLike(String var1) {
-      this.b = var1;
+   public BatchQuery nameLike(String nameLike) {
+      this.nameLike = nameLike;
       return this;
    }
 
-   public BatchQuery descLike(String var1) {
-      this.c = var1;
+   public BatchQuery descLike(String descLike) {
+      this.descLike = descLike;
       return this;
    }
 
-   public BatchQuery projectId(Long var1) {
-      this.i = var1;
+   public BatchQuery projectId(Long projectId) {
+      this.projectId = projectId;
       return this;
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      List var4;
+      List listResult;
       try {
-         String var2 = this.a();
-         List var3 = this.a(var1, var2);
-         var4 = var3;
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         String text = this.buildSelectSql();
+         List items = this.queryBatches(connection, text);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var4;
+      return listResult;
    }
 
-   public void page(Page var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void page(Page page) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var3 = this.a();
-         String var4 = var3 + " ORDER BY NAME_";
-         String var5 = JdbcUtils.getPageSql(var2, var4, var1.getStartRow(), var1.getPageSize());
-         List var6 = this.a(var2, var5);
-         var1.setData(var6);
-         String var7 = JdbcUtils.getCountSql(var3);
-         PreparedStatement var8 = var2.prepareStatement(var7);
-         JdbcUtils.fillPreparedStatementParameters(this.j, var8);
-         ResultSet var9 = var8.executeQuery();
-         if (var9.next()) {
-            var1.setTotalRows((long)var9.getInt(1));
+         String text = this.buildSelectSql();
+         String text2 = text + " ORDER BY NAME_";
+         String pageSql = JdbcUtils.getPageSql(connection, text2, page.getStartRow(), page.getPageSize());
+         List items = this.queryBatches(connection, pageSql);
+         page.setData(items);
+         String countSql = JdbcUtils.getCountSql(text);
+         PreparedStatement preparedStatement = connection.prepareStatement(countSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page.setTotalRows((long)resultSet.getInt(1));
          }
 
-         JdbcUtils.closeResultSet(var9);
-         JdbcUtils.closeStatement(var8);
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   private List a(Connection var1, String var2) throws Exception {
-      PreparedStatement var3 = var1.prepareStatement(var2);
-      JdbcUtils.fillPreparedStatementParameters(this.j, var3);
-      ArrayList var4 = new ArrayList();
-      ResultSet var5 = var3.executeQuery();
+   private List queryBatches(Connection connection, String text) throws Exception {
+      PreparedStatement preparedStatement = connection.prepareStatement(text);
+      JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+      ArrayList items = new ArrayList();
+      ResultSet resultSet = preparedStatement.executeQuery();
 
-      while(var5.next()) {
-         Batch var6 = this.a(var5);
-         var4.add(var6);
+      while(resultSet.next()) {
+         Batch batch = this.mapBatch(resultSet);
+         items.add(batch);
       }
 
-      JdbcUtils.closeResultSet(var5);
-      JdbcUtils.closeStatement(var3);
-      return var4;
+      JdbcUtils.closeResultSet(resultSet);
+      JdbcUtils.closeStatement(preparedStatement);
+      return items;
    }
 
-   private String a() {
-      String var1 = "SELECT NAME_, ASYNC_, CALLBACK_URL_, STATUS_, LISTENER_, SKIP_LIMIT_, THREAD_MULTI_, THREAD_SIZE_, THREAD_DATA_SIZE_, PROVIDER_ID_, RESOLVER_ID_, PACKET_ID_, PACKET_INPUT_DATA_, REST_ENABLE_, REST_SECURITY_ENABLE_, REST_SECURITY_USER_, REST_SECURITY_PASSWORD_, INPUT_DATA_, DESC_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, PROJECT_ID_, ENABLE_ FROM URULE_BATCH ";
-      StringBuilder var2 = this.b();
-      if (var2.length() > 0) {
-         var1 = var1 + " where" + var2.toString();
+   private String buildSelectSql() {
+      String text = "SELECT NAME_, ASYNC_, CALLBACK_URL_, STATUS_, LISTENER_, SKIP_LIMIT_, THREAD_MULTI_, THREAD_SIZE_, THREAD_DATA_SIZE_, PROVIDER_ID_, RESOLVER_ID_, PACKET_ID_, PACKET_INPUT_DATA_, REST_ENABLE_, REST_SECURITY_ENABLE_, REST_SECURITY_USER_, REST_SECURITY_PASSWORD_, INPUT_DATA_, DESC_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, PROJECT_ID_, ENABLE_ FROM URULE_BATCH ";
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      return var1;
+      return text;
    }
 
-   private Batch a(ResultSet var1) throws SQLException {
-      Batch var2 = new Batch();
-      var2.setName(var1.getString(1));
-      var2.setAsync(var1.getBoolean(2));
-      var2.setCallbackUrl(var1.getString(3));
-      var2.setStatus(BatchStatus.valueOf(var1.getString(4)));
-      var2.setListener(var1.getString(5));
-      var2.setSkipLimit(var1.getInt(6));
-      var2.setThreadMulti(var1.getBoolean(7));
-      var2.setThreadSize(var1.getInt(8));
-      var2.setThreadDataSize(var1.getInt(9));
-      var2.setProviderId(var1.getLong(10));
-      var2.setResolverId(var1.getLong(11));
-      var2.setPacketId(var1.getLong(12));
-      var2.setPacketInputData(var1.getString(13));
-      var2.setRestEnable(var1.getBoolean(14));
-      var2.setRestSecurityEnable(var1.getBoolean(15));
-      var2.setRestSecurityUser(var1.getString(16));
-      var2.setRestSecurityPassword(var1.getString(17));
-      var2.setInputData(var1.getString(18));
-      var2.setDesc(var1.getString(19));
-      var2.setCreateUser(var1.getString(20));
-      var2.setCreateDate(var1.getTimestamp(21));
-      var2.setUpdateUser(var1.getString(22));
-      var2.setUpdateDate(var1.getTimestamp(23));
-      var2.setId(var1.getLong(24));
-      var2.setProjectId(var1.getLong(25));
-      var2.setEnable(var1.getBoolean(26));
-      return var2;
+   private Batch mapBatch(ResultSet resultSet) throws SQLException {
+      Batch batch = new Batch();
+      batch.setName(resultSet.getString(1));
+      batch.setAsync(resultSet.getBoolean(2));
+      batch.setCallbackUrl(resultSet.getString(3));
+      batch.setStatus(BatchStatus.valueOf(resultSet.getString(4)));
+      batch.setListener(resultSet.getString(5));
+      batch.setSkipLimit(resultSet.getInt(6));
+      batch.setThreadMulti(resultSet.getBoolean(7));
+      batch.setThreadSize(resultSet.getInt(8));
+      batch.setThreadDataSize(resultSet.getInt(9));
+      batch.setProviderId(resultSet.getLong(10));
+      batch.setResolverId(resultSet.getLong(11));
+      batch.setPacketId(resultSet.getLong(12));
+      batch.setPacketInputData(resultSet.getString(13));
+      batch.setRestEnable(resultSet.getBoolean(14));
+      batch.setRestSecurityEnable(resultSet.getBoolean(15));
+      batch.setRestSecurityUser(resultSet.getString(16));
+      batch.setRestSecurityPassword(resultSet.getString(17));
+      batch.setInputData(resultSet.getString(18));
+      batch.setDesc(resultSet.getString(19));
+      batch.setCreateUser(resultSet.getString(20));
+      batch.setCreateDate(resultSet.getTimestamp(21));
+      batch.setUpdateUser(resultSet.getString(22));
+      batch.setUpdateDate(resultSet.getTimestamp(23));
+      batch.setId(resultSet.getLong(24));
+      batch.setProjectId(resultSet.getLong(25));
+      batch.setEnable(resultSet.getBoolean(26));
+      return batch;
    }
 
-   private StringBuilder b() {
-      this.j.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.nameLike != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ like ?");
-         this.j.add("%" + this.b + "%");
+         stringBuilder.append(" NAME_ like ?");
+         this.queryParameters.add("%" + this.nameLike + "%");
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.descLike != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" DESC_ like ?");
-         this.j.add("%" + this.c + "%");
+         stringBuilder.append(" DESC_ like ?");
+         this.queryParameters.add("%" + this.descLike + "%");
       }
 
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.j.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.i != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_=?");
-         this.j.add(this.i);
+         stringBuilder.append(" PROJECT_ID_=?");
+         this.queryParameters.add(this.projectId);
       }
 
-      if (this.h != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.packetId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PACKET_ID_=?");
-         this.j.add(this.h);
+         stringBuilder.append(" PACKET_ID_=?");
+         this.queryParameters.add(this.packetId);
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.enable != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ENABLE_=?");
-         this.j.add(this.e);
+         stringBuilder.append(" ENABLE_=?");
+         this.queryParameters.add(this.enable);
       }
 
-      if (this.f != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.async != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ASYNC_=?");
-         this.j.add(this.f);
+         stringBuilder.append(" ASYNC_=?");
+         this.queryParameters.add(this.async);
       }
 
-      if (this.g != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.status != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" STATUS_=?");
-         this.j.add(this.g.name());
+         stringBuilder.append(" STATUS_=?");
+         this.queryParameters.add(this.status.name());
       }
 
-      if (this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.createUser != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" CREATE_USER_ like ?");
-         this.j.add("%" + this.d + "%");
+         stringBuilder.append(" CREATE_USER_ like ?");
+         this.queryParameters.add("%" + this.createUser + "%");
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public BatchQuery enable(Boolean var1) {
-      this.e = var1;
+   public BatchQuery enable(Boolean enable) {
+      this.enable = enable;
       return this;
    }
 
-   public BatchQuery async(Boolean var1) {
-      this.f = var1;
+   public BatchQuery async(Boolean async) {
+      this.async = async;
       return this;
    }
 
-   public BatchQuery status(BatchStatus var1) {
-      this.g = var1;
+   public BatchQuery status(BatchStatus status) {
+      this.status = status;
       return this;
    }
 
-   public BatchQuery packetId(Long var1) {
-      this.h = var1;
+   public BatchQuery packetId(Long packetId) {
+      this.packetId = packetId;
       return this;
    }
 
-   public BatchQuery createUserLike(String var1) {
-      this.d = var1;
+   public BatchQuery createUserLike(String createUser) {
+      this.createUser = createUser;
       return this;
    }
 }

@@ -11,44 +11,44 @@ import com.bstek.urule.runtime.service.KnowledgePackageService;
 import java.io.IOException;
 
 public class KnowledgePackageServiceImpl implements KnowledgePackageService {
-   public KnowledgePackage buildKnowledgePackage(String var1) throws IOException {
-      PacketData var2 = this.a(var1);
-      return var2.getKnowledgePackageWrapper().getKnowledgePackage();
+   public KnowledgePackage buildKnowledgePackage(String packetId) throws IOException {
+      PacketData packetData = this.resolvePacketData(packetId);
+      return packetData.getKnowledgePackageWrapper().getKnowledgePackage();
    }
 
-   public KnowledgeBase buildKnowledgeBase(String var1) throws IOException {
-      KnowledgeBase var2 = PacketBuilder.ins.buildKnowledgeBase(Long.valueOf(var1));
-      return var2;
+   public KnowledgeBase buildKnowledgeBase(String packetId) throws IOException {
+      KnowledgeBase knowledgeBase = PacketBuilder.ins.buildKnowledgeBase(Long.valueOf(packetId));
+      return knowledgeBase;
    }
 
-   public KnowledgePackage verifyKnowledgePackage(String var1, long var2) throws IOException {
-      PacketData var4 = this.a(var1);
-      KnowledgePackage var5 = var4.getKnowledgePackageWrapper().getKnowledgePackage();
-      return var5.getTimestamp() == var2 ? null : var5;
+   public KnowledgePackage verifyKnowledgePackage(String packetId, long timestamp) throws IOException {
+      PacketData packetData = this.resolvePacketData(packetId);
+      KnowledgePackage knowledgePackage = packetData.getKnowledgePackageWrapper().getKnowledgePackage();
+      return knowledgePackage.getTimestamp() == timestamp ? null : knowledgePackage;
    }
 
-   private PacketData a(String var1) {
-      PacketData var2 = PacketCache.ins.getPacket(var1);
-      if (var2 == null) {
-         long var3 = 0L;
+   private PacketData resolvePacketData(String text) {
+      PacketData packet = PacketCache.ins.getPacket(text);
+      if (packet == null) {
+         long longValue = 0L;
 
          try {
-            var3 = Long.valueOf(var1);
-         } catch (NumberFormatException var6) {
-            throw new RuleException("Package [" + var1 + "] not exist");
+            longValue = Long.valueOf(text);
+         } catch (NumberFormatException numberFormatException) {
+            throw new RuleException("Package [" + text + "] not exist");
          }
 
-         var2 = PacketCache.ins.getPacket(var3);
+         packet = PacketCache.ins.getPacket(longValue);
       }
 
-      if (var2 == null) {
-         throw new RuleException("知识包【" + var1 + "】未发布或不存在");
+      if (packet == null) {
+         throw new RuleException("知识包【" + text + "】未发布或不存在");
       } else {
-         PacketConfig var8 = var2.getPacket();
-         if (!var8.isEnable()) {
-            throw new RuleException("知识包【" + var1 + "】已停用");
+         PacketConfig packet2 = packet.getPacket();
+         if (!packet2.isEnable()) {
+            throw new RuleException("知识包【" + text + "】已停用");
          } else {
-            return var2;
+            return packet;
          }
       }
    }

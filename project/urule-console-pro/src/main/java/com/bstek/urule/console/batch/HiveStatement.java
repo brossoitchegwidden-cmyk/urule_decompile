@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HiveStatement {
-   private List a = new ArrayList();
+   private List batchSqls = new ArrayList();
 
    public List getBatchSqls() {
-      return this.a;
+      return this.batchSqls;
    }
 
-   public void setBatchSqls(List var1) {
-      this.a = var1;
+   public void setBatchSqls(List batchSqls) {
+      this.batchSqls = batchSqls;
    }
 
-   public void addBatch(String var1) throws SQLException {
-      this.a.add(var1);
+   public void addBatch(String batchSql) throws SQLException {
+      this.batchSqls.add(batchSql);
    }
 }

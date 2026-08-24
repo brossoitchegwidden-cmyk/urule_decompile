@@ -15,94 +15,94 @@ import java.util.List;
 import java.util.Map;
 
 public class KnowledgeBase {
-   private Rete a;
-   private List<Rete> b;
-   private ResourceLibrary c;
-   private Map<String, FlowDefinition> d;
-   private List<PredefineExecutionUnit> e;
-   private KnowledgePackageImpl f;
+   private Rete rete;
+   private List<Rete> aloneRetes;
+   private ResourceLibrary resourceLibrary;
+   private Map<String, FlowDefinition> flowMap;
+   private List<PredefineExecutionUnit> predefineExecutionUnits;
+   private KnowledgePackageImpl knowledgePackageImpl;
 
-   public KnowledgeBase(Rete var1) {
-      this(var1, null, null, null);
+   public KnowledgeBase(Rete rete) {
+      this(rete, null, null, null);
    }
 
-   public KnowledgeBase(Rete var1, List<Rete> var2, Map<String, FlowDefinition> var3, List<PredefineExecutionUnit> var4) {
-      this.a = var1;
-      this.d = var3;
-      this.b = var2;
-      this.c = var1.getResourceLibrary();
-      if (var4 != null) {
-         Collections.sort(var4);
+   public KnowledgeBase(Rete rete, List<Rete> aloneRetes, Map<String, FlowDefinition> flowMap, List<PredefineExecutionUnit> predefineExecutionUnits) {
+      this.rete = rete;
+      this.flowMap = flowMap;
+      this.aloneRetes = aloneRetes;
+      this.resourceLibrary = rete.getResourceLibrary();
+      if (predefineExecutionUnits != null) {
+         Collections.sort(predefineExecutionUnits);
       }
 
-      this.e = var4;
+      this.predefineExecutionUnits = predefineExecutionUnits;
    }
 
    public KnowledgePackage getKnowledgePackage() {
-      if (this.f != null) {
-         return this.f;
+      if (this.knowledgePackageImpl != null) {
+         return this.knowledgePackageImpl;
       }
 
-      this.f = new KnowledgePackageImpl();
-      this.f.setRete(this.a);
-      this.f.setAloneRetes(this.b);
-      this.f.setFlowMap(this.d);
-      this.f.setPredefineExecutionUnits(this.e);
-      HashMap var1 = new HashMap();
-      HashMap var2 = new HashMap();
-      this.f.setVariableCategoryMap(var2);
-      List var3 = this.c.getVariableCategories();
-      this.f.setVariableCategories(var3);
-      this.f.setVariableCategoryWithDefaultValueClassMap(var1);
-      HashMap var4 = new HashMap();
-      this.f.setParameters(var4);
+      this.knowledgePackageImpl = new KnowledgePackageImpl();
+      this.knowledgePackageImpl.setRete(this.rete);
+      this.knowledgePackageImpl.setAloneRetes(this.aloneRetes);
+      this.knowledgePackageImpl.setFlowMap(this.flowMap);
+      this.knowledgePackageImpl.setPredefineExecutionUnits(this.predefineExecutionUnits);
+      HashMap valuesByKey = new HashMap();
+      HashMap valuesByKey2 = new HashMap();
+      this.knowledgePackageImpl.setVariableCategoryMap(valuesByKey2);
+      List variableCategories = this.resourceLibrary.getVariableCategories();
+      this.knowledgePackageImpl.setVariableCategories(variableCategories);
+      this.knowledgePackageImpl.setVariableCategoryWithDefaultValueClassMap(valuesByKey);
+      HashMap valuesByKey3 = new HashMap();
+      this.knowledgePackageImpl.setParameters(valuesByKey3);
 
-      for (VariableCategory var6 : (Iterable<VariableCategory>)(Iterable<?>)(var3)) {
-         String var7 = var6.getName();
-         String var8 = var6.getClazz();
-         var1.put(var8, var6.newVariableCategoryWithDefaultValue());
-         var2.put(var7, var6.getClazz());
-         if (var7.equals("参数")) {
-            List var9 = var6.getVariables();
-            if (var9 != null && var9.size() != 0) {
-               for (Variable var11 : (Iterable<Variable>)(Iterable<?>)(var9)) {
-                  var4.put(var11.getName(), var11.getType().name());
+      for (VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableCategories)) {
+         String name = variableCategory.getName();
+         String clazz = variableCategory.getClazz();
+         valuesByKey.put(clazz, variableCategory.newVariableCategoryWithDefaultValue());
+         valuesByKey2.put(name, variableCategory.getClazz());
+         if (name.equals("参数")) {
+            List variables = variableCategory.getVariables();
+            if (variables != null && variables.size() != 0) {
+               for (Variable variable : (Iterable<Variable>)(Iterable<?>)(variables)) {
+                  valuesByKey3.put(variable.getName(), variable.getType().name());
                }
             }
          }
       }
 
-      return this.f;
+      return this.knowledgePackageImpl;
    }
 
    public Rete getPredefineRete() {
-      if (this.e != null && this.e.size() != 0) {
-         PredefineExecutionUnit var1 = this.e.get(0);
-         PredefineGroup var2 = var1.getGroup();
-         if (var2 == null) {
+      if (this.predefineExecutionUnits != null && this.predefineExecutionUnits.size() != 0) {
+         PredefineExecutionUnit predefineExecutionUnit = this.predefineExecutionUnits.get(0);
+         PredefineGroup group = predefineExecutionUnit.getGroup();
+         if (group == null) {
             return null;
          }
 
-         PredefineGroup var3;
-         for (var3 = var2; var2.getNextGroup() != null; var3 = var2) {
-            var2 = var2.getNextGroup();
+         PredefineGroup predefineGroup;
+         for (predefineGroup = group; group.getNextGroup() != null; predefineGroup = group) {
+            group = group.getNextGroup();
          }
 
-         return var3 == null ? null : var3.getKnowledgePackageWrapper().getKnowledgePackage().getRete();
+         return predefineGroup == null ? null : predefineGroup.getKnowledgePackageWrapper().getKnowledgePackage().getRete();
       } else {
          return null;
       }
    }
 
    public Rete getRete() {
-      return this.a;
+      return this.rete;
    }
 
    public ResourceLibrary getResourceLibrary() {
-      return this.c;
+      return this.resourceLibrary;
    }
 
    public Map<String, FlowDefinition> getFlowMap() {
-      return this.d;
+      return this.flowMap;
    }
 }

@@ -6,40 +6,40 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class PacketParam {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
+   private String name;
+   private String label;
+   private String dataType;
+   private String batchParamName;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.b;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.b = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public String getDataType() {
-      return this.c;
+      return this.dataType;
    }
 
-   public void setDataType(String var1) {
-      this.c = var1;
+   public void setDataType(String dataType) {
+      this.dataType = dataType;
    }
 
    public String getBatchParamName() {
-      return this.d;
+      return this.batchParamName;
    }
 
-   public void setBatchParamName(String var1) {
-      this.d = var1;
+   public void setBatchParamName(String batchParamName) {
+      this.batchParamName = batchParamName;
    }
 }

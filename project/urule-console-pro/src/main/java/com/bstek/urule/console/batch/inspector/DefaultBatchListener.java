@@ -10,21 +10,21 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 public class DefaultBatchListener implements BatchListener {
-   public void beforeExecute(BatchContext var1) {
+   public void beforeExecute(BatchContext batchContext) {
    }
 
-   public void onExecute(BatchContext var1) {
-      Batch var2 = var1.getBatch();
-      BatchResult var3 = var1.getResult();
-      if (var2.isAsync() && !StringUtils.isBlank(var2.getCallbackUrl())) {
+   public void onExecute(BatchContext batchContext) {
+      Batch batch = batchContext.getBatch();
+      BatchResult batchResult = batchContext.getResult();
+      if (batch.isAsync() && !StringUtils.isBlank(batch.getCallbackUrl())) {
          try {
-            RestTemplate var4 = new RestTemplate();
-            HttpHeaders var5 = new HttpHeaders();
-            var5.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity var6 = new HttpEntity(var3, var5);
-            var4.postForLocation(var1.getBatch().getCallbackUrl(), var6, new Object[0]);
-         } catch (Exception var7) {
-            var7.printStackTrace();
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity httpEntity = new HttpEntity(batchResult, httpHeaders);
+            restTemplate.postForLocation(batchContext.getBatch().getCallbackUrl(), httpEntity, new Object[0]);
+         } catch (Exception exception) {
+            java.util.logging.Logger.getLogger(DefaultBatchListener.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
          }
 
       }

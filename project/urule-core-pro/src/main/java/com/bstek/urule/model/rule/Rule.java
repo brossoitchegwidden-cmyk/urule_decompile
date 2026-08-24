@@ -33,28 +33,28 @@ public class Rule implements Comparable<Rule> {
       return this.id;
    }
 
-   public void setId(String var1) {
-      this.id = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getFile() {
       return this.file;
    }
 
-   public void setFile(String var1) {
-      this.file = var1;
+   public void setFile(String file) {
+      this.file = file;
    }
 
-   public boolean isTargetResource(ResourceType var1) {
-      return this.file.startsWith(var1.name() + ":");
+   public boolean isTargetResource(ResourceType type) {
+      return this.file.startsWith(type.name() + ":");
    }
 
    public Date getEffectiveDate() {
@@ -65,143 +65,143 @@ public class Rule implements Comparable<Rule> {
       return this.salience;
    }
 
-   public void setSalience(Integer var1) {
-      this.salience = var1;
+   public void setSalience(Integer salience) {
+      this.salience = salience;
    }
 
    public Boolean getEnabled() {
       return this.enabled;
    }
 
-   public void setEnabled(Boolean var1) {
-      this.enabled = var1;
+   public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
    }
 
    public Boolean getDebug() {
       return this.debug;
    }
 
-   public void setDebug(Boolean var1) {
-      this.debug = var1;
+   public void setDebug(Boolean debug) {
+      this.debug = debug;
    }
 
    public boolean isDebugFromGlobal() {
       return this.debugFromGlobal;
    }
 
-   public void setDebugFromGlobal(boolean var1) {
-      this.debugFromGlobal = var1;
+   public void setDebugFromGlobal(boolean debugFromGlobal) {
+      this.debugFromGlobal = debugFromGlobal;
    }
 
    public Boolean getAutoFocus() {
       return this.autoFocus;
    }
 
-   public void setAutoFocus(Boolean var1) {
-      this.autoFocus = var1;
+   public void setAutoFocus(Boolean autoFocus) {
+      this.autoFocus = autoFocus;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public String getMutexGroup() {
       return this.mutexGroup;
    }
 
-   public void setMutexGroup(String var1) {
-      this.mutexGroup = var1;
+   public void setMutexGroup(String mutexGroup) {
+      this.mutexGroup = mutexGroup;
    }
 
    public String getPendedGroup() {
       return this.pendedGroup;
    }
 
-   public void setPendedGroup(String var1) {
-      this.pendedGroup = var1;
+   public void setPendedGroup(String pendedGroup) {
+      this.pendedGroup = pendedGroup;
    }
 
    public String getRemark() {
       return this.remark;
    }
 
-   public void setRemark(String var1) {
-      this.remark = var1;
+   public void setRemark(String remark) {
+      this.remark = remark;
    }
 
    public Lhs getLhs() {
       return this.lhs;
    }
 
-   public void setLhs(Lhs var1) {
-      this.lhs = var1;
+   public void setLhs(Lhs lhs) {
+      this.lhs = lhs;
    }
 
    public Rhs getRhs() {
       return this.rhs;
    }
 
-   public void setRhs(Rhs var1) {
-      this.rhs = var1;
+   public void setRhs(Rhs rhs) {
+      this.rhs = rhs;
    }
 
    public Other getOther() {
       return this.other;
    }
 
-   public void setOther(Other var1) {
-      this.other = var1;
+   public void setOther(Other other) {
+      this.other = other;
    }
 
    public Boolean getLoop() {
       return this.loop;
    }
 
-   public void setLoop(Boolean var1) {
-      this.loop = var1;
+   public void setLoop(Boolean loop) {
+      this.loop = loop;
    }
 
    public Boolean isLoopRule() {
       return this.loopRule;
    }
 
-   public void setLoopRule(Boolean var1) {
-      this.loopRule = var1;
+   public void setLoopRule(Boolean loopRule) {
+      this.loopRule = loopRule;
    }
 
    public boolean isWithElse() {
       return this.withElse;
    }
 
-   public void setWithElse(boolean var1) {
-      this.withElse = var1;
+   public void setWithElse(boolean withElse) {
+      this.withElse = withElse;
    }
 
    public Rule getElseRule() {
       return this.elseRule;
    }
 
-   public void setElseRule(Rule var1) {
-      this.elseRule = var1;
+   public void setElseRule(Rule elseRule) {
+      this.elseRule = elseRule;
    }
 
-   public int compareTo(Rule var1) {
-      Integer var2 = var1.getSalience();
-      Integer var3 = this.getSalience();
-      if (var2 != null && var3 != null) {
-         return var2 - var3;
-      } else if (var2 != null) {
+   public int compareTo(Rule rule) {
+      Integer salience = rule.getSalience();
+      Integer salience2 = this.getSalience();
+      if (salience != null && salience2 != null) {
+         return salience - salience2;
+      } else if (salience != null) {
          return 1;
       } else {
-         return var3 != null ? -1 : 0;
+         return salience2 != null ? -1 : 0;
       }
    }
 }

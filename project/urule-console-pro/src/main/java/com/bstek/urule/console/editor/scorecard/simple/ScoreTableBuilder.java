@@ -35,251 +35,251 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.dom4j.Document;
 
 public class ScoreTableBuilder {
-   private ExcelSupport a;
-   private ScoreTableData b;
-   private DSLRuleSetBuilder c;
-   private List d;
-   private ScorecardDeserializer e;
-   private Map f = new HashMap();
+   private ExcelSupport excelSupport;
+   private ScoreTableData scoreTableData;
+   private DSLRuleSetBuilder dSLRuleSetBuilder;
+   private List variableLibraries;
+   private ScorecardDeserializer scorecardDeserializer;
+   private Map importedLibrariesById = new HashMap();
 
-   public ScoreTableBuilder(ScoreTableData var1) {
-      this.b = var1;
-      this.a = new ExcelSupport();
-      this.d = VariableLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
-      this.c = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
-      this.e = (ScorecardDeserializer)Utils.getApplicationContext().getBean("urule.scorecardDeserializer");
+   public ScoreTableBuilder(ScoreTableData data) {
+      this.scoreTableData = data;
+      this.excelSupport = new ExcelSupport();
+      this.variableLibraries = VariableLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
+      this.dSLRuleSetBuilder = (DSLRuleSetBuilder)Utils.getApplicationContext().getBean("urule.dslRuleSetBuilder");
+      this.scorecardDeserializer = (ScorecardDeserializer)Utils.getApplicationContext().getBean("urule.scorecardDeserializer");
    }
 
    public ScorecardDefinition buildTable() {
       try {
-         String var1 = this.a();
-         Document var2 = DocumentHelper.parseText(var1);
-         return this.e.deserialize(var2.getRootElement());
-      } catch (Exception var3) {
-         throw new InfoException(var3);
+         String text2 = this.buildScorecardXml();
+         Document text = DocumentHelper.parseText(text2);
+         return this.scorecardDeserializer.deserialize(text.getRootElement());
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
 
-   private String a() throws IOException {
-      StringBuilder var1 = new StringBuilder();
-      List var2 = this.b.getHeaders();
-      TableHeader var3 = this.a(var2, false, false);
-      String var4 = null;
+   private String buildScorecardXml() throws IOException {
+      StringBuilder stringBuilder = new StringBuilder();
+      List headers = this.scoreTableData.getHeaders();
+      TableHeader tableHeader = this.findHeader(headers, false, false);
+      String uuid = null;
 
-      for(VariableInfo var6 : (Iterable<VariableInfo>)(Iterable<?>)(this.d)) {
-         for(VariableCategory var8 : (Iterable<VariableCategory>)(Iterable<?>)(var6.getVariableCategories())) {
-            if (var8.getName().contentEquals(var3.getName())) {
-               var4 = var8.getUuid();
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableLibraries)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getName().contentEquals(tableHeader.getName())) {
+               uuid = variableCategory.getUuid();
                break;
             }
          }
       }
 
-      if (var4 == null) {
-         throw new InfoException("名为【" + var3.getName() + "】的变量分类在当前项目的变量库中未定义");
+      if (uuid == null) {
+         throw new InfoException("名为【" + tableHeader.getName() + "】的变量分类在当前项目的变量库中未定义");
       } else {
-         boolean var26 = this.a(var2);
-         String var27 = "从Excel中导入的评分卡";
-         if (this.b.getProperties().containsKey("name")) {
-            var27 = (String)this.b.getProperties().get("name");
+         boolean flag = this.hasWeightSupport(headers);
+         String name = "从Excel中导入的评分卡";
+         if (this.scoreTableData.getProperties().containsKey("name")) {
+            name = (String)this.scoreTableData.getProperties().get("name");
          }
 
-         var1.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-         var1.append("<scorecard weight-support=\"" + var26 + "\" name=\"" + var27 + "\" attr-col-width=\"200\" attr-col-name=\"属性\" attr-col-category=\"" + var3.getName() + "\" attr-col-category-uuid=\"" + var4 + "\" condition-col-width=\"220\" condition-col-name=\"条件\" score-col-width=\"180\" score-col-name=\"分值\"");
-         ScoringType var28 = ExcelImportUtils.getScoringType(this.b.getProperties());
-         var1.append(" scoring-type=\"" + var28.name() + "\" ");
-         ExcelImportUtils.builderProperties(this.a, var1, this.b.getProperties(), true);
-         String var29 = ExcelImportUtils.getScoringBean(this.b.getProperties());
-         if (var28 == ScoringType.custom && StringUtils.isNotBlank(var29)) {
-            var1.append(" custom-scoring-bean=\"" + var29 + "\" ");
+         stringBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+         stringBuilder.append("<scorecard weight-support=\"" + flag + "\" name=\"" + name + "\" attr-col-width=\"200\" attr-col-name=\"属性\" attr-col-category=\"" + tableHeader.getName() + "\" attr-col-category-uuid=\"" + uuid + "\" condition-col-width=\"220\" condition-col-name=\"条件\" score-col-width=\"180\" score-col-name=\"分值\"");
+         ScoringType scoringType = ExcelImportUtils.getScoringType(this.scoreTableData.getProperties());
+         stringBuilder.append(" scoring-type=\"" + scoringType.name() + "\" ");
+         ExcelImportUtils.builderProperties(this.excelSupport, stringBuilder, this.scoreTableData.getProperties(), true);
+         String scoringBean = ExcelImportUtils.getScoringBean(this.scoreTableData.getProperties());
+         if (scoringType == ScoringType.custom && StringUtils.isNotBlank(scoringBean)) {
+            stringBuilder.append(" custom-scoring-bean=\"" + scoringBean + "\" ");
          }
 
-         var1.append(">");
-         ExcelImportUtils.builderRemark(var1, this.b.getProperties());
-         List var9 = this.b.getRows();
-         int var10 = 2;
+         stringBuilder.append(">");
+         ExcelImportUtils.builderRemark(stringBuilder, this.scoreTableData.getProperties());
+         List rows = this.scoreTableData.getRows();
+         int number = 2;
 
-         for(RowData var12 : (Iterable<RowData>)(Iterable<?>)(var9)) {
-            List var13 = var12.getCells();
-            CellData var14 = null;
+         for(RowData rowData : (Iterable<RowData>)(Iterable<?>)(rows)) {
+            List cells = rowData.getCells();
+            CellData cellData = null;
 
-            for(CellData var16 : (Iterable<CellData>)(Iterable<?>)(var13)) {
-               TableHeader var17 = var16.getHeader();
-               if (!var17.isCondition() && !var17.isScore() && !var17.isCustom()) {
-                  var14 = var16;
+            for(CellData cellData2 : (Iterable<CellData>)(Iterable<?>)(cells)) {
+               TableHeader header = cellData2.getHeader();
+               if (!header.isCondition() && !header.isScore() && !header.isCustom()) {
+                  cellData = cellData2;
                   break;
                }
             }
 
-            if (var14 != null) {
-               var1.append("<attribute-row row-number=\"" + var10 + "\">");
-               int var42 = var14.getSpan();
+            if (cellData != null) {
+               stringBuilder.append("<attribute-row row-number=\"" + number + "\">");
+               int span = cellData.getSpan();
 
-               for(int var44 = 1; var44 < var42; ++var44) {
-                  ++var10;
-                  var1.append("<condition-row row-number=\"" + var10 + "\"/>");
+               for(int index = 1; index < span; ++index) {
+                  ++number;
+                  stringBuilder.append("<condition-row row-number=\"" + number + "\"/>");
                }
 
-               var1.append("</attribute-row>");
-               ++var10;
+               stringBuilder.append("</attribute-row>");
+               ++number;
             }
          }
 
-         var10 = 2;
+         number = 2;
 
-         for(int var31 = 0; var31 < var9.size(); ++var31) {
-            RowData var33 = (RowData)var9.get(var31);
+         for(int index2 = 0; index2 < rows.size(); ++index2) {
+            RowData rowData2 = (RowData)rows.get(index2);
 
-            for(CellData var43 : (Iterable<CellData>)(Iterable<?>)(var33.getCells())) {
-               TableHeader var45 = var43.getHeader();
-               String var46 = var43.getContent();
-               int var18 = var43.getSpan();
-               if (var18 == 0) {
-                  var18 = 1;
+            for(CellData cellData3 : (Iterable<CellData>)(Iterable<?>)(rowData2.getCells())) {
+               TableHeader header2 = cellData3.getHeader();
+               String content = cellData3.getContent();
+               int span2 = cellData3.getSpan();
+               if (span2 == 0) {
+                  span2 = 1;
                }
 
-               if (var45.isCustom()) {
-                  var1.append("<card-cell type=\"custom\" row=\"" + var10 + "\" col=\"" + (var43.getCol() + 1) + "\">");
-                  var1.append("<value content=\"" + var46 + "\" type=\"Input\"/>");
-                  var1.append("</card-cell>");
-               } else if (!var45.isCondition() && !var45.isScore()) {
-                  String[] var48 = new String[]{var45.getName(), var46};
-                  String var20 = "";
-                  if (var26) {
-                     String[] var21 = var46.split("\n");
-                     var48[1] = var21[0].trim();
-                     var21[1] = var21[1].trim().toLowerCase();
-                     if (var21[1].startsWith("权重:")) {
-                        var20 = var21[1].substring("权重:".length());
-                     } else if (var21[1].startsWith("权重:")) {
-                        var20 = var21[1].substring("权重：".length());
-                     } else if (var21[1].startsWith("weight:")) {
-                        var20 = var21[1].substring("weight:".length());
-                     } else if (var21[1].startsWith("weight：")) {
-                        var20 = var21[1].substring("weight：".length());
+               if (header2.isCustom()) {
+                  stringBuilder.append("<card-cell type=\"custom\" row=\"" + number + "\" col=\"" + (cellData3.getCol() + 1) + "\">");
+                  stringBuilder.append("<value content=\"" + content + "\" type=\"Input\"/>");
+                  stringBuilder.append("</card-cell>");
+               } else if (!header2.isCondition() && !header2.isScore()) {
+                  String[] values = new String[]{header2.getName(), content};
+                  String substring = "";
+                  if (flag) {
+                     String[] parts = content.split("\n");
+                     values[1] = parts[0].trim();
+                     parts[1] = parts[1].trim().toLowerCase();
+                     if (parts[1].startsWith("权重:")) {
+                        substring = parts[1].substring("权重:".length());
+                     } else if (parts[1].startsWith("权重:")) {
+                        substring = parts[1].substring("权重：".length());
+                     } else if (parts[1].startsWith("weight:")) {
+                        substring = parts[1].substring("weight:".length());
+                     } else if (parts[1].startsWith("weight：")) {
+                        substring = parts[1].substring("weight：".length());
                      }
-                  } else if (var46.indexOf(".") > 0) {
-                     var48[1] = var46.split("\\.")[0];
+                  } else if (content.indexOf(".") > 0) {
+                     values[1] = content.split("\\.")[0];
                   }
 
-                  Variable var49 = null;
-                  Variable var22 = null;
-                  if (ExcelSupport.isParameter(var45.getName())) {
-                     String[] var23 = var46.split("\\.");
-                     String[] var24 = new String[]{"参数", var23[0]};
-                     var22 = this.a(var24);
-                     if (var22 != null) {
-                        VariableCategory var25 = this.a(var22.getDataType());
-                        if (var25 != null) {
-                           var49 = (Variable)var25.getVariableLabels().get(var23[1]);
+                  Variable variable = null;
+                  Variable variable2 = null;
+                  if (ExcelSupport.isParameter(header2.getName())) {
+                     String[] parts2 = content.split("\\.");
+                     String[] values2 = new String[]{"参数", parts2[0]};
+                     variable2 = this.findVariable(values2);
+                     if (variable2 != null) {
+                        VariableCategory variableCategory2 = this.findVariableCategoryByUuid(variable2.getDataType());
+                        if (variableCategory2 != null) {
+                           variable = (Variable)variableCategory2.getVariableLabels().get(parts2[1]);
                         }
                      }
                   } else {
-                     var49 = this.a(var48);
+                     variable = this.findVariable(values);
                   }
 
-                  String var50 = "";
-                  if (var26 && StringUtils.isNotBlank(var20)) {
-                     var50 = " weight=\"" + var20 + "\"";
+                  String text = "";
+                  if (flag && StringUtils.isNotBlank(substring)) {
+                     text = " weight=\"" + substring + "\"";
                   }
 
-                  if (null != var22) {
-                     if (null != var49) {
-                        var1.append("<card-cell type=\"attribute\" row=\"" + var10 + "\" col=\"" + (var43.getCol() + 1) + "\"" + var50 + " var=\"" + var49.getName() + "\" var-label=\"" + var49.getLabel() + "\" datatype=\"" + var49.getDataType() + "\" uuid=\"" + var49.getUuid() + "\" key-label=\"" + var22.getLabel() + "\" key-name=\"" + var22.getName() + "\" key-uuid=\"" + var22.getUuid() + "\"");
+                  if (null != variable2) {
+                     if (null != variable) {
+                        stringBuilder.append("<card-cell type=\"attribute\" row=\"" + number + "\" col=\"" + (cellData3.getCol() + 1) + "\"" + text + " var=\"" + variable.getName() + "\" var-label=\"" + variable.getLabel() + "\" datatype=\"" + variable.getDataType() + "\" uuid=\"" + variable.getUuid() + "\" key-label=\"" + variable2.getLabel() + "\" key-name=\"" + variable2.getName() + "\" key-uuid=\"" + variable2.getUuid() + "\"");
                      } else {
-                        var1.append("<card-cell type=\"attribute\" row=\"" + var10 + "\" col=\"" + (var43.getCol() + 1) + "\"" + var50 + " var=\"" + var22.getName() + "\" var-label=\"" + var22.getLabel() + "\" uuid=\"" + var22.getUuid() + "\" datatype=\"" + var22.getDataType() + "\"");
+                        stringBuilder.append("<card-cell type=\"attribute\" row=\"" + number + "\" col=\"" + (cellData3.getCol() + 1) + "\"" + text + " var=\"" + variable2.getName() + "\" var-label=\"" + variable2.getLabel() + "\" uuid=\"" + variable2.getUuid() + "\" datatype=\"" + variable2.getDataType() + "\"");
                      }
                   } else {
-                     if (var49 == null) {
-                        throw new RuleException(String.format("属性列[%s]不存在", var45.getName()));
+                     if (variable == null) {
+                        throw new RuleException(String.format("属性列[%s]不存在", header2.getName()));
                      }
 
-                     var1.append("<card-cell type=\"attribute\" row=\"" + var10 + "\" col=\"" + (var43.getCol() + 1) + "\"" + var50 + " var=\"" + var49.getName() + "\" var-label=\"" + var49.getLabel() + "\" uuid=\"" + var49.getUuid() + "\" datatype=\"" + var49.getDataType() + "\"");
+                     stringBuilder.append("<card-cell type=\"attribute\" row=\"" + number + "\" col=\"" + (cellData3.getCol() + 1) + "\"" + text + " var=\"" + variable.getName() + "\" var-label=\"" + variable.getLabel() + "\" uuid=\"" + variable.getUuid() + "\" datatype=\"" + variable.getDataType() + "\"");
                   }
 
-                  var1.append("/>");
-               } else if (var45.isScore()) {
-                  var1.append("<card-cell type=\"score\" row=\"" + var10 + "\" col=\"" + (var43.getCol() + 1) + "\">");
-                  var1.append("<value content=\"" + var46 + "\" type=\"Input\"/>");
-                  var1.append("</card-cell>");
+                  stringBuilder.append("/>");
+               } else if (header2.isScore()) {
+                  stringBuilder.append("<card-cell type=\"score\" row=\"" + number + "\" col=\"" + (cellData3.getCol() + 1) + "\">");
+                  stringBuilder.append("<value content=\"" + content + "\" type=\"Input\"/>");
+                  stringBuilder.append("</card-cell>");
                } else {
-                  if (!var45.isCondition()) {
-                     throw new InfoException("无法识别的单元格：" + var46 + "");
+                  if (!header2.isCondition()) {
+                     throw new InfoException("无法识别的单元格：" + content + "");
                   }
 
-                  var1.append("<card-cell type=\"condition\" row=\"" + var10 + "\" col=\"" + (var43.getCol() + 1) + "\">");
-                  Criterion var19 = this.c.buildCriterion(var46);
-                  var1.append(this.a(var19));
-                  var1.append("</card-cell>");
+                  stringBuilder.append("<card-cell type=\"condition\" row=\"" + number + "\" col=\"" + (cellData3.getCol() + 1) + "\">");
+                  Criterion criterion = this.dSLRuleSetBuilder.buildCriterion(content);
+                  stringBuilder.append(this.buildCriterionXml(criterion));
+                  stringBuilder.append("</card-cell>");
                }
             }
 
-            ++var10;
+            ++number;
          }
 
-         int var32 = 0;
+         int number2 = 0;
 
-         for(TableHeader var38 : (Iterable<TableHeader>)(Iterable<?>)(var2)) {
-            ++var32;
-            if (var38.isCustom()) {
-               var1.append("<custom-col col-number=\"" + var32 + "\" name=\"" + var38.getName() + "\" width=\"160\"/>");
+         for(TableHeader tableHeader2 : (Iterable<TableHeader>)(Iterable<?>)(headers)) {
+            ++number2;
+            if (tableHeader2.isCustom()) {
+               stringBuilder.append("<custom-col col-number=\"" + number2 + "\" name=\"" + tableHeader2.getName() + "\" width=\"160\"/>");
             }
          }
 
-         for(VariableInfo var39 : (Iterable<VariableInfo>)(Iterable<?>)(this.a.getVariableInfos())) {
-            this.f.put(var39.getId(), var39);
+         for(VariableInfo variableInfo2 : (Iterable<VariableInfo>)(Iterable<?>)(this.excelSupport.getVariableInfos())) {
+         this.importedLibrariesById.put(variableInfo2.getId(), variableInfo2);
          }
 
-         for(VariableInfo var40 : (Iterable<VariableInfo>)(Iterable<?>)(this.f.values())) {
-            if (var40.getType().endsWith(ResourceType.VariableLibrary.name())) {
-               var1.append("<import-variable-library id=\"" + var40.getId() + "\" path=\"" + var40.getPath() + "\"/>");
+         for(VariableInfo variableInfo3 : (Iterable<VariableInfo>)(Iterable<?>)(this.importedLibrariesById.values())) {
+            if (variableInfo3.getType().endsWith(ResourceType.VariableLibrary.name())) {
+               stringBuilder.append("<import-variable-library id=\"" + variableInfo3.getId() + "\" path=\"" + variableInfo3.getPath() + "\"/>");
             } else {
-               var1.append("<import-parameter-library id=\"" + var40.getId() + "\" path=\"" + var40.getPath() + "\"/>");
+               stringBuilder.append("<import-parameter-library id=\"" + variableInfo3.getId() + "\" path=\"" + variableInfo3.getPath() + "\"/>");
             }
          }
 
-         var1.append("</scorecard>");
-         return var1.toString();
+         stringBuilder.append("</scorecard>");
+         return stringBuilder.toString();
       }
    }
 
-   private TableHeader a(List var1, boolean var2, boolean var3) {
-      for(TableHeader var5 : (Iterable<TableHeader>)(Iterable<?>)(var1)) {
-         if (var2 && var5.isScore()) {
-            return var5;
+   private TableHeader findHeader(List items, boolean flag, boolean flag2) {
+      for(TableHeader tableHeader : (Iterable<TableHeader>)(Iterable<?>)(items)) {
+         if (flag && tableHeader.isScore()) {
+            return tableHeader;
          }
 
-         if (var3 && var5.isCondition()) {
-            return var5;
+         if (flag2 && tableHeader.isCondition()) {
+            return tableHeader;
          }
 
-         if (!var2 && !var3 && !var5.isScore() && !var5.isCondition()) {
-            return var5;
+         if (!flag && !flag2 && !tableHeader.isScore() && !tableHeader.isCondition()) {
+            return tableHeader;
          }
       }
 
       throw new InfoException("列定义存在问题！");
    }
 
-   private boolean a(List var1) {
-      boolean var2 = false;
+   private boolean hasWeightSupport(List items) {
+      boolean flag = false;
 
-      for(TableHeader var4 : (Iterable<TableHeader>)(Iterable<?>)(var1)) {
-         if (var4.isWeightWupport()) {
-            var2 = true;
+      for(TableHeader tableHeader : (Iterable<TableHeader>)(Iterable<?>)(items)) {
+         if (tableHeader.isWeightWupport()) {
+            flag = true;
             break;
          }
       }
 
-      return var2;
+      return flag;
    }
 
-   private VariableCategory a(String var1) {
-      for(VariableInfo var3 : (Iterable<VariableInfo>)(Iterable<?>)(this.d)) {
-         for(VariableCategory var6 : (Iterable<VariableCategory>)(Iterable<?>)(var3.getVariableCategories())) {
-            if (var6.getUuid().equals(var1)) {
-               this.f.put(var3.getId(), var3);
-               return var6;
+   private VariableCategory findVariableCategoryByUuid(String text) {
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableLibraries)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getUuid().equals(text)) {
+               this.importedLibrariesById.put(variableInfo.getId(), variableInfo);
+               return variableCategory;
             }
          }
       }
@@ -287,19 +287,19 @@ public class ScoreTableBuilder {
       return null;
    }
 
-   private Variable a(String[] var1) {
-      String var2 = var1[0];
-      String var3 = var1[1];
+   private Variable findVariable(String[] values) {
+      String text = values[0];
+      String text2 = values[1];
 
-      for(VariableInfo var5 : (Iterable<VariableInfo>)(Iterable<?>)(this.d)) {
-         for(VariableCategory var8 : (Iterable<VariableCategory>)(Iterable<?>)(var5.getVariableCategories())) {
-            if (var8.getName().equals(var2)) {
-               this.f.put(var5.getId(), var5);
-               List var9 = var8.getVariables();
-               if (var9 != null) {
-                  for(Variable var11 : (Iterable<Variable>)(Iterable<?>)(var9)) {
-                     if (var11.getLabel().equals(var3) || var11.getName().equals(var3)) {
-                        return var11;
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableLibraries)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getName().equals(text)) {
+               this.importedLibrariesById.put(variableInfo.getId(), variableInfo);
+               List variables = variableCategory.getVariables();
+               if (variables != null) {
+                  for(Variable variable : (Iterable<Variable>)(Iterable<?>)(variables)) {
+                     if (variable.getLabel().equals(text2) || variable.getName().equals(text2)) {
+                        return variable;
                      }
                   }
                }
@@ -307,82 +307,82 @@ public class ScoreTableBuilder {
          }
       }
 
-      throw new InfoException("变量[" + var2 + "." + var3 + "]在当前项目中未定义!");
+      throw new InfoException("变量[" + text + "." + text2 + "]在当前项目中未定义!");
    }
 
-   private String a(Criterion var1) {
-      StringBuilder var2 = new StringBuilder();
-      if (var1 instanceof Junction) {
-         Junction var3 = (Junction)var1;
-         List var4 = var3.getCriterions();
-         String var5 = "and";
-         if (var3 instanceof Or) {
-            var5 = "or";
+   private String buildCriterionXml(Criterion criterion) {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (criterion instanceof Junction) {
+         Junction junction = (Junction)criterion;
+         List criterions = junction.getCriterions();
+         String text = "and";
+         if (junction instanceof Or) {
+            text = "or";
          }
 
-         var2.append("<joint type=\"" + var5 + "\">");
-         if (var4 != null) {
-            for(Criterion var7 : (Iterable<Criterion>)(Iterable<?>)(var4)) {
-               if (var7 instanceof Criteria) {
-                  Criteria var8 = (Criteria)var7;
-                  var2.append("<condition op=\"" + var8.getOp().name() + "\">");
-                  Value var9 = var8.getValue();
-                  String var10 = this.a(var9);
-                  if (var10 != null) {
-                     var2.append(var10);
+         stringBuilder.append("<joint type=\"" + text + "\">");
+         if (criterions != null) {
+            for(Criterion criterion2 : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+               if (criterion2 instanceof Criteria) {
+                  Criteria criteria = (Criteria)criterion2;
+                  stringBuilder.append("<condition op=\"" + criteria.getOp().name() + "\">");
+                  Value localValue = criteria.getValue();
+                  String text2 = this.buildValueXml(localValue);
+                  if (text2 != null) {
+                     stringBuilder.append(text2);
                   }
 
-                  var2.append("</condition>");
+                  stringBuilder.append("</condition>");
                }
             }
          }
       } else {
-         var2.append("<joint type=\"and\">");
-         Criteria var11 = (Criteria)var1;
-         var2.append("<condition op=\"" + var11.getOp().name() + "\">");
-         Value var12 = var11.getValue();
-         var2.append(this.a(var12));
-         var2.append("</condition>");
+         stringBuilder.append("<joint type=\"and\">");
+         Criteria criteria2 = (Criteria)criterion;
+         stringBuilder.append("<condition op=\"" + criteria2.getOp().name() + "\">");
+         Value localValue2 = criteria2.getValue();
+         stringBuilder.append(this.buildValueXml(localValue2));
+         stringBuilder.append("</condition>");
       }
 
-      var2.append("</joint>");
-      return var2.toString();
+      stringBuilder.append("</joint>");
+      return stringBuilder.toString();
    }
 
-   private String a(Value var1) {
-      if (var1 == null) {
+   private String buildValueXml(Value localValue) {
+      if (localValue == null) {
          return null;
       } else {
-         StringBuilder var2 = new StringBuilder();
-         if (var1 instanceof SimpleValue) {
-            SimpleValue var3 = (SimpleValue)var1;
-            String var4 = StringEscapeUtils.escapeXml(var3.getContent());
-            var2.append(ExcelImportUtils.buildContentXml(var4));
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var6 = (VariableCategoryValue)var1;
-            String var9 = var6.getVariableCategory();
-            String var5 = StringEscapeUtils.escapeXml(var9);
-            var2.append(ExcelImportUtils.buildContentXml(var5));
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var7 = (VariableValue)var1;
-            String var10 = var7.getVariableCategory() + "." + var7.getVariableLabel();
-            var10 = StringEscapeUtils.escapeXml(var10);
-            var2.append(ExcelImportUtils.buildContentXml(var10));
+         StringBuilder stringBuilder = new StringBuilder();
+         if (localValue instanceof SimpleValue) {
+            SimpleValue simpleValue = (SimpleValue)localValue;
+            String text = StringEscapeUtils.escapeXml(simpleValue.getContent());
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text));
+         } else if (localValue instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)localValue;
+            String variableCategory = variableCategoryValue.getVariableCategory();
+            String text2 = StringEscapeUtils.escapeXml(variableCategory);
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text2));
+         } else if (localValue instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)localValue;
+            String text3 = variableValue.getVariableCategory() + "." + variableValue.getVariableLabel();
+            text3 = StringEscapeUtils.escapeXml(text3);
+            stringBuilder.append(ExcelImportUtils.buildContentXml(text3));
          } else {
-            var2.append(ExcelImportUtils.buildContentXml(""));
+            stringBuilder.append(ExcelImportUtils.buildContentXml(""));
          }
 
-         ComplexArithmetic var8 = var1.getArithmetic();
-         if (var8 == null) {
-            var2.append("</value>");
-            return var2.toString();
+         ComplexArithmetic arithmetic = localValue.getArithmetic();
+         if (arithmetic == null) {
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          } else {
-            ArithmeticType var12 = var8.getType();
-            var2.append("<complex-arith type=\"" + var12.name() + "\">");
-            var2.append(this.a(var8.getValue()));
-            var2.append("</complex-arith>");
-            var2.append("</value>");
-            return var2.toString();
+            ArithmeticType type = arithmetic.getType();
+            stringBuilder.append("<complex-arith type=\"" + type.name() + "\">");
+            stringBuilder.append(this.buildValueXml(arithmetic.getValue()));
+            stringBuilder.append("</complex-arith>");
+            stringBuilder.append("</value>");
+            return stringBuilder.toString();
          }
       }
    }

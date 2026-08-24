@@ -3,19 +3,19 @@ package com.bstek.urule.console.database.manager.project;
 import java.util.List;
 
 public interface ProjectQuery {
-   ProjectQuery userId(String var1);
+   ProjectQuery userId(String userId);
 
-   ProjectQuery name(String var1);
+   ProjectQuery name(String name);
 
-   ProjectQuery nameLike(String var1);
+   ProjectQuery nameLike(String name);
 
-   ProjectQuery type(String var1);
+   ProjectQuery type(String type);
 
-   ProjectQuery groupId(String var1);
+   ProjectQuery groupId(String groupId);
 
-   ProjectQuery orderbyCreateDate(String var1);
+   ProjectQuery orderbyCreateDate(String asc);
 
-   ProjectQuery orderbyName(String var1);
+   ProjectQuery orderbyName(String asc);
 
    List list();
 

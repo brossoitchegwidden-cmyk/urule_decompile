@@ -10,132 +10,132 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProviderFieldQueryImpl implements ProviderFieldQuery {
-   private Long a;
-   private Long b;
-   private Long c;
-   private String d;
-   private String e;
-   private List f = new ArrayList();
+   private Long id;
+   private Long batchId;
+   private Long providerId;
+   private String nameLike;
+   private String descLike;
+   private List queryParameters = new ArrayList();
 
-   public ProviderFieldQuery id(Long var1) {
-      this.a = var1;
+   public ProviderFieldQuery id(Long id) {
+      this.id = id;
       return this;
    }
 
-   public ProviderFieldQuery providerId(Long var1) {
-      this.c = var1;
+   public ProviderFieldQuery providerId(Long providerId) {
+      this.providerId = providerId;
       return this;
    }
 
-   public ProviderFieldQuery nameLike(String var1) {
-      this.d = var1;
+   public ProviderFieldQuery nameLike(String nameLike) {
+      this.nameLike = nameLike;
       return this;
    }
 
-   public ProviderFieldQuery descLike(String var1) {
-      this.e = var1;
+   public ProviderFieldQuery descLike(String descLike) {
+      this.descLike = descLike;
       return this;
    }
 
-   private StringBuilder a() {
-      this.f.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.nameLike != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" NAME_ like ?");
-         this.f.add("%" + this.d + "%");
+         stringBuilder.append(" NAME_ like ?");
+         this.queryParameters.add("%" + this.nameLike + "%");
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.descLike != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" DESC_ like ?");
-         this.f.add("%" + this.e + "%");
+         stringBuilder.append(" DESC_ like ?");
+         this.queryParameters.add("%" + this.descLike + "%");
       }
 
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.f.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.providerId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROVIDER_ID_=?");
-         this.f.add(this.c);
+         stringBuilder.append(" PROVIDER_ID_=?");
+         this.queryParameters.add(this.providerId);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.batchId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" BATCH_ID_=?");
-         this.f.add(this.b);
+         stringBuilder.append(" BATCH_ID_=?");
+         this.queryParameters.add(this.batchId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var13;
+      ArrayList listResult;
       try {
-         String var2 = "SELECT SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CLAZZ_PATH_, DATA_PROVIDER_ID_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, PROVIDER_ID_ FROM URULE_BATCH_PROVIDER_FIELD ";
-         StringBuilder var3 = this.a();
-         if (var3.length() > 0) {
-            var2 = var2 + " where" + var3.toString();
+         String text = "SELECT SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CLAZZ_PATH_, DATA_PROVIDER_ID_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, PROVIDER_ID_ FROM URULE_BATCH_PROVIDER_FIELD ";
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         PreparedStatement var4 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.f, var4);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            BatchDataProviderField var7 = new BatchDataProviderField();
-            var7.setSrcProperty(var6.getString(1));
-            var7.setDataType(var6.getString(2));
-            var7.setDestProperty(var6.getString(3));
-            var7.setClassPath(var6.getString(4));
-            var7.setDataProviderId(var6.getLong(5));
-            var7.setCreateUser(var6.getString(6));
-            var7.setCreateDate(var6.getTimestamp(7));
-            var7.setUpdateUser(var6.getString(8));
-            var7.setUpdateDate(var6.getTimestamp(9));
-            var7.setId(var6.getLong(10));
-            var7.setProjectId(var6.getLong(11));
-            var7.setBatchId(var6.getLong(12));
-            var7.setProviderId(var6.getLong(13));
-            var5.add(var7);
+         while(resultSet.next()) {
+            BatchDataProviderField batchDataProviderField = new BatchDataProviderField();
+            batchDataProviderField.setSrcProperty(resultSet.getString(1));
+            batchDataProviderField.setDataType(resultSet.getString(2));
+            batchDataProviderField.setDestProperty(resultSet.getString(3));
+            batchDataProviderField.setClassPath(resultSet.getString(4));
+            batchDataProviderField.setDataProviderId(resultSet.getLong(5));
+            batchDataProviderField.setCreateUser(resultSet.getString(6));
+            batchDataProviderField.setCreateDate(resultSet.getTimestamp(7));
+            batchDataProviderField.setUpdateUser(resultSet.getString(8));
+            batchDataProviderField.setUpdateDate(resultSet.getTimestamp(9));
+            batchDataProviderField.setId(resultSet.getLong(10));
+            batchDataProviderField.setProjectId(resultSet.getLong(11));
+            batchDataProviderField.setBatchId(resultSet.getLong(12));
+            batchDataProviderField.setProviderId(resultSet.getLong(13));
+            items.add(batchDataProviderField);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return listResult;
    }
 
-   public ProviderFieldQuery batchId(Long var1) {
-      this.b = var1;
+   public ProviderFieldQuery batchId(Long batchId) {
+      this.batchId = batchId;
       return this;
    }
 }

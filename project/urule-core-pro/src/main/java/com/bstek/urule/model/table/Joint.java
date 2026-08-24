@@ -19,39 +19,39 @@ public class Joint {
       return this.conditions;
    }
 
-   public void setConditions(List<Condition> var1) {
-      this.conditions = var1;
+   public void setConditions(List<Condition> conditions) {
+      this.conditions = conditions;
    }
 
-   public void addJoint(Joint var1) {
+   public void addJoint(Joint joint) {
       if (this.joints == null) {
          this.joints = new ArrayList<>();
       }
 
-      this.joints.add(var1);
+      this.joints.add(joint);
    }
 
-   public void addCondition(Condition var1) {
+   public void addCondition(Condition condition) {
       if (this.conditions == null) {
          this.conditions = new ArrayList<>();
       }
 
-      this.conditions.add(var1);
+      this.conditions.add(condition);
    }
 
    public List<Joint> getJoints() {
       return this.joints;
    }
 
-   public void setJoints(List<Joint> var1) {
-      this.joints = var1;
+   public void setJoints(List<Joint> joints) {
+      this.joints = joints;
    }
 
    public JointType getType() {
       return this.type;
    }
 
-   public void setType(JointType var1) {
-      this.type = var1;
+   public void setType(JointType type) {
+      this.type = type;
    }
 }

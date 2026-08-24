@@ -18,112 +18,111 @@ import java.util.List;
 import org.dom4j.Element;
 
 public class ReferenceServiceImpl implements ReferenceService {
-   public List uuid(long var1, long var3, String var5) {
-      ArrayList var6 = new ArrayList();
-      Project var7 = ProjectManager.ins.get(var1);
-      List var8 = this.a(var7, var3, var5);
-      var6.addAll(var8);
-      if (var7.getType().contentEquals(ProjectType.common.name())) {
-         for(Project var11 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type(ProjectType.custom.name()).groupId(var7.getGroupId()).list())) {
-            var8 = this.a(var11, var3, var5);
-            var6.addAll(var8);
+   public List uuid(long projectId, long id, String uuid) {
+      ArrayList uuidResult = new ArrayList();
+      Project project = ProjectManager.ins.get(projectId);
+      List items = this.collectResourceReferences(project, id, uuid);
+      uuidResult.addAll(items);
+      if (project.getType().contentEquals(ProjectType.common.name())) {
+         for(Project project2 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type(ProjectType.custom.name()).groupId(project.getGroupId()).list())) {
+            items = this.collectResourceReferences(project2, id, uuid);
+            uuidResult.addAll(items);
          }
       }
 
-      return var6;
+      return uuidResult;
    }
-
-   public List packet(long var1, long var3, String var5) {
-      ArrayList var6 = new ArrayList();
-      Project var7 = ProjectManager.ins.get(var1);
-      List var8 = this.b(var7, var3, var5);
-      var6.addAll(var8);
-      if (var7.getType().contentEquals(ProjectType.common.name())) {
-         for(Project var11 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type(ProjectType.custom.name()).groupId(var7.getGroupId()).list())) {
-            var8 = this.b(var11, var3, var5);
-            var6.addAll(var8);
+   public List packet(long projectId, long id, String code) {
+      ArrayList packetResult = new ArrayList();
+      Project project = ProjectManager.ins.get(projectId);
+      List items = this.collectPacketReferences(project, id, code);
+      packetResult.addAll(items);
+      if (project.getType().contentEquals(ProjectType.common.name())) {
+         for(Project project2 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type(ProjectType.custom.name()).groupId(project.getGroupId()).list())) {
+            items = this.collectPacketReferences(project2, id, code);
+            packetResult.addAll(items);
          }
       }
 
-      return var6;
+      return packetResult;
    }
 
-   private List a(Project var1, long var2, String var4) {
-      long var5 = var1.getId();
-      ArrayList var7 = new ArrayList();
+   private List collectResourceReferences(Project project, long longValue, String text) {
+      long id = project.getId();
+      ArrayList items = new ArrayList();
 
-      for(RuleFile var10 : (Iterable<RuleFile>)(Iterable<?>)(FileManager.ins.newQuery().deleted(false).asc("NAME_").list(var5))) {
-         if (var10.getId() != var2) {
-            Element var11 = null;
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(FileManager.ins.newQuery().deleted(false).asc("NAME_").list(id))) {
+         if (ruleFile.getId() != longValue) {
+            Element element = null;
 
             try {
-               String var12 = FileManager.ins.loadContent(var10.getId());
-               if (StringUtils.isBlank(var4)) {
-                  RuleFileHolder.resetRuleFile(var10.getPath());
+               String content = FileManager.ins.loadContent(ruleFile.getId());
+               if (StringUtils.isBlank(text)) {
+                  RuleFileHolder.resetRuleFile(ruleFile.getPath());
 
                   try {
-                     var11 = FileDeserializer.getInstance().parseXml(var12);
-                     Object var13 = FileDeserializer.getInstance().deserialize(var11);
-                     Reference var14 = Reference.loadReference(var13);
-                     if (var14 != null && var14.exist(var13, var2)) {
-                        var7.add(var10);
+                     element = FileDeserializer.getInstance().parseXml(content);
+                     Object objectValue = FileDeserializer.getInstance().deserialize(element);
+                     Reference reference = Reference.loadReference(objectValue);
+                     if (reference != null && reference.exist(objectValue, longValue)) {
+                        items.add(ruleFile);
                      }
-                  } catch (DeserializeException var15) {
+                  } catch (DeserializeException deserializeException) {
                   }
 
                   RuleFileHolder.clean();
-               } else if (var12.indexOf(var4) > -1) {
-                  var7.add(var10);
+               } else if (content.indexOf(text) > -1) {
+                  items.add(ruleFile);
                }
-            } catch (Exception var16) {
-               if (var16 instanceof RuleException) {
-                  throw (RuleException)var16;
+            } catch (Exception exception) {
+               if (exception instanceof RuleException) {
+                  throw (RuleException)exception;
                }
 
-               throw new RuleException(var16);
+               throw new RuleException(exception);
             }
          }
       }
 
-      if (StringUtils.isBlank(var4)) {
-         List var17 = KnowledgePacketBuilder.builder.referenceFiles(var1, var2);
-         var7.addAll(var17);
+      if (StringUtils.isBlank(text)) {
+         List items2 = KnowledgePacketBuilder.builder.referenceFiles(project, longValue);
+         items.addAll(items2);
       }
 
-      return var7;
+      return items;
    }
 
-   private List b(Project var1, long var2, String var4) {
-      long var5 = var1.getId();
-      ArrayList var7 = new ArrayList();
+   private List collectPacketReferences(Project project, long longValue, String text) {
+      long id = project.getId();
+      ArrayList items = new ArrayList();
 
-      for(RuleFile var10 : (Iterable<RuleFile>)(Iterable<?>)(FileManager.ins.newQuery().deleted(false).asc("NAME_").list(var5))) {
-         if (var10.getId() != var2) {
-            RuleFileHolder.resetRuleFile(var10.getPath());
-            String var11 = FileManager.ins.loadContent(var10.getId());
-            Element var12 = null;
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(FileManager.ins.newQuery().deleted(false).asc("NAME_").list(id))) {
+         if (ruleFile.getId() != longValue) {
+            RuleFileHolder.resetRuleFile(ruleFile.getPath());
+            String content = FileManager.ins.loadContent(ruleFile.getId());
+            Element element = null;
 
             try {
-               var12 = FileDeserializer.getInstance().parseXml(var11);
-               Object var13 = FileDeserializer.getInstance().deserialize(var12);
+               element = FileDeserializer.getInstance().parseXml(content);
+               Object objectValue = FileDeserializer.getInstance().deserialize(element);
                RuleFileHolder.clean();
-               Reference var14 = Reference.loadReference(var13);
-               if (var14 != null && var14 instanceof PacketSupportReference) {
-                  PacketSupportReference var15 = (PacketSupportReference)var14;
-                  if (var15.existPacket(var13, var2, var4)) {
-                     var7.add(var10);
+               Reference reference = Reference.loadReference(objectValue);
+               if (reference != null && reference instanceof PacketSupportReference) {
+                  PacketSupportReference packetSupportReference = (PacketSupportReference)reference;
+                  if (packetSupportReference.existPacket(objectValue, longValue, text)) {
+                     items.add(ruleFile);
                   }
                }
-            } catch (Exception var16) {
-               if (var16 instanceof DeserializeException) {
-                  throw (DeserializeException)var16;
+            } catch (Exception exception) {
+               if (exception instanceof DeserializeException) {
+                  throw (DeserializeException)exception;
                }
 
-               throw new RuleException(var16);
+               throw new RuleException(exception);
             }
          }
       }
 
-      return var7;
+      return items;
    }
 }

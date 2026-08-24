@@ -11,15 +11,15 @@ public class Condition {
       return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.op = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 }

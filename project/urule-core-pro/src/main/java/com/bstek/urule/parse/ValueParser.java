@@ -39,197 +39,197 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class ValueParser extends AbstractParser<Value> {
-   private List<MathParser> a = new ArrayList<>();
-   private ComplexArithmeticParser b;
+   private List<MathParser> mathParsers = new ArrayList<>();
+   private ComplexArithmeticParser complexArithmeticParser;
 
    public ValueParser() {
-      this.a.add(new AbsoluteMathParser(this));
-      this.a.add(new PowerMathParser(this));
-      this.a.add(new RadicalMathParser(this));
-      this.a.add(new NRadicalMathParser(this));
-      this.a.add(new SigmaMathParser(this));
-      this.a.add(new FractionMathParser(this));
-      this.a.add(new PiMathParser(this));
-      this.a.add(new LnMathParser(this));
-      this.a.add(new LogMathParser(this));
-      this.a.add(new TriangleFunctionMathParser(this));
-      this.a.add(new ExtremumFunctionMathParser(this));
-      this.a.add(new UpRoundMathParser(this));
-      this.a.add(new DownRoundMathParser(this));
+      this.mathParsers.add(new AbsoluteMathParser(this));
+      this.mathParsers.add(new PowerMathParser(this));
+      this.mathParsers.add(new RadicalMathParser(this));
+      this.mathParsers.add(new NRadicalMathParser(this));
+      this.mathParsers.add(new SigmaMathParser(this));
+      this.mathParsers.add(new FractionMathParser(this));
+      this.mathParsers.add(new PiMathParser(this));
+      this.mathParsers.add(new LnMathParser(this));
+      this.mathParsers.add(new LogMathParser(this));
+      this.mathParsers.add(new TriangleFunctionMathParser(this));
+      this.mathParsers.add(new ExtremumFunctionMathParser(this));
+      this.mathParsers.add(new UpRoundMathParser(this));
+      this.mathParsers.add(new DownRoundMathParser(this));
    }
 
-   public Value parse(Element var1) {
-      if (this.b == null) {
-         this.b = (ComplexArithmeticParser)Utils.getApplicationContext().getBean("urule.complexArithmeticParser");
+   public Value parse(Element element) {
+      if (this.complexArithmeticParser == null) {
+         this.complexArithmeticParser = (ComplexArithmeticParser)Utils.getApplicationContext().getBean("urule.complexArithmeticParser");
       }
 
-      AbstractValue var2 = null;
-      ValueType var3 = ValueType.valueOf(var1.attributeValue("type"));
-      if (var3.equals(ValueType.Input)) {
-         SimpleValue var4 = new SimpleValue();
-         String var5 = var1.attributeValue("content");
-         var4.setContent(StringEscapeUtils.unescapeXml(var5));
-         var2 = var4;
-      } else if (var3.equals(ValueType.Parameter)) {
-         ParameterValue var14 = new ParameterValue();
-         var14.setUuid(var1.attributeValue("uuid"));
-         var14.setVariableName(var1.attributeValue("var"));
-         var14.setVariableLabel(var1.attributeValue("var-label"));
-         var14.setKeyLabel(var1.attributeValue("key-label"));
-         var14.setKeyName(var1.attributeValue("key-name"));
-         var14.setKeyUuid(var1.attributeValue("key-uuid"));
-         var14.setKeyCategoryUuid(var1.attributeValue("key-category-uuid"));
-         String var24 = var1.attributeValue("datatype");
-         if (StringUtils.isNotEmpty(var24) && !var24.equals("undefined")) {
+      AbstractValue abstractValue = null;
+      ValueType valueType = ValueType.valueOf(element.attributeValue("type"));
+      if (valueType.equals(ValueType.Input)) {
+         SimpleValue simpleValue = new SimpleValue();
+         String text = element.attributeValue("content");
+         simpleValue.setContent(StringEscapeUtils.unescapeXml(text));
+         abstractValue = simpleValue;
+      } else if (valueType.equals(ValueType.Parameter)) {
+         ParameterValue parameterValue = new ParameterValue();
+         parameterValue.setUuid(element.attributeValue("uuid"));
+         parameterValue.setVariableName(element.attributeValue("var"));
+         parameterValue.setVariableLabel(element.attributeValue("var-label"));
+         parameterValue.setKeyLabel(element.attributeValue("key-label"));
+         parameterValue.setKeyName(element.attributeValue("key-name"));
+         parameterValue.setKeyUuid(element.attributeValue("key-uuid"));
+         parameterValue.setKeyCategoryUuid(element.attributeValue("key-category-uuid"));
+         String text2 = element.attributeValue("datatype");
+         if (StringUtils.isNotEmpty(text2) && !text2.equals("undefined")) {
             try {
-               var14.setDatatype(Datatype.valueOf(var24));
-            } catch (Exception var12) {
+               parameterValue.setDatatype(Datatype.valueOf(text2));
+            } catch (Exception exception) {
             }
          }
 
-         var2 = var14;
-      } else if (var3.equals(ValueType.Variable)) {
-         VariableValue var15 = new VariableValue();
-         var15.setUuid(var1.attributeValue("uuid"));
-         var15.setCategoryUuid(var1.attributeValue("category-uuid"));
-         String var25 = var1.attributeValue("var");
-         if (StringUtils.isNotEmpty(var25)) {
-            var15.setVariableName(var25);
+         abstractValue = parameterValue;
+      } else if (valueType.equals(ValueType.Variable)) {
+         VariableValue variableValue = new VariableValue();
+         variableValue.setUuid(element.attributeValue("uuid"));
+         variableValue.setCategoryUuid(element.attributeValue("category-uuid"));
+         String text3 = element.attributeValue("var");
+         if (StringUtils.isNotEmpty(text3)) {
+            variableValue.setVariableName(text3);
          }
 
-         String var6 = var1.attributeValue("var-label");
-         if (StringUtils.isNotEmpty(var6)) {
-            var15.setVariableLabel(var6);
+         String text4 = element.attributeValue("var-label");
+         if (StringUtils.isNotEmpty(text4)) {
+            variableValue.setVariableLabel(text4);
          }
 
-         String var7 = var1.attributeValue("datatype");
-         if (StringUtils.isNotEmpty(var7)) {
-            var15.setDatatype(Datatype.valueOf(var7));
+         String text5 = element.attributeValue("datatype");
+         if (StringUtils.isNotEmpty(text5)) {
+            variableValue.setDatatype(Datatype.valueOf(text5));
          }
 
-         String var8 = var1.attributeValue("var-category");
-         if (StringUtils.isNotEmpty(var8)) {
-            var15.setVariableCategory(var8);
+         String text6 = element.attributeValue("var-category");
+         if (StringUtils.isNotEmpty(text6)) {
+            variableValue.setVariableCategory(text6);
          }
 
-         var2 = var15;
-      } else if (var3.equals(ValueType.Predefine)) {
-         PredefineValue var16 = new PredefineValue();
-         var16.setUuid(var1.attributeValue("uuid"));
-         var16.setPropertyUuid(var1.attributeValue("property-uuid"));
-         var2 = var16;
-      } else if (var3.equals(ValueType.VariableCategory)) {
-         String var17 = var1.attributeValue("var-category");
-         VariableCategoryValue var26 = new VariableCategoryValue(var17);
-         var26.setUuid(var1.attributeValue("category-uuid"));
-         var2 = var26;
-      } else if (var3.equals(ValueType.Method)) {
-         MethodValue var18 = new MethodValue();
-         var18.setUuid(var1.attributeValue("uuid"));
-         var18.setCategoryUuid(var1.attributeValue("category-uuid"));
-         String var27 = var1.attributeValue("bean-name");
-         var18.setBeanId(var27);
-         String var31 = var1.attributeValue("bean-label");
-         var18.setBeanLabel(var31);
-         String var35 = var1.attributeValue("method-name");
-         var18.setMethodName(var35);
-         String var39 = var1.attributeValue("method-label");
-         var18.setMethodLabel(var39);
-         List var9 = this.a(var1, this);
-         var18.setParameters(var9);
-         var2 = var18;
-      } else if (var3.equals(ValueType.CommonFunction)) {
-         CommonFunctionValue var19 = new CommonFunctionValue();
-         var19.setName(var1.attributeValue("function-name"));
-         var19.setLabel(var1.attributeValue("function-label"));
+         abstractValue = variableValue;
+      } else if (valueType.equals(ValueType.Predefine)) {
+         PredefineValue predefineValue = new PredefineValue();
+         predefineValue.setUuid(element.attributeValue("uuid"));
+         predefineValue.setPropertyUuid(element.attributeValue("property-uuid"));
+         abstractValue = predefineValue;
+      } else if (valueType.equals(ValueType.VariableCategory)) {
+         String text7 = element.attributeValue("var-category");
+         VariableCategoryValue variableCategoryValue = new VariableCategoryValue(text7);
+         variableCategoryValue.setUuid(element.attributeValue("category-uuid"));
+         abstractValue = variableCategoryValue;
+      } else if (valueType.equals(ValueType.Method)) {
+         MethodValue methodValue = new MethodValue();
+         methodValue.setUuid(element.attributeValue("uuid"));
+         methodValue.setCategoryUuid(element.attributeValue("category-uuid"));
+         String text8 = element.attributeValue("bean-name");
+         methodValue.setBeanId(text8);
+         String text9 = element.attributeValue("bean-label");
+         methodValue.setBeanLabel(text9);
+         String text10 = element.attributeValue("method-name");
+         methodValue.setMethodName(text10);
+         String text11 = element.attributeValue("method-label");
+         methodValue.setMethodLabel(text11);
+         List parameters = this.parseParameters(element, this);
+         methodValue.setParameters(parameters);
+         abstractValue = methodValue;
+      } else if (valueType.equals(ValueType.CommonFunction)) {
+         CommonFunctionValue commonFunctionValue = new CommonFunctionValue();
+         commonFunctionValue.setName(element.attributeValue("function-name"));
+         commonFunctionValue.setLabel(element.attributeValue("function-label"));
 
-         for (Object var32 : var1.elements()) {
-            if (var32 instanceof Element) {
-               Element var36 = (Element)var32;
-               if (var36.getName().equals("function-parameter")) {
-                  CommonFunctionParameter var40 = new CommonFunctionParameter();
-                  var40.setName(var36.attributeValue("name"));
-                  var40.setProperty(var36.attributeValue("property-name"));
-                  var40.setPropertyLabel(var36.attributeValue("property-name"));
+         for (Object objectValue : element.elements()) {
+            if (objectValue instanceof Element) {
+               Element element2 = (Element)objectValue;
+               if (element2.getName().equals("function-parameter")) {
+                  CommonFunctionParameter commonFunctionParameter = new CommonFunctionParameter();
+                  commonFunctionParameter.setName(element2.attributeValue("name"));
+                  commonFunctionParameter.setProperty(element2.attributeValue("property-name"));
+                  commonFunctionParameter.setPropertyLabel(element2.attributeValue("property-name"));
 
-                  for (Object var10 : var36.elements()) {
-                     if (var10 instanceof Element) {
-                        Element var11 = (Element)var10;
-                        if (var11.getName().equals("value")) {
-                           var40.setObjectParameter(this.parse(var11));
+                  for (Object objectValue2 : element2.elements()) {
+                     if (objectValue2 instanceof Element) {
+                        Element element3 = (Element)objectValue2;
+                        if (element3.getName().equals("value")) {
+                           commonFunctionParameter.setObjectParameter(this.parse(element3));
                         }
                      }
                   }
 
-                  var19.setParameter(var40);
+                  commonFunctionValue.setParameter(commonFunctionParameter);
                }
             }
          }
 
-         var2 = var19;
-      } else if (var3.equals(ValueType.Math)) {
-         MathValue var20 = new MathValue();
-         var20.setMathSign(this.a(var1));
-         var2 = var20;
-      } else if (var3.equals(ValueType.SignI)) {
-         SignIValue var21 = new SignIValue();
-         var2 = var21;
+         abstractValue = commonFunctionValue;
+      } else if (valueType.equals(ValueType.Math)) {
+         MathValue mathValue = new MathValue();
+         mathValue.setMathSign(this.resolveMathSign(element));
+         abstractValue = mathValue;
+      } else if (valueType.equals(ValueType.SignI)) {
+         SignIValue signIValue = new SignIValue();
+         abstractValue = signIValue;
       } else {
-         ConstantValue var22 = new ConstantValue();
-         var22.setUuid(var1.attributeValue("uuid"));
-         var22.setCategoryUuid(var1.attributeValue("category-uuid"));
-         String var29 = var1.attributeValue("const");
-         var22.setConstantName(var29);
-         String var33 = var1.attributeValue("const-label");
-         if (StringUtils.isNotEmpty(var33)) {
-            var22.setConstantLabel(var33);
+         ConstantValue constantValue = new ConstantValue();
+         constantValue.setUuid(element.attributeValue("uuid"));
+         constantValue.setCategoryUuid(element.attributeValue("category-uuid"));
+         String text12 = element.attributeValue("const");
+         constantValue.setConstantName(text12);
+         String text13 = element.attributeValue("const-label");
+         if (StringUtils.isNotEmpty(text13)) {
+            constantValue.setConstantLabel(text13);
          }
 
-         String var37 = var1.attributeValue("const-category");
-         if (StringUtils.isNotEmpty(var37)) {
-            var22.setConstantCategory(var37);
+         String text14 = element.attributeValue("const-category");
+         if (StringUtils.isNotEmpty(text14)) {
+            constantValue.setConstantCategory(text14);
          }
 
-         String var41 = var1.attributeValue("data-type");
-         if (StringUtils.isNotBlank(var41)) {
-            var22.setDatatype(Datatype.valueOf(var41));
+         String text15 = element.attributeValue("data-type");
+         if (StringUtils.isNotBlank(text15)) {
+            constantValue.setDatatype(Datatype.valueOf(text15));
          }
 
-         var2 = var22;
+         abstractValue = constantValue;
       }
 
-      for (Object var30 : var1.elements()) {
-         if (var30 != null && var30 instanceof Element) {
-            Element var34 = (Element)var30;
-            String var38 = var34.getName();
-            if (this.b.support(var38)) {
-               var2.setArithmetic(this.b.parse(var34));
+      for (Object objectValue3 : element.elements()) {
+         if (objectValue3 != null && objectValue3 instanceof Element) {
+            Element element4 = (Element)objectValue3;
+            String name = element4.getName();
+            if (this.complexArithmeticParser.support(name)) {
+               abstractValue.setArithmetic(this.complexArithmeticParser.parse(element4));
                break;
             }
          }
       }
 
-      return var2;
+      return abstractValue;
    }
 
-   private MathSign a(Element var1) {
-      for (Object var3 : var1.elements()) {
-         if (var3 instanceof Element) {
-            Element var4 = (Element)var3;
+   private MathSign resolveMathSign(Element element) {
+      for (Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
 
-            for (MathParser var6 : this.a) {
-               if (var6.support(var4.getName())) {
-                  return var6.parse(var4);
+            for (MathParser mathParser : this.mathParsers) {
+               if (mathParser.support(element2.getName())) {
+                  return mathParser.parse(element2);
                }
             }
          }
       }
 
-      throw new RuleException("Unknow element [" + var1.asXML() + "]");
+      throw new RuleException("Unknow element [" + element.asXML() + "]");
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("value");
+   public boolean support(String name) {
+      return name.equals("value");
    }
 }

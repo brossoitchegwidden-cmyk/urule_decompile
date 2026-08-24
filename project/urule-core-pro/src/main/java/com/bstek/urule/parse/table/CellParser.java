@@ -13,39 +13,39 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class CellParser implements Parser<Cell>, ApplicationContextAware {
-   private JointParser a;
-   private ValueParser b;
-   private Collection<ActionParser> c;
+   private JointParser jointParser;
+   private ValueParser valueParser;
+   private Collection<ActionParser> actionParsers;
 
-   public Cell parse(Element var1) {
-      Cell var2 = new Cell();
-      var2.setRow(Integer.valueOf(var1.attributeValue("row")));
-      var2.setCol(Integer.valueOf(var1.attributeValue("col")));
-      var2.setRowspan(Integer.valueOf(var1.attributeValue("rowspan")));
-      var2.setVariableLabel(var1.attributeValue("var-label"));
-      var2.setVariableName(var1.attributeValue("var"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setKeyLabel(var1.attributeValue("key-label"));
-      var2.setKeyName(var1.attributeValue("key-name"));
-      var2.setKeyUuid(var1.attributeValue("key-uuid"));
-      var2.setKeyCategoryUuid(var1.attributeValue("key-category-uuid"));
-      String var3 = var1.attributeValue("datatype");
-      if (StringUtils.isNotBlank(var3)) {
-         var2.setDatatype(Datatype.valueOf(var3));
+   public Cell parse(Element element) {
+      Cell cell = new Cell();
+      cell.setRow(Integer.valueOf(element.attributeValue("row")));
+      cell.setCol(Integer.valueOf(element.attributeValue("col")));
+      cell.setRowspan(Integer.valueOf(element.attributeValue("rowspan")));
+      cell.setVariableLabel(element.attributeValue("var-label"));
+      cell.setVariableName(element.attributeValue("var"));
+      cell.setUuid(element.attributeValue("uuid"));
+      cell.setKeyLabel(element.attributeValue("key-label"));
+      cell.setKeyName(element.attributeValue("key-name"));
+      cell.setKeyUuid(element.attributeValue("key-uuid"));
+      cell.setKeyCategoryUuid(element.attributeValue("key-category-uuid"));
+      String text = element.attributeValue("datatype");
+      if (StringUtils.isNotBlank(text)) {
+         cell.setDatatype(Datatype.valueOf(text));
       }
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            String var7 = var6.getName();
-            if (this.a.support(var7)) {
-               var2.setJoint(this.a.parse(var6));
-            } else if (this.b.support(var7)) {
-               var2.setValue(this.b.parse(var6));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.jointParser.support(name)) {
+               cell.setJoint(this.jointParser.parse(element2));
+            } else if (this.valueParser.support(name)) {
+               cell.setValue(this.valueParser.parse(element2));
             } else {
-               for (ActionParser var9 : this.c) {
-                  if (var9.support(var7)) {
-                     var2.setAction(var9.parse(var6));
+               for (ActionParser actionParser : this.actionParsers) {
+                  if (actionParser.support(name)) {
+                     cell.setAction(actionParser.parse(element2));
                      break;
                   }
                }
@@ -53,23 +53,23 @@ public class CellParser implements Parser<Cell>, ApplicationContextAware {
          }
       }
 
-      return var2;
+      return cell;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("cell");
+   public boolean support(String name) {
+      return name.equals("cell");
    }
 
-   public void setJointParser(JointParser var1) {
-      this.a = var1;
+   public void setJointParser(JointParser jointParser) {
+      this.jointParser = jointParser;
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.b = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.c = var1.getBeansOfType(ActionParser.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.actionParsers = applicationContext.getBeansOfType(ActionParser.class).values();
    }
 }

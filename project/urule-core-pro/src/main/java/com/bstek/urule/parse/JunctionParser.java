@@ -8,24 +8,24 @@ import java.util.List;
 import org.dom4j.Element;
 
 public class JunctionParser extends CriterionParser {
-   public Criterion parse(Element var1) {
-      List var2 = this.parseCriterion(var1);
-      if (var2 != null && var2.size() != 0) {
-         String var3 = var1.getName();
-         if (var3.equals("and")) {
-            And var6 = new And();
-            var6.setCriterions(var2);
-            return var6;
-         } else if (var3.equals("or")) {
-            Or var5 = new Or();
-            var5.setCriterions(var2);
-            return var5;
+   public Criterion parse(Element element) {
+      List criterion = this.parseCriterion(element);
+      if (criterion != null && criterion.size() != 0) {
+         String name = element.getName();
+         if (name.equals("and")) {
+            And and = new And();
+            and.setCriterions(criterion);
+            return and;
+         } else if (name.equals("or")) {
+            Or or = new Or();
+            or.setCriterions(criterion);
+            return or;
          } else {
-            Met var4 = new Met();
-            var4.setMet(Integer.parseInt(var1.attributeValue("met")));
-            var4.setOnly(Boolean.parseBoolean(var1.attributeValue("only")));
-            var4.setCriterions(var2);
-            return var4;
+            Met met = new Met();
+            met.setMet(Integer.parseInt(element.attributeValue("met")));
+            met.setOnly(Boolean.parseBoolean(element.attributeValue("only")));
+            met.setCriterions(criterion);
+            return met;
          }
       } else {
          return null;
@@ -33,7 +33,7 @@ public class JunctionParser extends CriterionParser {
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("and") || var1.equals("or") || var1.equals("met");
+   public boolean support(String name) {
+      return name.equals("and") || name.equals("or") || name.equals("met");
    }
 }

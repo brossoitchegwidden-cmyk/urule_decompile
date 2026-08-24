@@ -7,35 +7,35 @@ import java.util.Date;
 import java.util.List;
 
 public interface PacketApplyQuery {
-   PacketApplyQuery id(long var1);
+   PacketApplyQuery id(long id);
 
-   PacketApplyQuery projectId(long var1);
+   PacketApplyQuery projectId(long projectId);
 
-   PacketApplyQuery packetId(long var1);
+   PacketApplyQuery packetId(long packetId);
 
-   PacketApplyQuery type(ApplyType var1);
+   PacketApplyQuery type(ApplyType type);
 
-   PacketApplyQuery status(ApplyStatus var1);
+   PacketApplyQuery status(ApplyStatus inStatus);
 
-   PacketApplyQuery statusIn(ApplyStatus[] var1);
+   PacketApplyQuery statusIn(ApplyStatus[] status);
 
-   PacketApplyQuery notStatus(ApplyStatus var1);
+   PacketApplyQuery notStatus(ApplyStatus status);
 
-   PacketApplyQuery titleLike(String var1);
+   PacketApplyQuery titleLike(String title);
 
-   PacketApplyQuery descLike(String var1);
+   PacketApplyQuery descLike(String desc);
 
-   PacketApplyQuery approver(String var1);
+   PacketApplyQuery approver(String approver);
 
-   PacketApplyQuery createUser(String var1);
+   PacketApplyQuery createUser(String createUser);
 
-   PacketApplyQuery createUserLike(String var1);
+   PacketApplyQuery createUserLike(String createUser);
 
-   PacketApplyQuery startDate(Date var1);
+   PacketApplyQuery startDate(Date date);
 
-   PacketApplyQuery endDate(Date var1);
+   PacketApplyQuery endDate(Date date);
 
    List list();
 
-   Page paging(int var1, int var2);
+   Page paging(int pageIndex, int pageSize);
 }

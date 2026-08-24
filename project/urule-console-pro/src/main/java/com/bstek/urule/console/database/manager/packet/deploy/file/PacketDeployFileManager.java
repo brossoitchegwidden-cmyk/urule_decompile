@@ -6,17 +6,17 @@ import java.util.List;
 public interface PacketDeployFileManager {
    PacketDeployFileManager ins = new PacketDeployFileManagerImpl();
 
-   PacketDeployFile load(long var1);
+   PacketDeployFile load(long id);
 
-   List loadFiles(long var1);
+   List loadFiles(long packetDeployId);
 
-   List loadFilesWithContent(long var1);
+   List loadFilesWithContent(long packetDeployId);
 
-   void add(PacketDeployFile var1);
+   void add(PacketDeployFile file);
 
-   void deleteByDeployId(long var1);
+   void deleteByDeployId(long deployId);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
    PacketDeployFileQuery newQuery();
 }

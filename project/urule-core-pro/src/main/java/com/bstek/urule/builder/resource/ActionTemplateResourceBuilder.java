@@ -5,10 +5,10 @@ import com.bstek.urule.parse.deserializer.ActionTemplateDeserializer;
 import org.dom4j.Element;
 
 public class ActionTemplateResourceBuilder implements ResourceBuilder<ActionTemplate> {
-   private ActionTemplateDeserializer a;
+   private ActionTemplateDeserializer actionTemplateDeserializer;
 
-   public ActionTemplate build(Element var1, String var2) {
-      return this.a.deserialize(var1);
+   public ActionTemplate build(Element root, String file) {
+      return this.actionTemplateDeserializer.deserialize(root);
    }
 
    @Override
@@ -17,11 +17,11 @@ public class ActionTemplateResourceBuilder implements ResourceBuilder<ActionTemp
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1);
+   public boolean support(Element root) {
+      return this.actionTemplateDeserializer.support(root);
    }
 
-   public void setActionTemplateDeserializer(ActionTemplateDeserializer var1) {
-      this.a = var1;
+   public void setActionTemplateDeserializer(ActionTemplateDeserializer actionTemplateDeserializer) {
+      this.actionTemplateDeserializer = actionTemplateDeserializer;
    }
 }

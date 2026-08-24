@@ -7,71 +7,71 @@ import java.util.Date;
    ignoreUnknown = true
 )
 public class Role {
-   private long a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private Date f;
-   private Date g;
+   private long id;
+   private String name;
+   private String type;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getType() {
-      return this.c;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.c = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String getCreateUser() {
-      return this.d;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.d = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.e;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.e = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.f;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.f = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.g;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.g = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String toString() {
-      return this.a + "," + this.b;
+      return this.id + "," + this.name;
    }
 }

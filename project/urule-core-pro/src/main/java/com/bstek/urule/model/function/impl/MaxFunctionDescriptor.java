@@ -16,55 +16,51 @@ public class MaxFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
-
    @Override
    public String getLabel() {
       return "求最大值对象";
    }
-
    @Override
    public String getName() {
       return "Max";
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      Collection var4 = null;
-      if (var1 instanceof Collection) {
-         var4 = (Collection)var1;
-         BigDecimal var5 = null;
-         Object var6 = null;
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      Collection items = null;
+      if (object instanceof Collection) {
+         items = (Collection)object;
+         BigDecimal decimalValue = null;
+         Object doFunctionResult = null;
 
-         for (Object var8 : var4) {
-            Object var9 = Utils.getObjectProperty(var8, var2);
-            BigDecimal var10 = Utils.toBigDecimal(var9);
-            if (var5 == null) {
-               var5 = var10;
-               var6 = var8;
+         for (Object objectValue : items) {
+            Object objectProperty = Utils.getObjectProperty(objectValue, property);
+            BigDecimal decimalValue2 = Utils.toBigDecimal(objectProperty);
+            if (decimalValue == null) {
+               decimalValue = decimalValue2;
+               doFunctionResult = objectValue;
             } else {
-               int var11 = var10.compareTo(var5);
-               if (var11 == 1) {
-                  var5 = var10;
-                  var6 = var8;
+               int number = decimalValue2.compareTo(decimalValue);
+               if (number == 1) {
+                  decimalValue = decimalValue2;
+                  doFunctionResult = objectValue;
                }
             }
          }
 
-         return var6;
+         return doFunctionResult;
       } else {
          throw new RuleException("Function[max] parameter must be java.util.Collection type.");
       }
    }
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("集合对象");
-      var1.setEname("Collection");
-      var1.setNeedProperty(true);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("集合对象");
+      argument.setEname("Collection");
+      argument.setNeedProperty(true);
+      return argument;
    }
 }

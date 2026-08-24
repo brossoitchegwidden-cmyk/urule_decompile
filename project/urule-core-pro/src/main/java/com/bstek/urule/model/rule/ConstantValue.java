@@ -17,48 +17,48 @@ public class ConstantValue extends AbstractValue {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getConstantName() {
       return this.constantName;
    }
 
-   public void setConstantName(String var1) {
-      this.constantName = var1;
+   public void setConstantName(String constantName) {
+      this.constantName = constantName;
    }
 
    public String getConstantLabel() {
       return this.constantLabel;
    }
 
-   public void setConstantLabel(String var1) {
-      this.constantLabel = var1;
+   public void setConstantLabel(String constantLabel) {
+      this.constantLabel = constantLabel;
    }
 
    public String getConstantCategory() {
       return this.constantCategory;
    }
 
-   public void setConstantCategory(String var1) {
-      this.constantCategory = var1;
+   public void setConstantCategory(String constantCategory) {
+      this.constantCategory = constantCategory;
    }
 
    public Datatype getDatatype() {
       return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.datatype = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    @Override
@@ -69,19 +69,19 @@ public class ConstantValue extends AbstractValue {
    @JsonIgnore
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Constant" : "常量";
-      String var2 = "[" + var1 + "]" + this.constantCategory + "." + this.constantLabel;
+      String text = LocaleHolder.isEnglish() ? "Constant" : "常量";
+      String id = "[" + text + "]" + this.constantCategory + "." + this.constantLabel;
       if (this.arithmetic != null) {
-         var2 = var2 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var2;
+      return id;
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Constant" : "常量";
-      return "[" + var1 + "]" + this.constantCategory + "." + this.constantLabel;
+      String text = LocaleHolder.isEnglish() ? "Constant" : "常量";
+      return "[" + text + "]" + this.constantCategory + "." + this.constantLabel;
    }
 }

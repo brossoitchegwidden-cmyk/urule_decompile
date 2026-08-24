@@ -3,40 +3,40 @@ package com.bstek.urule.console.editor.packet.scenario;
 import java.util.List;
 
 public class ScenarioData {
-   private String a;
-   private String b;
-   private List c;
-   private List d;
+   private String scenarioId;
+   private String scenarioDesc;
+   private List input;
+   private List output;
 
    public String getScenarioId() {
-      return this.a;
+      return this.scenarioId;
    }
 
-   public void setScenarioId(String var1) {
-      this.a = var1;
+   public void setScenarioId(String scenarioId) {
+      this.scenarioId = scenarioId;
    }
 
    public String getScenarioDesc() {
-      return this.b;
+      return this.scenarioDesc;
    }
 
-   public void setScenarioDesc(String var1) {
-      this.b = var1;
+   public void setScenarioDesc(String scenarioDesc) {
+      this.scenarioDesc = scenarioDesc;
    }
 
    public List getInput() {
-      return this.c;
+      return this.input;
    }
 
-   public void setInput(List var1) {
-      this.c = var1;
+   public void setInput(List input) {
+      this.input = input;
    }
 
    public List getOutput() {
-      return this.d;
+      return this.output;
    }
 
-   public void setOutput(List var1) {
-      this.d = var1;
+   public void setOutput(List output) {
+      this.output = output;
    }
 }

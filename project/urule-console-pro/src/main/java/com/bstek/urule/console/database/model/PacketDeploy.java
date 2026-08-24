@@ -4,121 +4,121 @@ import java.util.Date;
 import java.util.List;
 
 public class PacketDeploy {
-   private long a;
-   private long b;
-   private long c;
-   private long d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private ApplyStatus i;
-   private boolean j;
-   private String k;
-   private Date l;
-   private List m;
+   private long id;
+   private long packetId;
+   private long applyId;
+   private long projectId;
+   private String desc;
+   private String content;
+   private String digest;
+   private String version;
+   private ApplyStatus status;
+   private boolean enable;
+   private String createUser;
+   private Date createDate;
+   private List files;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getPacketId() {
-      return this.b;
+      return this.packetId;
    }
 
-   public void setPacketId(long var1) {
-      this.b = var1;
+   public void setPacketId(long packetId) {
+      this.packetId = packetId;
    }
 
    public long getApplyId() {
-      return this.c;
+      return this.applyId;
    }
 
-   public void setApplyId(long var1) {
-      this.c = var1;
+   public void setApplyId(long applyId) {
+      this.applyId = applyId;
    }
 
    public long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.d = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDesc() {
-      return this.e;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.e = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getDigest() {
-      return this.g;
+      return this.digest;
    }
 
-   public void setDigest(String var1) {
-      this.g = var1;
+   public void setDigest(String digest) {
+      this.digest = digest;
    }
 
    public String getContent() {
-      return this.f;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.f = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public String getVersion() {
-      return this.h;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.h = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public boolean isEnable() {
-      return this.j;
+      return this.enable;
    }
 
-   public void setEnable(boolean var1) {
-      this.j = var1;
+   public void setEnable(boolean enable) {
+      this.enable = enable;
    }
 
    public ApplyStatus getStatus() {
-      return this.i;
+      return this.status;
    }
 
-   public void setStatus(ApplyStatus var1) {
-      this.i = var1;
+   public void setStatus(ApplyStatus status) {
+      this.status = status;
    }
 
    public String getCreateUser() {
-      return this.k;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.k = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.l;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.l = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public List getFiles() {
-      return this.m;
+      return this.files;
    }
 
-   public void setFiles(List var1) {
-      this.m = var1;
+   public void setFiles(List files) {
+      this.files = files;
    }
 }

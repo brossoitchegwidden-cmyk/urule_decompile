@@ -3,13 +3,13 @@ package com.bstek.urule.console.editor.decision.table;
 import java.util.List;
 
 public class ContentRow {
-   private List a;
+   private List contents;
 
    public List getContents() {
-      return this.a;
+      return this.contents;
    }
 
-   public void setContents(List var1) {
-      this.a = var1;
+   public void setContents(List contents) {
+      this.contents = contents;
    }
 }

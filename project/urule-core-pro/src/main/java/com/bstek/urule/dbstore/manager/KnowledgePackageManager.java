@@ -27,123 +27,123 @@ import org.springframework.context.ApplicationContextAware;
 
 public class KnowledgePackageManager implements ApplicationContextAware {
    public static final String BEAN_ID = "urule.dbstore.knowledgePackageManager";
-   private static final String a = "urule.knowledgePackageDatabaseStore.dataSource";
-   private DataSource b;
-   private static List<DatabaseStore> c = new ArrayList<>();
+   private static final String URULE_KNOWLEDGEPACKAGEDATABASESTORE_DATASOURCE = "urule.knowledgePackageDatabaseStore.dataSource";
+   private DataSource dataSource;
+   private static List<DatabaseStore> databaseStores = new ArrayList<>();
 
-   public int removeKnowledgePackage(String var1) throws Exception {
-      Connection var2 = this.a();
-      Statement var3 = null;
-      String var4 = "DELETE FROM URULE_KP_STORE where ID_=?";
+   public int removeKnowledgePackage(String id) throws Exception {
+      Connection connection = this.resolveConnection();
+      Statement statement = null;
+      String text = "DELETE FROM URULE_KP_STORE where ID_=?";
 
       try {
-         var3 = var2.createStatement();
-         return var3.executeUpdate(var4);
+         statement = connection.createStatement();
+         return statement.executeUpdate(text);
       } finally {
-         if (var3 != null) {
-            var3.close();
+         if (statement != null) {
+            statement.close();
          }
 
-         var2.close();
+         connection.close();
       }
    }
 
-   public boolean saveKnowledgePackage(InputStream var1, String var2, String var3) throws Exception {
-      String var4 = "SELECT count(*) FROM URULE_KP_STORE WHERE ID_=?";
-      Connection var5 = this.a();
-      PreparedStatement var6 = null;
+   public boolean saveKnowledgePackage(InputStream inputStream, String id, String createUser) throws Exception {
+      String text = "SELECT count(*) FROM URULE_KP_STORE WHERE ID_=?";
+      Connection connection = this.resolveConnection();
+      PreparedStatement preparedStatement = null;
 
       try {
-         var6 = var5.prepareStatement(var4);
-         var6.setString(1, var2);
-         ResultSet var7 = var6.executeQuery();
-         int var8 = 0;
-         if (var7.next()) {
-            var8 = var7.getInt(1);
+         preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, id);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         int number = 0;
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         var7.close();
-         var6.close();
-         if (var8 > 0) {
-            var4 = "UPDATE URULE_KP_STORE SET UPDATE_DATE_=?,CREATE_USER_=?,DATA_=? WHERE ID_=?";
-            var6 = var5.prepareStatement(var4);
-            var6.setLong(1, new Date().getTime());
-            var6.setString(2, var3);
-            var6.setBlob(3, var1);
-            var6.setString(4, var2);
-            var6.executeUpdate();
-            var6.close();
+         resultSet.close();
+         preparedStatement.close();
+         if (number > 0) {
+            text = "UPDATE URULE_KP_STORE SET UPDATE_DATE_=?,CREATE_USER_=?,DATA_=? WHERE ID_=?";
+            preparedStatement = connection.prepareStatement(text);
+            preparedStatement.setLong(1, new Date().getTime());
+            preparedStatement.setString(2, createUser);
+            preparedStatement.setBlob(3, inputStream);
+            preparedStatement.setString(4, id);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
             return false;
          } else {
-            var4 = "INSERT INTO URULE_KP_STORE(ID_,UPDATE_DATE_,CREATE_USER_,DATA_) VALUES(?,?,?,?)";
-            var6 = var5.prepareStatement(var4);
-            var6.setString(1, var2);
-            var6.setLong(2, new Date().getTime());
-            var6.setString(3, var3);
-            var6.setBlob(4, var1);
-            var6.executeUpdate();
-            var6.close();
+            text = "INSERT INTO URULE_KP_STORE(ID_,UPDATE_DATE_,CREATE_USER_,DATA_) VALUES(?,?,?,?)";
+            preparedStatement = connection.prepareStatement(text);
+            preparedStatement.setString(1, id);
+            preparedStatement.setLong(2, new Date().getTime());
+            preparedStatement.setString(3, createUser);
+            preparedStatement.setBlob(4, inputStream);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
             return true;
          }
       } finally {
-         if (var6 != null && !var6.isClosed()) {
-            var6.close();
+         if (preparedStatement != null && !preparedStatement.isClosed()) {
+            preparedStatement.close();
          }
 
-         var5.close();
+         connection.close();
       }
    }
 
-   private Connection a() throws SQLException {
-      return this.b.getConnection();
+   private Connection resolveConnection() throws SQLException {
+      return this.dataSource.getConnection();
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      String var2 = PropertyConfigurer.getProperty("urule.knowledgePackageDatabaseStore.dataSource");
-      if (!StringUtils.isBlank(var2) && var1.containsBean(var2)) {
-         this.b = (DataSource)var1.getBean(var2);
-         String var3 = null;
-         DbService var4 = null;
-         Connection var5 = null;
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      String property = PropertyConfigurer.getProperty("urule.knowledgePackageDatabaseStore.dataSource");
+      if (!StringUtils.isBlank(property) && applicationContext.containsBean(property)) {
+         this.dataSource = (DataSource)applicationContext.getBean(property);
+         String databaseProductName = null;
+         DbService dbService = null;
+         Connection connection = null;
 
          try {
-            var5 = this.b.getConnection();
-            DatabaseMetaData var6 = var5.getMetaData();
-            var3 = var6.getDatabaseProductName();
+            connection = this.dataSource.getConnection();
+            DatabaseMetaData metaData = connection.getMetaData();
+            databaseProductName = metaData.getDatabaseProductName();
 
-            for (DatabaseStore var8 : c) {
-               if (var8.support(var3)) {
-                  System.out.println(">>>初始化" + var3 + "数据库中知识包存储表,目标数据库中如不存在知识包存储表将会自动创建...");
-                  var8.init(this.b);
-                  var4 = var8.getDbService();
+            for (DatabaseStore databaseStore : KnowledgePackageManager.databaseStores) {
+               if (databaseStore.support(databaseProductName)) {
+                  System.out.println(">>>初始化" + databaseProductName + "数据库中知识包存储表,目标数据库中如不存在知识包存储表将会自动创建...");
+                  databaseStore.init(this.dataSource);
+                  dbService = databaseStore.getDbService();
                   break;
                }
             }
-         } catch (Exception var16) {
-            throw new RuleException(var16);
+         } catch (Exception exception) {
+            throw new RuleException(exception);
          } finally {
             try {
-               if (var5 != null) {
-                  var5.close();
+               if (connection != null) {
+                  connection.close();
                }
-            } catch (SQLException var15) {
-               var15.printStackTrace();
+            } catch (SQLException sQLException) {
+               java.util.logging.Logger.getLogger(KnowledgePackageManager.class.getName()).log(java.util.logging.Level.SEVERE, sQLException.getMessage(), sQLException);
             }
          }
 
-         if (var4 != null) {
-            DatabaseKnowledgePackageFileService var19 = new DatabaseKnowledgePackageFileService(var4);
-            KnowledgeServiceImpl var20 = (KnowledgeServiceImpl)var1.getBean("urule.knowledgeService");
-            var20.setKnowledgePackageFileService(var19);
+         if (dbService != null) {
+            DatabaseKnowledgePackageFileService databaseKnowledgePackageFileService = new DatabaseKnowledgePackageFileService(dbService);
+            KnowledgeServiceImpl knowledgeServiceImpl = (KnowledgeServiceImpl)applicationContext.getBean("urule.knowledgeService");
+            knowledgeServiceImpl.setKnowledgePackageFileService(databaseKnowledgePackageFileService);
          } else {
-            System.out.println(">>>知识包数据存储不支持当前数据类型【" + var3 + "】...");
+            System.out.println(">>>知识包数据存储不支持当前数据类型【" + databaseProductName + "】...");
          }
       }
    }
 
    static {
-      c.add(new MysqlDatabaseStore());
-      c.add(new OracleDatabaseStore());
-      c.add(new MssqlDatabaseStore());
+      KnowledgePackageManager.databaseStores.add(new MysqlDatabaseStore());
+      KnowledgePackageManager.databaseStores.add(new OracleDatabaseStore());
+      KnowledgePackageManager.databaseStores.add(new MssqlDatabaseStore());
    }
 }

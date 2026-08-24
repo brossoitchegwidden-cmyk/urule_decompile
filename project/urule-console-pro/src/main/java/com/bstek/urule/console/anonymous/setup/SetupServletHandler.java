@@ -23,49 +23,49 @@ public class SetupServletHandler extends AnonymousServletHandler {
       return "/setup";
    }
 
-   public void init(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = HomeLocator.getHomePath();
-      if (StringUtils.isBlank(var3)) {
+   public void init(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String homePath = HomeLocator.getHomePath();
+      if (StringUtils.isBlank(homePath)) {
          throw new ConfigLoadException("当前系统环境下未发现URULE_HOME的配置:urule-init.properties,无法生成配置文件，请确认!");
       } else {
-         HashMap var4 = new HashMap();
+         HashMap valuesByKey = new HashMap();
 
          try {
             if (!BootstrapManager.get().isBootstrapped()) {
-               ObjectMapper var5 = JsonMapper.builder().build();
-               String var6 = var1.getParameter("setupInfo");
-               SetupInfo var7 = (SetupInfo)var5.readValue(var6, SetupInfo.class);
-               SetupManager.setup(var7);
-               var4.put("success", true);
+               ObjectMapper objectMapper = JsonMapper.builder().build();
+               String parameter = req.getParameter("setupInfo");
+               SetupInfo setupInfo = (SetupInfo)objectMapper.readValue(parameter, SetupInfo.class);
+               SetupManager.setup(setupInfo);
+               valuesByKey.put("success", true);
             } else {
-               var4.put("success", false);
-               var4.put("message", "Initialization has been completed and cannot be repeated.");
+               valuesByKey.put("success", false);
+               valuesByKey.put("message", "Initialization has been completed and cannot be repeated.");
             }
-         } catch (Exception var8) {
-            var8.printStackTrace();
-            var4.put("success", false);
-            var4.put("message", var8.getMessage());
+         } catch (Exception exception) {
+            java.util.logging.Logger.getLogger(SetupServletHandler.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
+            valuesByKey.put("success", false);
+            valuesByKey.put("message", exception.getMessage());
          }
 
-         this.a(var2, var4);
+         this.writeObjectToJson(resp, valuesByKey);
       }
    }
 
-   public void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = this.a(var1);
-      if (var3.indexOf("setup/init") > -1) {
-         this.init(var1, var2);
+   public void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String text = this.resolveRequestedMethod(req);
+      if (text.indexOf("setup/init") > -1) {
+         this.init(req, resp);
       } else {
-         VelocityContext var4 = new VelocityContext();
-         var4.put("chunkName", "setup");
-         var4.put("contextPath", var1.getContextPath());
-         var2.setContentType("text/html");
-         var2.setCharacterEncoding("utf-8");
-         String var5 = "template.html";
-         Template var6 = this.c.getTemplate("asserts/urule/html/" + var5, "utf-8");
-         PrintWriter var7 = var2.getWriter();
-         var6.merge(var4, var7);
-         var7.close();
+         VelocityContext velocityContext = new VelocityContext();
+         velocityContext.put("chunkName", "setup");
+         velocityContext.put("contextPath", req.getContextPath());
+         resp.setContentType("text/html");
+         resp.setCharacterEncoding("utf-8");
+         String text2 = "template.html";
+         Template template = this.velocityEngine.getTemplate("asserts/urule/html/" + text2, "utf-8");
+         PrintWriter writer = resp.getWriter();
+         template.merge(velocityContext, writer);
+         writer.close();
       }
 
    }

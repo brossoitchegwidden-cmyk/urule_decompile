@@ -7,13 +7,17 @@ import java.sql.SQLException;
 public interface OperationLogManager {
    OperationLogManager ins = new OperationLogManagerImpl();
 
-   void add(OperationLog var1);
+   /**新增日志*/
+   void add(OperationLog log);
 
-   void addBatch(PreparedStatement var1, OperationLog var2) throws SQLException;
+   /**新增日志*/
+   void addBatch(PreparedStatement stmt, OperationLog log) throws SQLException;
 
-   void removeByGroupId(String var1);
+   /**删除团队对应的日志*/
+   void removeByGroupId(String groupId);
 
-   void removeByProjectId(Long var1);
+   /**删除项目对应的日志*/
+   void removeByProjectId(Long projectId);
 
    OperationLogQuery newQuery();
 }

@@ -1,98 +1,99 @@
 package com.bstek.urule.console.database.model;
 
+/**系统操作日志*/
 public class OperationLog extends URuleLog {
-   private static final long a = 1L;
-   private String b;
-   private String c;
-   private Long d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
+   private static final long serialVersionUID = 1L;
+   private String groupId;
+   private String groupName;
+   private Long projectId;
+   private String projectName;
+   private String category;
+   private String action;
+   private String itemId;
+   private String content;
 
    public String getCategory() {
-      return this.f;
+      return this.category;
    }
 
-   public void setCategory(String var1) {
-      this.f = var1;
+   public void setCategory(String category) {
+      this.category = category;
    }
 
    public String getAction() {
-      return this.g;
+      return this.action;
    }
 
-   public void setAction(String var1) {
-      this.g = var1;
+   public void setAction(String action) {
+      this.action = action;
    }
 
    public String getContent() {
-      return this.i;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.i = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public String getGroupId() {
-      return this.b;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.b = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public String getGroupName() {
-      return this.c;
+      return this.groupName;
    }
 
-   public void setGroupName(String var1) {
-      this.c = var1;
+   public void setGroupName(String groupName) {
+      this.groupName = groupName;
    }
 
    public Long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.d = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public String getProjectName() {
-      return this.e;
+      return this.projectName;
    }
 
-   public void setProjectName(String var1) {
-      this.e = var1;
+   public void setProjectName(String projectName) {
+      this.projectName = projectName;
    }
 
    public String getItemId() {
-      return this.h;
+      return this.itemId;
    }
 
-   public void setItemId(String var1) {
-      this.h = var1;
+   public void setItemId(String itemId) {
+      this.itemId = itemId;
    }
 
    public String toString() {
-      StringBuilder var1 = new StringBuilder();
-      var1.append(this.getClass().getSimpleName());
-      var1.append(" [");
-      var1.append("Hash = ").append(this.hashCode());
-      var1.append(", id=").append(this.getId());
-      var1.append(", userId=").append(this.getUserId());
-      var1.append(", username=").append(this.getUsername());
-      var1.append(", groupId=").append(this.b);
-      var1.append(", groupName=").append(this.c);
-      var1.append(", projectId=").append(this.d);
-      var1.append(", projectName=").append(this.e);
-      var1.append(", category=").append(this.f);
-      var1.append(", action=").append(this.g);
-      var1.append(", content=").append(this.i);
-      var1.append(", createDate=").append(this.getCreateDate());
-      var1.append(", serialVersionUID=").append(1L);
-      var1.append("]");
-      return var1.toString();
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append(this.getClass().getSimpleName());
+      stringBuilder.append(" [");
+      stringBuilder.append("Hash = ").append(this.hashCode());
+      stringBuilder.append(", id=").append(this.getId());
+      stringBuilder.append(", userId=").append(this.getUserId());
+      stringBuilder.append(", username=").append(this.getUsername());
+      stringBuilder.append(", groupId=").append(this.groupId);
+      stringBuilder.append(", groupName=").append(this.groupName);
+      stringBuilder.append(", projectId=").append(this.projectId);
+      stringBuilder.append(", projectName=").append(this.projectName);
+      stringBuilder.append(", category=").append(this.category);
+      stringBuilder.append(", action=").append(this.action);
+      stringBuilder.append(", content=").append(this.content);
+      stringBuilder.append(", createDate=").append(this.getCreateDate());
+      stringBuilder.append(", serialVersionUID=").append(1L);
+      stringBuilder.append("]");
+      return stringBuilder.toString();
    }
 }

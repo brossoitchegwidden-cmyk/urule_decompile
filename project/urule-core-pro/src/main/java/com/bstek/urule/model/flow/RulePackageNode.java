@@ -14,8 +14,8 @@ public class RulePackageNode extends BindingNode {
    public RulePackageNode() {
    }
 
-   public RulePackageNode(String var1) {
-      super(var1);
+   public RulePackageNode(String name) {
+      super(name);
    }
 
    @Override
@@ -24,18 +24,18 @@ public class RulePackageNode extends BindingNode {
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      Exception var4 = null;
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      Exception exception2 = null;
 
       try {
-         var3.setCurrentNode(this);
-         this.executeNodeEvent(EventType.enter, var2, var3);
-         this.executeKnowledgePackage(var2, var3);
-         this.executeNodeEvent(EventType.leave, var2, var3);
-      } catch (Exception var9) {
-         var4 = var9;
+         instance.setCurrentNode(this);
+         this.executeNodeEvent(EventType.enter, context, instance);
+         this.executeKnowledgePackage(context, instance);
+         this.executeNodeEvent(EventType.leave, context, instance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         this.leave(null, var2, var3, var4);
+         this.leave(null, context, instance, exception2);
       }
    }
 
@@ -49,23 +49,23 @@ public class RulePackageNode extends BindingNode {
       return this.project;
    }
 
-   public void setProject(String var1) {
-      this.project = var1;
+   public void setProject(String project) {
+      this.project = project;
    }
 
    public String getPackageId() {
       return this.packageId;
    }
 
-   public void setPackageId(String var1) {
-      this.packageId = var1;
+   public void setPackageId(String packageId) {
+      this.packageId = packageId;
    }
 
    public String getCode() {
       return this.code == null ? this.packageId : this.code;
    }
 
-   public void setCode(String var1) {
-      this.code = var1;
+   public void setCode(String code) {
+      this.code = code;
    }
 }

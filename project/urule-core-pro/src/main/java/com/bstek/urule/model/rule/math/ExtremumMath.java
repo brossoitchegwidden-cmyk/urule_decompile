@@ -10,62 +10,62 @@ import java.util.Map;
 
 public class ExtremumMath implements MathSign {
    private String name;
-   private Value value1;
-   private Value value2;
+   private Value firstValue;
+   private Value secondValue;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.value1, var1, var2);
-      Object var4 = var1.getValueCompute().complexValueCompute(this.value2, var1, var2);
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.firstValue, context, factMap);
+      Object objectValue2 = context.getValueCompute().complexValueCompute(this.secondValue, context, factMap);
       if (this.name.equals("max")) {
-         return this.doMax(var3, var4);
+         return this.doMax(objectValue, objectValue2);
       } else if (this.name.equals("min")) {
-         return this.doMin(var3, var4);
+         return this.doMin(objectValue, objectValue2);
       } else {
          throw new RuleException("不支持的极值函数：" + this.name);
       }
    }
 
-   private BigDecimal doMax(Object var1, Object var2) {
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return var3.compareTo(var4) > 0 ? var3 : var4;
+   private BigDecimal doMax(Object objectValue, Object objectValue2) {
+      BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(objectValue2);
+      return decimalValue.compareTo(decimalValue2) > 0 ? decimalValue : decimalValue2;
    }
 
-   private BigDecimal doMin(Object var1, Object var2) {
-      BigDecimal var3 = Utils.toBigDecimal(var1);
-      BigDecimal var4 = Utils.toBigDecimal(var2);
-      return var3.compareTo(var4) < 1 ? var3 : var4;
+   private BigDecimal doMin(Object objectValue, Object objectValue2) {
+      BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(objectValue2);
+      return decimalValue.compareTo(decimalValue2) < 1 ? decimalValue : decimalValue2;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Value getValue1() {
-      return this.value1;
+      return this.firstValue;
    }
 
-   public void setValue1(Value var1) {
-      this.value1 = var1;
+   public void setValue1(Value value1) {
+      this.firstValue = value1;
    }
 
    public Value getValue2() {
-      return this.value2;
+      return this.secondValue;
    }
 
-   public void setValue2(Value var1) {
-      this.value2 = var1;
+   public void setValue2(Value value2) {
+      this.secondValue = value2;
    }
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Extremum" : "极值";
-      return "[" + var1 + "(" + this.name + ")](" + this.value1.getId() + "," + this.value2.getId() + ")";
+      String text = LocaleHolder.isEnglish() ? "Extremum" : "极值";
+      return "[" + text + "(" + this.name + ")](" + this.firstValue.getId() + "," + this.secondValue.getId() + ")";
    }
 
    @Override

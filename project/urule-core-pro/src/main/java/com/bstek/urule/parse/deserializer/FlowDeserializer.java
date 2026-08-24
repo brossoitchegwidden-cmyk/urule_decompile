@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class FlowDeserializer implements Deserializer<FlowDefinition> {
    public static final String BEAN_ID = "urule.flowDeserializer";
-   private FlowDefinitionParser a;
+   private FlowDefinitionParser flowDefinitionParser;
 
-   public FlowDefinition deserialize(Element var1) {
-      return this.a.parse(var1);
+   public FlowDefinition deserialize(Element root) {
+      return this.flowDefinitionParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.flowDefinitionParser.support(root.getName());
    }
 
-   public void setFlowDefinitionParser(FlowDefinitionParser var1) {
-      this.a = var1;
+   public void setFlowDefinitionParser(FlowDefinitionParser flowDefinitionParser) {
+      this.flowDefinitionParser = flowDefinitionParser;
    }
 }

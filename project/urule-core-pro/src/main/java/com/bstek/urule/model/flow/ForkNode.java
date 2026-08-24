@@ -14,8 +14,8 @@ public class ForkNode extends FlowNode {
    public ForkNode() {
    }
 
-   public ForkNode(String var1) {
-      super(var1);
+   public ForkNode(String name) {
+      super(name);
    }
 
    @Override
@@ -24,29 +24,29 @@ public class ForkNode extends FlowNode {
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      var3.setCurrentNode(this);
-      this.executeNodeEvent(EventType.enter, var2, var3);
-      ArrayList var4 = new ArrayList();
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      instance.setCurrentNode(this);
+      this.executeNodeEvent(EventType.enter, context, instance);
+      ArrayList items = new ArrayList();
 
-      for (Connection var6 : this.connections) {
-         if (var6.evaluate(var2)) {
-            var4.add(var6);
+      for (Connection connection : this.connections) {
+         if (connection.evaluate(context)) {
+            items.add(connection);
          }
       }
 
-      FlowContextImpl var13 = (FlowContextImpl)var2;
-      Map var14 = var13.getInstanceDataMap();
-      this.executeNodeEvent(EventType.leave, var2, var3);
-      BranchCounter var7 = new BranchCounter();
-      int var8 = var4.size();
+      FlowContextImpl flowContextImpl = (FlowContextImpl)context;
+      Map instanceDataMap = flowContextImpl.getInstanceDataMap();
+      this.executeNodeEvent(EventType.leave, context, instance);
+      BranchCounter branchCounter = new BranchCounter();
+      int number = items.size();
 
-      for (int var9 = 0; var9 < var8; var9++) {
-         Connection var10 = (Connection)var4.get(var9);
-         FlowInstance var11 = var3.newChildInstance();
-         InstanceData var12 = new InstanceData(var7, var8);
-         var14.put(var11.getId(), var12);
-         var10.execute(null, var2, var11);
+      for (int index = 0; index < number; index++) {
+         Connection connection2 = (Connection)items.get(index);
+         FlowInstance flowInstance = instance.newChildInstance();
+         InstanceData instanceData = new InstanceData(branchCounter, number);
+         instanceDataMap.put(flowInstance.getId(), instanceData);
+         connection2.execute(null, context, flowInstance);
       }
    }
 }

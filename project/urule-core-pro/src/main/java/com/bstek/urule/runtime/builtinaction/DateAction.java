@@ -16,78 +16,78 @@ import org.apache.commons.lang.StringUtils;
 public class DateAction {
    @ActionMethod(name = "取指定月份天数")
    @ActionMethodParameter(names = {"开始日期", "结束日期", "月份"}, enames = {"startDate", "endDate", "month"})
-   public int buildIncludeMonthDays(Object var1, Object var2, String var3) {
-      return this.a(var1, var2, var3, true);
+   public int buildIncludeMonthDays(Object start, Object end, String month) {
+      return this.countDaysByMonth(start, end, month, true);
    }
 
    @ActionMethod(name = "取非指定月份天数")
    @ActionMethodParameter(names = {"开始日期", "结束日期", "月份"}, enames = {"startDate", "endDate", "month"})
-   public int buildExcludeMonthDays(Object var1, Object var2, String var3) {
-      return this.a(var1, var2, var3, false);
+   public int buildExcludeMonthDays(Object start, Object end, String month) {
+      return this.countDaysByMonth(start, end, month, false);
    }
 
-   private int a(Object var1, Object var2, String var3, boolean var4) {
-      if (var1 == null) {
+   private int countDaysByMonth(Object objectValue, Object objectValue2, String text, boolean flag) {
+      if (objectValue == null) {
          throw new RuleException("开始日期不能为空！");
       }
 
-      if (var2 == null) {
+      if (objectValue2 == null) {
          throw new RuleException("开始日期不能为空！");
       }
 
-      Date var5 = this.a(var1);
-      Date var6 = this.a(var2);
-      if (var5.compareTo(var6) > 0) {
+      Date time = this.normalizeDate(objectValue);
+      Date dateValue = this.normalizeDate(objectValue2);
+      if (time.compareTo(dateValue) > 0) {
          throw new RuleException("开始日期必须要小于结束日期！");
       }
 
-      int var7 = 0;
-      int var8 = 0;
-      String[] var9 = var3.split(",");
-      List var10 = Arrays.asList(var9);
+      int number = 0;
+      int number2 = 0;
+      String[] parts = text.split(",");
+      List items = Arrays.asList(parts);
 
-      while (var5.compareTo(var6) <= 0) {
-         Calendar var11 = Calendar.getInstance();
-         var11.setTime(var5);
-         int var12 = var11.get(2) + 1;
-         if (var10.contains(String.valueOf(var12))) {
-            if (var4) {
-               var7++;
+      while (time.compareTo(dateValue) <= 0) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(time);
+         int number3 = calendar.get(2) + 1;
+         if (items.contains(String.valueOf(number3))) {
+            if (flag) {
+               number++;
             }
-         } else if (!var4) {
-            var8++;
+         } else if (!flag) {
+            number2++;
          }
 
-         var11.add(5, 1);
-         var5 = var11.getTime();
+         calendar.add(5, 1);
+         time = calendar.getTime();
       }
 
-      return var4 ? var7 : var8;
+      return flag ? number : number2;
    }
 
-   private Date a(Object var1) {
-      SimpleDateFormat var2 = new SimpleDateFormat("yyyy-MM-dd");
-      if (var1 instanceof Date) {
-         Date var10 = (Date)var1;
-         String var4 = var2.format(var10);
+   private Date normalizeDate(Object objectValue) {
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      if (objectValue instanceof Date) {
+         Date objectValue2 = (Date)objectValue;
+         String text = simpleDateFormat.format(objectValue2);
 
          try {
-            return var2.parse(var4);
-         } catch (ParseException var7) {
-            throw new RuleException(var7);
+            return simpleDateFormat.parse(text);
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       } else {
-         String var3 = var1.toString();
+         String text2 = objectValue.toString();
 
          try {
-            return var2.parse(var3);
-         } catch (ParseException var8) {
-            var2 = new SimpleDateFormat("yyyy/MM/dd");
+            return simpleDateFormat.parse(text2);
+         } catch (ParseException parseException2) {
+            simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
             try {
-               return var2.parse(var3);
-            } catch (ParseException var6) {
-               throw new RuleException("不能将[" + var1 + "]解析成日期");
+               return simpleDateFormat.parse(text2);
+            } catch (ParseException parseException3) {
+               throw new RuleException("不能将[" + objectValue + "]解析成日期");
             }
          }
       }
@@ -95,17 +95,17 @@ public class DateAction {
 
    @ActionMethod(name = "解析字符串为日期")
    @ActionMethodParameter(names = {"日期字符串", "格式"}, enames = {"string", "pattern"})
-   public Date formatString(String var1, String var2) {
-      if (StringUtils.isBlank(var1)) {
+   public Date formatString(String dateStr, String pattern) {
+      if (StringUtils.isBlank(dateStr)) {
          return null;
       }
 
-      SimpleDateFormat var3 = new SimpleDateFormat(var2);
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
       try {
-         return var3.parse(var1);
-      } catch (ParseException var5) {
-         throw new RuleException(var5);
+         return simpleDateFormat.parse(dateStr);
+      } catch (ParseException parseException) {
+         throw new RuleException(parseException);
       }
    }
 
@@ -117,302 +117,302 @@ public class DateAction {
 
    @ActionMethod(name = "格式化日期")
    @ActionMethodParameter(names = {"目标日期", "格式"}, enames = {"Date", "pattern"})
-   public String format(Date var1, String var2) {
-      if (var1 == null) {
+   public String format(Date date, String pattern) {
+      if (date == null) {
          return null;
       }
 
-      SimpleDateFormat var3 = new SimpleDateFormat(var2);
-      return var3.format(var1);
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+      return simpleDateFormat.format(date);
    }
 
    @ActionMethod(name = "加日期")
    @ActionMethodParameter(names = {"目标日期", "年数", "月数", "天数", "小时", "分钟", "秒数"}, enames = {"years", "months", "days", "hours", "minutes", "seconds"})
-   public Date addDate(Date var1, int var2, int var3, int var4, int var5, int var6, int var7) {
-      if (var1 == null) {
+   public Date addDate(Date date, int years, int months, int days, int hours, int minutes, int seconds) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var8 = Calendar.getInstance();
-      var8.setTime(var1);
-      var8.add(1, var2);
-      var8.add(2, var3);
-      var8.add(5, var4);
-      var8.add(11, var5);
-      var8.add(12, var6);
-      var8.add(13, var7);
-      return var8.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(1, years);
+      calendar.add(2, months);
+      calendar.add(5, days);
+      calendar.add(11, hours);
+      calendar.add(12, minutes);
+      calendar.add(13, seconds);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "日期加年")
    @ActionMethodParameter(names = {"目标日期", "年数"}, enames = {"Date", "years"})
-   public Date addDateForYear(Date var1, int var2) {
-      if (var1 == null) {
+   public Date addDateForYear(Date date, int years) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(1, var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(1, years);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "日期加月")
    @ActionMethodParameter(names = {"目标日期", "月数"}, enames = {"Date", "months"})
-   public Date addDateForMonth(Date var1, int var2) {
-      if (var1 == null) {
+   public Date addDateForMonth(Date date, int months) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(2, var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(2, months);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "日期加天")
    @ActionMethodParameter(names = {"目标日期", "天数"}, enames = {"Date", "days"})
-   public Date addDateForDay(Date var1, int var2) {
-      if (var1 == null) {
+   public Date addDateForDay(Date date, int days) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(5, var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(5, days);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "日期加小时")
    @ActionMethodParameter(names = {"目标日期", "小时数"}, enames = {"Date", "hours"})
-   public Date addDateForHour(Date var1, int var2) {
-      if (var1 == null) {
+   public Date addDateForHour(Date date, int hours) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(11, var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(11, hours);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "日期加分钟")
    @ActionMethodParameter(names = {"目标日期", "分钟数"}, enames = {"Date", "minutes"})
-   public Date addDateForMinute(Date var1, int var2) {
-      if (var1 == null) {
+   public Date addDateForMinute(Date date, int minutes) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(12, var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(12, minutes);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "日期加秒")
    @ActionMethodParameter(names = {"目标日期", "秒数"}, enames = {"Date", "seconds"})
-   public Date addDateForSecond(Date var1, int var2) {
-      if (var1 == null) {
+   public Date addDateForSecond(Date date, int seconds) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(13, var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(13, seconds);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期")
    @ActionMethodParameter(names = {"目标日期", "年数", "月数", "天数", "小时", "分钟", "秒数"}, enames = {"years", "months", "days", "hours", "minutes", "seconds"})
-   public Date subDate(Date var1, int var2, int var3, int var4, int var5, int var6, int var7) {
-      if (var1 == null) {
+   public Date subDate(Date date, int years, int months, int days, int hours, int minutes, int seconds) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var8 = Calendar.getInstance();
-      var8.setTime(var1);
-      var8.add(1, -var2);
-      var8.add(2, -var3);
-      var8.add(5, -var4);
-      var8.add(11, -var5);
-      var8.add(12, -var6);
-      var8.add(13, -var7);
-      return var8.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(1, -years);
+      calendar.add(2, -months);
+      calendar.add(5, -days);
+      calendar.add(11, -hours);
+      calendar.add(12, -minutes);
+      calendar.add(13, -seconds);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期减年")
    @ActionMethodParameter(names = {"目标日期", "年数"}, enames = {"Date", "years"})
-   public Date subDateForYear(Date var1, int var2) {
-      if (var1 == null) {
+   public Date subDateForYear(Date date, int years) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(1, -var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(1, -years);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期减月")
    @ActionMethodParameter(names = {"目标日期", "月数"}, enames = {"Date", "months"})
-   public Date subDateForMonth(Date var1, int var2) {
-      if (var1 == null) {
+   public Date subDateForMonth(Date date, int months) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(2, -var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(2, -months);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期减天")
    @ActionMethodParameter(names = {"目标日期", "天数"}, enames = {"Date", "days"})
-   public Date subDateForDay(Date var1, int var2) {
-      if (var1 == null) {
+   public Date subDateForDay(Date date, int days) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(5, -var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(5, -days);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期减小时")
    @ActionMethodParameter(names = {"目标日期", "小时"}, enames = {"Date", "hours"})
-   public Date subDateForHour(Date var1, int var2) {
-      if (var1 == null) {
+   public Date subDateForHour(Date date, int hours) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(11, -var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(11, -hours);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期减分钟")
    @ActionMethodParameter(names = {"目标日期", "分钟"}, enames = {"Date", "minutes"})
-   public Date subDateForMinute(Date var1, int var2) {
-      if (var1 == null) {
+   public Date subDateForMinute(Date date, int minutes) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(12, -var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(12, -minutes);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "减日期减秒")
    @ActionMethodParameter(names = {"目标日期", "秒数"}, enames = {"Date", "seconds"})
-   public Date subDateForSecond(Date var1, int var2) {
-      if (var1 == null) {
+   public Date subDateForSecond(Date date, int seconds) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      var3.add(13, -var2);
-      return var3.getTime();
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      calendar.add(13, -seconds);
+      return calendar.getTime();
    }
 
    @ActionMethod(name = "取年份")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getYear(Date var1) {
-      if (var1 == null) {
+   public Object getYear(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(1);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(1);
    }
 
    @ActionMethod(name = "取月份")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getMonth(Date var1) {
-      if (var1 == null) {
+   public Object getMonth(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(2);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(2);
    }
 
    @ActionMethod(name = "取星期")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getWeek(Date var1) {
-      if (var1 == null) {
+   public Object getWeek(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(7);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(7);
    }
 
    @ActionMethod(name = "取天")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getay(Date var1) {
-      if (var1 == null) {
+   public Object getay(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(5);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(5);
    }
 
    @ActionMethod(name = "取小时")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getHour(Date var1) {
-      if (var1 == null) {
+   public Object getHour(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(11);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(11);
    }
 
    @ActionMethod(name = "取分钟")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getMinute(Date var1) {
-      if (var1 == null) {
+   public Object getMinute(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(12);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(12);
    }
 
    @ActionMethod(name = "取秒")
    @ActionMethodParameter(names = "目标日期", enames = "Date")
-   public Object getSecond(Date var1) {
-      if (var1 == null) {
+   public Object getSecond(Date date) {
+      if (date == null) {
          return null;
       }
 
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var1);
-      return var2.get(13);
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(date);
+      return calendar.get(13);
    }
 
    @ActionMethod(name = "日期相减返回毫秒")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifMillSecond(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         long var5 = var3.getTimeInMillis();
-         long var7 = var4.getTimeInMillis();
-         return var5 - var7;
+   public Object dateDifMillSecond(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         long timeInMillis = calendar.getTimeInMillis();
+         long timeInMillis2 = calendar2.getTimeInMillis();
+         return timeInMillis - timeInMillis2;
       } else {
          return null;
       }
@@ -420,15 +420,15 @@ public class DateAction {
 
    @ActionMethod(name = "日期相减返回秒")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifSecond(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         long var5 = var3.getTimeInMillis();
-         long var7 = var4.getTimeInMillis();
-         return (var5 - var7) / 1000L;
+   public Object dateDifSecond(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         long timeInMillis = calendar.getTimeInMillis();
+         long timeInMillis2 = calendar2.getTimeInMillis();
+         return (timeInMillis - timeInMillis2) / 1000L;
       } else {
          return null;
       }
@@ -436,15 +436,15 @@ public class DateAction {
 
    @ActionMethod(name = "日期相减返回分钟")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifMinute(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         long var5 = var3.getTimeInMillis();
-         long var7 = var4.getTimeInMillis();
-         return (var5 - var7) / 60000L;
+   public Object dateDifMinute(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         long timeInMillis = calendar.getTimeInMillis();
+         long timeInMillis2 = calendar2.getTimeInMillis();
+         return (timeInMillis - timeInMillis2) / 60000L;
       } else {
          return null;
       }
@@ -452,15 +452,15 @@ public class DateAction {
 
    @ActionMethod(name = "日期相减返回小时")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifHour(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         long var5 = var3.getTimeInMillis();
-         long var7 = var4.getTimeInMillis();
-         return (var5 - var7) / 3600000L;
+   public Object dateDifHour(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         long timeInMillis = calendar.getTimeInMillis();
+         long timeInMillis2 = calendar2.getTimeInMillis();
+         return (timeInMillis - timeInMillis2) / 3600000L;
       } else {
          return null;
       }
@@ -468,15 +468,15 @@ public class DateAction {
 
    @ActionMethod(name = "日期相减返回天")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifDay(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         long var5 = var3.getTimeInMillis();
-         long var7 = var4.getTimeInMillis();
-         return (var5 - var7) / 86400000L;
+   public Object dateDifDay(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         long timeInMillis = calendar.getTimeInMillis();
+         long timeInMillis2 = calendar2.getTimeInMillis();
+         return (timeInMillis - timeInMillis2) / 86400000L;
       } else {
          return null;
       }
@@ -484,15 +484,15 @@ public class DateAction {
 
    @ActionMethod(name = "日期相减返回星期")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifWeek(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         long var5 = var3.getTimeInMillis();
-         long var7 = var4.getTimeInMillis();
-         return (var5 - var7) / 604800000L;
+   public Object dateDifWeek(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         long timeInMillis = calendar.getTimeInMillis();
+         long timeInMillis2 = calendar2.getTimeInMillis();
+         return (timeInMillis - timeInMillis2) / 604800000L;
       } else {
          return null;
       }
@@ -500,18 +500,18 @@ public class DateAction {
 
    @ActionMethod(name = "日期相减返回月")
    @ActionMethodParameter(names = {"日期", "减去的日期"}, enames = {"Date1", "Date2"})
-   public Object dateDifMonth(Date var1, Date var2) {
-      if (var1 != null && var2 != null) {
-         Calendar var3 = Calendar.getInstance();
-         var3.setTime(var1);
-         Calendar var4 = Calendar.getInstance();
-         var4.setTime(var2);
-         int var5 = var3.get(1);
-         int var6 = var4.get(1);
-         int var7 = var3.get(2);
-         int var8 = var4.get(2);
-         int var9 = 12 * (var5 - var6) + (var7 - var8);
-         return var9;
+   public Object dateDifMonth(Date d1, Date d2) {
+      if (d1 != null && d2 != null) {
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(d1);
+         Calendar calendar2 = Calendar.getInstance();
+         calendar2.setTime(d2);
+         int number = calendar.get(1);
+         int number2 = calendar2.get(1);
+         int number3 = calendar.get(2);
+         int number4 = calendar2.get(2);
+         int dateDifMonthResult = 12 * (number - number2) + (number3 - number4);
+         return dateDifMonthResult;
       } else {
          return null;
       }

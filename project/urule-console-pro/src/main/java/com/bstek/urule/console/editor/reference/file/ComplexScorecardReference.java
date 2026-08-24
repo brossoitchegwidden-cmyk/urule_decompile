@@ -12,12 +12,12 @@ public class ComplexScorecardReference extends Reference {
    protected ComplexScorecardReference() {
    }
 
-   public boolean exist(Object var1, Long var2) {
-      ComplexScorecardDefinition var3 = (ComplexScorecardDefinition)var1;
-      List var4 = var3.getLibraries();
-      if (var4 != null) {
-         for(Library var6 : (Iterable<Library>)(Iterable<?>)(var4)) {
-            if (var6.getId() == var2) {
+   public boolean exist(Object obj, Long fileId) {
+      ComplexScorecardDefinition complexScorecardDefinition = (ComplexScorecardDefinition)obj;
+      List libraries = complexScorecardDefinition.getLibraries();
+      if (libraries != null) {
+         for(Library library : (Iterable<Library>)(Iterable<?>)(libraries)) {
+            if (library.getId() == fileId) {
                return true;
             }
          }
@@ -26,28 +26,28 @@ public class ComplexScorecardReference extends Reference {
       return false;
    }
 
-   public FileReference build(Object var1) {
-      ComplexScorecardDefinition var2 = (ComplexScorecardDefinition)var1;
-      List var3 = var2.getLibraries();
-      FileReference var4 = new FileReference();
-      var4.setType(ResourceType.ComplexScorecard);
-      ArrayList var5 = new ArrayList();
-      var4.setChildren(var5);
-      FileReference var6 = this.b(var3);
-      if (var6 != null) {
-         var5.add(var6);
+   public FileReference build(Object obj) {
+      ComplexScorecardDefinition complexScorecardDefinition = (ComplexScorecardDefinition)obj;
+      List libraries = complexScorecardDefinition.getLibraries();
+      FileReference fileReference = new FileReference();
+      fileReference.setType(ResourceType.ComplexScorecard);
+      ArrayList items = new ArrayList();
+      fileReference.setChildren(items);
+      FileReference fileReference2 = this.buildLibraryReferences(libraries);
+      if (fileReference2 != null) {
+         items.add(fileReference2);
       }
 
-      Map var7 = var2.getCellMap();
-      List var8 = this.a(var7);
-      if (var8 != null) {
-         var5.addAll(var8);
+      Map cellMap = complexScorecardDefinition.getCellMap();
+      List items2 = this.buildActionReferences(cellMap);
+      if (items2 != null) {
+         items.addAll(items2);
       }
 
-      return var4;
+      return fileReference;
    }
 
-   public boolean support(Object var1) {
-      return var1 instanceof ComplexScorecardDefinition;
+   public boolean support(Object obj) {
+      return obj instanceof ComplexScorecardDefinition;
    }
 }

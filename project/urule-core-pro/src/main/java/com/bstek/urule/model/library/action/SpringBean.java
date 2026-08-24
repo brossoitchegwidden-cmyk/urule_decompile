@@ -14,47 +14,47 @@ public class SpringBean {
       return this.id;
    }
 
-   public void setId(String var1) {
-      this.id = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getEname() {
       return this.ename;
    }
 
-   public void setEname(String var1) {
-      this.ename = var1;
+   public void setEname(String ename) {
+      this.ename = ename;
    }
 
    public List<Method> getMethods() {
       return this.methods;
    }
 
-   public void addMethod(Method var1) {
+   public void addMethod(Method method) {
       if (this.methods == null) {
          this.methods = new ArrayList<>();
       }
 
-      this.methods.add(var1);
+      this.methods.add(method);
    }
 
-   public void setMethods(List<Method> var1) {
-      this.methods = var1;
+   public void setMethods(List<Method> methods) {
+      this.methods = methods;
    }
 }

@@ -3,11 +3,11 @@ package com.bstek.urule.console.database.manager.packet.deploy.file;
 import java.util.List;
 
 public interface PacketDeployFileQuery {
-   PacketDeployFileQuery id(long var1);
+   PacketDeployFileQuery id(long id);
 
-   PacketDeployFileQuery packetDeployId(long var1);
+   PacketDeployFileQuery packetDeployId(long packetDeployId);
 
-   PacketDeployFileQuery projectId(long var1);
+   PacketDeployFileQuery projectId(long projectId);
 
    List list();
 

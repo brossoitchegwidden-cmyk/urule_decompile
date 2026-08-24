@@ -6,31 +6,31 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class ValueCrossCellParser extends CrossCellParser implements Parser<ValueCrossCell> {
-   private ValueParser a;
+   private ValueParser valueParser;
 
-   public ValueCrossCell parse(Element var1) {
-      ValueCrossCell var2 = new ValueCrossCell();
-      this.a(var2, var1);
+   public ValueCrossCell parse(Element element) {
+      ValueCrossCell valueCrossCell = new ValueCrossCell();
+      this.parseCrossCell(valueCrossCell, element);
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (this.a.support(var5.getName())) {
-               var2.setValue(this.a.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               valueCrossCell.setValue(this.valueParser.parse(element2));
                break;
             }
          }
       }
 
-      return var2;
+      return valueCrossCell;
    }
 
    @Override
-   public boolean support(String var1) {
-      return "value-cell".equals(var1);
+   public boolean support(String name) {
+      return "value-cell".equals(name);
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.a = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 }

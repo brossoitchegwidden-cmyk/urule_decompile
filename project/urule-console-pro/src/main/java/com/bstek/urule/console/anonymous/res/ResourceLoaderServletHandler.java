@@ -14,50 +14,50 @@ import org.apache.commons.io.IOUtils;
 public class ResourceLoaderServletHandler extends AnonymousServletHandler {
    public static final String RES_PREFIX = "/res";
 
-   public void execute(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getContextPath() + "/urule" + "/res";
-      String var4 = var1.getRequestURI();
-      String var5 = var4.substring(var3.length() + 1);
-      if (var5.endsWith(".js")) {
-         var2.setContentType("text/javascript");
-      } else if (var5.endsWith(".css")) {
-         var2.setContentType("text/css");
-      } else if (var5.endsWith(".png")) {
-         var2.setContentType("image/png");
-      } else if (var5.endsWith(".jpg")) {
-         var2.setContentType("image/jpeg");
-      } else if (var5.endsWith(".svg")) {
-         var2.setContentType("image/svg+xml");
+   public void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String text = req.getContextPath() + "/urule" + "/res";
+      String requestURI = req.getRequestURI();
+      String substring = requestURI.substring(text.length() + 1);
+      if (substring.endsWith(".js")) {
+         resp.setContentType("text/javascript");
+      } else if (substring.endsWith(".css")) {
+         resp.setContentType("text/css");
+      } else if (substring.endsWith(".png")) {
+         resp.setContentType("image/png");
+      } else if (substring.endsWith(".jpg")) {
+         resp.setContentType("image/jpeg");
+      } else if (substring.endsWith(".svg")) {
+         resp.setContentType("image/svg+xml");
       } else {
-         var2.setContentType("application/octet-stream");
+         resp.setContentType("application/octet-stream");
       }
 
-      long var6 = var1.getDateHeader("If-Modified-Since");
-      long var8 = 0L;
+      long dateHeader = req.getDateHeader("If-Modified-Since");
+      long lastModified = 0L;
 
       try {
-         URL var10 = this.getClass().getClassLoader().getResource(var5);
-         var8 = var10.openConnection().getLastModified();
-      } catch (Exception var16) {
+         URL resource = this.getClass().getClassLoader().getResource(substring);
+         lastModified = resource.openConnection().getLastModified();
+      } catch (Exception exception) {
       }
 
-      if (var8 != 0L && var6 != 0L && Math.abs(var8 - var6) < 1000L) {
-         var2.setStatus(304);
+      if (lastModified != 0L && dateHeader != 0L && Math.abs(lastModified - dateHeader) < 1000L) {
+         resp.setStatus(304);
       } else {
-         var2.addDateHeader("Last-Modified", var8);
-         var2.addHeader("Cache-Control", "no-cache");
-         InputStream var17 = this.getClass().getClassLoader().getResourceAsStream(var5);
-         if (var17 == null) {
-            throw new RuleException("Resource【" + var5 + "】not exist！");
+         resp.addDateHeader("Last-Modified", lastModified);
+         resp.addHeader("Cache-Control", "no-cache");
+         InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(substring);
+         if (resourceAsStream == null) {
+            throw new RuleException("Resource【" + substring + "】not exist！");
          }
 
-         ServletOutputStream var11 = var2.getOutputStream();
+         ServletOutputStream outputStream = resp.getOutputStream();
 
          try {
-            IOUtils.copy(var17, var11);
+            IOUtils.copy(resourceAsStream, outputStream);
          } finally {
-            IOUtils.closeQuietly(var17);
-            IOUtils.closeQuietly(var11);
+            IOUtils.closeQuietly(resourceAsStream);
+            IOUtils.closeQuietly(outputStream);
          }
       }
 

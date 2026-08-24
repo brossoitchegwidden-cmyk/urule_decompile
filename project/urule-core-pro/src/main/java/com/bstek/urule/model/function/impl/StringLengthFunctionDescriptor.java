@@ -8,33 +8,29 @@ import com.bstek.urule.runtime.WorkingMemory;
 
 public class StringLengthFunctionDescriptor implements FunctionDescriptor {
    private boolean disabled = false;
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("对象");
-      var1.setEname("Object");
-      var1.setNeedProperty(true);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("对象");
+      argument.setEname("Object");
+      argument.setNeedProperty(true);
+      return argument;
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      Object var4 = Utils.getObjectProperty(var1, var2);
-      if (var4 == null) {
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      Object objectProperty = Utils.getObjectProperty(object, property);
+      if (objectProperty == null) {
          return 0;
-      } else if (!(var4 instanceof String)) {
+      } else if (!(objectProperty instanceof String)) {
          throw new RuleException("Function[StringLength] parameter value must be String.");
       } else {
-         return var4.toString().length();
+         return objectProperty.toString().length();
       }
    }
-
    @Override
    public String getName() {
       return "StringLength";
    }
-
    @Override
    public String getLabel() {
       return "计算字符长度";
@@ -45,7 +41,7 @@ public class StringLengthFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
 }

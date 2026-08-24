@@ -14,7 +14,7 @@ public interface Context {
 
    Logger getLogger();
 
-   void addTipMsg(String var1);
+   void addTipMsg(String msg);
 
    ValueCompute getValueCompute();
 
@@ -22,13 +22,13 @@ public interface Context {
 
    AssertorEvaluator getAssertorEvaluator();
 
-   void addRuleData(List<RuleData> var1);
+   void addRuleData(List<RuleData> ruleData);
 
    ApplicationContext getApplicationContext();
 
    boolean parentIsObjectInstanceMethod();
 
-   void resetParentIsObjectInstanceMethod(boolean var1);
+   void resetParentIsObjectInstanceMethod(boolean parentIsObjectInstanceMethod);
 
-   String getVariableCategoryClass(String var1);
+   String getVariableCategoryClass(String variableCategory);
 }

@@ -30,52 +30,52 @@ public class ObjectAction {
 
    @ActionMethod(name = "对象实例化")
    @ActionMethodParameter(names = "完整类路径", enames = "targetClass")
-   public Object newObjectInstance(String var1) {
+   public Object newObjectInstance(String targetClass) {
       try {
-         Class var2 = ClassUtils.getTargetClassDefaultNull(var1);
-         if (var2 == null) {
-            GeneralEntity var7 = new GeneralEntity(var1);
-            WorkingMemory var8 = WorkingMemoryHolder.getCurrentWorkingMemory();
-            Utils.assignVariableObjectDefaultValue(var7, var8);
-            return var7;
+         Class targetClassDefaultNull = ClassUtils.getTargetClassDefaultNull(targetClass);
+         if (targetClassDefaultNull == null) {
+            GeneralEntity generalEntity = new GeneralEntity(targetClass);
+            WorkingMemory currentWorkingMemory = WorkingMemoryHolder.getCurrentWorkingMemory();
+            Utils.assignVariableObjectDefaultValue(generalEntity, currentWorkingMemory);
+            return generalEntity;
          } else {
-            return var2.newInstance();
+            return targetClassDefaultNull.newInstance();
          }
-      } catch (Exception var6) {
-         GeneralEntity var3 = new GeneralEntity(var1);
-         WorkingMemory var4 = WorkingMemoryHolder.getCurrentWorkingMemory();
-         KnowledgeSession var5 = (KnowledgeSession)var4;
-         Utils.assignVariableObjectDefaultValue(var3, var5);
-         return var3;
+      } catch (Exception exception) {
+         GeneralEntity newObjectInstanceResult = new GeneralEntity(targetClass);
+         WorkingMemory currentWorkingMemory2 = WorkingMemoryHolder.getCurrentWorkingMemory();
+         KnowledgeSession knowledgeSession = (KnowledgeSession)currentWorkingMemory2;
+         Utils.assignVariableObjectDefaultValue(newObjectInstanceResult, knowledgeSession);
+         return newObjectInstanceResult;
       }
    }
 
    @ActionMethod(name = "根据对象创建新实例")
    @ActionMethodParameter(names = "目标对象", enames = "Object")
-   public Object newObjectInstanceByObject(Object var1) {
+   public Object newObjectInstanceByObject(Object obj) {
       try {
-         if (var1 instanceof GeneralEntity) {
-            GeneralEntity var2 = (GeneralEntity)var1;
-            String var3 = var2.getTargetClass();
-            var2 = new GeneralEntity(var3);
-            WorkingMemory var4 = WorkingMemoryHolder.getCurrentWorkingMemory();
-            Utils.assignVariableObjectDefaultValue(var2, var4);
-            return var2;
+         if (obj instanceof GeneralEntity) {
+            GeneralEntity generalEntity = (GeneralEntity)obj;
+            String targetClass = generalEntity.getTargetClass();
+            generalEntity = new GeneralEntity(targetClass);
+            WorkingMemory currentWorkingMemory = WorkingMemoryHolder.getCurrentWorkingMemory();
+            Utils.assignVariableObjectDefaultValue(generalEntity, currentWorkingMemory);
+            return generalEntity;
          } else {
-            return var1.getClass().newInstance();
+            return obj.getClass().newInstance();
          }
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
    @ActionMethod(name = "对象取值")
    @ActionMethodParameter(names = {"目标对象", "属性名"}, enames = {"Object", "propertyName"})
-   public Object getObjectProperty(Object var1, String var2) {
+   public Object getObjectProperty(Object obj, String property) {
       try {
-         return Utils.getObjectProperty(var1, var2);
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         return Utils.getObjectProperty(obj, property);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 }

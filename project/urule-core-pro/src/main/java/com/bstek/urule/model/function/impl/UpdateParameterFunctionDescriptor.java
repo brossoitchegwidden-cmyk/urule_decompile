@@ -9,17 +9,14 @@ public class UpdateParameterFunctionDescriptor implements FunctionDescriptor {
    public Argument getArgument() {
       return null;
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      return var3.update(var3.getParameters());
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      return workingMemory.update(workingMemory.getParameters());
    }
-
    @Override
    public String getName() {
       return "UpdateParameter";
    }
-
    @Override
    public String getLabel() {
       return "更新参数";

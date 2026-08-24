@@ -4,9 +4,9 @@ import com.bstek.urule.runtime.rete.EvaluationContext;
 
 public class And extends Junction {
    @Override
-   public boolean doEval(EvaluationContext var1, boolean var2) {
-      for (Criterion var5 : this.getCriterions()) {
-         if (!var5.doEval(var1, var2)) {
+   public boolean doEval(EvaluationContext context, boolean debug) {
+      for (Criterion criterion : this.getCriterions()) {
+         if (!criterion.doEval(context, debug)) {
             return false;
          }
       }

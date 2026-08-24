@@ -11,29 +11,29 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 public class AuthorizationBatchListener implements BatchListener {
-   private static final String a = "urule_authorization";
+   private static final String URULE_AUTHORIZATION = "urule_authorization";
 
-   public void beforeExecute(BatchContext var1) {
-      HttpServletRequest var2 = RequestHolder.getRequest();
-      if (var2 != null) {
-         var1.getParamValueMap().put("urule_authorization", var2.getHeader("Authorization"));
+   public void beforeExecute(BatchContext batchContext) {
+      HttpServletRequest request = RequestHolder.getRequest();
+      if (request != null) {
+         batchContext.getParamValueMap().put("urule_authorization", request.getHeader("Authorization"));
       }
 
    }
 
-   public void onExecute(BatchContext var1) {
-      Batch var2 = var1.getBatch();
-      BatchResult var3 = var1.getResult();
+   public void onExecute(BatchContext batchContext) {
+      Batch batch = batchContext.getBatch();
+      BatchResult batchResult = batchContext.getResult();
 
       try {
-         RestTemplate var4 = new RestTemplate();
-         HttpHeaders var5 = new HttpHeaders();
-         var5.set("Authorization", (String)var1.getParamValueMap().get("urule_authorization"));
-         var5.setContentType(MediaType.APPLICATION_JSON);
-         HttpEntity var6 = new HttpEntity(var3, var5);
-         var4.postForLocation(var2.getCallbackUrl(), var6, new Object[0]);
-      } catch (Exception var7) {
-         var7.printStackTrace();
+         RestTemplate restTemplate = new RestTemplate();
+         HttpHeaders httpHeaders = new HttpHeaders();
+         httpHeaders.set("Authorization", (String)batchContext.getParamValueMap().get("urule_authorization"));
+         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+         HttpEntity httpEntity = new HttpEntity(batchResult, httpHeaders);
+         restTemplate.postForLocation(batch.getCallbackUrl(), httpEntity, new Object[0]);
+      } catch (Exception exception) {
+         java.util.logging.Logger.getLogger(AuthorizationBatchListener.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
       }
 
    }

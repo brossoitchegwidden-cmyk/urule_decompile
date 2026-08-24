@@ -8,23 +8,23 @@ public class RuleParserParser$MultiNamedConditionsContext extends RuleParserPars
       return this.getRuleContexts(RuleParserParser$NamedConditionContext.class);
    }
 
-   public RuleParserParser$NamedConditionContext namedCondition(int var1) {
-      return (RuleParserParser$NamedConditionContext)this.getRuleContext(RuleParserParser$NamedConditionContext.class, var1);
+   public RuleParserParser$NamedConditionContext namedCondition(int number) {
+      return (RuleParserParser$NamedConditionContext)this.getRuleContext(RuleParserParser$NamedConditionContext.class, number);
    }
 
    public List<RuleParserParser$JoinContext> join() {
       return this.getRuleContexts(RuleParserParser$JoinContext.class);
    }
 
-   public RuleParserParser$JoinContext join(int var1) {
-      return (RuleParserParser$JoinContext)this.getRuleContext(RuleParserParser$JoinContext.class, var1);
+   public RuleParserParser$JoinContext join(int number) {
+      return (RuleParserParser$JoinContext)this.getRuleContext(RuleParserParser$JoinContext.class, number);
    }
 
-   public RuleParserParser$MultiNamedConditionsContext(RuleParserParser$NamedConditionContext var1) {
-      this.copyFrom(var1);
+   public RuleParserParser$MultiNamedConditionsContext(RuleParserParser$NamedConditionContext ruleParserParser$NamedConditionContext) {
+      this.copyFrom(ruleParserParser$NamedConditionContext);
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitMultiNamedConditions(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitMultiNamedConditions(this) : parseTreeVisitor.visitChildren(this));
    }
 }

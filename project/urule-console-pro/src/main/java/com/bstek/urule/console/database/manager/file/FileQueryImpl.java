@@ -13,104 +13,105 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Builds parameterized file and directory queries for the repository tree. */
 public class FileQueryImpl implements FileQuery {
-   private Long a;
-   private List b;
-   private String c;
-   private String d;
-   private String e;
-   private String[] f;
-   private String g;
-   private String h;
-   private Boolean i;
-   private boolean j;
-   private Boolean k;
-   private List l = new ArrayList();
-   private List m = new ArrayList();
+   private Long id;
+   private List ids;
+   private String name;
+   private String namePattern;
+   private String type;
+   private String[] types;
+   private String lockedUser;
+   private String updateUser;
+   private Boolean deleted;
+   private boolean removeEmpty;
+   private boolean containCommonProject;
+   private List<String> ascendingProperties = new ArrayList<>();
+   private List<String> descendingProperties = new ArrayList<>();
 
    protected FileQueryImpl() {
    }
 
-   public List tree(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public List tree(Long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var15;
+      ArrayList treeResult;
       try {
-         ArrayList var3 = new ArrayList();
-         Project var4 = ProjectManager.ins.get(var1);
-         var3.add(this.a(var2, var4));
-         if (this.k && var1 != null) {
-            String var5 = var4.getGroupId();
+         ArrayList items = new ArrayList();
+         Project project = ProjectManager.ins.get(projectId);
+         items.add(this.buildProjectRoot(connection, project));
+         if (this.containCommonProject && projectId != null) {
+            String groupId = project.getGroupId();
 
-            for(Project var8 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().groupId(var5).type("common").list())) {
-               if (var8.getId() != var1) {
-                  RuleFile var9 = this.a(var2, var8);
-                  var3.add(var9);
+            for(Project project2 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().groupId(groupId).type("common").list())) {
+               if (!project2.getId().equals(projectId)) {
+                  RuleFile ruleFile = this.buildProjectRoot(connection, project2);
+                  items.add(ruleFile);
                }
             }
          }
 
-         var15 = var3;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         treeResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var15;
+      return treeResult;
    }
 
-   private RuleFile a(Connection var1, Project var2) {
+   private RuleFile buildProjectRoot(Connection connection, Project project) {
       try {
-         RuleFile var3 = new RuleFile();
-         var3.setName(var2.getName());
-         var3.setType(var2.getType());
-         var3.setProjectId(var2.getId());
-         var3.setParentId(-1L);
-         var3.setDirectory(true);
-         var3.setPath("/");
-         var3.setId(0L);
-         ArrayList var4 = new ArrayList();
-         var3.setChildren(var4);
-         var4.addAll(this.b(var3, var1));
-         var4.addAll(this.a(var3, var1));
-         if (this.j) {
-            this.a((List)var4);
+         RuleFile ruleFile = new RuleFile();
+         ruleFile.setName(project.getName());
+         ruleFile.setType(project.getType());
+         ruleFile.setProjectId(project.getId());
+         ruleFile.setParentId(-1L);
+         ruleFile.setDirectory(true);
+         ruleFile.setPath("/");
+         ruleFile.setId(0L);
+         ArrayList items = new ArrayList();
+         ruleFile.setChildren(items);
+         items.addAll(this.queryFiles(ruleFile, connection));
+         items.addAll(this.queryDirectories(ruleFile, connection));
+         if (this.removeEmpty) {
+            this.removeEmptyDirectories(items);
          }
 
-         return var3;
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+         return ruleFile;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   private void a(List var1) {
-      if (var1 != null) {
-         ArrayList var2 = new ArrayList();
-         var2.addAll(var1);
+   private void removeEmptyDirectories(List<RuleFile> files) {
+      if (files != null) {
+         List<RuleFile> snapshot = new ArrayList<>();
+         snapshot.addAll(files);
 
-         for(RuleFile var4 : (Iterable<RuleFile>)(Iterable<?>)(var2)) {
-            if (var4.isDirectory()) {
-               if (this.a(var4)) {
-                  var1.remove(var4);
+         for(RuleFile ruleFile : snapshot) {
+            if (ruleFile.isDirectory()) {
+               if (this.isEmptyDirectory(ruleFile)) {
+                  files.remove(ruleFile);
                }
 
-               this.a(var4.getChildren());
+               this.removeEmptyDirectories(ruleFile.getChildren());
             }
          }
 
       }
    }
 
-   private boolean a(RuleFile var1) {
-      List var2 = var1.getChildren();
-      if (var2 != null && var2.size() != 0) {
-         for(RuleFile var4 : (Iterable<RuleFile>)(Iterable<?>)(var2)) {
-            if (!var4.isDirectory()) {
+   private boolean isEmptyDirectory(RuleFile ruleFile) {
+      List children = ruleFile.getChildren();
+      if (children != null && children.size() != 0) {
+         for(RuleFile ruleFile2 : (Iterable<RuleFile>)(Iterable<?>)(children)) {
+            if (!ruleFile2.isDirectory()) {
                return false;
             }
 
-            if (!this.a(var4)) {
+            if (!this.isEmptyDirectory(ruleFile2)) {
                return false;
             }
          }
@@ -121,483 +122,483 @@ public class FileQueryImpl implements FileQuery {
       }
    }
 
-   public List list(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
-      RuleFile var3 = new RuleFile();
-      Project var4 = null;
-      var3.setPath("/");
-      if (var1 != null) {
-         var3.setProjectId(var1);
-         var4 = ProjectManager.ins.get(var1);
+   public List list(Long projectId) {
+      Connection connection = JdbcUtils.getConnection();
+      RuleFile ruleFile = new RuleFile();
+      Project project = null;
+      ruleFile.setPath("/");
+      if (projectId != null) {
+         ruleFile.setProjectId(projectId);
+         project = ProjectManager.ins.get(projectId);
       }
 
-      var3.setId(-1L);
-      List var5 = this.b(var3, var2);
+      ruleFile.setId(-1L);
+      List listResult = this.queryFiles(ruleFile, connection);
 
-      for(RuleFile var7 : (Iterable<RuleFile>)(Iterable<?>)(var5)) {
-         PathInfo var8 = new PathInfo();
-         var8.setPath("");
-         this.a(var2, var7.getParentId(), var8);
-         var7.setFileSet(var8.isFileSet());
-         String var9 = var8.getPath();
-         if (var4 == null) {
-            Project var10 = ProjectManager.ins.get(var7.getProjectId());
-            var9 = var10.getName() + "/" + var9;
+      for(RuleFile ruleFile2 : (Iterable<RuleFile>)(Iterable<?>)(listResult)) {
+         PathInfo pathInfo = new PathInfo();
+         pathInfo.setPath("");
+         this.buildPath(connection, ruleFile2.getParentId(), pathInfo);
+         ruleFile2.setFileSet(pathInfo.isFileSet());
+         String path = pathInfo.getPath();
+         if (project == null) {
+            Project project2 = ProjectManager.ins.get(ruleFile2.getProjectId());
+            path = project2.getName() + "/" + path;
          } else {
-            var9 = var4.getName() + "/" + var9;
+            path = project.getName() + "/" + path;
          }
 
-         var7.setPath(var7.getType() + ":" + var9 + var7.getName());
+         ruleFile2.setPath(ruleFile2.getType() + ":" + path + ruleFile2.getName());
       }
 
-      JdbcUtils.closeConnection(var2);
-      return var5;
+      JdbcUtils.closeConnection(connection);
+      return listResult;
    }
 
-   private void a(Connection var1, long var2, PathInfo var4) {
-      String var5 = "select ID_, NAME_, TYPE_, PARENT_ID_ from URULE_PACKAGE where ID_=?";
-      PreparedStatement var6 = null;
-      ResultSet var7 = null;
+   private void buildPath(Connection connection, long parentId, PathInfo pathInfo) {
+      String text = "select ID_, NAME_, TYPE_, PARENT_ID_ from URULE_PACKAGE where ID_=?";
+      PreparedStatement preparedStatement = null;
+      ResultSet resultSet = null;
 
       try {
-         var6 = var1.prepareStatement(var5);
-         var6.setLong(1, var2);
-         var7 = var6.executeQuery();
-         if (var7.next()) {
-            long var8 = var7.getLong(1);
-            String var10 = var7.getString(2);
-            String var11 = var7.getString(3);
-            long var12 = var7.getLong(4);
-            if (var8 == var12) {
-               throw new RuleException("[" + var2 + "] buildPath error!");
+         preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, parentId);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            long longValue = resultSet.getLong(1);
+            String string = resultSet.getString(2);
+            String string2 = resultSet.getString(3);
+            long longValue2 = resultSet.getLong(4);
+            if (longValue == longValue2) {
+               throw new RuleException("[" + parentId + "] buildPath error!");
             }
 
-            String var14 = var4.getPath();
-            var14 = var10 + "/" + var14;
-            var4.setPath(var14);
-            if (ResourceType.General.name().equals(var11)) {
-               var4.setFileSet(true);
+            String path = pathInfo.getPath();
+            path = string + "/" + path;
+            pathInfo.setPath(path);
+            if (ResourceType.General.name().equals(string2)) {
+               pathInfo.setFileSet(true);
             }
 
-            this.a(var1, var12, var4);
+            this.buildPath(connection, longValue2, pathInfo);
          }
-      } catch (Exception var18) {
-         throw new RuleException(var18);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var6);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
       }
 
    }
 
-   private List a(RuleFile var1, Connection var2) {
+   private List<RuleFile> queryDirectories(RuleFile ruleFile, Connection connection) {
       try {
-         ArrayList var3 = new ArrayList();
-         String var4 = "select ID_, NAME_, TYPE_,PARENT_ID_,PROJECT_ID_,CREATE_DATE_,UPDATE_USER_,UPDATE_DATE_ from URULE_PACKAGE";
-         StringBuilder var5 = new StringBuilder();
-         if (var1.getId() > -1L) {
-            var5.append("  where PARENT_ID_=?");
-            var3.add(var1.getId());
+         ArrayList items = new ArrayList();
+         String text = "select ID_, NAME_, TYPE_,PARENT_ID_,PROJECT_ID_,CREATE_DATE_,UPDATE_USER_,UPDATE_DATE_ from URULE_PACKAGE";
+         StringBuilder stringBuilder = new StringBuilder();
+         if (ruleFile.getId() > -1L) {
+            stringBuilder.append("  where PARENT_ID_=?");
+            items.add(ruleFile.getId());
          }
 
-         if (var1.getProjectId() > 0L) {
-            if (var5.length() > 0) {
-               var5.append("  and PROJECT_ID_=?");
+         if (ruleFile.getProjectId() > 0L) {
+            if (stringBuilder.length() > 0) {
+               stringBuilder.append("  and PROJECT_ID_=?");
             } else {
-               var5.append("  where PROJECT_ID_=?");
+               stringBuilder.append("  where PROJECT_ID_=?");
             }
 
-            var3.add(var1.getProjectId());
+            items.add(ruleFile.getProjectId());
          }
 
-         var4 = this.a(var5, var3, var4, true);
-         var4 = this.b(var4);
-         PreparedStatement var6 = var2.prepareStatement(var4);
-         ArrayList var7 = new ArrayList();
-         JdbcUtils.fillPreparedStatementParameters(var3, var6);
-         ResultSet var8 = var6.executeQuery();
-         String var9 = var1.getPath();
-         if (var9.endsWith("/")) {
-            var9 = var9 + var1.getName();
+         text = this.appendFilters(stringBuilder, items, text, true);
+         text = this.appendOrderBy(text);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         ArrayList directories = new ArrayList();
+         JdbcUtils.fillPreparedStatementParameters(items, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         String path = ruleFile.getPath();
+         if (path.endsWith("/")) {
+            path = path + ruleFile.getName();
          } else {
-            var9 = var9 + "/" + var1.getName();
+            path = path + "/" + ruleFile.getName();
          }
 
-         while(var8.next()) {
-            RuleFile var10 = this.a(var2, var8, var9);
-            var7.add(var10);
+         while(resultSet.next()) {
+            RuleFile directoryRuleFile = this.buildDirectoryRuleFile(connection, resultSet, path);
+            directories.add(directoryRuleFile);
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var6);
-         return var7;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         return directories;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   private List b(RuleFile var1, Connection var2) {
+   private List<RuleFile> queryFiles(RuleFile ruleFile, Connection connection) {
       try {
-         ArrayList var3 = new ArrayList();
-         String var4 = "select ID_,NAME_, TYPE_,CREATE_DATE_,UPDATE_USER_,UPDATE_DATE_,LOCKED_USER_,PACKAGE_ID_,PROJECT_ID_,LATEST_VERSION_,DIGEST_,DELETED_ from URULE_FILE ";
-         StringBuilder var5 = new StringBuilder();
-         if (var1.getId() > -1L) {
-            var5.append("  where PACKAGE_ID_=?");
-            var3.add(var1.getId());
+         ArrayList items = new ArrayList();
+         String text = "select ID_,NAME_, TYPE_,CREATE_DATE_,UPDATE_USER_,UPDATE_DATE_,LOCKED_USER_,PACKAGE_ID_,PROJECT_ID_,LATEST_VERSION_,DIGEST_,DELETED_ from URULE_FILE ";
+         StringBuilder stringBuilder = new StringBuilder();
+         if (ruleFile.getId() > -1L) {
+            stringBuilder.append("  where PACKAGE_ID_=?");
+            items.add(ruleFile.getId());
          }
 
-         if (var1.getProjectId() > 0L) {
-            if (var1.getId() > -1L) {
-               var5.append("  and PROJECT_ID_=?");
+         if (ruleFile.getProjectId() > 0L) {
+            if (ruleFile.getId() > -1L) {
+               stringBuilder.append("  and PROJECT_ID_=?");
             } else {
-               var5.append("  where PROJECT_ID_=?");
+               stringBuilder.append("  where PROJECT_ID_=?");
             }
 
-            var3.add(var1.getProjectId());
+            items.add(ruleFile.getProjectId());
          }
 
-         var4 = this.a(var5, var3, var4, false);
-         var4 = this.b(var4);
-         PreparedStatement var6 = var2.prepareStatement(var4);
-         JdbcUtils.fillPreparedStatementParameters(var3, var6);
-         ArrayList var7 = new ArrayList();
-         ResultSet var8 = var6.executeQuery();
-         String var9 = var1.getPath();
-         if (var9.endsWith("/")) {
-            var9 = var9 + var1.getName();
+         text = this.appendFilters(stringBuilder, items, text, false);
+         text = this.appendOrderBy(text);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(items, preparedStatement);
+         ArrayList files = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
+         String path = ruleFile.getPath();
+         if (path.endsWith("/")) {
+            path = path + ruleFile.getName();
          } else {
-            var9 = var9 + "/" + var1.getName();
+            path = path + "/" + ruleFile.getName();
          }
 
-         while(var8.next()) {
-            RuleFile var10 = this.a(var8, var9);
-            var7.add(var10);
+         while(resultSet.next()) {
+            RuleFile fileRuleFile = this.buildFileRuleFile(resultSet, path);
+            files.add(fileRuleFile);
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var6);
-         return var7;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         return files;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   private RuleFile a(Connection var1, ResultSet var2, String var3) throws SQLException {
-      RuleFile var4 = new RuleFile();
-      var4.setDirectory(true);
-      var4.setId(var2.getLong(1));
-      var4.setName(var2.getString(2));
-      var4.setType(var2.getString(3));
-      var4.setParentId(var2.getLong(4));
-      var4.setProjectId(var2.getLong(5));
-      var4.setCreateDate(var2.getTimestamp(6));
-      var4.setUpdateUser(var2.getString(7));
-      var4.setModifyDate(var2.getTimestamp(8));
-      var4.setPath(var3);
-      ArrayList var5 = new ArrayList();
-      var4.setChildren(var5);
-      var5.addAll(this.b(var4, var1));
-      var5.addAll(this.a(var4, var1));
-      return var4;
+   private RuleFile buildDirectoryRuleFile(Connection connection, ResultSet resultSet, String path) throws SQLException {
+      RuleFile ruleFile = new RuleFile();
+      ruleFile.setDirectory(true);
+      ruleFile.setId(resultSet.getLong(1));
+      ruleFile.setName(resultSet.getString(2));
+      ruleFile.setType(resultSet.getString(3));
+      ruleFile.setParentId(resultSet.getLong(4));
+      ruleFile.setProjectId(resultSet.getLong(5));
+      ruleFile.setCreateDate(resultSet.getTimestamp(6));
+      ruleFile.setUpdateUser(resultSet.getString(7));
+      ruleFile.setModifyDate(resultSet.getTimestamp(8));
+      ruleFile.setPath(path);
+      ArrayList items = new ArrayList();
+      ruleFile.setChildren(items);
+      items.addAll(this.queryFiles(ruleFile, connection));
+      items.addAll(this.queryDirectories(ruleFile, connection));
+      return ruleFile;
    }
 
-   private RuleFile a(ResultSet var1, String var2) throws SQLException {
-      RuleFile var3 = new RuleFile();
-      var3.setDirectory(false);
-      var3.setId(var1.getLong(1));
-      var3.setName(var1.getString(2));
-      var3.setType(var1.getString(3));
-      var3.setCreateDate(var1.getTimestamp(4));
-      var3.setUpdateUser(var1.getString(5));
-      var3.setModifyDate(var1.getTimestamp(6));
-      var3.setLockedUser(var1.getString(7));
-      var3.setParentId(var1.getLong(8));
-      var3.setProjectId(var1.getLong(9));
-      var3.setLatestVersion(var1.getString(10));
-      var3.setDigest(var1.getString(11));
-      var3.setDeleted(var1.getBoolean(12));
-      if (var2.endsWith("/")) {
-         var2 = var2 + var3.getName();
+   private RuleFile buildFileRuleFile(ResultSet resultSet, String path) throws SQLException {
+      RuleFile ruleFile = new RuleFile();
+      ruleFile.setDirectory(false);
+      ruleFile.setId(resultSet.getLong(1));
+      ruleFile.setName(resultSet.getString(2));
+      ruleFile.setType(resultSet.getString(3));
+      ruleFile.setCreateDate(resultSet.getTimestamp(4));
+      ruleFile.setUpdateUser(resultSet.getString(5));
+      ruleFile.setModifyDate(resultSet.getTimestamp(6));
+      ruleFile.setLockedUser(resultSet.getString(7));
+      ruleFile.setParentId(resultSet.getLong(8));
+      ruleFile.setProjectId(resultSet.getLong(9));
+      ruleFile.setLatestVersion(resultSet.getString(10));
+      ruleFile.setDigest(resultSet.getString(11));
+      ruleFile.setDeleted(resultSet.getBoolean(12));
+      if (path.endsWith("/")) {
+         path = path + ruleFile.getName();
       } else {
-         var2 = var2 + "/" + var3.getName();
+         path = path + "/" + ruleFile.getName();
       }
 
-      var3.setPath(var3.getType() + ":" + var2);
-      return var3;
+      ruleFile.setPath(ruleFile.getType() + ":" + path);
+      return ruleFile;
    }
 
-   private String a(String var1) {
-      String var2 = var1;
-      if (!var1.equals(ResourceType.VariableLibrary.name()) && !var1.equals(ResourceType.ParameterLibrary.name()) && !var1.equals(ResourceType.ConstantLibrary.name()) && !var1.equals(ResourceType.ActionLibrary.name())) {
-         if (!var1.equals(ResourceType.DecisionTable.name()) && !var1.contentEquals(ResourceType.CrossDecisionTable.name())) {
-            if (var1.equals(ResourceType.Scorecard.name()) || var1.equals(ResourceType.ComplexScorecard.name())) {
-               var2 = ResourceType.Scorecard.name();
+   private String normalizeDirectoryResourceType(String resourceType) {
+      String normalizedType = resourceType;
+      if (!resourceType.equals(ResourceType.VariableLibrary.name()) && !resourceType.equals(ResourceType.ParameterLibrary.name()) && !resourceType.equals(ResourceType.ConstantLibrary.name()) && !resourceType.equals(ResourceType.ActionLibrary.name())) {
+         if (!resourceType.equals(ResourceType.DecisionTable.name()) && !resourceType.contentEquals(ResourceType.CrossDecisionTable.name())) {
+            if (resourceType.equals(ResourceType.Scorecard.name()) || resourceType.equals(ResourceType.ComplexScorecard.name())) {
+               normalizedType = ResourceType.Scorecard.name();
             }
          } else {
-            var2 = ResourceType.DecisionTable.name();
+            normalizedType = ResourceType.DecisionTable.name();
          }
       } else {
-         var2 = ResourceType.Library.name();
+         normalizedType = ResourceType.Library.name();
       }
 
-      return var2;
+      return normalizedType;
    }
 
-   private String a(StringBuilder var1, List var2, String var3, boolean var4) {
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+   private String appendFilters(StringBuilder stringBuilder, List items, String baseSql, boolean directoryQuery) {
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" ID_ = ?");
-         var2.add(this.a);
+         stringBuilder.append(" ID_ = ?");
+         items.add(this.id);
       }
 
-      if (this.b != null && this.b.size() > 0) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.ids != null && this.ids.size() > 0) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         StringBuilder var5 = new StringBuilder();
+         StringBuilder stringBuilder2 = new StringBuilder();
 
-         for(long var7 : (Iterable<Long>)(Iterable<?>)(this.b)) {
-            if (var5.length() > 0) {
-               var5.append(",");
+         for(long longValue : (Iterable<Long>)(Iterable<?>)(this.ids)) {
+            if (stringBuilder2.length() > 0) {
+               stringBuilder2.append(",");
             }
 
-            var5.append("?");
-            var2.add(var7);
+            stringBuilder2.append("?");
+            items.add(longValue);
          }
 
-         if (var5.length() > 0) {
-            var1.append(" ID_ in (" + var5.toString() + ") ");
+         if (stringBuilder2.length() > 0) {
+            stringBuilder.append(" ID_ in (" + stringBuilder2.toString() + ") ");
          }
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.name != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" NAME_=?");
-         var2.add(this.c);
+         stringBuilder.append(" NAME_=?");
+         items.add(this.name);
       }
 
-      if (!var4 && this.d != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (!directoryQuery && this.namePattern != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" NAME_ like ?");
-         var2.add("%" + this.d + "%");
+         stringBuilder.append(" NAME_ like ?");
+         items.add("%" + this.namePattern + "%");
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.type != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" TYPE_ = ?");
-         String var10 = this.e;
-         if (var4) {
-            var10 = this.a(this.e);
+         stringBuilder.append(" TYPE_ = ?");
+         String text = this.type;
+         if (directoryQuery) {
+            text = this.normalizeDirectoryResourceType(this.type);
          }
 
-         var2.add(var10);
+         items.add(text);
       }
 
-      if (this.f != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.types != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         StringBuilder var11 = new StringBuilder();
+         StringBuilder stringBuilder3 = new StringBuilder();
 
-         for(int var12 = 0; var12 < this.f.length; ++var12) {
-            if (var12 > 0) {
-               var11.append(",");
+         for(int index = 0; index < this.types.length; ++index) {
+            if (index > 0) {
+               stringBuilder3.append(",");
             }
 
-            var11.append("?");
-            String var13 = this.f[var12];
-            if (var4) {
-               var13 = this.a(var13);
+            stringBuilder3.append("?");
+            String text2 = this.types[index];
+            if (directoryQuery) {
+               text2 = this.normalizeDirectoryResourceType(text2);
             }
 
-            var2.add(var13);
+            items.add(text2);
          }
 
-         var1.append("TYPE_ in (" + var11.toString() + ")");
+         stringBuilder.append("TYPE_ in (" + stringBuilder3.toString() + ")");
       }
 
-      if (this.g != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.lockedUser != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" LOCKED_USER_ = ?");
-         var2.add(this.g);
+         stringBuilder.append(" LOCKED_USER_ = ?");
+         items.add(this.lockedUser);
       }
 
-      if (this.h != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.updateUser != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" UPDATE_USER_ = ?");
-         var2.add(this.h);
+         stringBuilder.append(" UPDATE_USER_ = ?");
+         items.add(this.updateUser);
       }
 
-      if (this.i != null) {
-         if (var1.length() > 0) {
-            var1.append(" and ");
+      if (this.deleted != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and ");
          } else {
-            var1.append(" where ");
+            stringBuilder.append(" where ");
          }
 
-         var1.append(" DELETED_ = ?");
-         var2.add(this.i);
+         stringBuilder.append(" DELETED_ = ?");
+         items.add(this.deleted);
       }
 
-      var3 = var3 + var1.toString();
-      return var3;
+      baseSql = baseSql + stringBuilder.toString();
+      return baseSql;
    }
 
-   private String b(String var1) {
-      StringBuilder var2 = new StringBuilder();
-      StringBuilder var3 = new StringBuilder();
+   private String appendOrderBy(String sql) {
+      StringBuilder ascendingColumns = new StringBuilder();
+      StringBuilder descendingColumns = new StringBuilder();
 
-      for(String var5 : (Iterable<String>)(Iterable<?>)(this.l)) {
-         if (var2.length() > 0) {
-            var2.append(",");
+      for(String property : this.ascendingProperties) {
+         if (ascendingColumns.length() > 0) {
+            ascendingColumns.append(",");
          }
 
-         var2.append(var5);
+         ascendingColumns.append(property);
       }
 
-      for(String var7 : (Iterable<String>)(Iterable<?>)(this.m)) {
-         if (var3.length() > 0) {
-            var3.append(",");
+      for(String property : this.descendingProperties) {
+         if (descendingColumns.length() > 0) {
+            descendingColumns.append(",");
          }
 
-         var3.append(var7);
+         descendingColumns.append(property);
       }
 
-      if (var2.length() > 0 || var3.length() > 0) {
-         var1 = var1 + " order by ";
+      if (ascendingColumns.length() > 0 || descendingColumns.length() > 0) {
+         sql = sql + " order by ";
       }
 
-      if (var2.length() > 0) {
-         var1 = var1 + var2.toString() + " asc";
-         if (var3.length() > 0) {
-            var1 = var1 + "," + var3.toString() + " desc";
+      if (ascendingColumns.length() > 0) {
+         sql = sql + ascendingColumns.toString() + " asc";
+         if (descendingColumns.length() > 0) {
+            sql = sql + "," + descendingColumns.toString() + " desc";
          }
-      } else if (var3.length() > 0) {
-         var1 = var1 + var3.toString() + " desc";
+      } else if (descendingColumns.length() > 0) {
+         sql = sql + descendingColumns.toString() + " desc";
       }
 
-      return var1;
+      return sql;
    }
 
-   public FileQuery id(long var1) {
-      this.a = var1;
+   public FileQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public FileQuery ids(List var1) {
-      this.b = var1;
+   public FileQuery ids(List ids) {
+      this.ids = ids;
       return this;
    }
 
-   public FileQuery name(String var1) {
-      this.c = var1;
+   public FileQuery name(String name) {
+      this.name = name;
       return this;
    }
 
-   public FileQuery nameLike(String var1) {
-      this.d = var1;
+   public FileQuery nameLike(String name) {
+      this.namePattern = name;
       return this;
    }
 
-   public FileQuery type(String var1) {
-      this.e = var1;
+   public FileQuery type(String type) {
+      this.type = type;
       return this;
    }
 
-   public FileQuery types(String[] var1) {
-      this.f = var1;
+   public FileQuery types(String[] types) {
+      this.types = types;
       return this;
    }
 
-   public FileQuery lockedUser(String var1) {
-      this.g = var1;
+   public FileQuery lockedUser(String lockedUser) {
+      this.lockedUser = lockedUser;
       return this;
    }
 
-   public FileQuery deleted(boolean var1) {
-      this.i = var1;
+   public FileQuery deleted(boolean deleted) {
+      this.deleted = deleted;
       return this;
    }
 
-   public FileQuery removeEmpty(boolean var1) {
-      this.j = var1;
+   public FileQuery removeEmpty(boolean removeEmpty) {
+      this.removeEmpty = removeEmpty;
       return this;
    }
 
-   public FileQuery containCommonProject(boolean var1) {
-      this.k = var1;
+   public FileQuery containCommonProject(boolean containCommonProject) {
+      this.containCommonProject = containCommonProject;
       return this;
    }
 
-   public FileQuery desc(String var1) {
-      this.m.add(var1);
+   public FileQuery desc(String property) {
+      this.descendingProperties.add(property);
       return this;
    }
 
-   public FileQuery asc(String var1) {
-      this.l.add(var1);
+   public FileQuery asc(String property) {
+      this.ascendingProperties.add(property);
       return this;
    }
 
-   public FileQuery updateUser(String var1) {
-      this.h = var1;
+   public FileQuery updateUser(String updateUser) {
+      this.updateUser = updateUser;
       return this;
    }
 
    class PathInfo {
-      private String b;
-      private boolean c;
+      private String path;
+      private boolean fileSet;
 
       public String getPath() {
-         return this.b;
+         return this.path;
       }
 
-      public void setPath(String var1) {
-         this.b = var1;
+      public void setPath(String path) {
+         this.path = path;
       }
 
       public boolean isFileSet() {
-         return this.c;
+         return this.fileSet;
       }
 
-      public void setFileSet(boolean var1) {
-         this.c = var1;
+      public void setFileSet(boolean fileSet) {
+         this.fileSet = fileSet;
       }
    }
 }

@@ -6,93 +6,90 @@ import java.util.Date;
 import java.util.Set;
 
 public class MatchedRuleLog extends DataLog {
-   private static final String b = "√√规则【%s】匹配，(%s)";
-   private static final String c = "√√Rule【%s】 is matched，(%s)";
-   private static final String d = "，条件：";
-   private static final String e = "，conditions：";
-   private static final String f = "，条件：无";
-   private static final String g = "，conditions：none";
-   private Integer h;
-   private String i;
-   private String j;
-   private Date k;
-   private Date l;
-   private Boolean m;
-   private Boolean n;
-   private String o;
-   private String p;
+   private static final String RULE_S_IS_MATCHED_S = "√√Rule【%s】 is matched，(%s)";
+   private static final String CONDITIONS = "，conditions：";
+   private static final String CONDITIONS_NONE = "，conditions：none";
+   private Integer salience;
+   private String ruleName;
+   private String ruleFile;
+   private Date effectiveDate;
+   private Date expiresDate;
+   private Boolean enabled;
+   private Boolean debug;
+   private String activationGroup;
+   private String agendaGroup;
 
-   public MatchedRuleLog(Rule var1, Set<Criteria> var2) {
-      this.i = var1.getName();
-      this.j = var1.getFile();
-      this.h = var1.getSalience();
-      this.k = var1.getEffectiveDate();
-      this.l = var1.getExpiresDate();
-      this.m = var1.getEnabled();
-      this.n = var1.getDebug();
-      this.o = var1.getMutexGroup();
-      this.p = var1.getPendedGroup();
-      String var3 = this.a() ? "√√Rule【%s】 is matched，(%s)" : "√√规则【%s】匹配，(%s)";
-      this.a = String.format(var3, var1.getName(), this.j);
-      if (var2.size() > 0) {
-         this.a = this.a + (this.a() ? "，conditions：" : "，条件：" + this.a(var2));
+   public MatchedRuleLog(Rule rule, Set<Criteria> criterias) {
+      this.ruleName = rule.getName();
+      this.ruleFile = rule.getFile();
+      this.salience = rule.getSalience();
+      this.effectiveDate = rule.getEffectiveDate();
+      this.expiresDate = rule.getExpiresDate();
+      this.enabled = rule.getEnabled();
+      this.debug = rule.getDebug();
+      this.activationGroup = rule.getMutexGroup();
+      this.agendaGroup = rule.getPendedGroup();
+      String text = this.isEnglishLanguage() ? "√√Rule【%s】 is matched，(%s)" : "√√规则【%s】匹配，(%s)";
+      this.msg = String.format(text, rule.getName(), this.ruleFile);
+      if (criterias.size() > 0) {
+         this.msg = this.msg + (this.isEnglishLanguage() ? "，conditions：" : "，条件：" + this.joinCriteriaIds(criterias));
       } else {
-         this.a = this.a + (this.a() ? "，conditions：none" : "，条件：无");
+         this.msg = this.msg + (this.isEnglishLanguage() ? "，conditions：none" : "，条件：无");
       }
    }
 
-   private String a(Set<Criteria> var1) {
-      StringBuilder var2 = new StringBuilder();
+   private String joinCriteriaIds(Set<Criteria> criterias) {
+      StringBuilder stringBuilder = new StringBuilder();
 
-      for (Criteria var4 : var1) {
-         if (var2.length() > 0) {
-            var2.append("◆");
+      for (Criteria criteria : criterias) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append("◆");
          }
 
-         var2.append(var4.getId());
+         stringBuilder.append(criteria.getId());
       }
 
-      return var2.toString();
+      return stringBuilder.toString();
    }
 
    public String getRuleFile() {
-      return this.j;
+      return this.ruleFile;
    }
 
    public String getRuleName() {
-      return this.i;
+      return this.ruleName;
    }
 
    public Integer getSalience() {
-      return this.h;
+      return this.salience;
    }
 
    public String getActivationGroup() {
-      return this.o;
+      return this.activationGroup;
    }
 
    public String getAgendaGroup() {
-      return this.p;
+      return this.agendaGroup;
    }
 
    public Boolean getDebug() {
-      return this.n;
+      return this.debug;
    }
 
    public Date getEffectiveDate() {
-      return this.k;
+      return this.effectiveDate;
    }
 
    public Boolean getEnabled() {
-      return this.m;
+      return this.enabled;
    }
 
    public Date getExpiresDate() {
-      return this.l;
+      return this.expiresDate;
    }
 
    @Override
    public String toString() {
-      return "MatchedRuleLog [ruleName=" + this.i + ", ruleFile=" + this.j + ", salience=" + this.h + "]";
+      return "MatchedRuleLog [ruleName=" + this.ruleName + ", ruleFile=" + this.ruleFile + ", salience=" + this.salience + "]";
    }
 }

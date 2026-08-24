@@ -26,55 +26,55 @@ import org.apache.commons.lang.StringUtils;
 
 public class LoadKnowledgeServletHandler extends AnonymousServletHandler {
    public static final String URL = "/loadknowledge";
-   private RemoteDynamicJarsBuilder a = ServiceUtils.getRemoteDynamicJarsBuilder();
+   private RemoteDynamicJarsBuilder remoteDynamicJarsBuilder = ServiceUtils.getRemoteDynamicJarsBuilder();
 
-   public void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      if (ValidateUtils.validateUserPwd(var1, this.a.getUser(), this.a.getPwd())) {
-         String var3 = var1.getParameter("packageId");
-         if (StringUtils.isEmpty(var3)) {
-            String var16 = "<h1>PackageId can not be null<h1>";
-            this.a(var2, var16);
+   public void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      if (ValidateUtils.validateUserPwd(req, this.remoteDynamicJarsBuilder.getUser(), this.remoteDynamicJarsBuilder.getPwd())) {
+         String parameter = req.getParameter("packageId");
+         if (StringUtils.isEmpty(parameter)) {
+            String text = "<h1>PackageId can not be null<h1>";
+            this.writeResponse(resp, text);
          } else {
-            var3 = Utils.decodeURL(var3);
-            String var4 = var1.getParameter("timestamp");
-            PacketData var5 = PacketCache.ins.getPacket(var3);
-            if (var5 == null) {
-               long var6 = 0L;
+            parameter = Utils.decodeURL(parameter);
+            String parameter2 = req.getParameter("timestamp");
+            PacketData packet = PacketCache.ins.getPacket(parameter);
+            if (packet == null) {
+               long longValue = 0L;
 
                try {
-                  var6 = Long.valueOf(var3);
-               } catch (NumberFormatException var14) {
-                  throw new RuleException("Package [" + var3 + "] not exist");
+                  longValue = Long.valueOf(parameter);
+               } catch (NumberFormatException numberFormatException) {
+                  throw new RuleException("Package [" + parameter + "] not exist");
                }
 
-               var5 = PacketCache.ins.getPacket(var6);
+               packet = PacketCache.ins.getPacket(longValue);
             }
 
-            if (var5 == null) {
-               throw new RuleException("Package [" + var3 + "] not exist");
+            if (packet == null) {
+               throw new RuleException("Package [" + parameter + "] not exist");
             } else {
-               KnowledgePackageWrapper var18 = var5.getKnowledgePackageWrapper();
-               KnowledgePackage var7 = var18.getKnowledgePackage();
-               boolean var8 = false;
-               String var9 = var1.getParameter("debug");
-               if (var9 != null && var9.equals("true") && Utils.isDebug()) {
-                  var8 = true;
+               KnowledgePackageWrapper knowledgePackageWrapper = packet.getKnowledgePackageWrapper();
+               KnowledgePackage knowledgePackage = knowledgePackageWrapper.getKnowledgePackage();
+               boolean flag = false;
+               String parameter3 = req.getParameter("debug");
+               if (parameter3 != null && parameter3.equals("true") && Utils.isDebug()) {
+                  flag = true;
                }
 
-               if (StringUtils.isNotEmpty(var4)) {
-                  long var10 = Long.valueOf(var4);
-                  long var12 = var7.getTimestamp();
-                  if (var12 > var10) {
-                     if (var8) {
-                        this.a(var2, (Object)var18);
+               if (StringUtils.isNotEmpty(parameter2)) {
+                  long longValue2 = Long.valueOf(parameter2);
+                  long timestamp = knowledgePackage.getTimestamp();
+                  if (timestamp > longValue2) {
+                     if (flag) {
+                        this.writeObjectToJson(resp, (Object)knowledgePackageWrapper);
                      } else {
-                        this.a(var2, var5);
+                        this.writeResponse(resp, packet);
                      }
                   }
-               } else if (var8) {
-                  this.a(var2, (Object)var18);
+               } else if (flag) {
+                  this.writeObjectToJson(resp, (Object)knowledgePackageWrapper);
                } else {
-                  this.a(var2, var5);
+                  this.writeResponse(resp, packet);
                }
 
             }
@@ -82,38 +82,38 @@ public class LoadKnowledgeServletHandler extends AnonymousServletHandler {
       }
    }
 
-   private void a(HttpServletResponse var1, String var2) throws IOException {
-      var1.setContentType("text/html");
-      PrintWriter var3 = var1.getWriter();
-      var3.write("<html>");
-      var3.write("<header>");
-      var3.write("</header>");
-      var3.write("<body>");
-      var3.write(var2);
-      var3.write("</body>");
-      var3.write("</html>");
-      var3.flush();
-      var3.close();
+   private void writeResponse(HttpServletResponse httpServletResponse, String text) throws IOException {
+      httpServletResponse.setContentType("text/html");
+      PrintWriter writer = httpServletResponse.getWriter();
+      writer.write("<html>");
+      writer.write("<header>");
+      writer.write("</header>");
+      writer.write("<body>");
+      writer.write(text);
+      writer.write("</body>");
+      writer.write("</html>");
+      writer.flush();
+      writer.close();
    }
 
-   private void a(HttpServletResponse var1, PacketData var2) throws IOException {
-      var1.setContentType("text/json");
-      var1.setCharacterEncoding("UTF-8");
-      byte[] var3 = PacketCache.ins.getKnowledgeContent(var2.getPacket().getId());
-      if (var3 == null) {
-         JsonMapper.Builder var4 = JsonMapper.builder();
-         var4.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-         ObjectMapper var5 = var4.build();
-         var5.setSerializationInclusion(Include.NON_NULL);
-         var5.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
-         String var6 = var5.writeValueAsString(var2.getKnowledgePackageWrapper());
-         var3 = Utils.compress(var6);
+   private void writeResponse(HttpServletResponse httpServletResponse, PacketData packetData) throws IOException {
+      httpServletResponse.setContentType("text/json");
+      httpServletResponse.setCharacterEncoding("UTF-8");
+      byte[] knowledgeContent = PacketCache.ins.getKnowledgeContent(packetData.getPacket().getId());
+      if (knowledgeContent == null) {
+         JsonMapper.Builder builder = JsonMapper.builder();
+         builder.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+         ObjectMapper objectMapper = builder.build();
+         objectMapper.setSerializationInclusion(Include.NON_NULL);
+         objectMapper.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
+         String text = objectMapper.writeValueAsString(packetData.getKnowledgePackageWrapper());
+         knowledgeContent = Utils.compress(text);
       }
 
-      ServletOutputStream var7 = var1.getOutputStream();
-      ((OutputStream)var7).write(var3);
-      ((OutputStream)var7).flush();
-      ((OutputStream)var7).close();
+      ServletOutputStream outputStream = httpServletResponse.getOutputStream();
+      ((OutputStream)outputStream).write(knowledgeContent);
+      ((OutputStream)outputStream).flush();
+      ((OutputStream)outputStream).close();
    }
 
    public String url() {

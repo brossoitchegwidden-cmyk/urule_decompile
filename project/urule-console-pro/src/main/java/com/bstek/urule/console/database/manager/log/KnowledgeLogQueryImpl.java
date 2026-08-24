@@ -14,270 +14,269 @@ import java.util.Date;
 import java.util.List;
 
 public class KnowledgeLogQueryImpl implements KnowledgeLogQuery {
-   private String a;
-   private String b;
-   private Long c;
-   private String d;
-   private Long e;
-   private String f;
-   private Date g;
-   private Date h;
-   private Boolean i;
-   private List j = new ArrayList();
+   private String user;
+   private String ip;
+   private Long projectId;
+   private String groupId;
+   private Long packetId;
+   private String packetName;
+   private Date date;
+   private Date endDate;
+   private Boolean orderByExecutionTime;
+   private List queryParameters = new ArrayList();
 
    protected KnowledgeLogQueryImpl() {
    }
 
    public KnowledgeLogQuery orderTime() {
-      this.i = true;
+      this.orderByExecutionTime = true;
       return this;
    }
 
-   public Page paging(int var1, int var2) {
-      String var3 = "select ID_, USER_, KNOWLEDGE_ID_, KNOWLEDGE_NAME_, VERSION_, TIME_, PROJECT_ID_, IP_, USER_AGENT_, START_TIME_, END_TIME_, CREATE_DATE_ from URULE_LOG_KNOWLEDGE";
-      Connection var4 = JdbcUtils.getConnection();
+   public Page paging(int pageIndex, int pageSize) {
+      String pageSql = "select ID_, USER_, KNOWLEDGE_ID_, KNOWLEDGE_NAME_, VERSION_, TIME_, PROJECT_ID_, IP_, USER_AGENT_, START_TIME_, END_TIME_, CREATE_DATE_ from URULE_LOG_KNOWLEDGE";
+      Connection connection = JdbcUtils.getConnection();
 
-      Page var10;
+      Page page;
       try {
-         StringBuilder var5 = this.a();
-         if (var5.length() > 0) {
-            var3 = var3 + " where" + var5.toString();
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         if (this.i != null) {
-            var3 = var3 + " order by TIME_ desc";
+         if (this.orderByExecutionTime != null) {
+            pageSql = pageSql + " order by TIME_ desc";
          } else {
-            var3 = var3 + " order by CREATE_DATE_ desc";
+            pageSql = pageSql + " order by CREATE_DATE_ desc";
          }
 
-         Page var6 = new Page(var1, var2);
-         var3 = JdbcUtils.getPageSql(var3, var6.getStartRow(), var2);
-         PreparedStatement var7 = var4.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.j, var7);
-         ResultSet var8 = var7.executeQuery();
-         List var9 = this.a(var8);
-         var6.setData(var9);
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var3 = "select count(*) from URULE_LOG_KNOWLEDGE";
-         if (var5.length() > 0) {
-            var3 = var3 + " where" + var5.toString();
+         Page page2 = new Page(pageIndex, pageSize);
+         pageSql = JdbcUtils.getPageSql(pageSql, page2.getStartRow(), pageSize);
+         PreparedStatement preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readKnowledgeLogs(resultSet);
+         page2.setData(items);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         pageSql = "select count(*) from URULE_LOG_KNOWLEDGE";
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var7 = var4.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.j, var7);
-         var8 = var7.executeQuery();
-         if (var8.next()) {
-            var6.setTotalRows(var8.getLong(1));
+         preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page2.setTotalRows(resultSet.getLong(1));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var10 = var6;
-      } catch (Exception var14) {
-         throw new RuleException(var14);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         page = page2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var10;
+      return page;
    }
 
    public List list() {
-      String var1 = "select ID_, USER_, KNOWLEDGE_ID_, KNOWLEDGE_NAME_, VERSION_, TIME_, PROJECT_ID_, IP_, USER_AGENT_, START_TIME_, END_TIME_, CREATE_DATE_ from URULE_LOG_KNOWLEDGE";
-      Connection var2 = JdbcUtils.getConnection();
+      String text = "select ID_, USER_, KNOWLEDGE_ID_, KNOWLEDGE_NAME_, VERSION_, TIME_, PROJECT_ID_, IP_, USER_AGENT_, START_TIME_, END_TIME_, CREATE_DATE_ from URULE_LOG_KNOWLEDGE";
+      Connection connection = JdbcUtils.getConnection();
 
-      List var7;
+      List listResult;
       try {
-         StringBuilder var3 = this.a();
-         if (var3.length() > 0) {
-            var1 = var1 + " where" + var3.toString();
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         var1 = var1 + " order by CREATE_DATE_ desc";
-         PreparedStatement var4 = var2.prepareStatement(var1);
-         JdbcUtils.fillPreparedStatementParameters(this.j, var4);
-         ResultSet var5 = var4.executeQuery();
-         List var6 = this.a(var5);
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         text = text + " order by CREATE_DATE_ desc";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readKnowledgeLogs(resultSet);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listResult;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readKnowledgeLogs(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         KnowledgeLog var3 = new KnowledgeLog();
-         var3.setId(var1.getLong(1));
-         var3.setUserId(var1.getString(2));
-         var3.setUsername(var3.getUserId());
-         var3.setKnowledgeId(var1.getLong(3));
-         var3.setKnowledgeName(var1.getString(4));
-         var3.setVersion(var1.getString(5));
-         var3.setTime(var1.getLong(6));
-         var3.setProjectId(var1.getLong(7));
-         var3.setIp(var1.getString(8));
-         var3.setUserAgent(var1.getString(9));
-         var3.setStartTime(var1.getTimestamp(10));
-         var3.setEndTime(var1.getTimestamp(11));
-         var3.setCreateDate(var1.getTimestamp(12));
-         var2.add(var3);
+      while(resultSet.next()) {
+         KnowledgeLog knowledgeLog = new KnowledgeLog();
+         knowledgeLog.setId(resultSet.getLong(1));
+         knowledgeLog.setUserId(resultSet.getString(2));
+         knowledgeLog.setUsername(knowledgeLog.getUserId());
+         knowledgeLog.setKnowledgeId(resultSet.getLong(3));
+         knowledgeLog.setKnowledgeName(resultSet.getString(4));
+         knowledgeLog.setVersion(resultSet.getString(5));
+         knowledgeLog.setTime(resultSet.getLong(6));
+         knowledgeLog.setProjectId(resultSet.getLong(7));
+         knowledgeLog.setIp(resultSet.getString(8));
+         knowledgeLog.setUserAgent(resultSet.getString(9));
+         knowledgeLog.setStartTime(resultSet.getTimestamp(10));
+         knowledgeLog.setEndTime(resultSet.getTimestamp(11));
+         knowledgeLog.setCreateDate(resultSet.getTimestamp(12));
+         items.add(knowledgeLog);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a() throws SQLException {
-      this.j.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (StringUtils.isNotBlank(this.a)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() throws SQLException {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (StringUtils.isNotBlank(this.user)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" USER_ like ?");
-         this.j.add("%" + this.a + "%");
+         stringBuilder.append(" USER_ like ?");
+         this.queryParameters.add("%" + this.user + "%");
       }
 
-      if (StringUtils.isNotBlank(this.b)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.ip)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" IP_ = ?");
-         this.j.add(this.b);
+         stringBuilder.append(" IP_ = ?");
+         this.queryParameters.add(this.ip);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_ = ?");
-         this.j.add(this.c);
+         stringBuilder.append(" PROJECT_ID_ = ?");
+         this.queryParameters.add(this.projectId);
       }
 
-      if (StringUtils.isNotBlank(this.d)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.groupId)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" GROUP_ID_ = ?");
-         this.j.add(this.d);
+         stringBuilder.append(" GROUP_ID_ = ?");
+         this.queryParameters.add(this.groupId);
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.packetId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" KNOWLEDGE_ID_ = ?");
-         this.j.add(this.e);
+         stringBuilder.append(" KNOWLEDGE_ID_ = ?");
+         this.queryParameters.add(this.packetId);
       }
 
-      if (StringUtils.isNotBlank(this.f)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.packetName)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" KNOWLEDGE_NAME_ like ?");
-         this.j.add("%" + this.f + "%");
+         stringBuilder.append(" KNOWLEDGE_NAME_ like ?");
+         this.queryParameters.add("%" + this.packetName + "%");
       }
 
-      if (this.g != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.date != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" CREATE_DATE_ > ?");
-         this.j.add(this.g);
+         stringBuilder.append(" CREATE_DATE_ > ?");
+         this.queryParameters.add(this.date);
       }
 
-      if (this.h != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.endDate != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" CREATE_DATE_ < ?");
-         this.j.add(this.h);
+         stringBuilder.append(" CREATE_DATE_ < ?");
+         this.queryParameters.add(this.endDate);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public KnowledgeLogQuery user(String var1) {
-      this.a = var1;
+   public KnowledgeLogQuery user(String user) {
+      this.user = user;
       return this;
    }
 
-   public KnowledgeLogQuery ip(String var1) {
-      this.b = var1;
+   public KnowledgeLogQuery ip(String ip) {
+      this.ip = ip;
       return this;
    }
 
-   public KnowledgeLogQuery dateBegin(Date var1) {
-      this.g = var1;
+   public KnowledgeLogQuery dateBegin(Date date) {
+      this.date = date;
       return this;
    }
 
-   public KnowledgeLogQuery dateEnd(Date var1) {
-      this.h = var1;
+   public KnowledgeLogQuery dateEnd(Date date) {
+      this.endDate = date;
       return this;
    }
 
-   public KnowledgeLogQuery projectId(Long var1) {
-      this.c = var1;
+   public KnowledgeLogQuery projectId(Long projectId) {
+      this.projectId = projectId;
       return this;
    }
 
-   public KnowledgeLogQuery packetId(Long var1) {
-      this.e = var1;
+   public KnowledgeLogQuery packetId(Long packetId) {
+      this.packetId = packetId;
       return this;
    }
 
-   public KnowledgeLogQuery packetNameLike(String var1) {
-      this.f = var1;
+   public KnowledgeLogQuery packetNameLike(String packetName) {
+      this.packetName = packetName;
       return this;
    }
 
-   public KnowledgeLogQuery groupId(String var1) {
-      this.d = var1;
+   public KnowledgeLogQuery groupId(String groupId) {
+      this.groupId = groupId;
       return this;
    }
+   public KnowledgeLog details(Long id) {
+      String text = "select IN_PARAMS_, OUT_PARAMS_, LOGS_ from URULE_LOG_KNOWLEDGE WHERE ID_=?";
+      Connection connection = JdbcUtils.getConnection();
 
-   public KnowledgeLog details(Long var1) {
-      String var2 = "select IN_PARAMS_, OUT_PARAMS_, LOGS_ from URULE_LOG_KNOWLEDGE WHERE ID_=?";
-      Connection var3 = JdbcUtils.getConnection();
-
-      KnowledgeLog var7;
+      KnowledgeLog knowledgeLog;
       try {
-         PreparedStatement var4 = var3.prepareStatement(var2);
-         var4.setLong(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         KnowledgeLog var6 = new KnowledgeLog();
-         if (var5.next()) {
-            var6.setInParams(var5.getString(1));
-            var6.setOutParams(var5.getString(2));
-            var6.setLogs(var5.getString(3));
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, id);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         KnowledgeLog knowledgeLog2 = new KnowledgeLog();
+         if (resultSet.next()) {
+            knowledgeLog2.setInParams(resultSet.getString(1));
+            knowledgeLog2.setOutParams(resultSet.getString(2));
+            knowledgeLog2.setLogs(resultSet.getString(3));
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         knowledgeLog = knowledgeLog2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return knowledgeLog;
    }
 }

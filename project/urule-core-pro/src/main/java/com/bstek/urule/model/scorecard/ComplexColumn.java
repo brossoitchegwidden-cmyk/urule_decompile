@@ -12,47 +12,47 @@ public class ComplexColumn {
       return this.num;
    }
 
-   public void setNum(int var1) {
-      this.num = var1;
+   public void setNum(int num) {
+      this.num = num;
    }
 
    public int getWidth() {
       return this.width;
    }
 
-   public void setWidth(int var1) {
-      this.width = var1;
+   public void setWidth(int width) {
+      this.width = width;
    }
 
    public String getVariableCategory() {
       return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.variableCategory = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public ComplexColumnType getType() {
       return this.type;
    }
 
-   public void setType(ComplexColumnType var1) {
-      this.type = var1;
+   public void setType(ComplexColumnType type) {
+      this.type = type;
    }
 
    public String getCustomLabel() {
       return this.customLabel;
    }
 
-   public void setCustomLabel(String var1) {
-      this.customLabel = var1;
+   public void setCustomLabel(String customLabel) {
+      this.customLabel = customLabel;
    }
 }

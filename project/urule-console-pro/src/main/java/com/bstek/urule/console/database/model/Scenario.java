@@ -3,121 +3,121 @@ package com.bstek.urule.console.database.model;
 import java.util.Date;
 
 public class Scenario {
-   private long a;
-   private long b;
-   private long c;
-   private String d;
-   private String e;
-   private byte[] f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private String k;
-   private Date l;
-   private Date m;
+   private long id;
+   private long packetId;
+   private long projectId;
+   private String name;
+   private String desc;
+   private byte[] excelFile;
+   private String excelFileName;
+   private String inputData;
+   private String outputData;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getPacketId() {
-      return this.b;
+      return this.packetId;
    }
 
-   public void setPacketId(long var1) {
-      this.b = var1;
+   public void setPacketId(long packetId) {
+      this.packetId = packetId;
    }
 
    public long getProjectId() {
-      return this.c;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.c = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getName() {
-      return this.d;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.d = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getDesc() {
-      return this.e;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.e = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public byte[] getExcelFile() {
-      return this.f;
+      return this.excelFile;
    }
 
-   public void setExcelFile(byte[] var1) {
-      this.f = var1;
+   public void setExcelFile(byte[] excelFile) {
+      this.excelFile = excelFile;
    }
 
    public String getExcelFileName() {
-      return this.g;
+      return this.excelFileName;
    }
 
-   public void setExcelFileName(String var1) {
-      this.g = var1;
+   public void setExcelFileName(String excelFileName) {
+      this.excelFileName = excelFileName;
    }
 
    public String getInputData() {
-      return this.h;
+      return this.inputData;
    }
 
-   public void setInputData(String var1) {
-      this.h = var1;
+   public void setInputData(String inputData) {
+      this.inputData = inputData;
    }
 
    public String getOutputData() {
-      return this.i;
+      return this.outputData;
    }
 
-   public void setOutputData(String var1) {
-      this.i = var1;
+   public void setOutputData(String outputData) {
+      this.outputData = outputData;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.k;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.k = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.l;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.l = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.m;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.m = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 }

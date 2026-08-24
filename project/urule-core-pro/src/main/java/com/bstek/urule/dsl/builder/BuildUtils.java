@@ -34,138 +34,139 @@ import java.util.Objects;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+/** Builds rule values from the ANTLR DSL parse tree. */
 public class BuildUtils {
-   public static AbstractValue buildValue(RuleParserParser$ComplexValueContext var0) {
-      if (var0 == null) {
+   public static AbstractValue buildValue(RuleParserParser$ComplexValueContext context) {
+      if (context == null) {
          return null;
       }
 
-      AbstractValue var1 = null;
-      if (var0.leftParen() != null) {
-         ParenValue var2 = new ParenValue();
-         List var3 = var0.complexValue();
-         AbstractValue var4 = buildValue((RuleParserParser$ComplexValueContext)var3.get(0));
-         var2.setValue(var4);
-         var1 = var2;
-      } else if (var0.value() != null) {
-         var1 = a(var0.value());
-      } else if (var0.variable() != null) {
-         var1 = a(var0.variable());
-      } else if (var0.constant() != null) {
-         var1 = a(var0.constant());
-      } else if (var0.variableCategory() != null) {
-         RuleParserParser$VariableCategoryContext var13 = var0.variableCategory();
-         String var19 = var13.Identifier().getText();
-         var1 = new VariableCategoryValue(var19);
-      } else if (var0.parameter() != null) {
-         RuleParserParser$ParameterContext var14 = var0.parameter();
-         ParameterValue var20 = new ParameterValue();
-         var20.setVariableLabel(var14.Identifier().getText());
-         var1 = var20;
-      } else if (var0.methodInvoke() != null) {
-         RuleParserParser$MethodInvokeContext var15 = var0.methodInvoke();
-         MethodValue var21 = new MethodValue();
-         RuleParserParser$BeanMethodContext var24 = var15.beanMethod();
-         String var5 = var24.Identifier(0).getText();
-         String var6 = var24.Identifier(1).getText();
-         var21.setBeanLabel(var5);
-         var21.setMethodLabel(var6);
-         RuleParserParser$ActionParametersContext var7 = var15.actionParameters();
-         if (var7 != null && var7.complexValue() != null) {
-            List var8 = var7.complexValue();
-            ArrayList var9 = new ArrayList();
+      AbstractValue abstractValue = null;
+      if (context.leftParen() != null) {
+         ParenValue parenValue = new ParenValue();
+         List items = context.complexValue();
+         AbstractValue abstractValue2 = buildValue((RuleParserParser$ComplexValueContext)items.get(0));
+         parenValue.setValue(abstractValue2);
+         abstractValue = parenValue;
+      } else if (context.value() != null) {
+         abstractValue = buildSimpleValue(context.value());
+      } else if (context.variable() != null) {
+         abstractValue = buildVariableValue(context.variable());
+      } else if (context.constant() != null) {
+         abstractValue = buildConstantValue(context.constant());
+      } else if (context.variableCategory() != null) {
+         RuleParserParser$VariableCategoryContext ruleParserParser$VariableCategoryContext = context.variableCategory();
+         String text = ruleParserParser$VariableCategoryContext.Identifier().getText();
+         abstractValue = new VariableCategoryValue(text);
+      } else if (context.parameter() != null) {
+         RuleParserParser$ParameterContext ruleParserParser$ParameterContext = context.parameter();
+         ParameterValue parameterValue = new ParameterValue();
+         parameterValue.setVariableLabel(ruleParserParser$ParameterContext.Identifier().getText());
+         abstractValue = parameterValue;
+      } else if (context.methodInvoke() != null) {
+         RuleParserParser$MethodInvokeContext ruleParserParser$MethodInvokeContext = context.methodInvoke();
+         MethodValue methodValue = new MethodValue();
+         RuleParserParser$BeanMethodContext ruleParserParser$BeanMethodContext = ruleParserParser$MethodInvokeContext.beanMethod();
+         String text2 = ruleParserParser$BeanMethodContext.Identifier(0).getText();
+         String text3 = ruleParserParser$BeanMethodContext.Identifier(1).getText();
+         methodValue.setBeanLabel(text2);
+         methodValue.setMethodLabel(text3);
+         RuleParserParser$ActionParametersContext ruleParserParser$ActionParametersContext = ruleParserParser$MethodInvokeContext.actionParameters();
+         if (ruleParserParser$ActionParametersContext != null && ruleParserParser$ActionParametersContext.complexValue() != null) {
+            List items2 = ruleParserParser$ActionParametersContext.complexValue();
+            ArrayList items3 = new ArrayList();
 
-            for (RuleParserParser$ComplexValueContext var11 : (Iterable<RuleParserParser$ComplexValueContext>)(Iterable<?>)(var8)) {
-               Parameter var12 = new Parameter();
-               var12.setValue(buildValue(var11));
-               var9.add(var12);
+            for (RuleParserParser$ComplexValueContext ruleParserParser$ComplexValueContext : (Iterable<RuleParserParser$ComplexValueContext>)(Iterable<?>)(items2)) {
+               Parameter parameter = new Parameter();
+               parameter.setValue(buildValue(ruleParserParser$ComplexValueContext));
+               items3.add(parameter);
             }
 
-            var21.setParameters(var9);
+            methodValue.setParameters(items3);
          }
 
-         var1 = var21;
-      } else if (var0.commonFunction() != null) {
-         RuleParserParser$CommonFunctionContext var16 = var0.commonFunction();
-         Collection var22 = Utils.getApplicationContext().getBeansOfType(FunctionDescriptor.class).values();
-         CommonFunctionValue var25 = new CommonFunctionValue();
-         String var27 = var16.Identifier().getText();
+         abstractValue = methodValue;
+      } else if (context.commonFunction() != null) {
+         RuleParserParser$CommonFunctionContext ruleParserParser$CommonFunctionContext = context.commonFunction();
+         Collection functionDescriptors = Utils.getApplicationContext().getBeansOfType(FunctionDescriptor.class).values();
+         CommonFunctionValue commonFunctionValue = new CommonFunctionValue();
+         String text4 = ruleParserParser$CommonFunctionContext.Identifier().getText();
 
-         for (FunctionDescriptor var31 : (Iterable<FunctionDescriptor>)(Iterable<?>)(var22)) {
-            if (var27.equals(var31.getName())) {
-               var25.setName(var31.getName());
-               var25.setLabel(var31.getLabel());
+         for (FunctionDescriptor functionDescriptor : (Iterable<FunctionDescriptor>)(Iterable<?>)(functionDescriptors)) {
+            if (text4.equals(functionDescriptor.getName())) {
+               commonFunctionValue.setName(functionDescriptor.getName());
+               commonFunctionValue.setLabel(functionDescriptor.getLabel());
                break;
             }
 
-            if (var27.equals(var31.getLabel())) {
-               var25.setName(var31.getName());
-               var25.setLabel(var31.getLabel());
+            if (text4.equals(functionDescriptor.getLabel())) {
+               commonFunctionValue.setName(functionDescriptor.getName());
+               commonFunctionValue.setLabel(functionDescriptor.getLabel());
                break;
             }
          }
 
-         if (var25.getName() == null) {
-            throw new RuleException("Function[" + var27 + "] not exist.");
+         if (commonFunctionValue.getName() == null) {
+            throw new RuleException("Function[" + text4 + "] not exist.");
          }
 
-         RuleParserParser$ComplexValueContext var30 = var16.complexValue();
-         CommonFunctionParameter var32 = new CommonFunctionParameter();
-         var32.setObjectParameter(buildValue(var30));
-         RuleParserParser$PropertyContext var33 = var16.property();
-         if (var33 != null) {
-            var32.setProperty(var33.getText());
+         RuleParserParser$ComplexValueContext ruleParserParser$ComplexValueContext2 = ruleParserParser$CommonFunctionContext.complexValue();
+         CommonFunctionParameter commonFunctionParameter = new CommonFunctionParameter();
+         commonFunctionParameter.setObjectParameter(buildValue(ruleParserParser$ComplexValueContext2));
+         RuleParserParser$PropertyContext ruleParserParser$PropertyContext = ruleParserParser$CommonFunctionContext.property();
+         if (ruleParserParser$PropertyContext != null) {
+            commonFunctionParameter.setProperty(ruleParserParser$PropertyContext.getText());
          }
 
-         var25.setParameter(var32);
-         var1 = var25;
-      } else if (var0.complexValue() != null) {
-         List var17 = var0.complexValue();
-         var1 = buildValue((RuleParserParser$ComplexValueContext)var17.get(0));
+         commonFunctionValue.setParameter(commonFunctionParameter);
+         abstractValue = commonFunctionValue;
+      } else if (context.complexValue() != null) {
+         List items4 = context.complexValue();
+         abstractValue = buildValue((RuleParserParser$ComplexValueContext)items4.get(0));
       }
 
-      List var18 = var0.ARITH();
-      if (!Objects.isNull(var1) && var18 != null && var18.size() > 0) {
-         TerminalNode var23 = (TerminalNode)var18.get(0);
-         ComplexArithmetic var26 = new ComplexArithmetic();
-         var26.setType(ArithmeticType.parse(var23.getText()));
-         ParseTree var28 = var0.getChild(2);
-         var26.setValue(buildValue((RuleParserParser$ComplexValueContext)var28));
-         var1.setArithmetic(var26);
+      List items5 = context.ARITH();
+      if (!Objects.isNull(abstractValue) && items5 != null && items5.size() > 0) {
+         TerminalNode terminalNode = (TerminalNode)items5.get(0);
+         ComplexArithmetic complexArithmetic = new ComplexArithmetic();
+         complexArithmetic.setType(ArithmeticType.parse(terminalNode.getText()));
+         ParseTree child = context.getChild(2);
+         complexArithmetic.setValue(buildValue((RuleParserParser$ComplexValueContext)child));
+         abstractValue.setArithmetic(complexArithmetic);
       }
 
-      return var1;
+      return abstractValue;
    }
 
-   private static ConstantValue a(RuleParserParser$ConstantContext var0) {
-      ConstantValue var1 = new ConstantValue();
-      var1.setConstantCategory(var0.constantCategory().Identifier().getText());
-      var1.setConstantLabel(var0.property().getText());
-      return var1;
+   private static ConstantValue buildConstantValue(RuleParserParser$ConstantContext context) {
+      ConstantValue constantValue = new ConstantValue();
+      constantValue.setConstantCategory(context.constantCategory().Identifier().getText());
+      constantValue.setConstantLabel(context.property().getText());
+      return constantValue;
    }
 
-   private static VariableValue a(RuleParserParser$VariableContext var0) {
-      VariableValue var1 = new VariableValue();
-      var1.setVariableCategory(var0.variableCategory().getText());
-      var1.setVariableLabel(var0.property().getText());
-      return var1;
+   private static VariableValue buildVariableValue(RuleParserParser$VariableContext context) {
+      VariableValue variableValue = new VariableValue();
+      variableValue.setVariableCategory(context.variableCategory().getText());
+      variableValue.setVariableLabel(context.property().getText());
+      return variableValue;
    }
 
-   private static SimpleValue a(RuleParserParser$ValueContext var0) {
-      SimpleValue var1 = new SimpleValue();
-      if (var0.STRING() != null) {
-         var1.setContent(getSTRINGContent(var0.STRING()));
-      } else if (var0.Boolean() != null) {
-         var1.setContent(var0.Boolean().getText());
-      } else if (var0.NUMBER() != null) {
-         var1.setContent(var0.NUMBER().getText());
+   private static SimpleValue buildSimpleValue(RuleParserParser$ValueContext context) {
+      SimpleValue simpleValue = new SimpleValue();
+      if (context.STRING() != null) {
+         simpleValue.setContent(getSTRINGContent(context.STRING()));
+      } else if (context.Boolean() != null) {
+         simpleValue.setContent(context.Boolean().getText());
+      } else if (context.NUMBER() != null) {
+         simpleValue.setContent(context.NUMBER().getText());
       }
 
-      return var1;
+      return simpleValue;
    }
 
-   public static String getSTRINGContent(TerminalNode var0) {
-      String var1 = var0.getText();
-      return var1.substring(1, var1.length() - 1);
+   public static String getSTRINGContent(TerminalNode node) {
+      String text = node.getText();
+      return text.substring(1, text.length() - 1);
    }
 }

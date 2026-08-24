@@ -6,85 +6,85 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class DataParam {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private Long e;
-   private Object f;
-   private Integer g;
-   private String h;
-   private BatchDataProvider i;
+   private String name;
+   private String label;
+   private String dataType;
+   private String batchParamName;
+   private Long dataProviderId;
+   private Object value;
+   private Integer index;
+   private String formatter;
+   private BatchDataProvider dataProvider;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.b;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.b = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public String getDataType() {
-      return this.c;
+      return this.dataType;
    }
 
-   public void setDataType(String var1) {
-      this.c = var1;
+   public void setDataType(String dataType) {
+      this.dataType = dataType;
    }
 
    public Object getValue() {
-      return this.f;
+      return this.value;
    }
 
-   public void setValue(Object var1) {
-      this.f = var1;
+   public void setValue(Object value) {
+      this.value = value;
    }
 
    public Integer getIndex() {
-      return this.g;
+      return this.index;
    }
 
-   public void setIndex(Integer var1) {
-      this.g = var1;
+   public void setIndex(Integer index) {
+      this.index = index;
    }
 
    public String getBatchParamName() {
-      return this.d;
+      return this.batchParamName;
    }
 
-   public void setBatchParamName(String var1) {
-      this.d = var1;
+   public void setBatchParamName(String batchParamName) {
+      this.batchParamName = batchParamName;
    }
 
    public Long getDataProviderId() {
-      return this.e;
+      return this.dataProviderId;
    }
 
-   public void setDataProviderId(Long var1) {
-      this.e = var1;
+   public void setDataProviderId(Long dataProviderId) {
+      this.dataProviderId = dataProviderId;
    }
 
    public BatchDataProvider getDataProvider() {
-      return this.i;
+      return this.dataProvider;
    }
 
-   public void setDataProvider(BatchDataProvider var1) {
-      this.i = var1;
+   public void setDataProvider(BatchDataProvider dataProvider) {
+      this.dataProvider = dataProvider;
    }
 
    public String getFormatter() {
-      return this.h;
+      return this.formatter;
    }
 
-   public void setFormatter(String var1) {
-      this.h = var1;
+   public void setFormatter(String formatter) {
+      this.formatter = formatter;
    }
 }

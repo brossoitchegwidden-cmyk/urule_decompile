@@ -9,15 +9,15 @@ public class RuleParserParser$NamedVariableCategoryContext extends ParserRuleCon
       return this.getToken(96, 0);
    }
 
-   public RuleParserParser$NamedVariableCategoryContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$NamedVariableCategoryContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 66;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitNamedVariableCategory(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitNamedVariableCategory(this) : parseTreeVisitor.visitChildren(this));
    }
 }

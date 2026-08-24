@@ -11,8 +11,8 @@ public class RuleNode extends BindingNode {
    public RuleNode() {
    }
 
-   public RuleNode(String var1) {
-      super(var1);
+   public RuleNode(String name) {
+      super(name);
    }
 
    @Override
@@ -21,18 +21,18 @@ public class RuleNode extends BindingNode {
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      Exception var4 = null;
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      Exception exception2 = null;
 
       try {
-         var3.setCurrentNode(this);
-         this.executeNodeEvent(EventType.enter, var2, var3);
-         this.executeKnowledgePackage(var2, var3);
-         this.executeNodeEvent(EventType.leave, var2, var3);
-      } catch (Exception var9) {
-         var4 = var9;
+         instance.setCurrentNode(this);
+         this.executeNodeEvent(EventType.enter, context, instance);
+         this.executeKnowledgePackage(context, instance);
+         this.executeNodeEvent(EventType.leave, context, instance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         this.leave(null, var2, var3, var4);
+         this.leave(null, context, instance, exception2);
       }
    }
 
@@ -40,7 +40,7 @@ public class RuleNode extends BindingNode {
       return this.files;
    }
 
-   public void setFiles(List<BindingFile> var1) {
-      this.files = var1;
+   public void setFiles(List<BindingFile> files) {
+      this.files = files;
    }
 }

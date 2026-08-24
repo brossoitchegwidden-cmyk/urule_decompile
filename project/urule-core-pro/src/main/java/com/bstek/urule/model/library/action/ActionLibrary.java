@@ -10,15 +10,15 @@ public class ActionLibrary {
       return this.springBeans;
    }
 
-   public void setSpringBeans(List<SpringBean> var1) {
-      this.springBeans = var1;
+   public void setSpringBeans(List<SpringBean> springBeans) {
+      this.springBeans = springBeans;
    }
 
-   public void addSpringBean(SpringBean var1) {
+   public void addSpringBean(SpringBean springBean) {
       if (this.springBeans == null) {
          this.springBeans = new ArrayList<>();
       }
 
-      this.springBeans.add(var1);
+      this.springBeans.add(springBean);
    }
 }

@@ -3,25 +3,25 @@ package com.bstek.urule;
 import java.util.Locale;
 
 public class LocaleHolder {
-   private static Locale a = null;
-   private static final ThreadLocal<Locale> b = new ThreadLocal<>();
+   private static Locale locale = null;
+   private static final ThreadLocal<Locale> CURRENT_LOCALE = new ThreadLocal<>();
 
-   public static void set(Locale var0) {
-      b.set(var0);
+   public static void set(Locale locale) {
+      CURRENT_LOCALE.set(locale);
    }
 
    public static Locale get() {
-      Locale var0 = b.get();
-      if (var0 == null) {
-         var0 = a;
+      Locale locale = CURRENT_LOCALE.get();
+      if (locale == null) {
+         locale = LocaleHolder.locale;
       }
 
-      return var0 == null ? Locale.SIMPLIFIED_CHINESE : var0;
+      return locale == null ? Locale.SIMPLIFIED_CHINESE : locale;
    }
 
-   public static void setLocale(Locale var0) {
-      if (a == null) {
-         a = var0;
+   public static void setLocale(Locale locale) {
+      if (LocaleHolder.locale == null) {
+         LocaleHolder.locale = locale;
       }
    }
 

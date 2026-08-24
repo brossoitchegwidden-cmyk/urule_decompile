@@ -13,29 +13,29 @@ public class FractionMath implements MathSign {
    private Value denominator;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.numerator, var1, var2);
-      Object var4 = var1.getValueCompute().complexValueCompute(this.denominator, var1, var2);
-      BigDecimal var5 = Utils.toBigDecimal(var3);
-      BigDecimal var6 = Utils.toBigDecimal(var4);
-      BigDecimal var7 = var5.divide(var6, 15, RoundingMode.HALF_UP).stripTrailingZeros();
-      return var7.stripTrailingZeros();
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.numerator, context, factMap);
+      Object objectValue2 = context.getValueCompute().complexValueCompute(this.denominator, context, factMap);
+      BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(objectValue2);
+      BigDecimal decimalValue3 = decimalValue.divide(decimalValue2, 15, RoundingMode.HALF_UP).stripTrailingZeros();
+      return decimalValue3.stripTrailingZeros();
    }
 
    public Value getNumerator() {
       return this.numerator;
    }
 
-   public void setNumerator(Value var1) {
-      this.numerator = var1;
+   public void setNumerator(Value numerator) {
+      this.numerator = numerator;
    }
 
    public Value getDenominator() {
       return this.denominator;
    }
 
-   public void setDenominator(Value var1) {
-      this.denominator = var1;
+   public void setDenominator(Value denominator) {
+      this.denominator = denominator;
    }
 
    @Override
@@ -45,7 +45,7 @@ public class FractionMath implements MathSign {
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Fraction" : "分数";
-      return "[" + var1 + "]" + this.numerator.getId() + "/" + this.denominator.getId();
+      String text = LocaleHolder.isEnglish() ? "Fraction" : "分数";
+      return "[" + text + "]" + this.numerator.getId() + "/" + this.denominator.getId();
    }
 }

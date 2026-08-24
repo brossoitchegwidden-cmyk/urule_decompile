@@ -7,62 +7,62 @@ import java.util.Set;
 import java.util.UUID;
 
 public abstract class AbstractActivity implements Activity {
-   private List<Path> b;
-   protected String a = UUID.randomUUID().toString();
+   private List<Path> paths;
+   protected String activityId = UUID.randomUUID().toString();
 
    @Override
    public List<Path> getPaths() {
-      return this.b;
+      return this.paths;
    }
 
-   public void addPath(Path var1) {
-      if (this.b == null) {
-         this.b = new ArrayList<>();
+   public void addPath(Path path) {
+      if (this.paths == null) {
+         this.paths = new ArrayList<>();
       }
 
-      this.b.add(var1);
+      this.paths.add(path);
    }
 
-   protected List<FactTracker> a(EvaluationContext var1, Object var2, FactTracker var3) {
-      ArrayList var4 = new ArrayList();
-      if (this.b != null && this.b.size() != 0) {
-         int var5 = this.b.size();
+   protected List<FactTracker> visitPahs(EvaluationContext context, Object obj, FactTracker tracker) {
+      ArrayList visitPahsResult = new ArrayList();
+      if (this.paths != null && this.paths.size() != 0) {
+         int number = this.paths.size();
 
-         for (Path var7 : this.b) {
-            Collection var8 = null;
-            AbstractActivity var9 = (AbstractActivity)var7.getTo();
-            Set var10 = var1.getPathPassedSet();
-            var10.add(var7.getId());
-            boolean var11 = var9.orNodeTokensExist(var1, var3.getTokens());
-            if (!var11) {
-               if (var5 > 1) {
-                  FactTracker var12 = var3.newSubFactTracker();
-                  var12.setCurrentPath(var7);
-                  var8 = var9.enter(var1, var2, var12);
+         for (Path path : this.paths) {
+            Collection items = null;
+            AbstractActivity to = (AbstractActivity)path.getTo();
+            Set pathPassedSet = context.getPathPassedSet();
+            pathPassedSet.add(path.getId());
+            boolean flag = to.orNodeTokensExist(context, tracker.getTokens());
+            if (!flag) {
+               if (number > 1) {
+                  FactTracker factTracker = tracker.newSubFactTracker();
+                  factTracker.setCurrentPath(path);
+                  items = to.enter(context, obj, factTracker);
                } else {
-                  var3.setCurrentPath(var7);
-                  var8 = var9.enter(var1, var2, var3);
+                  tracker.setCurrentPath(path);
+                  items = to.enter(context, obj, tracker);
                }
 
-               if (var8 != null) {
-                  var4.addAll(var8);
+               if (items != null) {
+                  visitPahsResult.addAll(items);
                }
             }
          }
 
-         return var4;
+         return visitPahsResult;
       } else {
-         return var4;
+         return visitPahsResult;
       }
    }
 
    @Override
-   public boolean orNodeTokensExist(EvaluationContext var1, Set<Integer> var2) {
-      List var3 = this.getPaths();
-      if (var3 != null && var3.size() == 1) {
-         Path var4 = (Path)var3.get(0);
-         AbstractActivity var5 = (AbstractActivity)var4.getTo();
-         return var5.orNodeTokensExist(var1, var2);
+   public boolean orNodeTokensExist(EvaluationContext context, Set<Integer> tokens) {
+      List paths = this.getPaths();
+      if (paths != null && paths.size() == 1) {
+         Path path = (Path)paths.get(0);
+         AbstractActivity to = (AbstractActivity)path.getTo();
+         return to.orNodeTokensExist(context, tokens);
       } else {
          return false;
       }

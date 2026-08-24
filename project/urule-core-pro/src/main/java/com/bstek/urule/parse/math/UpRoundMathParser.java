@@ -6,18 +6,18 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class UpRoundMathParser extends MathParser {
-   public UpRoundMathParser(ValueParser var1) {
-      super(var1);
+   public UpRoundMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("up-round");
+   public boolean support(String name) {
+      return name.equals("up-round");
    }
 
-   public MathSign parse(Element var1) {
-      UpRoundMath var2 = new UpRoundMath();
-      var2.setValue(this.a(var1));
-      return var2;
+   public MathSign parse(Element element) {
+      UpRoundMath upRoundMath = new UpRoundMath();
+      upRoundMath.setValue(this.parseValue(element));
+      return upRoundMath;
    }
 }

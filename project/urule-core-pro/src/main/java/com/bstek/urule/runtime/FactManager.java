@@ -8,139 +8,139 @@ import java.util.List;
 import java.util.Map;
 
 public class FactManager {
-   private FactManager a;
-   private List<Object> b = new ArrayList<>();
-   private Map<String, Object> c = new HashMap<>();
-   private Map<String, Object> d = new HashMap<>();
-   private Map<String, Object> e = new HashMap<>();
-   private Map<String, Object> f = new HashMap<>();
-   private Map<String, List<Object>> g = new HashMap<>();
+   private FactManager parentFactManager;
+   private List<Object> facts = new ArrayList<>();
+   private Map<String, Object> factMap = new HashMap<>();
+   private Map<String, Object> parameters = new HashMap<>();
+   private Map<String, Object> initialParameters = new HashMap<>();
+   private Map<String, Object> insertedParameters = new HashMap<>();
+   private Map<String, List<Object>> factListMap = new HashMap<>();
 
-   public FactManager(KnowledgeSession var1) {
-      if (var1 != null) {
-         for (Object var3 : var1.getFactList()) {
-            if (!var3.getClass().getName().equals(HashMap.class.getName())) {
-               this.b.add(var3);
+   public FactManager(KnowledgeSession parentSession) {
+      if (parentSession != null) {
+         for (Object parentFact : parentSession.getFactList()) {
+            if (!parentFact.getClass().getName().equals(HashMap.class.getName())) {
+               this.facts.add(parentFact);
             }
          }
 
-         this.g.putAll(var1.getFactManager().g);
-         this.c.putAll(var1.getAllFactsMap());
-         this.a = var1.getFactManager();
+         this.factListMap.putAll(parentSession.getFactManager().factListMap);
+         this.factMap.putAll(parentSession.getAllFactsMap());
+         this.parentFactManager = parentSession.getFactManager();
       }
    }
 
-   public void initKnowledgePackageParameters(KnowledgePackage var1) {
-      ParameterManager.getInstance().initKnowledgePackageParameters(var1, this.e);
+   public void initKnowledgePackageParameters(KnowledgePackage knowledgePackage) {
+      ParameterManager.getInstance().initKnowledgePackageParameters(knowledgePackage, this.initialParameters);
    }
 
-   public Map<String, Object> buildRuntimeParameters(Map<String, Object> var1) {
-      this.d.clear();
-      ParameterManager.getInstance().clearInitParameters(this.e);
-      this.d.putAll(this.e);
-      this.d.putAll(this.f);
-      if (var1 != null) {
-         for (String var3 : var1.keySet()) {
-            if (!var3.equals("_loop_rule_break_tag__")) {
-               this.d.put(var3, var1.get(var3));
+   public Map<String, Object> buildRuntimeParameters(Map<String, Object> inputParameters) {
+      this.parameters.clear();
+      ParameterManager.getInstance().clearInitParameters(this.initialParameters);
+      this.parameters.putAll(this.initialParameters);
+      this.parameters.putAll(this.insertedParameters);
+      if (inputParameters != null) {
+         for (String parameterName : inputParameters.keySet()) {
+            if (!parameterName.equals("_loop_rule_break_tag__")) {
+               this.parameters.put(parameterName, inputParameters.get(parameterName));
             }
          }
       }
 
-      this.addToFactsMap(this.d);
-      return this.d;
+      this.addToFactsMap(this.parameters);
+      return this.parameters;
    }
 
-   public boolean insert(Object var1) {
-      if (this.a != null) {
-         this.a.insert(var1);
+   public boolean insert(Object fact) {
+      if (this.parentFactManager != null) {
+         this.parentFactManager.insert(fact);
       }
 
-      if (!(var1 instanceof GeneralEntity) && var1 instanceof Map) {
-         Map var2 = (Map)var1;
+      if (!(fact instanceof GeneralEntity) && fact instanceof Map) {
+         Map factParameters = (Map)fact;
 
-         for (Object var4 : var2.keySet()) {
-            if (var4 != null) {
-               this.f.put(var4.toString(), var2.get(var4));
+         for (Object parameterName : factParameters.keySet()) {
+            if (parameterName != null) {
+               this.insertedParameters.put(parameterName.toString(), factParameters.get(parameterName));
             }
          }
 
          return false;
       } else {
-         this.addToFactsMap(var1);
+         this.addToFactsMap(fact);
          return true;
       }
    }
 
-   public void insertLoopFact(Object var1) {
-      if (!(var1 instanceof GeneralEntity) && var1 instanceof Map) {
-         Map var2 = (Map)var1;
+   public void insertLoopFact(Object fact) {
+      if (!(fact instanceof GeneralEntity) && fact instanceof Map) {
+         Map factParameters = (Map)fact;
 
-         for (Object var4 : var2.keySet()) {
-            if (var4 != null) {
-               this.f.put(var4.toString(), var2.get(var4));
+         for (Object parameterName : factParameters.keySet()) {
+            if (parameterName != null) {
+               this.insertedParameters.put(parameterName.toString(), factParameters.get(parameterName));
             }
          }
       } else {
-         this.addToFactsMap(var1);
+         this.addToFactsMap(fact);
       }
    }
 
-   public void addToFactsMap(Object var1) {
-      boolean var2 = false;
+   public void addToFactsMap(Object fact) {
+      boolean alreadyInserted = false;
 
-      for (Object var4 : this.b) {
-         if (var4 == var1) {
-            var2 = true;
+      for (Object insertedFact : this.facts) {
+         if (insertedFact == fact) {
+            alreadyInserted = true;
             break;
          }
       }
 
-      if (!var2) {
-         this.b.add(var1);
+      if (!alreadyInserted) {
+         this.facts.add(fact);
       }
 
-      String var5 = Utils.getClassName(var1);
-      this.a(var1, var5);
-      this.c.put(var5, var1);
+      String className = Utils.getClassName(fact);
+      this.addToFactListMap(fact, className);
+      this.factMap.put(className, fact);
    }
 
-   private void a(Object var1, String var2) {
-      List var3 = this.g.get(var2);
-      if (var3 == null) {
-         var3 = new ArrayList();
-         this.g.put(var2, var3);
+   private void addToFactListMap(Object fact, String className) {
+      List factsOfType = this.factListMap.get(className);
+      if (factsOfType == null) {
+         factsOfType = new ArrayList();
+         this.factListMap.put(className, factsOfType);
       }
 
-      var3.add(var1);
+      factsOfType.add(fact);
    }
 
    public void clean() {
-      this.c.clear();
-      this.b.clear();
-      this.g.clear();
-      this.f.clear();
+      this.factMap.clear();
+      this.facts.clear();
+      this.factListMap.clear();
+      this.insertedParameters.clear();
    }
 
    public Map<String, Object> getParameters() {
-      return this.d;
+      return this.parameters;
    }
 
    public Map<String, Object> getFactMap() {
-      return this.c;
+      return this.factMap;
    }
 
-   public List<Object> getFacts(String var1) {
-      return this.g.get(var1);
+   public List<Object> getFacts(String className) {
+      return this.factListMap.get(className);
    }
 
    public Map<String, List<Object>> getFactListMap() {
-      return this.g;
+      return this.factListMap;
    }
 
    public List<Object> getFactList() {
-      ArrayList var1 = new ArrayList(this.b.size());
-      var1.addAll(this.b);
-      return var1;
+      ArrayList factList = new ArrayList(this.facts.size());
+      factList.addAll(this.facts);
+      return factList;
    }
 }

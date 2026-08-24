@@ -1,22 +1,22 @@
 package com.bstek.urule.console.config.setup;
 
 public class PropertiesInfo {
-   private String a;
-   private String b;
+   private String adminUsername;
+   private String adminPassword;
 
    public String getAdminUsername() {
-      return this.a;
+      return this.adminUsername;
    }
 
-   public void setAdminUsername(String var1) {
-      this.a = var1;
+   public void setAdminUsername(String adminUsername) {
+      this.adminUsername = adminUsername;
    }
 
    public String getAdminPassword() {
-      return this.b;
+      return this.adminPassword;
    }
 
-   public void setAdminPassword(String var1) {
-      this.b = var1;
+   public void setAdminPassword(String adminPassword) {
+      this.adminPassword = adminPassword;
    }
 }

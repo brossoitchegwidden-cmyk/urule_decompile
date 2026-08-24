@@ -10,200 +10,200 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class BatchDataResolverItem {
-   private Long a;
-   private String b;
-   private Long c;
-   private Long d;
-   private Long e;
-   private BatchUpdateMode f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private int k;
-   private String l;
-   private String m;
-   private String n;
-   private Date o;
-   private Date p;
-   private List q;
-   private String r;
-   private List s;
-   private PreparedStatement t;
-   private List u;
+   private Long id;
+   private String name;
+   private Long batchId;
+   private Long projectId;
+   private Long resolverId;
+   private BatchUpdateMode updateMode;
+   private String tableName;
+   private String filterData;
+   private String partitionName;
+   private String partitionValue;
+   private int commitLimit;
+   private String desc;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private List filters;
+   private String updateSql;
+   private List params;
+   private PreparedStatement stmt;
+   private List fields;
 
    public BatchDataResolverItem() {
-      this.f = BatchUpdateMode.update;
-      this.k = 1000;
-      this.q = new ArrayList();
-      this.u = new ArrayList();
+      this.updateMode = BatchUpdateMode.update;
+      this.commitLimit = 1000;
+      this.filters = new ArrayList();
+      this.fields = new ArrayList();
    }
 
    public List getFilters() {
-      return this.q;
+      return this.filters;
    }
 
-   public void setFilters(List var1) {
-      this.q = var1;
+   public void setFilters(List filters) {
+      this.filters = filters;
    }
 
    public List getFields() {
-      return this.u;
+      return this.fields;
    }
 
-   public void setFields(List var1) {
-      this.u = var1;
+   public void setFields(List fields) {
+      this.fields = fields;
    }
 
    public Long getResolverId() {
-      return this.e;
+      return this.resolverId;
    }
 
-   public void setResolverId(Long var1) {
-      this.e = var1;
+   public void setResolverId(Long resolverId) {
+      this.resolverId = resolverId;
    }
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Long getBatchId() {
-      return this.c;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.c = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public Long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.d = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDesc() {
-      return this.l;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.l = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getTableName() {
-      return this.g;
+      return this.tableName;
    }
 
-   public void setTableName(String var1) {
-      this.g = var1;
+   public void setTableName(String tableName) {
+      this.tableName = tableName;
    }
 
    public BatchUpdateMode getUpdateMode() {
-      return this.f;
+      return this.updateMode;
    }
 
-   public void setUpdateMode(BatchUpdateMode var1) {
-      this.f = var1;
+   public void setUpdateMode(BatchUpdateMode updateMode) {
+      this.updateMode = updateMode;
    }
 
    public String getCreateUser() {
-      return this.m;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.m = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.n;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.n = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.o;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.o = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.p;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.p = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getFilterData() {
-      return this.h;
+      return this.filterData;
    }
 
-   public void setFilterData(String var1) {
-      this.h = var1;
+   public void setFilterData(String filterData) {
+      this.filterData = filterData;
    }
 
    public String getUpdateSql() {
-      return this.r;
+      return this.updateSql;
    }
 
-   public void setUpdateSql(String var1) {
-      this.r = var1;
+   public void setUpdateSql(String updateSql) {
+      this.updateSql = updateSql;
    }
 
    public List getParams() {
-      return this.s;
+      return this.params;
    }
 
-   public void setParams(List var1) {
-      this.s = var1;
+   public void setParams(List params) {
+      this.params = params;
    }
 
    public PreparedStatement getStmt() {
-      return this.t;
+      return this.stmt;
    }
 
-   public void setStmt(PreparedStatement var1) {
-      this.t = var1;
+   public void setStmt(PreparedStatement stmt) {
+      this.stmt = stmt;
    }
 
    public String getPartitionName() {
-      return this.i;
+      return this.partitionName;
    }
 
-   public void setPartitionName(String var1) {
-      this.i = var1;
+   public void setPartitionName(String partitionName) {
+      this.partitionName = partitionName;
    }
 
    public String getPartitionValue() {
-      return this.j;
+      return this.partitionValue;
    }
 
-   public void setPartitionValue(String var1) {
-      this.j = var1;
+   public void setPartitionValue(String partitionValue) {
+      this.partitionValue = partitionValue;
    }
 
    public int getCommitLimit() {
-      return this.k;
+      return this.commitLimit;
    }
 
-   public void setCommitLimit(int var1) {
-      this.k = var1;
+   public void setCommitLimit(int commitLimit) {
+      this.commitLimit = commitLimit;
    }
 }

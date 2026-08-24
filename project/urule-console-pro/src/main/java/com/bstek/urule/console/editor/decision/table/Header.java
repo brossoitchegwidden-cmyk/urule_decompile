@@ -1,35 +1,35 @@
 package com.bstek.urule.console.editor.decision.table;
 
 public class Header {
-   private String a;
-   private HeaderType b;
-   private boolean c;
+   private String name;
+   private HeaderType type;
+   private boolean predefine;
 
    public Header() {
-      this.b = HeaderType.condition;
+      this.type = HeaderType.condition;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public HeaderType getType() {
-      return this.b;
+      return this.type;
    }
 
-   public void setType(HeaderType var1) {
-      this.b = var1;
+   public void setType(HeaderType type) {
+      this.type = type;
    }
 
    public boolean isPredefine() {
-      return this.c;
+      return this.predefine;
    }
 
-   public void setPredefine(boolean var1) {
-      this.c = var1;
+   public void setPredefine(boolean predefine) {
+      this.predefine = predefine;
    }
 }

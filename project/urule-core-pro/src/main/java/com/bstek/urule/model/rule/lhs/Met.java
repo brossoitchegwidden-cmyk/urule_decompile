@@ -8,21 +8,21 @@ public class Met extends Junction {
    private boolean only;
 
    @Override
-   public boolean doEval(EvaluationContext var1, boolean var2) {
-      List var3 = this.getCriterions();
-      int var4 = 0;
+   public boolean doEval(EvaluationContext context, boolean debug) {
+      List criterions = this.getCriterions();
+      int number = 0;
 
-      for (Criterion var6 : (Iterable<Criterion>)(Iterable<?>)(var3)) {
-         if (var6.doEval(var1, var2)) {
-            var4++;
+      for (Criterion criterion : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+         if (criterion.doEval(context, debug)) {
+            number++;
          }
       }
 
       if (this.only) {
-         if (var4 == this.met) {
+         if (number == this.met) {
             return true;
          }
-      } else if (var4 >= this.met) {
+      } else if (number >= this.met) {
          return true;
       }
 
@@ -33,16 +33,16 @@ public class Met extends Junction {
       return this.met;
    }
 
-   public void setMet(int var1) {
-      this.met = var1;
+   public void setMet(int met) {
+      this.met = met;
    }
 
    public boolean isOnly() {
       return this.only;
    }
 
-   public void setOnly(boolean var1) {
-      this.only = var1;
+   public void setOnly(boolean only) {
+      this.only = only;
    }
 
    @Override

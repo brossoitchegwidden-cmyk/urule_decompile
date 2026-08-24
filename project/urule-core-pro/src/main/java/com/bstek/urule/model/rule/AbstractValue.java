@@ -8,7 +8,7 @@ public abstract class AbstractValue implements Value {
       return this.arithmetic;
    }
 
-   public void setArithmetic(ComplexArithmetic var1) {
-      this.arithmetic = var1;
+   public void setArithmetic(ComplexArithmetic arithmetic) {
+      this.arithmetic = arithmetic;
    }
 }

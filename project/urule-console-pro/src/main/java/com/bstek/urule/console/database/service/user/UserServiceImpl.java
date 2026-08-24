@@ -8,51 +8,46 @@ import com.bstek.urule.console.util.StringUtils;
 import com.bstek.urule.exception.RuleException;
 import java.util.List;
 
+/**默认用户服务类*/
 public class UserServiceImpl implements PersistUserService {
-   public void add(User var1) {
-      UserManager.ins.add(var1);
+   public void add(User user) {
+      UserManager.ins.add(user);
    }
-
-   public void update(User var1) {
-      UserManager.ins.update(var1);
+   public void update(User user) {
+      UserManager.ins.update(user);
    }
-
-   public User get(String var1) {
-      return UserManager.ins.get(var1);
+   public User get(String account) {
+      return UserManager.ins.get(account);
    }
-
-   public void remove(User var1) {
-      UserManager.ins.remove(var1.getId());
+   public void remove(User user) {
+      UserManager.ins.remove(user.getId());
    }
-
-   public void changeEmail(String var1, String var2) {
-      UserManager.ins.changeEmail(var1, var2);
+   public void changeEmail(String account, String email) {
+      UserManager.ins.changeEmail(account, email);
    }
-
-   public void changePassword(String var1, String var2) {
-      UserManager.ins.changePassword(var1, var2);
+   public void changePassword(String account, String password) {
+      UserManager.ins.changePassword(account, password);
    }
-
-   public User validate(String var1, String var2) {
-      User var3 = null;
+   public User validate(String account, String password) {
+      User user = null;
 
       try {
-         if (!StringUtils.isEmpty(var1) && !StringUtils.isEmpty(var2)) {
-            var3 = this.get(var1);
-            if (var3 == null) {
+         if (!StringUtils.isEmpty(account) && !StringUtils.isEmpty(password)) {
+            user = this.get(account);
+            if (user == null) {
                throw new InfoException("账号或密码错误!<br>Username or Password is invalid.");
-            } else if (!var2.equals(var3.getPassword())) {
+            } else if (!password.equals(user.getPassword())) {
                throw new InfoException("账号或密码错误!<br>Username or Password is invalid.");
             } else {
-               List var4 = GroupManager.ins.createQuery().list(var3.getId());
-               var3.setGroups(var4);
-               return var3;
+               List items = GroupManager.ins.createQuery().list(user.getId());
+               user.setGroups(items);
+               return user;
             }
          } else {
             throw new InfoException("账号和密码不能为空!<br>Username and Password can not be null.");
          }
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 }

@@ -19,163 +19,163 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 public class Agenda {
-   private ActivationRuleBox a;
-   private Context b;
-   private FactManager c;
-   private EvaluationContextImpl d;
-   private Map<String, List<ReteInstanceUnit>> e;
-   private Map<String, List<ReteInstanceUnit>> f;
+   private ActivationRuleBox activationRuleBox;
+   private Context context;
+   private FactManager factManager;
+   private EvaluationContextImpl evaluationContext;
+   private Map<String, List<ReteInstanceUnit>> mutexReteInstancesMap;
+   private Map<String, List<ReteInstanceUnit>> pendedReteInstancesMap;
 
-   public Agenda(WorkingMemory var1, Map<String, String> var2, Map<String, List<ReteInstanceUnit>> var3, Map<String, List<ReteInstanceUnit>> var4) {
-      this.c = var1.getFactManager();
-      this.f = var3;
-      this.e = var4;
-      this.b = new ContextImpl(var1, var2);
-      this.a = new ActivationRuleBox(this.b);
-      this.d = new EvaluationContextImpl(var1, var2);
+   public Agenda(WorkingMemory workingMemory, Map<String, String> allVariableCateogoryMap, Map<String, List<ReteInstanceUnit>> pendedReteInstancesMap, Map<String, List<ReteInstanceUnit>> mutexReteInstancesMap) {
+      this.factManager = workingMemory.getFactManager();
+      this.pendedReteInstancesMap = pendedReteInstancesMap;
+      this.mutexReteInstancesMap = mutexReteInstancesMap;
+      this.context = new ContextImpl(workingMemory, allVariableCateogoryMap);
+      this.activationRuleBox = new ActivationRuleBox(this.context);
+      this.evaluationContext = new EvaluationContextImpl(workingMemory, allVariableCateogoryMap);
    }
 
-   public Collection<FactTracker> doRete(ReteInstance var1, Object var2, boolean var3) {
-      Collection var4 = var1.enter(this.d, var2);
-      this.a(var4, var2, var3);
-      return var4;
+   public Collection<FactTracker> doRete(ReteInstance reteInstance, Object fact, boolean prime) {
+      Collection doReteResult = reteInstance.enter(this.evaluationContext, fact);
+      this.addActivations(doReteResult, fact, prime);
+      return doReteResult;
    }
 
-   public void execute(ReteInstance var1, AgendaFilter var2, int var3) {
-      this.a.execute(var2, var3);
-      this.a.clean();
-      this.d.resetActivitiesState();
+   public void execute(ReteInstance reteInstance, AgendaFilter filter, int max) {
+      this.activationRuleBox.execute(filter, max);
+      this.activationRuleBox.clean();
+      this.evaluationContext.resetActivitiesState();
    }
 
-   public void reEvaluationExecute(ReteInstance var1) {
-      this.a.execute(null, Integer.MAX_VALUE);
+   public void reEvaluationExecute(ReteInstance reteInstance) {
+      this.activationRuleBox.execute(null, Integer.MAX_VALUE);
    }
 
-   public void activePendedGroupAndExecute(String var1) {
-      this.a(var1, true);
+   public void activePendedGroupAndExecute(String groupName) {
+      this.activatePendedGroup(groupName, true);
    }
 
-   public void activePendedGroup(String var1) {
-      this.a(var1, false);
+   public void activePendedGroup(String groupName) {
+      this.activatePendedGroup(groupName, false);
    }
 
-   private void a(String var1, boolean var2) {
-      if (!this.f.containsKey(var1)) {
-         throw new RuleException("执行组 [" + var1 + "] 不存在！");
+   private void activatePendedGroup(String groupName, boolean executeImmediately) {
+      if (!this.pendedReteInstancesMap.containsKey(groupName)) {
+         throw new RuleException("执行组 [" + groupName + "] 不存在！");
       }
 
-      this.b.cleanTipMsg();
-      this.d.resetActivitiesState();
-      List var3 = this.c.getFactList();
+      this.context.cleanTipMsg();
+      this.evaluationContext.resetActivitiesState();
+      List factList = this.factManager.getFactList();
 
-      for (ReteInstanceUnit var6 : this.f.get(var1)) {
-         if (this.a(var6)) {
-            if (var6 instanceof MutexReteInstanceUnit) {
-               MutexReteInstanceUnit var10 = (MutexReteInstanceUnit)var6;
-               this.b.addTipMsg("执行执行组[" + var1 + "]下的互斥组:" + var10.getMutexGroupName() + "");
-               this.a(var10, var3);
+      for (ReteInstanceUnit reteInstanceUnit : this.pendedReteInstancesMap.get(groupName)) {
+         if (this.isRuleActive(reteInstanceUnit)) {
+            if (reteInstanceUnit instanceof MutexReteInstanceUnit) {
+               MutexReteInstanceUnit mutexReteInstanceUnit = (MutexReteInstanceUnit)reteInstanceUnit;
+               this.context.addTipMsg("执行执行组[" + groupName + "]下的互斥组:" + mutexReteInstanceUnit.getMutexGroupName() + "");
+               this.executeMutexGroup(mutexReteInstanceUnit, factList);
             } else {
-               ReteInstance var7 = var6.getReteInstance();
+               ReteInstance reteInstance = reteInstanceUnit.getReteInstance();
 
-               for (Object var9 : var3) {
-                  this.doRete(var7, var9, true);
+               for (Object objectValue : factList) {
+                  this.doRete(reteInstance, objectValue, true);
                }
 
-               this.doRete(var7, "__*__", true);
+               this.doRete(reteInstance, "__*__", true);
             }
          }
       }
 
-      if (var2) {
-         this.a.execute(null, Integer.MAX_VALUE);
+      if (executeImmediately) {
+         this.activationRuleBox.execute(null, Integer.MAX_VALUE);
       }
    }
 
-   private void a(MutexReteInstanceUnit var1, List<Object> var2) {
-      this.d.resetActivitiesState();
+   private void executeMutexGroup(MutexReteInstanceUnit mutexReteInstanceUnit, List<Object> objects) {
+      this.evaluationContext.resetActivitiesState();
 
-      for (ReteInstance var5 : var1.getReteInstances()) {
-         Collection var6 = null;
+      for (ReteInstance reteInstance : mutexReteInstanceUnit.getReteInstances()) {
+         Collection items = null;
 
-         for (Object var8 : var2) {
-            var6 = this.doRete(var5, var8, true);
-            if (var6 != null && var6.size() > 0) {
+         for (Object objectValue : objects) {
+            items = this.doRete(reteInstance, objectValue, true);
+            if (items != null && items.size() > 0) {
                break;
             }
          }
 
-         if (var6 == null || var6.size() == 0) {
-            var6 = this.doRete(var5, "__*__", true);
+         if (items == null || items.size() == 0) {
+            items = this.doRete(reteInstance, "__*__", true);
          }
 
-         if (var6 != null && var6.size() != 0) {
+         if (items != null && items.size() != 0) {
             break;
          }
       }
    }
 
-   public void activeMutexGroupRule(String var1, String var2) {
-      if (StringUtils.isBlank(var1)) {
+   public void activeMutexGroupRule(String mutexGroupName, String ruleName) {
+      if (StringUtils.isBlank(mutexGroupName)) {
          throw new RuleException("互斥组名不能为空，当前操作只能发生在互斥组内部！");
       }
 
-      if (!this.e.containsKey(var1)) {
-         throw new RuleException("互斥组 [" + var1 + "] 不存在!");
+      if (!this.mutexReteInstancesMap.containsKey(mutexGroupName)) {
+         throw new RuleException("互斥组 [" + mutexGroupName + "] 不存在!");
       }
 
-      this.d.resetActivitiesState();
-      List var3 = this.e.get(var1);
-      List var4 = this.c.getFactList();
+      this.evaluationContext.resetActivitiesState();
+      List items = this.mutexReteInstancesMap.get(mutexGroupName);
+      List factList = this.factManager.getFactList();
 
-      for (ReteInstanceUnit var6 : (Iterable<ReteInstanceUnit>)(Iterable<?>)(var3)) {
-         String var7 = var6.getRuleName();
-         if (var7.equals(var2) && this.a(var6)) {
-            ReteInstance var8 = var6.getReteInstance();
+      for (ReteInstanceUnit reteInstanceUnit : (Iterable<ReteInstanceUnit>)(Iterable<?>)(items)) {
+         String ruleName2 = reteInstanceUnit.getRuleName();
+         if (ruleName2.equals(ruleName) && this.isRuleActive(reteInstanceUnit)) {
+            ReteInstance reteInstance = reteInstanceUnit.getReteInstance();
 
-            for (Object var10 : var4) {
-               this.doRete(var8, var10, false);
+            for (Object objectValue : factList) {
+               this.doRete(reteInstance, objectValue, false);
             }
 
-            this.doRete(var8, "__*__", false);
+            this.doRete(reteInstance, "__*__", false);
             break;
          }
       }
    }
 
-   private boolean a(ReteInstanceUnit var1) {
-      Date var2 = new Date();
-      Date var3 = var1.getEffectiveDate();
-      if (var3 != null && var3.compareTo(var2) < 0) {
+   private boolean isRuleActive(ReteInstanceUnit reteInstanceUnit) {
+      Date date = new Date();
+      Date effectiveDate = reteInstanceUnit.getEffectiveDate();
+      if (effectiveDate != null && effectiveDate.compareTo(date) < 0) {
          return false;
       }
 
-      Date var4 = var1.getExpiresDate();
-      return var4 == null || var4.compareTo(var2) <= 0;
+      Date expiresDate = reteInstanceUnit.getExpiresDate();
+      return expiresDate == null || expiresDate.compareTo(date) <= 0;
    }
 
-   private void a(Collection<FactTracker> var1, Object var2, boolean var3) {
-      if (var1 != null) {
-         for (FactTracker var5 : var1) {
-            Activation var6 = var5.getActivation();
-            Rule var7 = var6.getRule();
-            if (var2.equals("__*__") && var7.isWithElse()) {
-               this.a.addElseRule(var6);
+   private void addActivations(Collection<FactTracker> factTrackers, Object objectValue, boolean prime) {
+      if (factTrackers != null) {
+         for (FactTracker factTracker : factTrackers) {
+            Activation activation = factTracker.getActivation();
+            Rule rule = activation.getRule();
+            if (objectValue.equals("__*__") && rule.isWithElse()) {
+               this.activationRuleBox.addElseRule(activation);
             } else {
-               this.a.add(var6, var3);
+               this.activationRuleBox.add(activation, prime);
             }
          }
       }
    }
 
    public Context getContext() {
-      return this.b;
+      return this.context;
    }
 
    public EvaluationContext getEvaluationContext() {
-      return this.d;
+      return this.evaluationContext;
    }
 
    public void clean() {
-      this.a.clean();
+      this.activationRuleBox.clean();
    }
 }

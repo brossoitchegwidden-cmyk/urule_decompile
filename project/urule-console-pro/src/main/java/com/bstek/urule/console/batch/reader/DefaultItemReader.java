@@ -37,66 +37,66 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class DefaultItemReader implements ItemReader {
-   private static Log a = LogFactory.getLog(DefaultItemReader.class);
+   private static Log logger = LogFactory.getLog(DefaultItemReader.class);
 
-   private void a(BatchDataProvider var1, Map var2) {
-      for(DataParam var4 : (Iterable<DataParam>)(Iterable<?>)(var1.getParams())) {
-         if (var2.containsKey(var4.getBatchParamName())) {
-            var4.setValue(var2.get(var4.getBatchParamName()));
+   private void bindProviderParameters(BatchDataProvider batchDataProvider, Map valuesByKey) {
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batchDataProvider.getParams())) {
+         if (valuesByKey.containsKey(dataParam.getBatchParamName())) {
+            dataParam.setValue(valuesByKey.get(dataParam.getBatchParamName()));
          }
       }
 
    }
 
-   public List getPageDatas(Connection var1, BatchContext var2, int var3, int var4) throws ReaderException {
+   public List getPageDatas(Connection conn, BatchContext context, int pageIndex, int pageSize) throws ReaderException {
       try {
-         Batch var5 = var2.getBatch();
-         BatchDataProvider var18 = var5.getDataProvider();
-         Dialect var7 = var18.getDialect();
-         String var8 = var18.getPageSql();
-         if (var3 >= 0) {
-            String var9 = var18.getOrderField();
-            if (var7 instanceof OrderLimitDialect && StringUtils.isNotBlank(var9)) {
-               OrderLimitDialect var10 = (OrderLimitDialect)var7;
-               String var11 = var18.getPageLimitType();
-               if (!StringUtils.isBlank(var11) && !"between".equals(var11)) {
-                  GeneralEntity var12 = var2.getHiveLastData();
-                  String var13 = var18.getOrderFieldParamName();
-                  if (!var5.isThreadMulti() && var3 > 1 && var12 != null && StringUtils.isNotBlank(var13)) {
-                     Object var14 = var12.get(var9);
+         Batch batch = context.getBatch();
+         BatchDataProvider dataProvider = batch.getDataProvider();
+         Dialect dialect = dataProvider.getDialect();
+         String pageSql = dataProvider.getPageSql();
+         if (pageIndex >= 0) {
+            String orderField = dataProvider.getOrderField();
+            if (dialect instanceof OrderLimitDialect && StringUtils.isNotBlank(orderField)) {
+               OrderLimitDialect orderLimitDialect = (OrderLimitDialect)dialect;
+               String pageLimitType = dataProvider.getPageLimitType();
+               if (!StringUtils.isBlank(pageLimitType) && !"between".equals(pageLimitType)) {
+                  GeneralEntity hiveLastData = context.getHiveLastData();
+                  String orderFieldParamName = dataProvider.getOrderFieldParamName();
+                  if (!batch.isThreadMulti() && pageIndex > 1 && hiveLastData != null && StringUtils.isNotBlank(orderFieldParamName)) {
+                     Object objectValue = hiveLastData.get(orderField);
 
-                     for(DataParam var16 : (Iterable<DataParam>)(Iterable<?>)(var18.getParams())) {
-                        if (var13.equalsIgnoreCase(var16.getName())) {
-                           var16.setValue(var14);
+                     for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(dataProvider.getParams())) {
+                        if (orderFieldParamName.equalsIgnoreCase(dataParam.getName())) {
+                           dataParam.setValue(objectValue);
                         }
                      }
                   }
 
-                  var8 = var10.getLimitString(var18.getPageSql(), var4);
+                  pageSql = orderLimitDialect.getLimitString(dataProvider.getPageSql(), pageSize);
                } else {
-                  var8 = var10.getLimitString(var18.getPageSql(), var3 * var4, var4, var9);
+                  pageSql = orderLimitDialect.getLimitString(dataProvider.getPageSql(), pageIndex * pageSize, pageSize, orderField);
                }
             } else {
-               var8 = var7.getLimitString(var18.getPageSql(), var3 * var4, var4);
+               pageSql = dialect.getLimitString(dataProvider.getPageSql(), pageIndex * pageSize, pageSize);
             }
          }
 
-         List var19 = this.a(var1, var2, var8, true);
-         return var19;
-      } catch (Exception var17) {
-         ReaderException var6 = new ReaderException(var17.getMessage(), var17);
-         var6.setPageIndex(var3);
-         throw var6;
+         List pageDatas = this.queryPageData(conn, context, pageSql, true);
+         return pageDatas;
+      } catch (Exception exception) {
+         ReaderException readerException = new ReaderException(exception.getMessage(), exception);
+         readerException.setPageIndex(pageIndex);
+         throw readerException;
       }
    }
 
-   protected boolean a(BatchContext var1, BatchDataProvider var2, Map var3) {
-      for(Filter var5 : (Iterable<Filter>)(Iterable<?>)(var2.getFilters())) {
-         for(FilterItem var7 : (Iterable<FilterItem>)(Iterable<?>)(var5.getItems())) {
-            if (var7.getType() == FilterType.bean) {
-               ReaderFilter var8 = (ReaderFilter)Utils.getApplicationContext().getBean(var7.getValue());
-               boolean var9 = var8.filter(var1, var2, var3);
-               if (var9) {
+   protected boolean matchesReaderFilter(BatchContext batchContext, BatchDataProvider batchDataProvider, Map valuesByKey) {
+      for(Filter filter : (Iterable<Filter>)(Iterable<?>)(batchDataProvider.getFilters())) {
+         for(FilterItem filterItem : (Iterable<FilterItem>)(Iterable<?>)(filter.getItems())) {
+            if (filterItem.getType() == FilterType.bean) {
+               ReaderFilter readerFilter = (ReaderFilter)Utils.getApplicationContext().getBean(filterItem.getValue());
+               boolean flag = readerFilter.filter(batchContext, batchDataProvider, valuesByKey);
+               if (flag) {
                   return true;
                }
             }
@@ -106,212 +106,211 @@ public class DefaultItemReader implements ItemReader {
       return false;
    }
 
-   private List a(Connection var1, BatchContext var2, String var3, boolean var4) throws Exception {
-      Batch var5 = var2.getBatch();
-      BatchDataProvider var6 = var5.getDataProvider();
-      ArrayList var7 = new ArrayList();
+   private List queryPageData(Connection connection, BatchContext batchContext, String text, boolean flag) throws Exception {
+      Batch batch = batchContext.getBatch();
+      BatchDataProvider dataProvider = batch.getDataProvider();
+      ArrayList items = new ArrayList();
 
       try {
-         ParsedSql var8 = NamedSQLUtils.parseSql(var3);
-         String var9 = JdbcUtils.getOriginSql(var8.getOriginalSql());
-         PreparedStatement var10 = var1.prepareStatement(var9);
-         StmtUtils.setStmtQueryParameters(var8, var6.getParams(), var10);
-         ResultSet var11 = var10.executeQuery();
-         PacketData var12 = PacketCache.ins.getPacket(Long.valueOf(var5.getPacketId()));
-         List var13 = var12.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
-         VariableCategory var14 = JsonBuilder.getInstance().findVariableCategory(var13, var6.getPacketVarName());
-         List var15 = var6.getFields();
+         ParsedSql sql = NamedSQLUtils.parseSql(text);
+         String originSql = JdbcUtils.getOriginSql(sql.getOriginalSql());
+         PreparedStatement preparedStatement = connection.prepareStatement(originSql);
+         StmtUtils.setStmtQueryParameters(sql, dataProvider.getParams(), preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         PacketData packet = PacketCache.ins.getPacket(Long.valueOf(batch.getPacketId()));
+         List variableCategories = packet.getKnowledgePackageWrapper().getKnowledgePackage().getVariableCategories();
+         VariableCategory variableCategory = JsonBuilder.getInstance().findVariableCategory(variableCategories, dataProvider.getPacketVarName());
+         List fields = dataProvider.getFields();
 
-         while(var11.next()) {
-            GeneralEntity var16 = null;
-            if (var6.getPacketVarName().equals("参数")) {
-               var16 = new GeneralEntity();
+         while(resultSet.next()) {
+            GeneralEntity generalEntity = null;
+            if (dataProvider.getPacketVarName().equals("参数")) {
+               generalEntity = new GeneralEntity();
             } else {
-               var16 = new GeneralEntity(var14.getClazz());
+               generalEntity = new GeneralEntity(variableCategory.getClazz());
             }
 
-            for(BatchDataProviderField var18 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var15)) {
-               if ("Boolean".equals(var18.getDataType())) {
-                  var16.put(var18.getDestProperty(), var11.getBoolean(var18.getSrcProperty()));
-               } else if ("Object".equals(var18.getDataType())) {
-                  if (var18.getDataProvider() != null) {
-                     BatchDataProvider var34 = var18.getDataProvider();
-                     this.a(var34, var2.getParamValueMap());
-                     this.a(var34, (Map)var16);
-                     List var37 = this.a(var1, var34, var13);
-                     if (var37.size() > 0) {
-                        var16.put(var18.getDestProperty(), var37.get(0));
+            for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(fields)) {
+               if ("Boolean".equals(batchDataProviderField.getDataType())) {
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getBoolean(batchDataProviderField.getSrcProperty()));
+               } else if ("Object".equals(batchDataProviderField.getDataType())) {
+                  if (batchDataProviderField.getDataProvider() != null) {
+                     BatchDataProvider dataProvider2 = batchDataProviderField.getDataProvider();
+                     this.bindProviderParameters(dataProvider2, batchContext.getParamValueMap());
+                     this.bindProviderParameters(dataProvider2, (Map)generalEntity);
+                     List items2 = this.queryNestedData(connection, dataProvider2, variableCategories);
+                     if (items2.size() > 0) {
+                        generalEntity.put(batchDataProviderField.getDestProperty(), items2.get(0));
                      }
                   }
 
-                  var16.put(var18.getDestProperty(), var11.getObject(var18.getSrcProperty()));
-               } else if ("List".equals(var18.getDataType())) {
-                  if (var18.getDataProvider() != null) {
-                     BatchDataProvider var33 = var18.getDataProvider();
-                     this.a(var33, var2.getParamValueMap());
-                     this.a(var33, (Map)var16);
-                     List var36 = this.a(var1, var33, var13);
-                     var16.put(var18.getDestProperty(), var36);
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getObject(batchDataProviderField.getSrcProperty()));
+               } else if ("List".equals(batchDataProviderField.getDataType())) {
+                  if (batchDataProviderField.getDataProvider() != null) {
+                     BatchDataProvider dataProvider3 = batchDataProviderField.getDataProvider();
+                     this.bindProviderParameters(dataProvider3, batchContext.getParamValueMap());
+                     this.bindProviderParameters(dataProvider3, (Map)generalEntity);
+                     List items3 = this.queryNestedData(connection, dataProvider3, variableCategories);
+                     generalEntity.put(batchDataProviderField.getDestProperty(), items3);
                   }
-               } else if ("JsonObject".equals(var18.getDataType())) {
-                  String var32 = var11.getString(var18.getSrcProperty());
-                  Map var35 = (Map)JsonUtils.getObjectJsonMapper().readValue(var32, HashMap.class);
-                  if (var18.getDataProvider() != null) {
-                     BatchDataProvider var38 = var18.getDataProvider();
-                     VariableCategory var39 = JsonBuilder.getInstance().findVariableCategory(var13, var38.getPacketVarName());
-                     GeneralEntity var40 = this.a(var38, var39);
+               } else if ("JsonObject".equals(batchDataProviderField.getDataType())) {
+                  String string = resultSet.getString(batchDataProviderField.getSrcProperty());
+                  Map valuesByKey = (Map)JsonUtils.getObjectJsonMapper().readValue(string, HashMap.class);
+                  if (batchDataProviderField.getDataProvider() != null) {
+                     BatchDataProvider dataProvider4 = batchDataProviderField.getDataProvider();
+                     VariableCategory variableCategory2 = JsonBuilder.getInstance().findVariableCategory(variableCategories, dataProvider4.getPacketVarName());
+                     GeneralEntity generalEntity2 = this.createGeneralEntity(dataProvider4, variableCategory2);
 
-                     for(BatchDataProviderField var42 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var38.getFields())) {
-                        if (var35.containsKey(var42.getSrcProperty())) {
-                           var40.put(var42.getDestProperty(), var35.get(var42.getSrcProperty()));
+                     for(BatchDataProviderField batchDataProviderField2 : (Iterable<BatchDataProviderField>)(Iterable<?>)(dataProvider4.getFields())) {
+                        if (valuesByKey.containsKey(batchDataProviderField2.getSrcProperty())) {
+                           generalEntity2.put(batchDataProviderField2.getDestProperty(), valuesByKey.get(batchDataProviderField2.getSrcProperty()));
                         }
                      }
 
-                     var16.put(var18.getDestProperty(), var40);
+                     generalEntity.put(batchDataProviderField.getDestProperty(), generalEntity2);
                   }
-               } else if (!"JsonArray".equals(var18.getDataType())) {
-                  var16.put(var18.getDestProperty(), var11.getObject(var18.getSrcProperty()));
+               } else if (!"JsonArray".equals(batchDataProviderField.getDataType())) {
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getObject(batchDataProviderField.getSrcProperty()));
                } else {
-                  String var19 = var11.getString(var18.getSrcProperty());
-                  List var20 = (List)JsonUtils.getObjectJsonMapper().readValue(var19, new TypeReference() {
+                  String string2 = resultSet.getString(batchDataProviderField.getSrcProperty());
+                  List items4 = (List)JsonUtils.getObjectJsonMapper().readValue(string2, new TypeReference() {
                   });
-                  ArrayList var21 = new ArrayList();
+                  ArrayList items5 = new ArrayList();
 
-                  for(Map var23 : (Iterable<Map>)(Iterable<?>)(var20)) {
-                     if (var18.getDataProvider() != null) {
-                        BatchDataProvider var24 = var18.getDataProvider();
-                        VariableCategory var25 = JsonBuilder.getInstance().findVariableCategory(var13, var24.getPacketVarName());
-                        GeneralEntity var26 = this.a(var24, var25);
+                  for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)(items4)) {
+                     if (batchDataProviderField.getDataProvider() != null) {
+                        BatchDataProvider dataProvider5 = batchDataProviderField.getDataProvider();
+                        VariableCategory variableCategory3 = JsonBuilder.getInstance().findVariableCategory(variableCategories, dataProvider5.getPacketVarName());
+                        GeneralEntity generalEntity3 = this.createGeneralEntity(dataProvider5, variableCategory3);
 
-                        for(BatchDataProviderField var28 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var24.getFields())) {
-                           if (var23.containsKey(var28.getSrcProperty())) {
-                              var26.put(var28.getDestProperty(), var23.get(var28.getSrcProperty()));
+                        for(BatchDataProviderField batchDataProviderField3 : (Iterable<BatchDataProviderField>)(Iterable<?>)(dataProvider5.getFields())) {
+                           if (valuesByKey2.containsKey(batchDataProviderField3.getSrcProperty())) {
+                              generalEntity3.put(batchDataProviderField3.getDestProperty(), valuesByKey2.get(batchDataProviderField3.getSrcProperty()));
                            }
                         }
 
-                        var21.add(var26);
+                        items5.add(generalEntity3);
                      }
                   }
 
-                  var16.put(var18.getDestProperty(), var21);
+                  generalEntity.put(batchDataProviderField.getDestProperty(), items5);
                }
             }
 
-            if (!var5.isThreadMulti() && var4) {
-               var2.setHiveLastData(var16);
+            if (!batch.isThreadMulti() && flag) {
+               batchContext.setHiveLastData(generalEntity);
             }
 
-            boolean var31 = this.a((BatchContext)var2, var6, (Map)var16);
-            if (!var31) {
-               var7.add(var16);
+            boolean flag2 = this.matchesReaderFilter((BatchContext)batchContext, dataProvider, (Map)generalEntity);
+            if (!flag2) {
+               items.add(generalEntity);
             }
          }
 
-         var11.close();
-         var10.close();
-      } catch (Exception var29) {
-         a.error(var29);
-         var29.printStackTrace();
+         resultSet.close();
+         preparedStatement.close();
+      } catch (Exception exception) {
+         DefaultItemReader.logger.error(exception);
+         java.util.logging.Logger.getLogger(DefaultItemReader.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
       }
 
-      return var7;
+      return items;
    }
 
-   private GeneralEntity a(BatchDataProvider var1, VariableCategory var2) {
-      GeneralEntity var3 = null;
-      if (var1.getPacketVarName().equals("参数")) {
-         var3 = new GeneralEntity();
+   private GeneralEntity createGeneralEntity(BatchDataProvider batchDataProvider, VariableCategory variableCategory) {
+      GeneralEntity generalEntity = null;
+      if (batchDataProvider.getPacketVarName().equals("参数")) {
+         generalEntity = new GeneralEntity();
       } else {
-         var3 = new GeneralEntity(var2.getClazz());
+         generalEntity = new GeneralEntity(variableCategory.getClazz());
       }
 
-      return var3;
+      return generalEntity;
    }
 
-   private List a(Connection var1, BatchDataProvider var2, List var3) throws Exception {
-      VariableCategory var4 = JsonBuilder.getInstance().findVariableCategory(var3, var2.getPacketVarName());
-      Object var5 = null;
-      ArrayList var6 = new ArrayList();
+   private List queryNestedData(Connection connection, BatchDataProvider batchDataProvider, List items) throws Exception {
+      VariableCategory variableCategory = JsonBuilder.getInstance().findVariableCategory(items, batchDataProvider.getPacketVarName());
+      Object objectValue = null;
+      ArrayList items2 = new ArrayList();
 
       try {
-         ParsedSql var7 = NamedSQLUtils.parseSql(var2.getPageSql());
-         String var8 = JdbcUtils.getOriginSql(var7.getOriginalSql());
-         PreparedStatement var9 = var1.prepareStatement(var8);
-         StmtUtils.setStmtQueryParameters(var7, var2.getParams(), var9);
-         ResultSet var10 = var9.executeQuery();
-         List var11 = var2.getFields();
+         ParsedSql sql = NamedSQLUtils.parseSql(batchDataProvider.getPageSql());
+         String originSql = JdbcUtils.getOriginSql(sql.getOriginalSql());
+         PreparedStatement preparedStatement = connection.prepareStatement(originSql);
+         StmtUtils.setStmtQueryParameters(sql, batchDataProvider.getParams(), preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List fields = batchDataProvider.getFields();
 
-         while(var10.next()) {
-            GeneralEntity var12 = this.a(var2, var4);
+         while(resultSet.next()) {
+            GeneralEntity generalEntity = this.createGeneralEntity(batchDataProvider, variableCategory);
 
-            for(BatchDataProviderField var14 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var11)) {
-               if ("Boolean".equals(var14.getDataType())) {
-                  var12.put(var14.getDestProperty(), var10.getBoolean(var14.getSrcProperty()));
-               } else if (!"Object".equals(var14.getDataType()) && !"List".equals(var14.getDataType()) && !"JsonObject".equals(var14.getDataType()) && !"JsonArray".equals(var14.getDataType())) {
-                  var12.put(var14.getDestProperty(), var10.getObject(var14.getSrcProperty()));
+            for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(fields)) {
+               if ("Boolean".equals(batchDataProviderField.getDataType())) {
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getBoolean(batchDataProviderField.getSrcProperty()));
+               } else if (!"Object".equals(batchDataProviderField.getDataType()) && !"List".equals(batchDataProviderField.getDataType()) && !"JsonObject".equals(batchDataProviderField.getDataType()) && !"JsonArray".equals(batchDataProviderField.getDataType())) {
+                  generalEntity.put(batchDataProviderField.getDestProperty(), resultSet.getObject(batchDataProviderField.getSrcProperty()));
                }
             }
 
-            var6.add(var12);
+            items2.add(generalEntity);
          }
 
-         var10.close();
-         var9.close();
-      } catch (Exception var15) {
-         a.error(var15);
-         var15.printStackTrace();
+         resultSet.close();
+         preparedStatement.close();
+      } catch (Exception exception) {
+         DefaultItemReader.logger.error(exception);
+         java.util.logging.Logger.getLogger(DefaultItemReader.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
       }
 
-      return var6;
+      return items2;
    }
 
-   public List getDatas(Connection var1, BatchContext var2) throws ReaderException {
+   public List getDatas(Connection conn, BatchContext context) throws ReaderException {
       try {
-         Batch var3 = var2.getBatch();
-         BatchDataProvider var7 = var3.getDataProvider();
-         String var5 = var7.getPageSql();
-         return this.a(var1, var2, var5, false);
-      } catch (Exception var6) {
-         ReaderException var4 = new ReaderException(var6.getMessage(), var6);
-         throw var4;
+         Batch batch = context.getBatch();
+         BatchDataProvider dataProvider = batch.getDataProvider();
+         String pageSql = dataProvider.getPageSql();
+         return this.queryPageData(conn, context, pageSql, false);
+      } catch (Exception exception) {
+         ReaderException readerException = new ReaderException(exception.getMessage(), exception);
+         throw readerException;
       }
    }
 
-   public int getTotleRows(BatchDataProvider var1) throws Exception {
-      int var2 = 0;
-      List var3 = var1.getParams();
-      DataSource var4 = null;
-      Connection var5 = null;
+   public int getTotleRows(BatchDataProvider dataProvider) throws Exception {
+      int totleRows = 0;
+      List params = dataProvider.getParams();
+      DataSource dataSource = null;
+      Connection connection = null;
 
       try {
-         var4 = DataSourceHandlerManager.getDataSource(var1.getDatasource());
-         var5 = var4.getConnection();
-         ParsedSql var6 = NamedSQLUtils.parseSql(var1.getCountSql());
-         String var7 = JdbcUtils.getOriginSql(var6.getOriginalSql());
-         PreparedStatement var8 = var5.prepareStatement(var7);
-         StmtUtils.setStmtQueryParameters(var6, var3, var8);
-         ResultSet var9 = var8.executeQuery();
-         if (var9.next()) {
-            var2 = var9.getInt(1);
+         dataSource = DataSourceHandlerManager.getDataSource(dataProvider.getDatasource());
+         connection = dataSource.getConnection();
+         ParsedSql sql = NamedSQLUtils.parseSql(dataProvider.getCountSql());
+         String originSql = JdbcUtils.getOriginSql(sql.getOriginalSql());
+         PreparedStatement preparedStatement = connection.prepareStatement(originSql);
+         StmtUtils.setStmtQueryParameters(sql, params, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            totleRows = resultSet.getInt(1);
          }
 
-         var9.close();
-         var8.close();
-         var5.close();
-         return var2;
-      } catch (Exception var11) {
-         a.error(var11);
-         var11.printStackTrace();
-
+         resultSet.close();
+         preparedStatement.close();
+         connection.close();
+         return totleRows;
+      } catch (Exception exception) {
+         DefaultItemReader.logger.error(exception);
+         java.util.logging.Logger.getLogger(DefaultItemReader.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
          try {
-            if (var5 != null) {
-               var5.close();
+            if (connection != null) {
+               connection.close();
             }
-         } catch (Exception var10) {
-            var10.printStackTrace();
+         } catch (Exception exception2) {
+            java.util.logging.Logger.getLogger(DefaultItemReader.class.getName()).log(java.util.logging.Level.SEVERE, exception2.getMessage(), exception2);
          }
 
-         throw var11;
+         throw exception;
       }
    }
 }

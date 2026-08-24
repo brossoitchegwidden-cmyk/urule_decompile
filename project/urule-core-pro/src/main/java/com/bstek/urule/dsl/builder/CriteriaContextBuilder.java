@@ -34,149 +34,149 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class CriteriaContextBuilder extends AbstractContextBuilder implements ApplicationContextAware {
-   private Collection<FunctionDescriptor> a;
+   private Collection<FunctionDescriptor> functionDescriptors;
 
-   public Criteria build(ParserRuleContext var1) {
-      RuleParserParser$SingleConditionContext var2 = (RuleParserParser$SingleConditionContext)var1;
-      RuleParserParser$ConditionLeftContext var3 = var2.conditionLeft();
-      RuleParserParser$VariableContext var4 = null;
-      RuleParserParser$ParameterContext var5 = null;
-      RuleParserParser$FunctionInvokeContext var6 = null;
-      RuleParserParser$CommonFunctionContext var7 = null;
-      RuleParserParser$MethodInvokeContext var8 = null;
-      if (var3 != null) {
-         var4 = var3.variable();
-         var5 = var3.parameter();
-         var6 = var3.functionInvoke();
-         var7 = var3.commonFunction();
-         var8 = var3.methodInvoke();
+   public Criteria build(ParserRuleContext context) {
+      RuleParserParser$SingleConditionContext ruleParserParser$SingleConditionContext = (RuleParserParser$SingleConditionContext)context;
+      RuleParserParser$ConditionLeftContext ruleParserParser$ConditionLeftContext = ruleParserParser$SingleConditionContext.conditionLeft();
+      RuleParserParser$VariableContext ruleParserParser$VariableContext = null;
+      RuleParserParser$ParameterContext ruleParserParser$ParameterContext = null;
+      RuleParserParser$FunctionInvokeContext ruleParserParser$FunctionInvokeContext = null;
+      RuleParserParser$CommonFunctionContext ruleParserParser$CommonFunctionContext = null;
+      RuleParserParser$MethodInvokeContext ruleParserParser$MethodInvokeContext = null;
+      if (ruleParserParser$ConditionLeftContext != null) {
+         ruleParserParser$VariableContext = ruleParserParser$ConditionLeftContext.variable();
+         ruleParserParser$ParameterContext = ruleParserParser$ConditionLeftContext.parameter();
+         ruleParserParser$FunctionInvokeContext = ruleParserParser$ConditionLeftContext.functionInvoke();
+         ruleParserParser$CommonFunctionContext = ruleParserParser$ConditionLeftContext.commonFunction();
+         ruleParserParser$MethodInvokeContext = ruleParserParser$ConditionLeftContext.methodInvoke();
       }
 
-      Criteria var9 = new Criteria();
-      Left var10 = new Left();
-      LeftPart var11 = null;
-      String var12 = null;
-      String var13 = null;
-      if (var4 != null) {
-         var12 = var4.variableCategory().Identifier().getText();
-         var13 = var4.property().getText();
-         VariableLeftPart var14 = new VariableLeftPart();
-         var14.setVariableCategory(var12);
-         var14.setVariableLabel(var13);
-         var10.setType(LeftType.variable);
-         var11 = var14;
-      } else if (var5 != null) {
-         var12 = "参数";
-         var13 = var5.Identifier().getText();
-         VariableLeftPart var27 = new VariableLeftPart();
-         var27.setVariableCategory(var12);
-         var27.setVariableLabel(var13);
-         var10.setType(LeftType.variable);
-         var11 = var27;
-      } else if (var6 != null) {
-         FunctionLeftPart var28 = new FunctionLeftPart();
-         String var15 = var6.Identifier().getText();
-         RuleParserParser$ActionParametersContext var16 = var6.actionParameters();
-         if (var16 != null) {
-            ArrayList var17 = new ArrayList();
+      Criteria criteria = new Criteria();
+      Left left = new Left();
+      LeftPart leftPart = null;
+      String text2 = null;
+      String text3 = null;
+      if (ruleParserParser$VariableContext != null) {
+         text2 = ruleParserParser$VariableContext.variableCategory().Identifier().getText();
+         text3 = ruleParserParser$VariableContext.property().getText();
+         VariableLeftPart variableLeftPart = new VariableLeftPart();
+         variableLeftPart.setVariableCategory(text2);
+         variableLeftPart.setVariableLabel(text3);
+         left.setType(LeftType.variable);
+         leftPart = variableLeftPart;
+      } else if (ruleParserParser$ParameterContext != null) {
+         text2 = "参数";
+         text3 = ruleParserParser$ParameterContext.Identifier().getText();
+         VariableLeftPart variableLeftPart2 = new VariableLeftPart();
+         variableLeftPart2.setVariableCategory(text2);
+         variableLeftPart2.setVariableLabel(text3);
+         left.setType(LeftType.variable);
+         leftPart = variableLeftPart2;
+      } else if (ruleParserParser$FunctionInvokeContext != null) {
+         FunctionLeftPart functionLeftPart = new FunctionLeftPart();
+         String text = ruleParserParser$FunctionInvokeContext.Identifier().getText();
+         RuleParserParser$ActionParametersContext ruleParserParser$ActionParametersContext = ruleParserParser$FunctionInvokeContext.actionParameters();
+         if (ruleParserParser$ActionParametersContext != null) {
+            ArrayList items = new ArrayList();
 
-            for (RuleParserParser$ComplexValueContext var19 : var16.complexValue()) {
-               Parameter var20 = new Parameter();
-               var20.setValue(BuildUtils.buildValue(var19));
-               var17.add(var20);
+            for (RuleParserParser$ComplexValueContext ruleParserParser$ComplexValueContext : ruleParserParser$ActionParametersContext.complexValue()) {
+               Parameter parameter = new Parameter();
+               parameter.setValue(BuildUtils.buildValue(ruleParserParser$ComplexValueContext));
+               items.add(parameter);
             }
 
-            var28.setParameters(var17);
+            functionLeftPart.setParameters(items);
          }
 
-         var28.setName(var15);
-         var10.setType(LeftType.function);
-         var11 = var28;
-      } else if (var7 != null) {
-         CommonFunctionLeftPart var29 = new CommonFunctionLeftPart();
-         String var32 = var7.Identifier().getText();
+         functionLeftPart.setName(text);
+         left.setType(LeftType.function);
+         leftPart = functionLeftPart;
+      } else if (ruleParserParser$CommonFunctionContext != null) {
+         CommonFunctionLeftPart commonFunctionLeftPart = new CommonFunctionLeftPart();
+         String text4 = ruleParserParser$CommonFunctionContext.Identifier().getText();
 
-         for (FunctionDescriptor var38 : this.a) {
-            if (var32.equals(var38.getName())) {
-               var29.setName(var38.getName());
-               var29.setLabel(var38.getLabel());
+         for (FunctionDescriptor functionDescriptor : this.functionDescriptors) {
+            if (text4.equals(functionDescriptor.getName())) {
+               commonFunctionLeftPart.setName(functionDescriptor.getName());
+               commonFunctionLeftPart.setLabel(functionDescriptor.getLabel());
                break;
             }
 
-            if (var32.equals(var38.getLabel())) {
-               var29.setName(var38.getName());
-               var29.setLabel(var38.getLabel());
+            if (text4.equals(functionDescriptor.getLabel())) {
+               commonFunctionLeftPart.setName(functionDescriptor.getName());
+               commonFunctionLeftPart.setLabel(functionDescriptor.getLabel());
                break;
             }
          }
 
-         if (var29.getName() == null) {
-            throw new RuleException("Function[" + var32 + "] not exist.");
+         if (commonFunctionLeftPart.getName() == null) {
+            throw new RuleException("Function[" + text4 + "] not exist.");
          }
 
-         RuleParserParser$ComplexValueContext var36 = var7.complexValue();
-         CommonFunctionParameter var39 = new CommonFunctionParameter();
-         var39.setObjectParameter(BuildUtils.buildValue(var36));
-         RuleParserParser$PropertyContext var41 = var7.property();
-         if (var41 != null) {
-            var39.setProperty(var41.getText());
+         RuleParserParser$ComplexValueContext ruleParserParser$ComplexValueContext2 = ruleParserParser$CommonFunctionContext.complexValue();
+         CommonFunctionParameter commonFunctionParameter = new CommonFunctionParameter();
+         commonFunctionParameter.setObjectParameter(BuildUtils.buildValue(ruleParserParser$ComplexValueContext2));
+         RuleParserParser$PropertyContext ruleParserParser$PropertyContext = ruleParserParser$CommonFunctionContext.property();
+         if (ruleParserParser$PropertyContext != null) {
+            commonFunctionParameter.setProperty(ruleParserParser$PropertyContext.getText());
          }
 
-         var29.setParameter(var39);
-         var10.setType(LeftType.commonfunction);
-         var11 = var29;
-      } else if (var8 != null) {
-         MethodLeftPart var30 = new MethodLeftPart();
-         RuleParserParser$BeanMethodContext var33 = var8.beanMethod();
-         String var37 = var33.Identifier(0).getText();
-         String var40 = var33.Identifier(1).getText();
-         var30.setBeanLabel(var37);
-         var30.setMethodLabel(var40);
-         RuleParserParser$ActionParametersContext var42 = var8.actionParameters();
-         if (var42 != null) {
-            ArrayList var43 = new ArrayList();
+         commonFunctionLeftPart.setParameter(commonFunctionParameter);
+         left.setType(LeftType.commonfunction);
+         leftPart = commonFunctionLeftPart;
+      } else if (ruleParserParser$MethodInvokeContext != null) {
+         MethodLeftPart methodLeftPart = new MethodLeftPart();
+         RuleParserParser$BeanMethodContext ruleParserParser$BeanMethodContext = ruleParserParser$MethodInvokeContext.beanMethod();
+         String text5 = ruleParserParser$BeanMethodContext.Identifier(0).getText();
+         String text6 = ruleParserParser$BeanMethodContext.Identifier(1).getText();
+         methodLeftPart.setBeanLabel(text5);
+         methodLeftPart.setMethodLabel(text6);
+         RuleParserParser$ActionParametersContext ruleParserParser$ActionParametersContext2 = ruleParserParser$MethodInvokeContext.actionParameters();
+         if (ruleParserParser$ActionParametersContext2 != null) {
+            ArrayList items2 = new ArrayList();
 
-            for (RuleParserParser$ComplexValueContext var21 : var42.complexValue()) {
-               Parameter var22 = new Parameter();
-               var22.setValue(BuildUtils.buildValue(var21));
-               var43.add(var22);
+            for (RuleParserParser$ComplexValueContext ruleParserParser$ComplexValueContext3 : ruleParserParser$ActionParametersContext2.complexValue()) {
+               Parameter parameter2 = new Parameter();
+               parameter2.setValue(BuildUtils.buildValue(ruleParserParser$ComplexValueContext3));
+               items2.add(parameter2);
             }
 
-            var30.setParameters(var43);
+            methodLeftPart.setParameters(items2);
          }
 
-         var10.setType(LeftType.method);
-         var11 = var30;
+         left.setType(LeftType.method);
+         leftPart = methodLeftPart;
       }
 
-      var10.setLeftPart(var11);
-      var9.setLeft(var10);
-      Op var31 = DSLUtils.parseOp(var2.op());
-      var9.setOp(var31);
-      RuleParserParser$NullValueContext var34 = var2.nullValue();
-      if (var34 != null) {
-         if (var31.equals(Op.Equals)) {
-            var9.setOp(Op.Null);
+      left.setLeftPart(leftPart);
+      criteria.setLeft(left);
+      Op op = DSLUtils.parseOp(ruleParserParser$SingleConditionContext.op());
+      criteria.setOp(op);
+      RuleParserParser$NullValueContext ruleParserParser$NullValueContext = ruleParserParser$SingleConditionContext.nullValue();
+      if (ruleParserParser$NullValueContext != null) {
+         if (op.equals(Op.Equals)) {
+            criteria.setOp(Op.Null);
          } else {
-            if (!var31.equals(Op.NotEquals)) {
+            if (!op.equals(Op.NotEquals)) {
                throw new RuleException("'null' value only support '==' or '!=' operator.");
             }
 
-            var9.setOp(Op.NotNull);
+            criteria.setOp(Op.NotNull);
          }
       } else {
-         var9.setValue(BuildUtils.buildValue(var2.complexValue()));
+         criteria.setValue(BuildUtils.buildValue(ruleParserParser$SingleConditionContext.complexValue()));
       }
 
-      return var9;
+      return criteria;
    }
 
    @Override
-   public boolean support(ParserRuleContext var1) {
-      return var1 instanceof RuleParserParser$SingleConditionContext;
+   public boolean support(ParserRuleContext context) {
+      return context instanceof RuleParserParser$SingleConditionContext;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.a = var1.getBeansOfType(FunctionDescriptor.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.functionDescriptors = applicationContext.getBeansOfType(FunctionDescriptor.class).values();
    }
 }

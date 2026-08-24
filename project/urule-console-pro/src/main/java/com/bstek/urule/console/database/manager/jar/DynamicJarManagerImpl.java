@@ -23,157 +23,157 @@ public class DynamicJarManagerImpl implements DynamicJarManager {
    protected DynamicJarManagerImpl() {
    }
 
-   public int createJarFiles(String var1) {
-      int var2 = 0;
-      StringBuilder var3 = new StringBuilder();
+   public int createJarFiles(String path) {
+      int jarFiles = 0;
+      StringBuilder stringBuilder = new StringBuilder();
 
-      for(DynamicJar var6 : (Iterable<DynamicJar>)(Iterable<?>)(DynamicJarManager.ins.newQuery().list())) {
-         byte[] var7 = DynamicJarManager.ins.loadJar(var6.getId());
-         if (var7 != null) {
-            ++var2;
-            this.a(var6.getName(), var7, var1);
-            var3.append(var6.getId());
+      for(DynamicJar dynamicJar : (Iterable<DynamicJar>)(Iterable<?>)(DynamicJarManager.ins.newQuery().list())) {
+         byte[] jar = DynamicJarManager.ins.loadJar(dynamicJar.getId());
+         if (jar != null) {
+            ++jarFiles;
+            this.writeJarFile(dynamicJar.getName(), jar, path);
+            stringBuilder.append(dynamicJar.getId());
          }
       }
 
-      String var8 = MD5Utils.stringToMD5(var3.toString());
-      DynamicSpringConfigLoader var9 = (DynamicSpringConfigLoader)Utils.getApplicationContext().getBean("urule.dynamicSpringConfigLoader");
-      var9.resetDynamicJarsIdDigest(var8);
-      return var2;
+      String text = MD5Utils.stringToMD5(stringBuilder.toString());
+      DynamicSpringConfigLoader dynamicSpringConfigLoader = (DynamicSpringConfigLoader)Utils.getApplicationContext().getBean("urule.dynamicSpringConfigLoader");
+      dynamicSpringConfigLoader.resetDynamicJarsIdDigest(text);
+      return jarFiles;
    }
 
-   private void a(String var1, byte[] var2, String var3) {
-      File var4 = new File(var3);
-      if (!var4.exists()) {
-         var4.mkdirs();
+   private void writeJarFile(String text, byte[] bytes, String text2) {
+      File file = new File(text2);
+      if (!file.exists()) {
+         file.mkdirs();
       }
 
       try {
-         String var5 = var3 + "/" + var1;
-         ByteArrayInputStream var6 = new ByteArrayInputStream(var2);
-         File var7 = new File(var5);
-         if (!var7.exists()) {
-            var7.createNewFile();
+         String text3 = text2 + "/" + text;
+         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+         File file2 = new File(text3);
+         if (!file2.exists()) {
+            file2.createNewFile();
          }
 
-         FileOutputStream var8 = new FileOutputStream(var7);
-         IOUtils.copy(var6, var8);
-         IOUtils.closeQuietly(var8);
-         IOUtils.closeQuietly(var6);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         FileOutputStream fileOutputStream = new FileOutputStream(file2);
+         IOUtils.copy(byteArrayInputStream, fileOutputStream);
+         IOUtils.closeQuietly(fileOutputStream);
+         IOUtils.closeQuietly(byteArrayInputStream);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public byte[] loadJar(long var1) {
-      String var3 = "select JAR_ from URULE_DYNAMIC_JAR where ID_=?";
-      Connection var4 = JdbcUtils.getConnection();
+   public byte[] loadJar(long id) {
+      String text = "select JAR_ from URULE_DYNAMIC_JAR where ID_=?";
+      Connection connection = JdbcUtils.getConnection();
 
-      byte[] var8;
+      byte[] jar;
       try {
-         PreparedStatement var5 = var4.prepareStatement(var3);
-         var5.setLong(1, var1);
-         ResultSet var6 = var5.executeQuery();
-         byte[] var7 = null;
-         if (var6.next()) {
-            var7 = var6.getBytes(1);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, id);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         byte[] bytes = null;
+         if (resultSet.next()) {
+            bytes = resultSet.getBytes(1);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-         var8 = var7;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         jar = bytes;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var8;
+      return jar;
    }
 
-   public DynamicJar load(long var1) {
-      List var3 = this.newQuery().id(var1).list();
-      return var3.size() > 0 ? (DynamicJar)var3.get(0) : null;
+   public DynamicJar load(long id) {
+      List items = this.newQuery().id(id).list();
+      return items.size() > 0 ? (DynamicJar)items.get(0) : null;
    }
 
-   public void add(DynamicJar var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(DynamicJar jar) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setCreateDate(new Date());
-         var1.setUpdateDate(new Date());
-         var1.setId(IDGenerator.getInstance().nextId(IDType.DYNAMIC_JAR));
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_DYNAMIC_JAR(ID_, NAME_,DESC_, CREATE_DATE_, UPDATE_DATE_,CREATE_USER_,UPDATE_USER_,GROUP_ID_) values (?, ?, ?, ?, ?, ?, ?,?)");
-         var3.setLong(1, var1.getId());
-         var3.setString(2, var1.getName());
-         var3.setString(3, var1.getDesc());
-         var3.setTimestamp(4, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setTimestamp(5, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setString(6, var1.getCreateUser());
-         var3.setString(7, var1.getCreateUser());
-         var3.setString(8, var1.getGroupId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         jar.setCreateDate(new Date());
+         jar.setUpdateDate(new Date());
+         jar.setId(IDGenerator.getInstance().nextId(IDType.DYNAMIC_JAR));
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_DYNAMIC_JAR(ID_, NAME_,DESC_, CREATE_DATE_, UPDATE_DATE_,CREATE_USER_,UPDATE_USER_,GROUP_ID_) values (?, ?, ?, ?, ?, ?, ?,?)");
+         preparedStatement.setLong(1, jar.getId());
+         preparedStatement.setString(2, jar.getName());
+         preparedStatement.setString(3, jar.getDesc());
+         preparedStatement.setTimestamp(4, new Timestamp(jar.getCreateDate().getTime()));
+         preparedStatement.setTimestamp(5, new Timestamp(jar.getUpdateDate().getTime()));
+         preparedStatement.setString(6, jar.getCreateUser());
+         preparedStatement.setString(7, jar.getCreateUser());
+         preparedStatement.setString(8, jar.getGroupId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
-      }
-
-   }
-
-   public void update(DynamicJar var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      try {
-         var1.setUpdateDate(new Date());
-         PreparedStatement var3 = var2.prepareStatement("update URULE_DYNAMIC_JAR set DESC_=?, UPDATE_DATE_=? , UPDATE_USER_=? where ID_=?");
-         var3.setString(1, var1.getDesc());
-         var3.setTimestamp(2, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setString(3, var1.getUpdateUser());
-         var3.setLong(4, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
-      } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void delete(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void update(DynamicJar jar) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete FROM URULE_DYNAMIC_JAR where ID_=?");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         jar.setUpdateDate(new Date());
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_DYNAMIC_JAR set DESC_=?, UPDATE_DATE_=? , UPDATE_USER_=? where ID_=?");
+         preparedStatement.setString(1, jar.getDesc());
+         preparedStatement.setTimestamp(2, new Timestamp(jar.getUpdateDate().getTime()));
+         preparedStatement.setString(3, jar.getUpdateUser());
+         preparedStatement.setLong(4, jar.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void updateJar(long var1, String var3, String var4, byte[] var5) {
-      Connection var6 = JdbcUtils.getConnection();
+   public void delete(long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var7 = var6.prepareStatement("update URULE_DYNAMIC_JAR set NAME_=?,JAR_=?,UPDATE_DATE_=? , UPDATE_USER_=?  where ID_=?");
-         var7.setString(1, var3);
-         var7.setBytes(2, var5);
-         var7.setTimestamp(3, new Timestamp((new Date()).getTime()));
-         var7.setString(4, var4);
-         var7.setLong(5, var1);
-         var7.executeUpdate();
-         JdbcUtils.closeStatement(var7);
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_DYNAMIC_JAR where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var6);
+         JdbcUtils.closeConnection(connection);
+      }
+
+   }
+
+   public void updateJar(long id, String fileName, String updateUser, byte[] bytes) {
+      Connection connection = JdbcUtils.getConnection();
+
+      try {
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_DYNAMIC_JAR set NAME_=?,JAR_=?,UPDATE_DATE_=? , UPDATE_USER_=?  where ID_=?");
+         preparedStatement.setString(1, fileName);
+         preparedStatement.setBytes(2, bytes);
+         preparedStatement.setTimestamp(3, new Timestamp((new Date()).getTime()));
+         preparedStatement.setString(4, updateUser);
+         preparedStatement.setLong(5, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
       }
 
    }

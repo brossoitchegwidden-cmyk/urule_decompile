@@ -12,99 +12,99 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BatchSkipLogQueryImpl implements BatchSkipLogQuery {
-   private Long a;
-   private List b = new ArrayList();
+   private Long batchLogId;
+   private List queryParameters = new ArrayList();
 
-   public BatchSkipLogQuery batchLogId(Long var1) {
-      this.a = var1;
+   public BatchSkipLogQuery batchLogId(Long batchLogId) {
+      this.batchLogId = batchLogId;
       return this;
    }
 
-   private StringBuilder a() throws SQLException {
-      this.b.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (StringUtils.isNotBlank(this.a)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() throws SQLException {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (StringUtils.isNotBlank(this.batchLogId)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" LOG_ID_ = ?");
-         this.b.add(this.a);
+         stringBuilder.append(" LOG_ID_ = ?");
+         this.queryParameters.add(this.batchLogId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
    public List list() {
-      String var1 = "select ID_, LOG_ID_, BATCH_ID_, TYPE_, MSG_, CREATE_DATE_ from URULE_LOG_BATCH_SKIP";
-      Connection var2 = JdbcUtils.getConnection();
+      String text = "select ID_, LOG_ID_, BATCH_ID_, TYPE_, MSG_, CREATE_DATE_ from URULE_LOG_BATCH_SKIP";
+      Connection connection = JdbcUtils.getConnection();
 
-      List var7;
+      List listResult;
       try {
-         StringBuilder var3 = this.a();
-         if (var3.length() > 0) {
-            var1 = var1 + " where" + var3.toString();
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         var1 = var1 + " order by CREATE_DATE_ desc";
-         PreparedStatement var4 = var2.prepareStatement(var1);
-         JdbcUtils.fillPreparedStatementParameters(this.b, var4);
-         ResultSet var5 = var4.executeQuery();
-         List var6 = this.a(var5);
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         text = text + " order by CREATE_DATE_ desc";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readSkippedBatchRecords(resultSet);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listResult;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readSkippedBatchRecords(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         BatchSkipLog var3 = new BatchSkipLog();
-         var3.setId(var1.getLong(1));
-         var3.setLogId(var1.getLong(2));
-         var3.setBatchId(var1.getLong(3));
-         var3.setType(var1.getString(4));
-         var3.setMsg(var1.getString(5));
-         var3.setCreateDate(var1.getTimestamp(6));
-         var2.add(var3);
+      while(resultSet.next()) {
+         BatchSkipLog batchSkipLog = new BatchSkipLog();
+         batchSkipLog.setId(resultSet.getLong(1));
+         batchSkipLog.setLogId(resultSet.getLong(2));
+         batchSkipLog.setBatchId(resultSet.getLong(3));
+         batchSkipLog.setType(resultSet.getString(4));
+         batchSkipLog.setMsg(resultSet.getString(5));
+         batchSkipLog.setCreateDate(resultSet.getTimestamp(6));
+         items.add(batchSkipLog);
       }
 
-      return var2;
+      return items;
    }
 
-   public BatchSkipLog details(Long var1) {
-      String var2 = "select MSG_, DETAIL_, DATA_ from URULE_LOG_BATCH_SKIP WHERE ID_=?";
-      Connection var3 = JdbcUtils.getConnection();
+   public BatchSkipLog details(Long id) {
+      String text = "select MSG_, DETAIL_, DATA_ from URULE_LOG_BATCH_SKIP WHERE ID_=?";
+      Connection connection = JdbcUtils.getConnection();
 
-      BatchSkipLog var7;
+      BatchSkipLog batchSkipLog;
       try {
-         PreparedStatement var4 = var3.prepareStatement(var2);
-         var4.setLong(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         BatchSkipLog var6 = new BatchSkipLog();
-         if (var5.next()) {
-            var6.setMsg(var5.getString(1));
-            var6.setDetail(var5.getString(2));
-            var6.setData(var5.getString(3));
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, id);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         BatchSkipLog batchSkipLog2 = new BatchSkipLog();
+         if (resultSet.next()) {
+            batchSkipLog2.setMsg(resultSet.getString(1));
+            batchSkipLog2.setDetail(resultSet.getString(2));
+            batchSkipLog2.setData(resultSet.getString(3));
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         batchSkipLog = batchSkipLog2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return batchSkipLog;
    }
 }

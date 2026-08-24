@@ -6,19 +6,19 @@ import com.bstek.urule.console.database.model.batch.Batch;
 public interface BatchManager {
    BatchManager ins = new BatchManagerImpl();
 
-   Batch get(Long var1);
+   Batch get(Long id);
 
-   void add(Batch var1);
+   void add(Batch batch);
 
-   void update(Batch var1);
+   void update(Batch batch);
 
-   void remove(Long var1);
+   void remove(Long id);
 
-   void removeByProjectId(Long var1);
+   void removeByProjectId(Long id);
 
-   void removeByGroupId(String var1);
+   void removeByGroupId(String groupId);
 
-   void updateStatus(Long var1, BatchStatus var2);
+   void updateStatus(Long batchId, BatchStatus status);
 
    BatchQuery createQuery();
 }

@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class GroupRole extends Role {
-   private String a;
+   private String groupId;
 
    public String getGroupId() {
-      return this.a;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.a = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 }

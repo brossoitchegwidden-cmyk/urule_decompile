@@ -12,28 +12,28 @@ public class NRadicalMath implements MathSign {
    private Value value;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.power, var1, var2);
-      Object var4 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
-      BigDecimal var5 = Utils.toBigDecimal(var3);
-      BigDecimal var6 = Utils.toBigDecimal(var4);
-      return new BigDecimal(Math.pow(var6.doubleValue(), 1.0 / var5.doubleValue())).stripTrailingZeros();
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.power, context, factMap);
+      Object objectValue2 = context.getValueCompute().complexValueCompute(this.value, context, factMap);
+      BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(objectValue2);
+      return new BigDecimal(Math.pow(decimalValue2.doubleValue(), 1.0 / decimalValue.doubleValue())).stripTrailingZeros();
    }
 
    public Value getPower() {
       return this.power;
    }
 
-   public void setPower(Value var1) {
-      this.power = var1;
+   public void setPower(Value power) {
+      this.power = power;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override
@@ -43,7 +43,7 @@ public class NRadicalMath implements MathSign {
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "NRadical" : "开N次方根";
-      return "[" + var1 + "]" + this.power.getId() + "√" + this.value.getId();
+      String text = LocaleHolder.isEnglish() ? "NRadical" : "开N次方根";
+      return "[" + text + "]" + this.power.getId() + "√" + this.value.getId();
    }
 }

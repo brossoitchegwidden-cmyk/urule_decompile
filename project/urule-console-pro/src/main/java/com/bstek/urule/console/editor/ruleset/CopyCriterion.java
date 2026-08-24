@@ -3,19 +3,19 @@ package com.bstek.urule.console.editor.ruleset;
 import com.bstek.urule.model.rule.lhs.Criterion;
 
 public class CopyCriterion {
-   private Criterion a;
-   private String b;
+   private Criterion criterion;
+   private String libs;
 
-   public CopyCriterion(Criterion var1, String var2) {
-      this.a = var1;
-      this.b = var2;
+   public CopyCriterion(Criterion criterion, String libs) {
+      this.criterion = criterion;
+      this.libs = libs;
    }
 
    public Criterion getCriterion() {
-      return this.a;
+      return this.criterion;
    }
 
    public String getLibs() {
-      return this.b;
+      return this.libs;
    }
 }

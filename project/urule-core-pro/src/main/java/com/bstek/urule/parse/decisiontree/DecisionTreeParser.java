@@ -26,145 +26,145 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class DecisionTreeParser extends LibrariesParser<DecisionTree> {
-   private VariableTreeNodeParser a;
-   private RulesRebuilder b;
+   private VariableTreeNodeParser variableTreeNodeParser;
+   private RulesRebuilder rulesRebuilder;
 
-   public DecisionTree parse(Element var1) {
-      DecisionTree var2 = new DecisionTree();
-      String var3 = var1.attributeValue("salience");
-      if (StringUtils.isNotEmpty(var3)) {
-         var2.setSalience(Integer.valueOf(var3));
+   public DecisionTree parse(Element element) {
+      DecisionTree decisionTree = new DecisionTree();
+      String text = element.attributeValue("salience");
+      if (StringUtils.isNotEmpty(text)) {
+         decisionTree.setSalience(Integer.valueOf(text));
       }
 
-      String var4 = var1.attributeValue("effective-date");
-      SimpleDateFormat var5 = new SimpleDateFormat(Configure.getDateFormat());
-      if (StringUtils.isNotEmpty(var4)) {
+      String text2 = element.attributeValue("effective-date");
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      if (StringUtils.isNotEmpty(text2)) {
          try {
-            var2.setEffectiveDate(var5.parse(var4));
-         } catch (ParseException var17) {
-            throw new RuleException(var17);
+            decisionTree.setEffectiveDate(simpleDateFormat.parse(text2));
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       }
 
-      String var6 = var1.attributeValue("expires-date");
-      if (StringUtils.isNotEmpty(var6)) {
+      String text3 = element.attributeValue("expires-date");
+      if (StringUtils.isNotEmpty(text3)) {
          try {
-            var2.setExpiresDate(var5.parse(var6));
-         } catch (ParseException var16) {
-            throw new RuleException(var16);
+            decisionTree.setExpiresDate(simpleDateFormat.parse(text3));
+         } catch (ParseException parseException2) {
+            throw new RuleException(parseException2);
          }
       }
 
-      String var7 = var1.attributeValue("enabled");
-      if (StringUtils.isNotEmpty(var7)) {
-         var2.setEnabled(Boolean.valueOf(var7));
+      String text4 = element.attributeValue("enabled");
+      if (StringUtils.isNotEmpty(text4)) {
+         decisionTree.setEnabled(Boolean.valueOf(text4));
       }
 
-      String var8 = var1.attributeValue("debug");
-      if (StringUtils.isNotEmpty(var8)) {
-         var2.setDebug(Boolean.valueOf(var8));
+      String text5 = element.attributeValue("debug");
+      if (StringUtils.isNotEmpty(text5)) {
+         decisionTree.setDebug(Boolean.valueOf(text5));
       }
 
-      ArrayList var9 = new ArrayList();
+      ArrayList items = new ArrayList();
 
-      for (Object var11 : var1.elements()) {
-         if (var11 != null && var11 instanceof Element) {
-            Element var12 = (Element)var11;
-            String var13 = var12.getName();
-            if (this.a.support(var13)) {
-               var2.setVariableTreeNode(this.a.parse(var12));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.variableTreeNodeParser.support(name)) {
+               decisionTree.setVariableTreeNode(this.variableTreeNodeParser.parse(element2));
             }
 
-            Library var14 = this.a(var12);
-            if (var14 != null) {
-               var9.add(var14);
-            } else if (var13.equals("quick-test-data")) {
-               String var15 = var12.getTextTrim();
-               var2.setQuickTestData(var15);
-            } else if (var13.equals("remark")) {
-               var2.setRemark(var12.getText());
+            Library library = this.parseLibrary(element2);
+            if (library != null) {
+               items.add(library);
+            } else if (name.equals("quick-test-data")) {
+               String textTrim = element2.getTextTrim();
+               decisionTree.setQuickTestData(textTrim);
+            } else if (name.equals("remark")) {
+               decisionTree.setRemark(element2.getText());
             }
          }
       }
 
-      var2.setLibraries(var9);
-      List var18 = null;
-      PredefineGroupDefinition var19 = var2.getPredefineGroup();
-      if (var19 != null) {
-         var18 = var19.getPredefines();
+      decisionTree.setLibraries(items);
+      List predefines = null;
+      PredefineGroupDefinition predefineGroup = decisionTree.getPredefineGroup();
+      if (predefineGroup != null) {
+         predefines = predefineGroup.getPredefines();
       }
 
-      ResourceLibrary var20 = this.b.getResourceLibraryBuilder().buildResourceLibrary(var9, var18);
-      this.a(var20, var2.getVariableTreeNode());
-      return var2;
+      ResourceLibrary resourceLibrary = this.rulesRebuilder.getResourceLibraryBuilder().buildResourceLibrary(items, predefines);
+      this.processResourceLibrary(resourceLibrary, decisionTree.getVariableTreeNode());
+      return decisionTree;
    }
 
-   private void a(ResourceLibrary var1, TreeNode var2) {
-      if (var2 != null) {
-         if (var2 instanceof VariableTreeNode) {
-            VariableTreeNode var3 = (VariableTreeNode)var2;
-            Left var4 = var3.getLeft();
-            if (var4 != null) {
-               LeftPart var5 = var4.getLeftPart();
-               if (var5 != null && var5 instanceof VariableLeftPart) {
-                  VariableLeftPart var6 = (VariableLeftPart)var5;
-                  VariableData var7 = var1.getVariableByUuid(var6.getCategoryUuid(), var6.getUuid());
-                  if (var6.getKeyCategoryUuid() != null) {
-                     VariableData var8 = var1.getVariableByUuid(var6.getKeyCategoryUuid(), var6.getKeyUuid());
-                     var6.setDatatype(var8.getVariable().getType());
-                     var6.setKeyName(var7.getVariable().getName());
-                     var6.setKeyLabel(var7.getVariable().getLabel());
-                     var6.setVariableName(var8.getVariable().getName());
-                     var6.setVariableLabel(var8.getVariable().getLabel());
+   private void processResourceLibrary(ResourceLibrary resourceLibrary, TreeNode treeNode) {
+      if (treeNode != null) {
+         if (treeNode instanceof VariableTreeNode) {
+            VariableTreeNode variableTreeNode2 = (VariableTreeNode)treeNode;
+            Left left = variableTreeNode2.getLeft();
+            if (left != null) {
+               LeftPart leftPart = left.getLeftPart();
+               if (leftPart != null && leftPart instanceof VariableLeftPart) {
+                  VariableLeftPart variableLeftPart = (VariableLeftPart)leftPart;
+                  VariableData variableByUuid = resourceLibrary.getVariableByUuid(variableLeftPart.getCategoryUuid(), variableLeftPart.getUuid());
+                  if (variableLeftPart.getKeyCategoryUuid() != null) {
+                     VariableData variableByUuid2 = resourceLibrary.getVariableByUuid(variableLeftPart.getKeyCategoryUuid(), variableLeftPart.getKeyUuid());
+                     variableLeftPart.setDatatype(variableByUuid2.getVariable().getType());
+                     variableLeftPart.setKeyName(variableByUuid.getVariable().getName());
+                     variableLeftPart.setKeyLabel(variableByUuid.getVariable().getLabel());
+                     variableLeftPart.setVariableName(variableByUuid2.getVariable().getName());
+                     variableLeftPart.setVariableLabel(variableByUuid2.getVariable().getLabel());
                   } else {
-                     var6.setDatatype(var7.getVariable().getType());
-                     var6.setVariableLabel(var7.getVariable().getLabel());
-                     var6.setVariableName(var7.getVariable().getName());
-                     var6.setVariableCategory(var7.getCategory().getName());
+                     variableLeftPart.setDatatype(variableByUuid.getVariable().getType());
+                     variableLeftPart.setVariableLabel(variableByUuid.getVariable().getLabel());
+                     variableLeftPart.setVariableName(variableByUuid.getVariable().getName());
+                     variableLeftPart.setVariableCategory(variableByUuid.getCategory().getName());
                   }
                }
             }
 
-            List var14 = var3.getConditionTreeNodes();
-            if (var14 != null) {
-               for (ConditionTreeNode var21 : (Iterable<ConditionTreeNode>)(Iterable<?>)(var14)) {
-                  this.a(var1, var21);
+            List conditionTreeNodes = variableTreeNode2.getConditionTreeNodes();
+            if (conditionTreeNodes != null) {
+               for (ConditionTreeNode conditionTreeNode : (Iterable<ConditionTreeNode>)(Iterable<?>)(conditionTreeNodes)) {
+                  this.processResourceLibrary(resourceLibrary, conditionTreeNode);
                }
             }
-         } else if (var2 instanceof ConditionTreeNode) {
-            ConditionTreeNode var10 = (ConditionTreeNode)var2;
-            Value var12 = var10.getValue();
-            if (var12 != null) {
-               this.b.rebuildValue(var12, var1, false);
+         } else if (treeNode instanceof ConditionTreeNode) {
+            ConditionTreeNode conditionTreeNode2 = (ConditionTreeNode)treeNode;
+            Value localValue = conditionTreeNode2.getValue();
+            if (localValue != null) {
+               this.rulesRebuilder.rebuildValue(localValue, resourceLibrary, false);
             }
 
-            List var15 = var10.getActionTreeNodes();
-            if (var15 != null) {
-               for (ActionTreeNode var22 : (Iterable<ActionTreeNode>)(Iterable<?>)(var15)) {
-                  this.a(var1, var22);
-               }
-            }
-
-            List var19 = var10.getConditionTreeNodes();
-            if (var19 != null) {
-               for (ConditionTreeNode var25 : (Iterable<ConditionTreeNode>)(Iterable<?>)(var19)) {
-                  this.a(var1, var25);
+            List actionTreeNodes = conditionTreeNode2.getActionTreeNodes();
+            if (actionTreeNodes != null) {
+               for (ActionTreeNode actionTreeNode : (Iterable<ActionTreeNode>)(Iterable<?>)(actionTreeNodes)) {
+                  this.processResourceLibrary(resourceLibrary, actionTreeNode);
                }
             }
 
-            List var24 = var10.getVariableTreeNodes();
-            if (var24 != null) {
-               for (VariableTreeNode var9 : (Iterable<VariableTreeNode>)(Iterable<?>)(var24)) {
-                  this.a(var1, var9);
+            List conditionTreeNodes2 = conditionTreeNode2.getConditionTreeNodes();
+            if (conditionTreeNodes2 != null) {
+               for (ConditionTreeNode conditionTreeNode3 : (Iterable<ConditionTreeNode>)(Iterable<?>)(conditionTreeNodes2)) {
+                  this.processResourceLibrary(resourceLibrary, conditionTreeNode3);
                }
             }
-         } else if (var2 instanceof ActionTreeNode) {
-            ActionTreeNode var11 = (ActionTreeNode)var2;
-            List var13 = var11.getActions();
-            if (var13 != null) {
-               for (Action var20 : (Iterable<Action>)(Iterable<?>)(var13)) {
-                  if (var20 != null) {
-                     this.b.rebuildAction(var20, var1, false);
+
+            List variableTreeNodes = conditionTreeNode2.getVariableTreeNodes();
+            if (variableTreeNodes != null) {
+               for (VariableTreeNode variableTreeNode : (Iterable<VariableTreeNode>)(Iterable<?>)(variableTreeNodes)) {
+                  this.processResourceLibrary(resourceLibrary, variableTreeNode);
+               }
+            }
+         } else if (treeNode instanceof ActionTreeNode) {
+            ActionTreeNode actionTreeNode2 = (ActionTreeNode)treeNode;
+            List actions = actionTreeNode2.getActions();
+            if (actions != null) {
+               for (Action action : (Iterable<Action>)(Iterable<?>)(actions)) {
+                  if (action != null) {
+                     this.rulesRebuilder.rebuildAction(action, resourceLibrary, false);
                   }
                }
             }
@@ -172,16 +172,16 @@ public class DecisionTreeParser extends LibrariesParser<DecisionTree> {
       }
    }
 
-   public void setVariableTreeNodeParser(VariableTreeNodeParser var1) {
-      this.a = var1;
+   public void setVariableTreeNodeParser(VariableTreeNodeParser variableTreeNodeParser) {
+      this.variableTreeNodeParser = variableTreeNodeParser;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("decision-tree");
+   public boolean support(String name) {
+      return name.equals("decision-tree");
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.b = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 }

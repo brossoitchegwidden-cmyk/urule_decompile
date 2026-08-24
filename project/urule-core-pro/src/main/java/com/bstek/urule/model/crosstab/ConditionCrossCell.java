@@ -14,7 +14,7 @@ public class ConditionCrossCell extends CrossCell {
       return this.joint;
    }
 
-   public void setJoint(Joint var1) {
-      this.joint = var1;
+   public void setJoint(Joint joint) {
+      this.joint = joint;
    }
 }

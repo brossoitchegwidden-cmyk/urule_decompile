@@ -3,23 +3,23 @@ package com.bstek.urule.runtime.cache;
 import com.bstek.urule.runtime.KnowledgePackage;
 
 public class KnowledgePackageData {
-   private boolean a;
-   private KnowledgePackage b;
+   private boolean enable;
+   private KnowledgePackage knowledgePackage;
 
-   public KnowledgePackageData(KnowledgePackage var1, boolean var2) {
-      this.b = var1;
-      this.a = var2;
+   public KnowledgePackageData(KnowledgePackage knowledgePackage, boolean enable) {
+      this.knowledgePackage = knowledgePackage;
+      this.enable = enable;
    }
 
    public KnowledgePackage getKnowledgePackage() {
-      return this.b;
+      return this.knowledgePackage;
    }
 
    public boolean isEnable() {
-      return this.a;
+      return this.enable;
    }
 
-   public void setEnable(boolean var1) {
-      this.a = var1;
+   public void setEnable(boolean enable) {
+      this.enable = enable;
    }
 }

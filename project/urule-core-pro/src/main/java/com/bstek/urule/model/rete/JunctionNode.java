@@ -9,16 +9,16 @@ public abstract class JunctionNode extends BaseReteNode {
    @JsonIgnore
    protected List<Line> toConnections = new ArrayList<>();
 
-   public JunctionNode(int var1) {
-      super(var1);
+   public JunctionNode(int id) {
+      super(id);
    }
 
    public List<Line> getToConnections() {
       return this.toConnections;
    }
 
-   public void addToConnection(Line var1) {
-      this.toConnections.add(var1);
+   public void addToConnection(Line connection) {
+      this.toConnections.add(connection);
       this.toLineCount = this.toConnections.size();
    }
 

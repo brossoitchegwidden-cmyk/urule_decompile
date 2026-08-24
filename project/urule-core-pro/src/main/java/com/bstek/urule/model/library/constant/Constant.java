@@ -12,31 +12,31 @@ public class Constant {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
       return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.label = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public Datatype getType() {
       return this.type;
    }
 
-   public void setType(Datatype var1) {
-      this.type = var1;
+   public void setType(Datatype type) {
+      this.type = type;
    }
 }

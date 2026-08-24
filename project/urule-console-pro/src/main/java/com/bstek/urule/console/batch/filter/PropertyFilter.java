@@ -3,31 +3,31 @@ package com.bstek.urule.console.batch.filter;
 import java.util.List;
 
 public class PropertyFilter {
-   private String a;
-   private String b;
-   private List c;
+   private String andorType;
+   private String property;
+   private List values;
 
    public String getAndorType() {
-      return this.a;
+      return this.andorType;
    }
 
-   public void setAndorType(String var1) {
-      this.a = var1;
+   public void setAndorType(String andorType) {
+      this.andorType = andorType;
    }
 
    public String getProperty() {
-      return this.b;
+      return this.property;
    }
 
-   public void setProperty(String var1) {
-      this.b = var1;
+   public void setProperty(String property) {
+      this.property = property;
    }
 
    public List getValues() {
-      return this.c;
+      return this.values;
    }
 
-   public void setValues(List var1) {
-      this.c = var1;
+   public void setValues(List values) {
+      this.values = values;
    }
 }

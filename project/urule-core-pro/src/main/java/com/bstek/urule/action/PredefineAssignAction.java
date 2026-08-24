@@ -11,46 +11,46 @@ import com.bstek.urule.runtime.rete.ValueCompute;
 import java.util.Map;
 
 public class PredefineAssignAction extends AbstractAction {
-   private String b;
-   private String c;
-   private Datatype d;
-   private String e;
-   private String f;
-   private String g;
-   private Datatype h;
-   private String i;
-   private String j;
-   private Value k;
+   private String uuid;
+   private String name;
+   private Datatype datatype;
+   private String variableCategory;
+   private String variableCategoryUuid;
+   private String propertyName;
+   private Datatype propertyDatatype;
+   private String propertyLabel;
+   private String propertyUuid;
+   private Value value;
 
    @Override
-   public ActionValue execute(Context var1, Map<String, Object> var2) {
-      AbstractWorkingMemory var3 = (AbstractWorkingMemory)var1.getWorkingMemory();
-      ValueCompute var4 = var1.getValueCompute();
-      Object var5 = null;
-      if (this.k == null) {
+   public ActionValue execute(Context context, Map<String, Object> factMap) {
+      AbstractWorkingMemory workingMemory = (AbstractWorkingMemory)context.getWorkingMemory();
+      ValueCompute valueCompute = context.getValueCompute();
+      Object objectValue = null;
+      if (this.value == null) {
          return null;
       }
 
-      var5 = var4.complexValueCompute(this.k, var1, var2);
-      if (this.g == null) {
-         if (this.d != null) {
-            var5 = this.d.convert(var5);
+      objectValue = valueCompute.complexValueCompute(this.value, context, factMap);
+      if (this.propertyName == null) {
+         if (this.datatype != null) {
+            objectValue = this.datatype.convert(objectValue);
          }
 
-         var3.setPredefineValue(this.b, var5);
-         if (this.a) {
-            var1.getLogger().logValueAssign("[预定义值]" + this.c + "", var5);
+         workingMemory.setPredefineValue(this.uuid, objectValue);
+         if (this.debug) {
+            context.getLogger().logValueAssign("[预定义值]" + this.name + "", objectValue);
          }
       } else {
-         Object var6 = var3.getPredefineValue(this.b);
-         if (var6 == null) {
-            throw new RuleException("预定义对象【" + this.c + "】对应的对象【" + this.e + "】未初始化，不能为其属性【" + this.i + "】赋值");
+         Object predefineValue = workingMemory.getPredefineValue(this.uuid);
+         if (predefineValue == null) {
+            throw new RuleException("预定义对象【" + this.name + "】对应的对象【" + this.variableCategory + "】未初始化，不能为其属性【" + this.propertyLabel + "】赋值");
          }
 
-         var5 = this.h.convert(var5);
-         Utils.setObjectProperty(var6, this.g, var5);
-         if (this.a) {
-            var1.getLogger().logValueAssign("[预定义值]" + this.c + "." + this.e + "." + this.g, var5);
+         objectValue = this.propertyDatatype.convert(objectValue);
+         Utils.setObjectProperty(predefineValue, this.propertyName, objectValue);
+         if (this.debug) {
+            context.getLogger().logValueAssign("[预定义值]" + this.name + "." + this.variableCategory + "." + this.propertyName, objectValue);
          }
       }
 
@@ -63,11 +63,11 @@ public class PredefineAssignAction extends AbstractAction {
    }
 
    public String getUuid() {
-      return this.b;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.b = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public LeftType getType() {
@@ -75,74 +75,74 @@ public class PredefineAssignAction extends AbstractAction {
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Datatype getDatatype() {
-      return this.d;
+      return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.d = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    public String getVariableCategory() {
-      return this.e;
+      return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.e = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    public String getVariableCategoryUuid() {
-      return this.f;
+      return this.variableCategoryUuid;
    }
 
-   public void setVariableCategoryUuid(String var1) {
-      this.f = var1;
+   public void setVariableCategoryUuid(String variableCategoryUuid) {
+      this.variableCategoryUuid = variableCategoryUuid;
    }
 
    public String getPropertyName() {
-      return this.g;
+      return this.propertyName;
    }
 
-   public void setPropertyName(String var1) {
-      this.g = var1;
+   public void setPropertyName(String propertyName) {
+      this.propertyName = propertyName;
    }
 
    public Datatype getPropertyDatatype() {
-      return this.h;
+      return this.propertyDatatype;
    }
 
-   public void setPropertyDatatype(Datatype var1) {
-      this.h = var1;
+   public void setPropertyDatatype(Datatype propertyDatatype) {
+      this.propertyDatatype = propertyDatatype;
    }
 
    public String getPropertyLabel() {
-      return this.i;
+      return this.propertyLabel;
    }
 
-   public void setPropertyLabel(String var1) {
-      this.i = var1;
+   public void setPropertyLabel(String propertyLabel) {
+      this.propertyLabel = propertyLabel;
    }
 
    public String getPropertyUuid() {
-      return this.j;
+      return this.propertyUuid;
    }
 
-   public void setPropertyUuid(String var1) {
-      this.j = var1;
+   public void setPropertyUuid(String propertyUuid) {
+      this.propertyUuid = propertyUuid;
    }
 
    public Value getValue() {
-      return this.k;
+      return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.k = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 }

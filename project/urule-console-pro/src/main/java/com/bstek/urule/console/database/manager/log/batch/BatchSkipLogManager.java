@@ -5,11 +5,14 @@ import com.bstek.urule.console.database.model.batch.BatchSkipLog;
 public interface BatchSkipLogManager {
    BatchSkipLogManager ins = new BatchSkipLogManagerImpl();
 
-   void add(BatchSkipLog var1);
+   /**新增日志*/
+   void add(BatchSkipLog log);
 
-   void removeByGroupId(String var1);
+   /**删除用户对应的日志*/
+   void removeByGroupId(String groupId);
 
-   void removeByProject(Long var1);
+   /**删除项目对应的日志*/
+   void removeByProject(Long projectId);
 
    BatchSkipLogQuery newQuery();
 }

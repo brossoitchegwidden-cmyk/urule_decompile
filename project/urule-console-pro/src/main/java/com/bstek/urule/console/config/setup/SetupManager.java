@@ -11,44 +11,44 @@ import com.bstek.urule.console.util.StringUtils;
 import java.util.Properties;
 
 public class SetupManager {
-   public static void setup(SetupInfo var0) throws SetupException {
+   public static void setup(SetupInfo setupInfo) throws SetupException {
       BootstrapManager.get().getApplicationConfig();
-      String var1 = HomeLocator.getHomePath();
-      String var2 = var0.getConfigType();
-      ApplicationConfig var3 = new ApplicationConfig();
-      var3.setApplicationHome(var1);
-      var3.setConfigType(var2);
-      var3.setConfigurationFileName(HomeLocator.getConfigFileName());
-      a(var0, var3.getProperties());
-      ConfigManager var4 = ConfigureManagerFactory.initConfigManager(var3);
-      var4.init(var0);
-      Properties var5 = var3.getProperties();
-      Properties var6 = new Properties();
-      var6.put("urule.config.type", var2);
-      var6.putAll(var5);
-      PropertiesUtils.writeConfigFile(var1 + "/" + "urule.properties", var6);
+      String homePath = HomeLocator.getHomePath();
+      String configType = setupInfo.getConfigType();
+      ApplicationConfig applicationConfig = new ApplicationConfig();
+      applicationConfig.setApplicationHome(homePath);
+      applicationConfig.setConfigType(configType);
+      applicationConfig.setConfigurationFileName(HomeLocator.getConfigFileName());
+      populateDataSourceProperties(setupInfo, applicationConfig.getProperties());
+      ConfigManager configManager = ConfigureManagerFactory.initConfigManager(applicationConfig);
+      configManager.init(setupInfo);
+      Properties properties = applicationConfig.getProperties();
+      Properties properties2 = new Properties();
+      properties2.put("urule.config.type", configType);
+      properties2.putAll(properties);
+      PropertiesUtils.writeConfigFile(homePath + "/" + "urule.properties", properties2);
       BootstrapManager.get().load();
    }
 
-   private static void a(SetupInfo var0, Properties var1) {
-      DataSourceInfo var2 = var0.getDataSourceInfo();
-      a(var1, "urule.store.database.classname", var2.getConnectionClassName());
-      a(var1, "urule.store.database.platform", var2.getPlatform());
-      a(var1, "urule.store.database.driver", var2.getDriver());
-      a(var1, "urule.store.database.url", var2.getUrl());
-      a(var1, "urule.store.database.username", var2.getUsername());
-      a(var1, "urule.store.database.password", var2.getPassword());
-      a(var1, "urule.store.database.jndiname", var2.getJndi());
-      a(var1, "urule.store.database.initialsize", Integer.toString(var2.getInitialSize()));
-      a(var1, "urule.store.database.maxTotal", Integer.toString(var2.getMaxTotal()));
-      a(var1, "urule.store.database.maxIdle", Integer.toString(var2.getMaxIdle()));
-      a(var1, "urule.store.database.minIdle", Integer.toString(var2.getMinIdle()));
-      a(var1, "urule.store.database.validationQuery", var2.getValidationQuery());
+   private static void populateDataSourceProperties(SetupInfo setupInfo, Properties properties) {
+      DataSourceInfo dataSourceInfo = setupInfo.getDataSourceInfo();
+      putIfNotBlank(properties, "urule.store.database.classname", dataSourceInfo.getConnectionClassName());
+      putIfNotBlank(properties, "urule.store.database.platform", dataSourceInfo.getPlatform());
+      putIfNotBlank(properties, "urule.store.database.driver", dataSourceInfo.getDriver());
+      putIfNotBlank(properties, "urule.store.database.url", dataSourceInfo.getUrl());
+      putIfNotBlank(properties, "urule.store.database.username", dataSourceInfo.getUsername());
+      putIfNotBlank(properties, "urule.store.database.password", dataSourceInfo.getPassword());
+      putIfNotBlank(properties, "urule.store.database.jndiname", dataSourceInfo.getJndi());
+      putIfNotBlank(properties, "urule.store.database.initialsize", Integer.toString(dataSourceInfo.getInitialSize()));
+      putIfNotBlank(properties, "urule.store.database.maxTotal", Integer.toString(dataSourceInfo.getMaxTotal()));
+      putIfNotBlank(properties, "urule.store.database.maxIdle", Integer.toString(dataSourceInfo.getMaxIdle()));
+      putIfNotBlank(properties, "urule.store.database.minIdle", Integer.toString(dataSourceInfo.getMinIdle()));
+      putIfNotBlank(properties, "urule.store.database.validationQuery", dataSourceInfo.getValidationQuery());
    }
 
-   private static void a(Properties var0, String var1, String var2) {
-      if (StringUtils.isNotBlank(var2)) {
-         var0.put(var1, var2);
+   private static void putIfNotBlank(Properties properties, String text, String text2) {
+      if (StringUtils.isNotBlank(text2)) {
+         properties.put(text, text2);
       }
 
    }

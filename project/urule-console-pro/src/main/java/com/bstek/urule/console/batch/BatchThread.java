@@ -1,13 +1,13 @@
 package com.bstek.urule.console.batch;
 
 public class BatchThread extends Thread {
-   private BatchContext a;
+   private BatchContext batchContext;
 
-   public BatchThread(BatchContext var1) {
-      this.a = var1;
+   public BatchThread(BatchContext batchContext) {
+      this.batchContext = batchContext;
    }
 
    public void run() {
-      BatchRunHelper.a(this.a);
+      BatchRunHelper.run(this.batchContext);
    }
 }

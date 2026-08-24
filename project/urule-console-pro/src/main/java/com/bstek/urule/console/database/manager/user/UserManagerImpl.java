@@ -11,345 +11,338 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserManagerImpl implements UserManager {
-   public void add(User var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(User user) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setCreateDate(new Timestamp(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_USER (ID_, NAME_, PASSWORD_, EMAIL_, DESC_, CREATE_USER_,CREATE_DATE_) values (?, ?, ?, ?, ?,?, ?)");
-         var3.setString(1, var1.getId());
-         var3.setString(2, var1.getName());
-         var3.setString(3, var1.getPassword());
-         var3.setString(4, var1.getEmail());
-         var3.setString(5, var1.getDesc());
-         var3.setString(6, var1.getCreateUser());
-         var3.setTimestamp(7, new Timestamp(var1.getCreateDate().getTime()));
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         user.setCreateDate(new Timestamp(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_USER (ID_, NAME_, PASSWORD_, EMAIL_, DESC_, CREATE_USER_,CREATE_DATE_) values (?, ?, ?, ?, ?,?, ?)");
+         preparedStatement.setString(1, user.getId());
+         preparedStatement.setString(2, user.getName());
+         preparedStatement.setString(3, user.getPassword());
+         preparedStatement.setString(4, user.getEmail());
+         preparedStatement.setString(5, user.getDesc());
+         preparedStatement.setString(6, user.getCreateUser());
+         preparedStatement.setTimestamp(7, new Timestamp(user.getCreateDate().getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void update(User var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(User user) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("update URULE_USER set PASSWORD_=?, EMAIL_=?, SECRET_KEY_=?, DESC_=?, UPDATE_DATE_=?, EXPIR_DATE_=?, UPDATE_USER_=?, NAME_=?  where ID_=?");
-         var3.setString(1, var1.getPassword());
-         var3.setString(2, var1.getEmail());
-         var3.setString(3, var1.getSecretKey());
-         var3.setString(4, var1.getDesc());
-         var3.setTimestamp(5, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setTimestamp(6, var1.getExpirDate() == null ? null : new Timestamp(var1.getExpirDate().getTime()));
-         var3.setString(7, var1.getId());
-         var3.setString(8, var1.getName());
-         var3.setString(9, var1.getUpdateUser());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         user.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_USER set PASSWORD_=?, EMAIL_=?, SECRET_KEY_=?, DESC_=?, UPDATE_DATE_=?, EXPIR_DATE_=?, UPDATE_USER_=?, NAME_=?  where ID_=?");
+         preparedStatement.setString(1, user.getPassword());
+         preparedStatement.setString(2, user.getEmail());
+         preparedStatement.setString(3, user.getSecretKey());
+         preparedStatement.setString(4, user.getDesc());
+         preparedStatement.setTimestamp(5, new Timestamp(user.getUpdateDate().getTime()));
+         preparedStatement.setTimestamp(6, user.getExpirDate() == null ? null : new Timestamp(user.getExpirDate().getTime()));
+         preparedStatement.setString(7, user.getId());
+         preparedStatement.setString(8, user.getName());
+         preparedStatement.setString(9, user.getUpdateUser());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void remove(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void remove(String account) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_USER where ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_USER where ID_=?");
+         preparedStatement.setString(1, account);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public User get(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public User get(String account) {
+      Connection connection = JdbcUtils.getConnection();
 
-      User var7;
+      User user;
       try {
-         String var3 = "select ID_, NAME_, PASSWORD_, EMAIL_, SECRET_KEY_, DESC_, EXPIR_DATE_, CREATE_DATE_, UPDATE_DATE_ from URULE_USER where ID_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         User var6 = null;
-         if (var5.next()) {
-            var6 = new User();
-            var6.setId(var5.getString(1));
-            var6.setName(var5.getString(2));
-            var6.setPassword(var5.getString(3));
-            var6.setEmail(var5.getString(4));
-            var6.setSecretKey(var5.getString(5));
-            var6.setDesc(var5.getString(6));
-            var6.setExpirDate(var5.getTimestamp(7));
-            var6.setCreateDate(var5.getTimestamp(8));
-            var6.setUpdateDate(var5.getTimestamp(9));
+         String text = "select ID_, NAME_, PASSWORD_, EMAIL_, SECRET_KEY_, DESC_, EXPIR_DATE_, CREATE_DATE_, UPDATE_DATE_ from URULE_USER where ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, account);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         User user2 = null;
+         if (resultSet.next()) {
+            user2 = new User();
+            user2.setId(resultSet.getString(1));
+            user2.setName(resultSet.getString(2));
+            user2.setPassword(resultSet.getString(3));
+            user2.setEmail(resultSet.getString(4));
+            user2.setSecretKey(resultSet.getString(5));
+            user2.setDesc(resultSet.getString(6));
+            user2.setExpirDate(resultSet.getTimestamp(7));
+            user2.setCreateDate(resultSet.getTimestamp(8));
+            user2.setUpdateDate(resultSet.getTimestamp(9));
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         user = user2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return user;
    }
-
-   public void changePassword(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void changePassword(String account, String password) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var4 = "update URULE_USER set PASSWORD_=? where ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setString(1, var1);
-         var5.setString(2, var2);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         String text = "update URULE_USER set PASSWORD_=? where ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, account);
+         preparedStatement.setString(2, password);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public List getUsersByGroupId(String groupdId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List getUsersByGroupId(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      ArrayList var13;
+      ArrayList usersByGroupId;
       try {
-         String var3 = "select URULE_USER.ID_, URULE_USER.NAME_, URULE_USER.PASSWORD_, URULE_USER.EMAIL_, URULE_USER.SECRET_KEY_, URULE_USER.DESC_, URULE_USER.EXPIR_DATE_, URULE_USER.CREATE_DATE_, URULE_USER.UPDATE_DATE_ from URULE_USER left join URULE_GROUP_USER on URULE_USER.ID_=URULE_GROUP_USER.USER_ID_  where URULE_GROUP_USER.GROUP_ID_ = ?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         ArrayList var6 = new ArrayList();
+         String text = "select URULE_USER.ID_, URULE_USER.NAME_, URULE_USER.PASSWORD_, URULE_USER.EMAIL_, URULE_USER.SECRET_KEY_, URULE_USER.DESC_, URULE_USER.EXPIR_DATE_, URULE_USER.CREATE_DATE_, URULE_USER.UPDATE_DATE_ from URULE_USER left join URULE_GROUP_USER on URULE_USER.ID_=URULE_GROUP_USER.USER_ID_  where URULE_GROUP_USER.GROUP_ID_ = ?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupdId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ArrayList items = new ArrayList();
 
-         while(var5.next()) {
-            User var7 = new User();
-            var7.setId(var5.getString(1));
-            var7.setName(var5.getString(2));
-            var7.setEmail(var5.getString(3));
-            var7.setSecretKey(var5.getString(4));
-            var7.setEnable(var5.getBoolean(5));
-            var7.setDesc(var5.getString(6));
-            var7.setExpirDate(var5.getTimestamp(7));
-            var7.setCreateDate(var5.getTimestamp(8));
-            var7.setUpdateDate(var5.getTimestamp(9));
-            var6.add(var7);
+         while(resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getString(1));
+            user.setName(resultSet.getString(2));
+            user.setEmail(resultSet.getString(3));
+            user.setSecretKey(resultSet.getString(4));
+            user.setEnable(resultSet.getBoolean(5));
+            user.setDesc(resultSet.getString(6));
+            user.setExpirDate(resultSet.getTimestamp(7));
+            user.setCreateDate(resultSet.getTimestamp(8));
+            user.setUpdateDate(resultSet.getTimestamp(9));
+            items.add(user);
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var13 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         usersByGroupId = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return usersByGroupId;
    }
+   public List getUsersByRoleId(long roleId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List getUsersByRoleId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
-
-      ArrayList var14;
+      ArrayList usersByRoleId;
       try {
-         String var4 = "select URULE_USER.ID_, URULE_USER.NAME_, URULE_USER.PASSWORD_, URULE_USER.EMAIL_, URULE_USER.SECRET_KEY_, URULE_USER.DESC_, URULE_USER.EXPIR_DATE_, URULE_USER.CREATE_DATE_, URULE_USER.UPDATE_DATE_ from URULE_USER left join URULE_GROUP_USER_ROLE on URULE_USER.ID_=URULE_GROUP_USER_ROLE.USER_ID_  where URULE_GROUP_USER_ROLE.ROLE_ID_ = ?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setLong(1, var1);
-         ResultSet var6 = var5.executeQuery();
-         ArrayList var7 = new ArrayList();
+         String text = "select URULE_USER.ID_, URULE_USER.NAME_, URULE_USER.PASSWORD_, URULE_USER.EMAIL_, URULE_USER.SECRET_KEY_, URULE_USER.DESC_, URULE_USER.EXPIR_DATE_, URULE_USER.CREATE_DATE_, URULE_USER.UPDATE_DATE_ from URULE_USER left join URULE_GROUP_USER_ROLE on URULE_USER.ID_=URULE_GROUP_USER_ROLE.USER_ID_  where URULE_GROUP_USER_ROLE.ROLE_ID_ = ?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, roleId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ArrayList items = new ArrayList();
 
-         while(var6.next()) {
-            User var8 = new User();
-            var8.setId(var6.getString(1));
-            var8.setName(var6.getString(2));
-            var8.setEmail(var6.getString(3));
-            var8.setSecretKey(var6.getString(4));
-            var8.setEnable(var6.getBoolean(5));
-            var8.setDesc(var6.getString(6));
-            var8.setExpirDate(var6.getTimestamp(7));
-            var8.setCreateDate(var6.getTimestamp(8));
-            var8.setUpdateDate(var6.getTimestamp(9));
-            var7.add(var8);
+         while(resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getString(1));
+            user.setName(resultSet.getString(2));
+            user.setEmail(resultSet.getString(3));
+            user.setSecretKey(resultSet.getString(4));
+            user.setEnable(resultSet.getBoolean(5));
+            user.setDesc(resultSet.getString(6));
+            user.setExpirDate(resultSet.getTimestamp(7));
+            user.setCreateDate(resultSet.getTimestamp(8));
+            user.setUpdateDate(resultSet.getTimestamp(9));
+            items.add(user);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-         var14 = var7;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         usersByRoleId = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return usersByRoleId;
    }
+   public List getUsersByProjectId(long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List getUsersByProjectId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
-
-      ArrayList var14;
+      ArrayList usersByProjectId;
       try {
-         String var4 = "select URULE_USER.ID_, NAME_, PASSWORD_, EMAIL_, SECRET_KEY_, DESC_, EXPIR_DATE_, URULE_PROJECT_USER.CREATE_DATE_, UPDATE_DATE_ from URULE_USER left join URULE_PROJECT_USER on URULE_USER.ID_=URULE_PROJECT_USER.USER_ID_  where URULE_PROJECT_USER.PROJECT_ID_=? order by URULE_PROJECT_USER.CREATE_DATE_";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setLong(1, var1);
-         ResultSet var6 = var5.executeQuery();
-         ArrayList var7 = new ArrayList();
+         String text = "select URULE_USER.ID_, NAME_, PASSWORD_, EMAIL_, SECRET_KEY_, DESC_, EXPIR_DATE_, URULE_PROJECT_USER.CREATE_DATE_, UPDATE_DATE_ from URULE_USER left join URULE_PROJECT_USER on URULE_USER.ID_=URULE_PROJECT_USER.USER_ID_  where URULE_PROJECT_USER.PROJECT_ID_=? order by URULE_PROJECT_USER.CREATE_DATE_";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ArrayList items = new ArrayList();
 
-         while(var6.next()) {
-            User var8 = new User();
-            var8.setId(var6.getString(1));
-            var8.setName(var6.getString(2));
-            var8.setEmail(var6.getString(3));
-            var8.setSecretKey(var6.getString(4));
-            var8.setEnable(var6.getBoolean(5));
-            var8.setDesc(var6.getString(6));
-            var8.setExpirDate(var6.getTimestamp(7));
-            var8.setCreateDate(var6.getTimestamp(8));
-            var8.setUpdateDate(var6.getTimestamp(9));
-            var7.add(var8);
+         while(resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getString(1));
+            user.setName(resultSet.getString(2));
+            user.setEmail(resultSet.getString(3));
+            user.setSecretKey(resultSet.getString(4));
+            user.setEnable(resultSet.getBoolean(5));
+            user.setDesc(resultSet.getString(6));
+            user.setExpirDate(resultSet.getTimestamp(7));
+            user.setCreateDate(resultSet.getTimestamp(8));
+            user.setUpdateDate(resultSet.getTimestamp(9));
+            items.add(user);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-         var14 = var7;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         usersByProjectId = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return usersByProjectId;
    }
 
-   public User getByEmail(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public User getByEmail(String email) {
+      Connection connection = JdbcUtils.getConnection();
 
-      User var7;
+      User user;
       try {
-         String var3 = "select ID_, NAME_, PASSWORD_, EMAIL_, SECRET_KEY_, DESC_, EXPIR_DATE_, CREATE_DATE_, UPDATE_DATE_ from URULE_USER where EMAIL_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         User var6 = null;
-         if (var5.next()) {
-            var6 = new User();
-            var6.setId(var5.getString(1));
-            var6.setName(var5.getString(2));
-            var6.setPassword(var5.getString(3));
-            var6.setEmail(var5.getString(4));
-            var6.setSecretKey(var5.getString(5));
-            var6.setDesc(var5.getString(6));
-            var6.setExpirDate(var5.getTimestamp(7));
-            var6.setCreateDate(var5.getTimestamp(8));
-            var6.setUpdateDate(var5.getTimestamp(9));
+         String text = "select ID_, NAME_, PASSWORD_, EMAIL_, SECRET_KEY_, DESC_, EXPIR_DATE_, CREATE_DATE_, UPDATE_DATE_ from URULE_USER where EMAIL_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, email);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         User user2 = null;
+         if (resultSet.next()) {
+            user2 = new User();
+            user2.setId(resultSet.getString(1));
+            user2.setName(resultSet.getString(2));
+            user2.setPassword(resultSet.getString(3));
+            user2.setEmail(resultSet.getString(4));
+            user2.setSecretKey(resultSet.getString(5));
+            user2.setDesc(resultSet.getString(6));
+            user2.setExpirDate(resultSet.getTimestamp(7));
+            user2.setCreateDate(resultSet.getTimestamp(8));
+            user2.setUpdateDate(resultSet.getTimestamp(9));
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         user = user2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return user;
    }
 
    public UserQuery newQuery() {
       return new UserQueryImpl();
    }
+   public User getGroupUser(String groupId, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public User getGroupUser(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
-
-      User var8;
+      User user;
       try {
-         String var4 = "select USER_ID_, USER_NAME_ from URULE_GROUP_USER where GROUP_ID_=? and USER_ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setString(1, var1);
-         var5.setString(2, var2);
-         User var6 = null;
-         ResultSet var7 = var5.executeQuery();
-         if (var7.next()) {
-            var6 = new User();
-            var6.setId(var7.getString(1));
-            var6.setName(var7.getString(2));
+         String text = "select USER_ID_, USER_NAME_ from URULE_GROUP_USER where GROUP_ID_=? and USER_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setString(2, account);
+         User user2 = null;
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            user2 = new User();
+            user2.setId(resultSet.getString(1));
+            user2.setName(resultSet.getString(2));
          }
 
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var5);
-         var8 = var6;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         user = user2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var8;
+      return user;
    }
+   public User getProjectUser(long projectId, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public User getProjectUser(long var1, String var3) {
-      Connection var4 = JdbcUtils.getConnection();
-
-      User var9;
+      User user;
       try {
-         String var5 = "select USER_ID_, USER_NAME_ from URULE_PROJECT_USER where PROJECT_ID_=? and USER_ID_=?";
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setLong(1, var1);
-         var6.setString(2, var3);
-         User var7 = null;
-         ResultSet var8 = var6.executeQuery();
-         if (var8.next()) {
-            var7 = new User();
-            var7.setId(var8.getString(1));
-            var7.setName(var8.getString(2));
+         String text = "select USER_ID_, USER_NAME_ from URULE_PROJECT_USER where PROJECT_ID_=? and USER_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.setString(2, account);
+         User user2 = null;
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            user2 = new User();
+            user2.setId(resultSet.getString(1));
+            user2.setName(resultSet.getString(2));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var6);
-         var9 = var7;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         user = user2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var9;
+      return user;
    }
-
-   public void changeEmail(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void changeEmail(String account, String email) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var4 = "update URULE_USER set EMAIL_=? where ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setString(1, var2);
-         var5.setString(2, var1);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         String text = "update URULE_USER set EMAIL_=? where ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, email);
+         preparedStatement.setString(2, account);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

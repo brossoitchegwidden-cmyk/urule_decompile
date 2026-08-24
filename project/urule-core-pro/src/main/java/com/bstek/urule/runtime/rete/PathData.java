@@ -5,31 +5,31 @@ import java.util.Map;
 import java.util.Set;
 
 class PathData {
-   private Set<Criteria> a;
-   private Map<String, Object> b;
+   private Set<Criteria> criterias;
+   private Map<String, Object> factMap;
 
-   public PathData(Set<Criteria> var1, Map<String, Object> var2) {
-      this.a = var1;
-      this.b = var2;
+   public PathData(Set<Criteria> criterias2, Map<String, Object> valuesByKey) {
+      this.criterias = criterias2;
+      this.factMap = valuesByKey;
    }
 
    public Set<Criteria> getCriterias() {
-      return this.a;
+      return this.criterias;
    }
 
-   public void addCriterias(Set<Criteria> var1) {
-      this.a.addAll(var1);
+   public void addCriterias(Set<Criteria> criterias2) {
+      this.criterias.addAll(criterias2);
    }
 
-   public void setCriterias(Set<Criteria> var1) {
-      this.a = var1;
+   public void setCriterias(Set<Criteria> criterias2) {
+      this.criterias = criterias2;
    }
 
    public Map<String, Object> getFactMap() {
-      return this.b;
+      return this.factMap;
    }
 
-   public void setFactMap(Map<String, Object> var1) {
-      this.b = var1;
+   public void setFactMap(Map<String, Object> valuesByKey) {
+      this.factMap = valuesByKey;
    }
 }

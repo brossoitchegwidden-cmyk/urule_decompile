@@ -9,19 +9,19 @@ public class RuleParserParser$OtherContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$ActionContext.class);
    }
 
-   public RuleParserParser$ActionContext action(int var1) {
-      return (RuleParserParser$ActionContext)this.getRuleContext(RuleParserParser$ActionContext.class, var1);
+   public RuleParserParser$ActionContext action(int number) {
+      return (RuleParserParser$ActionContext)this.getRuleContext(RuleParserParser$ActionContext.class, number);
    }
 
-   public RuleParserParser$OtherContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$OtherContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 49;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitOther(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitOther(this) : parseTreeVisitor.visitChildren(this));
    }
 }

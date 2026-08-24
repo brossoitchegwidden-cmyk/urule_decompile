@@ -8,41 +8,41 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class StoreTools {
-   private static ClipboardStore a;
-   private static ObjectMapper b = new ObjectMapper();
+   private static ClipboardStore clipboardStore;
+   private static ObjectMapper objectMapper = new ObjectMapper();
 
-   public static void setAttribute(String var0, Object var1) {
-      a.set(var0, a(var1));
+   public static void setAttribute(String key, Object obj) {
+      StoreTools.clipboardStore.set(key, serializeClipboardValue(obj));
    }
 
-   public static void removeAttribute(String var0) {
-      a.remove(var0);
+   public static void removeAttribute(String key) {
+      StoreTools.clipboardStore.remove(key);
    }
 
-   public static Object getAttribute(String var0) {
+   public static Object getAttribute(String key) {
       try {
-         String var1 = a.get(var0);
-         return StringUtils.isNotBlank(var1) ? b.readValue(var1, HashMap.class) : null;
-      } catch (Exception var2) {
-         throw new RuleException(var2);
+         String text = StoreTools.clipboardStore.get(key);
+         return StringUtils.isNotBlank(text) ? StoreTools.objectMapper.readValue(text, HashMap.class) : null;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   private static String a(Object var0) {
+   private static String serializeClipboardValue(Object objectValue) {
       try {
-         String var1 = b.writeValueAsString(var0);
-         return var1;
-      } catch (Exception var3) {
-         throw new RuleException(var3);
+         String text = StoreTools.objectMapper.writeValueAsString(objectValue);
+         return text;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
    static {
-      Collection var0 = Utils.getApplicationContext().getBeansOfType(ClipboardStore.class).values();
-      if (var0.size() > 0) {
-         a = (ClipboardStore)var0.iterator().next();
+      Collection clipboardStores = Utils.getApplicationContext().getBeansOfType(ClipboardStore.class).values();
+      if (clipboardStores.size() > 0) {
+         StoreTools.clipboardStore = (ClipboardStore)clipboardStores.iterator().next();
       } else {
-         a = new SessionClipboardStore();
+         StoreTools.clipboardStore = new SessionClipboardStore();
       }
 
    }

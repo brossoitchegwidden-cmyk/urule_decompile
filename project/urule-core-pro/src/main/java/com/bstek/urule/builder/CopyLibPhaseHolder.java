@@ -1,18 +1,18 @@
 package com.bstek.urule.builder;
 
 public class CopyLibPhaseHolder {
-   private static final ThreadLocal<Boolean> a = new ThreadLocal<>();
+   private static final ThreadLocal<Boolean> COPY_LIBRARY_PHASE = new ThreadLocal<>();
 
    public static void set() {
-      a.set(true);
+      COPY_LIBRARY_PHASE.set(true);
    }
 
    public static boolean isCopyLib() {
-      Boolean var0 = a.get();
-      return var0 == null ? false : var0;
+      Boolean flag = COPY_LIBRARY_PHASE.get();
+      return flag == null ? false : flag;
    }
 
    public static void clean() {
-      a.remove();
+      COPY_LIBRARY_PHASE.remove();
    }
 }

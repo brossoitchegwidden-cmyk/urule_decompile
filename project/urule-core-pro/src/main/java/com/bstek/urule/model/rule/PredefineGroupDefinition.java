@@ -11,23 +11,23 @@ public class PredefineGroupDefinition {
       return this.priority;
    }
 
-   public void setPriority(int var1) {
-      this.priority = var1;
+   public void setPriority(int priority) {
+      this.priority = priority;
    }
 
    public List<Predefine> getPredefines() {
       return this.predefines;
    }
 
-   public void setPredefines(List<Predefine> var1) {
-      this.predefines = var1;
+   public void setPredefines(List<Predefine> predefines) {
+      this.predefines = predefines;
    }
 
    public String getFilePath() {
       return this.filPath;
    }
 
-   public void setFilePath(String var1) {
-      this.filPath = var1;
+   public void setFilePath(String path) {
+      this.filPath = path;
    }
 }

@@ -9,23 +9,23 @@ public class HeaderCell {
       return this.rowspan;
    }
 
-   public void setRowspan(int var1) {
-      this.rowspan = var1;
+   public void setRowspan(int rowspan) {
+      this.rowspan = rowspan;
    }
 
    public int getColspan() {
       return this.colspan;
    }
 
-   public void setColspan(int var1) {
-      this.colspan = var1;
+   public void setColspan(int colspan) {
+      this.colspan = colspan;
    }
 
    public String getText() {
       return this.text;
    }
 
-   public void setText(String var1) {
-      this.text = var1;
+   public void setText(String text) {
+      this.text = text;
    }
 }

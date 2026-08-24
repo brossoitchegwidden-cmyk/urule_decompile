@@ -10,99 +10,99 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class BatchManagerImpl implements BatchManager {
-   public Batch get(Long var1) {
-      List var2 = this.createQuery().id(var1).list();
-      return var2.size() > 0 ? (Batch)var2.get(0) : null;
+   public Batch get(Long id) {
+      List items = this.createQuery().id(id).list();
+      return items.size() > 0 ? (Batch)items.get(0) : null;
    }
 
-   public void add(Batch var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(Batch batch) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_BATCH (NAME_, ASYNC_, CALLBACK_URL_, STATUS_, LISTENER_, SKIP_LIMIT_, THREAD_MULTI_, THREAD_SIZE_, THREAD_DATA_SIZE_, PROVIDER_ID_, RESOLVER_ID_, PACKET_ID_, PACKET_INPUT_DATA_, REST_ENABLE_, REST_SECURITY_ENABLE_, REST_SECURITY_USER_, REST_SECURITY_PASSWORD_, INPUT_DATA_, DESC_, CREATE_USER_, CREATE_DATE_, ID_, PROJECT_ID_, ENABLE_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-         var3.setString(1, var1.getName());
-         var3.setBoolean(2, var1.isAsync());
-         var3.setString(3, var1.getCallbackUrl());
-         var3.setString(4, var1.getStatus().name());
-         var3.setString(5, var1.getListener());
-         var3.setInt(6, var1.getSkipLimit());
-         var3.setBoolean(7, var1.isThreadMulti());
-         var3.setInt(8, var1.getThreadSize());
-         var3.setInt(9, var1.getThreadDataSize());
-         var3.setLong(10, var1.getProviderId());
-         var3.setLong(11, var1.getResolverId());
-         var3.setLong(12, var1.getPacketId());
-         var3.setString(13, var1.getPacketInputData());
-         var3.setBoolean(14, var1.isRestEnable());
-         var3.setBoolean(15, var1.isRestSecurityEnable());
-         var3.setString(16, var1.getRestSecurityUser());
-         var3.setString(17, var1.getRestSecurityPassword());
-         var3.setString(18, var1.getInputData());
-         var3.setString(19, var1.getDesc());
-         var3.setString(20, var1.getCreateUser());
-         var3.setTimestamp(21, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setLong(22, var1.getId());
-         var3.setLong(23, var1.getProjectId());
-         var3.setBoolean(24, var1.isEnable());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_BATCH (NAME_, ASYNC_, CALLBACK_URL_, STATUS_, LISTENER_, SKIP_LIMIT_, THREAD_MULTI_, THREAD_SIZE_, THREAD_DATA_SIZE_, PROVIDER_ID_, RESOLVER_ID_, PACKET_ID_, PACKET_INPUT_DATA_, REST_ENABLE_, REST_SECURITY_ENABLE_, REST_SECURITY_USER_, REST_SECURITY_PASSWORD_, INPUT_DATA_, DESC_, CREATE_USER_, CREATE_DATE_, ID_, PROJECT_ID_, ENABLE_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+         preparedStatement.setString(1, batch.getName());
+         preparedStatement.setBoolean(2, batch.isAsync());
+         preparedStatement.setString(3, batch.getCallbackUrl());
+         preparedStatement.setString(4, batch.getStatus().name());
+         preparedStatement.setString(5, batch.getListener());
+         preparedStatement.setInt(6, batch.getSkipLimit());
+         preparedStatement.setBoolean(7, batch.isThreadMulti());
+         preparedStatement.setInt(8, batch.getThreadSize());
+         preparedStatement.setInt(9, batch.getThreadDataSize());
+         preparedStatement.setLong(10, batch.getProviderId());
+         preparedStatement.setLong(11, batch.getResolverId());
+         preparedStatement.setLong(12, batch.getPacketId());
+         preparedStatement.setString(13, batch.getPacketInputData());
+         preparedStatement.setBoolean(14, batch.isRestEnable());
+         preparedStatement.setBoolean(15, batch.isRestSecurityEnable());
+         preparedStatement.setString(16, batch.getRestSecurityUser());
+         preparedStatement.setString(17, batch.getRestSecurityPassword());
+         preparedStatement.setString(18, batch.getInputData());
+         preparedStatement.setString(19, batch.getDesc());
+         preparedStatement.setString(20, batch.getCreateUser());
+         preparedStatement.setTimestamp(21, new Timestamp(batch.getCreateDate().getTime()));
+         preparedStatement.setLong(22, batch.getId());
+         preparedStatement.setLong(23, batch.getProjectId());
+         preparedStatement.setBoolean(24, batch.isEnable());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void update(Batch var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(Batch batch) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("update URULE_BATCH set NAME_=?, ASYNC_=?, CALLBACK_URL_=?, LISTENER_=?, SKIP_LIMIT_=?, THREAD_MULTI_=?, THREAD_SIZE_=?, THREAD_DATA_SIZE_=?, PROVIDER_ID_=?, RESOLVER_ID_=?, PACKET_ID_=?, PACKET_INPUT_DATA_=?, REST_ENABLE_=?, REST_SECURITY_ENABLE_=?, REST_SECURITY_USER_=?, REST_SECURITY_PASSWORD_=?, INPUT_DATA_=?, DESC_=?, UPDATE_USER_=?, UPDATE_DATE_=?, ENABLE_=? where ID_=?");
-         var3.setString(1, var1.getName());
-         var3.setBoolean(2, var1.isAsync());
-         var3.setString(3, var1.getCallbackUrl());
-         var3.setString(4, var1.getListener());
-         var3.setInt(5, var1.getSkipLimit());
-         var3.setBoolean(6, var1.isThreadMulti());
-         var3.setInt(7, var1.getThreadSize());
-         var3.setInt(8, var1.getThreadDataSize());
-         var3.setLong(9, var1.getProviderId());
-         var3.setLong(10, var1.getResolverId());
-         var3.setLong(11, var1.getPacketId());
-         var3.setString(12, var1.getPacketInputData());
-         var3.setBoolean(13, var1.isRestEnable());
-         var3.setBoolean(14, var1.isRestSecurityEnable());
-         var3.setString(15, var1.getRestSecurityUser());
-         var3.setString(16, var1.getRestSecurityPassword());
-         var3.setString(17, var1.getInputData());
-         var3.setString(18, var1.getDesc());
-         var3.setString(19, var1.getUpdateUser());
-         var3.setTimestamp(20, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setBoolean(21, var1.isEnable());
-         var3.setLong(22, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_BATCH set NAME_=?, ASYNC_=?, CALLBACK_URL_=?, LISTENER_=?, SKIP_LIMIT_=?, THREAD_MULTI_=?, THREAD_SIZE_=?, THREAD_DATA_SIZE_=?, PROVIDER_ID_=?, RESOLVER_ID_=?, PACKET_ID_=?, PACKET_INPUT_DATA_=?, REST_ENABLE_=?, REST_SECURITY_ENABLE_=?, REST_SECURITY_USER_=?, REST_SECURITY_PASSWORD_=?, INPUT_DATA_=?, DESC_=?, UPDATE_USER_=?, UPDATE_DATE_=?, ENABLE_=? where ID_=?");
+         preparedStatement.setString(1, batch.getName());
+         preparedStatement.setBoolean(2, batch.isAsync());
+         preparedStatement.setString(3, batch.getCallbackUrl());
+         preparedStatement.setString(4, batch.getListener());
+         preparedStatement.setInt(5, batch.getSkipLimit());
+         preparedStatement.setBoolean(6, batch.isThreadMulti());
+         preparedStatement.setInt(7, batch.getThreadSize());
+         preparedStatement.setInt(8, batch.getThreadDataSize());
+         preparedStatement.setLong(9, batch.getProviderId());
+         preparedStatement.setLong(10, batch.getResolverId());
+         preparedStatement.setLong(11, batch.getPacketId());
+         preparedStatement.setString(12, batch.getPacketInputData());
+         preparedStatement.setBoolean(13, batch.isRestEnable());
+         preparedStatement.setBoolean(14, batch.isRestSecurityEnable());
+         preparedStatement.setString(15, batch.getRestSecurityUser());
+         preparedStatement.setString(16, batch.getRestSecurityPassword());
+         preparedStatement.setString(17, batch.getInputData());
+         preparedStatement.setString(18, batch.getDesc());
+         preparedStatement.setString(19, batch.getUpdateUser());
+         preparedStatement.setTimestamp(20, new Timestamp(batch.getUpdateDate().getTime()));
+         preparedStatement.setBoolean(21, batch.isEnable());
+         preparedStatement.setLong(22, batch.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void remove(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void remove(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH where ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -111,51 +111,51 @@ public class BatchManagerImpl implements BatchManager {
       return new BatchQueryImpl();
    }
 
-   public void updateStatus(Long var1, BatchStatus var2) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void updateStatus(Long batchId, BatchStatus status) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("update URULE_BATCH set STATUS_=? where ID_=?");
-         var4.setString(1, var2.name());
-         var4.setLong(2, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_BATCH set STATUS_=? where ID_=?");
+         preparedStatement.setString(1, status.name());
+         preparedStatement.setLong(2, batchId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByProjectId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByProjectId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH where PROJECT_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH where PROJECT_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByGroupId(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByGroupId(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

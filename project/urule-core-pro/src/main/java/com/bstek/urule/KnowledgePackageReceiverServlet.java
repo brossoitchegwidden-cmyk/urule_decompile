@@ -24,142 +24,142 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 public class KnowledgePackageReceiverServlet extends HttpServlet {
-   private static final long a = -4342175088856372588L;
+   private static final long serialVersionUID = -4342175088856372588L;
    public static final String URL = "/knowledgepackagereceiver";
-   private DynamicSpringConfigLoader b;
-   private RemoteDynamicJarsBuilder c;
-   private Logger d = Logger.getGlobal();
+   private DynamicSpringConfigLoader dynamicSpringConfigLoader;
+   private RemoteDynamicJarsBuilder remoteDynamicJarsBuilder;
+   private Logger logger = Logger.getGlobal();
 
-   public void init(ServletConfig var1) throws ServletException {
-      super.init(var1);
-      WebApplicationContext var2 = WebApplicationContextUtils.getRequiredWebApplicationContext(var1.getServletContext());
-      this.b = (DynamicSpringConfigLoader)var2.getBean("urule.dynamicSpringConfigLoader");
-      this.c = (RemoteDynamicJarsBuilder)var2.getBean("urule.remoteDynamicJarsBuilder");
+   public void init(ServletConfig config) throws ServletException {
+      super.init(config);
+      WebApplicationContext requiredWebApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(config.getServletContext());
+      this.dynamicSpringConfigLoader = (DynamicSpringConfigLoader)requiredWebApplicationContext.getBean("urule.dynamicSpringConfigLoader");
+      this.remoteDynamicJarsBuilder = (RemoteDynamicJarsBuilder)requiredWebApplicationContext.getBean("urule.remoteDynamicJarsBuilder");
    }
 
-   public void doPost(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getParameter("_u");
-      String var4 = var1.getParameter("_p");
-      if (var3 != null && var4 != null) {
-         var3 = URLDecoder.decode(var3, "utf-8");
-         var4 = URLDecoder.decode(var4, "utf-8");
-         if (var3.equals(this.c.getUser()) && var4.equals(this.c.getPwd())) {
-            String var5 = var1.getParameter("dynamicjars");
-            String var6 = var1.getParameter("packageId");
-            String var7 = var1.getParameter("code");
-            SimpleDateFormat var8 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (StringUtils.isNotBlank(var6)) {
-               String var9 = var1.getParameter("enable");
-               String var10 = null;
+   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String parameter = req.getParameter("_u");
+      String parameter2 = req.getParameter("_p");
+      if (parameter != null && parameter2 != null) {
+         parameter = URLDecoder.decode(parameter, "utf-8");
+         parameter2 = URLDecoder.decode(parameter2, "utf-8");
+         if (parameter.equals(this.remoteDynamicJarsBuilder.getUser()) && parameter2.equals(this.remoteDynamicJarsBuilder.getPwd())) {
+            String parameter3 = req.getParameter("dynamicjars");
+            String substring = req.getParameter("packageId");
+            String parameter4 = req.getParameter("code");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            if (StringUtils.isNotBlank(substring)) {
+               String parameter5 = req.getParameter("enable");
+               String version = null;
 
                try {
-                  var6 = URLDecoder.decode(var6, "utf-8");
-                  if (var6.startsWith("/")) {
-                     var6 = var6.substring(1, var6.length());
+                  substring = URLDecoder.decode(substring, "utf-8");
+                  if (substring.startsWith("/")) {
+                     substring = substring.substring(1, substring.length());
                   }
 
-                  if (StringUtils.isNotBlank(var9)) {
-                     boolean var11 = Boolean.valueOf(var9);
-                     CacheUtils.getKnowledgeCache().enable(var6, var11);
-                     if (StringUtils.isNotBlank(var7)) {
-                        CacheUtils.getKnowledgeCache().enable(var7, var11);
+                  if (StringUtils.isNotBlank(parameter5)) {
+                     boolean flag = Boolean.valueOf(parameter5);
+                     CacheUtils.getKnowledgeCache().enable(substring, flag);
+                     if (StringUtils.isNotBlank(parameter4)) {
+                        CacheUtils.getKnowledgeCache().enable(parameter4, flag);
                      }
                   } else {
-                     ServletInputStream var23 = var1.getInputStream();
-                     byte[] var25 = IOUtils.toByteArray(var23);
-                     var23.close();
-                     String var13 = Utils.uncompress(var25);
-                     if (var13 != null) {
-                        KnowledgePackageImpl var14 = (KnowledgePackageImpl)Utils.stringToKnowledgePackage(var13);
-                        var14.setPackageInfo(var6);
-                        var10 = var14.getVersion();
-                        CacheUtils.getKnowledgeCache().putKnowledge(var6, var14);
-                        if (StringUtils.isNotBlank(var7)) {
-                           CacheUtils.getKnowledgeCache().putKnowledge(var7, var14);
+                     ServletInputStream inputStream = req.getInputStream();
+                     byte[] bytes = IOUtils.toByteArray(inputStream);
+                     inputStream.close();
+                     String text = Utils.uncompress(bytes);
+                     if (text != null) {
+                        KnowledgePackageImpl knowledgePackageImpl = (KnowledgePackageImpl)Utils.stringToKnowledgePackage(text);
+                        knowledgePackageImpl.setPackageInfo(substring);
+                        version = knowledgePackageImpl.getVersion();
+                        CacheUtils.getKnowledgeCache().putKnowledge(substring, knowledgePackageImpl);
+                        if (StringUtils.isNotBlank(parameter4)) {
+                           CacheUtils.getKnowledgeCache().putKnowledge(parameter4, knowledgePackageImpl);
                         }
                      }
                   }
-               } catch (Exception var16) {
-                  var16.printStackTrace();
-                  String var12 = this.a(var16);
-                  this.a(var2, var12);
+               } catch (Exception exception) {
+                  java.util.logging.Logger.getLogger(KnowledgePackageReceiverServlet.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
+                  String text2 = this.formatStackTrace(exception);
+                  this.writePlainTextResponse(resp, text2);
                   return;
                }
 
-               if (StringUtils.isNotBlank(var9)) {
-                  if (Boolean.valueOf(var9)) {
+               if (StringUtils.isNotBlank(parameter5)) {
+                  if (Boolean.valueOf(parameter5)) {
                      System.out
                         .println(
                            "["
-                              + var8.format(new Date())
+                              + simpleDateFormat.format(new Date())
                               + "] Successfully receive the server side to enable package:"
-                              + var6
-                              + (StringUtils.isBlank(var7) ? "" : "(" + var7 + ")")
+                              + substring
+                              + (StringUtils.isBlank(parameter4) ? "" : "(" + parameter4 + ")")
                         );
                   } else {
                      System.out
                         .println(
                            "["
-                              + var8.format(new Date())
+                              + simpleDateFormat.format(new Date())
                               + "] Successfully receive the server side to disable package:"
-                              + var6
-                              + (StringUtils.isBlank(var7) ? "" : "(" + var7 + ")")
+                              + substring
+                              + (StringUtils.isBlank(parameter4) ? "" : "(" + parameter4 + ")")
                         );
                   }
                } else {
-                  String var24 = "["
-                     + var8.format(new Date())
+                  String text3 = "["
+                     + simpleDateFormat.format(new Date())
                      + "] Successfully receive the server side to pushed package:"
-                     + var6
-                     + (StringUtils.isBlank(var7) ? "" : "(" + var7 + ")");
-                  if (StringUtils.isNotBlank(var10)) {
-                     var24 = var24 + "(" + var10 + ")";
+                     + substring
+                     + (StringUtils.isBlank(parameter4) ? "" : "(" + parameter4 + ")");
+                  if (StringUtils.isNotBlank(version)) {
+                     text3 = text3 + "(" + version + ")";
                   }
 
-                  System.out.println(var24);
+                  System.out.println(text3);
                }
-            } else if (var5 != null && var5.equals("true")) {
+            } else if (parameter3 != null && parameter3.equals("true")) {
                try {
-                  String var20 = this.b.buildDynamicJarsStoreDirectPath();
-                  ServletInputStream var22 = var1.getInputStream();
-                  this.c.unzipDynamicJars(var22, var20);
-                  IOUtils.closeQuietly(var22);
-                  System.out.println("[" + var8.format(new Date()) + "] Successfully receive the server side to pushed dynamic jars");
-                  this.b.loadDynamicJars(var20);
-               } catch (Exception var15) {
-                  var15.printStackTrace();
-                  String var21 = this.a(var15);
-                  this.a(var2, var21);
+                  String dynamicJarsStoreDirectPath = this.dynamicSpringConfigLoader.buildDynamicJarsStoreDirectPath();
+                  ServletInputStream inputStream2 = req.getInputStream();
+                  this.remoteDynamicJarsBuilder.unzipDynamicJars(inputStream2, dynamicJarsStoreDirectPath);
+                  IOUtils.closeQuietly(inputStream2);
+                  System.out.println("[" + simpleDateFormat.format(new Date()) + "] Successfully receive the server side to pushed dynamic jars");
+                  this.dynamicSpringConfigLoader.loadDynamicJars(dynamicJarsStoreDirectPath);
+               } catch (Exception exception2) {
+                  java.util.logging.Logger.getLogger(KnowledgePackageReceiverServlet.class.getName()).log(java.util.logging.Level.SEVERE, exception2.getMessage(), exception2);
+                  String text4 = this.formatStackTrace(exception2);
+                  this.writePlainTextResponse(resp, text4);
                   return;
                }
             }
 
-            this.a(var2, "ok");
+            this.writePlainTextResponse(resp, "ok");
          } else {
-            this.a(var2, "User or password is invalid.");
-            this.d.warning("User or password is invalid.");
+            this.writePlainTextResponse(resp, "User or password is invalid.");
+            this.logger.warning("User or password is invalid.");
          }
       } else {
-         this.a(var2, "User and password can not be null.");
-         this.d.warning("User and password can not be null.");
+         this.writePlainTextResponse(resp, "User and password can not be null.");
+         this.logger.warning("User and password can not be null.");
       }
    }
 
-   private void a(HttpServletResponse var1, String var2) throws ServletException, IOException {
-      var1.setContentType("text/plain");
-      PrintWriter var3 = var1.getWriter();
-      var3.write(var2);
-      var3.flush();
-      var3.close();
+   private void writePlainTextResponse(HttpServletResponse httpServletResponse, String text) throws ServletException, IOException {
+      httpServletResponse.setContentType("text/plain");
+      PrintWriter writer = httpServletResponse.getWriter();
+      writer.write(text);
+      writer.flush();
+      writer.close();
    }
 
-   private String a(Throwable var1) {
-      ByteArrayOutputStream var2 = new ByteArrayOutputStream();
-      PrintStream var3 = new PrintStream(var2);
-      var1.printStackTrace(var3);
-      String var4 = new String(var2.toByteArray());
-      IOUtils.closeQuietly(var3);
-      IOUtils.closeQuietly(var2);
-      return var4.replaceAll("\n", "<br>");
+   private String formatStackTrace(Throwable throwable) {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      PrintStream printStream = new PrintStream(byteArrayOutputStream);
+      throwable.printStackTrace(printStream);
+      String string = new String(byteArrayOutputStream.toByteArray());
+      IOUtils.closeQuietly(printStream);
+      IOUtils.closeQuietly(byteArrayOutputStream);
+      return string.replaceAll("\n", "<br>");
    }
 }

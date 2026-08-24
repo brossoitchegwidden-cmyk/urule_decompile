@@ -15,9 +15,9 @@ public class ObjectTypeNode extends BaseReteNode {
       super(0);
    }
 
-   public ObjectTypeNode(String var1, int var2) {
-      super(var2);
-      this.objectTypeClass = var1;
+   public ObjectTypeNode(String objectTypeClass, int id) {
+      super(id);
+      this.objectTypeClass = objectTypeClass;
    }
 
    @Override
@@ -25,48 +25,48 @@ public class ObjectTypeNode extends BaseReteNode {
       return this.nodeType;
    }
 
-   public boolean support(Object var1) {
-      return this.support(var1.getClass().getName());
+   public boolean support(Object object) {
+      return this.support(object.getClass().getName());
    }
 
-   public boolean support(String var1) {
-      return this.objectTypeClass.equals(var1);
+   public boolean support(String className) {
+      return this.objectTypeClass.equals(className);
    }
 
    public String getObjectTypeClass() {
       return this.objectTypeClass;
    }
 
-   public void setObjectTypeClass(String var1) {
-      this.objectTypeClass = var1;
+   public void setObjectTypeClass(String objectTypeClass) {
+      this.objectTypeClass = objectTypeClass;
    }
 
    @Override
-   public Activity newActivity(Map<Object, Object> var1) {
-      Class var2 = null;
-      ObjectTypeActivity var3 = null;
+   public Activity newActivity(Map<Object, Object> context) {
+      Class targetClassDefaultNull = null;
+      ObjectTypeActivity objectTypeActivity = null;
       if (this.objectTypeClass.equals("__*__")) {
-         var3 = new ObjectTypeActivity(this.objectTypeClass);
+         objectTypeActivity = new ObjectTypeActivity(this.objectTypeClass);
       } else {
          try {
             if (!this.objectTypeClass.equals("*")) {
-               var2 = ClassUtils.getTargetClassDefaultNull(this.objectTypeClass);
+               targetClassDefaultNull = ClassUtils.getTargetClassDefaultNull(this.objectTypeClass);
             }
 
-            if (var2 == null) {
-               var3 = new ObjectTypeActivity(this.objectTypeClass);
+            if (targetClassDefaultNull == null) {
+               objectTypeActivity = new ObjectTypeActivity(this.objectTypeClass);
             } else {
-               var3 = new ObjectTypeActivity(var2);
+               objectTypeActivity = new ObjectTypeActivity(targetClassDefaultNull);
             }
-         } catch (Exception var6) {
-            var3 = new ObjectTypeActivity(this.objectTypeClass);
+         } catch (Exception exception) {
+            objectTypeActivity = new ObjectTypeActivity(this.objectTypeClass);
          }
       }
 
-      for (Line var5 : this.lines) {
-         var3.addPath(var5.newPath(var1));
+      for (Line line : this.lines) {
+         objectTypeActivity.addPath(line.newPath(context));
       }
 
-      return var3;
+      return objectTypeActivity;
    }
 }

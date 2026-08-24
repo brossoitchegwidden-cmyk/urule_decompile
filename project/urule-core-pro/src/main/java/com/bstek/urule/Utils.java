@@ -59,441 +59,441 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class Utils implements ApplicationContextAware {
-   private static boolean a = true;
-   private static boolean b;
-   private static boolean c = true;
+   private static boolean debug = true;
+   private static boolean spaceToZero;
+   private static boolean subPropertyNotExistToNull = true;
    public static final String SystemId = UUID.randomUUID().toString();
-   private static ApplicationContext d;
-   private static BeanUtilsBean e = new BeanUtilsBean();
+   private static ApplicationContext applicationContext;
+   private static BeanUtilsBean beanUtilsBean = new BeanUtilsBean();
    public static final String VAR_PREFIX = "${";
-   private static Map<String, FunctionDescriptor> f = new HashMap<>();
-   private static Map<String, FunctionDescriptor> g = new HashMap<>();
+   private static Map<String, FunctionDescriptor> functionDescriptorMap = new HashMap<>();
+   private static Map<String, FunctionDescriptor> functionDescriptorLabelMap = new HashMap<>();
 
    public static ApplicationContext getApplicationContext() {
-      return d;
+      return applicationContext;
    }
 
-   public static String decodeURL(String var0) {
-      if (StringUtils.isBlank(var0)) {
-         return var0;
+   public static String decodeURL(String str) {
+      if (StringUtils.isBlank(str)) {
+         return str;
       }
 
       try {
-         var0 = URLDecoder.decode(var0, "utf-8");
-         return URLDecoder.decode(var0, "utf-8");
-      } catch (Exception var2) {
-         return var0;
+         str = URLDecoder.decode(str, "utf-8");
+         return URLDecoder.decode(str, "utf-8");
+      } catch (Exception exception) {
+         return str;
       }
    }
 
-   public static String getClassName(Object var0) {
-      String var1 = null;
-      if (var0 instanceof GeneralEntity) {
-         GeneralEntity var2 = (GeneralEntity)var0;
-         var1 = var2.getTargetClass();
+   public static String getClassName(Object fact) {
+      String className = null;
+      if (fact instanceof GeneralEntity) {
+         GeneralEntity generalEntity = (GeneralEntity)fact;
+         className = generalEntity.getTargetClass();
       } else {
-         var1 = var0.getClass().getName();
+         className = fact.getClass().getName();
       }
 
-      return var1;
+      return className;
    }
 
-   public static String decodeContent(String var0) {
-      if (StringUtils.isBlank(var0)) {
-         return var0;
+   public static String decodeContent(String content) {
+      if (StringUtils.isBlank(content)) {
+         return content;
       }
 
       try {
-         return URLDecoder.decode(var0, "utf-8");
-      } catch (Exception var2) {
-         return var0;
+         return URLDecoder.decode(content, "utf-8");
+      } catch (Exception exception) {
+         return content;
       }
    }
 
-   public static Throwable buildCause(Throwable var0, StringBuilder var1) {
-      if (var0 instanceof RuleAssertException) {
-         RuleException var2 = (RuleException)var0;
-         String var3 = var2.getTipMsg();
-         if (var3 != null) {
-            var1.append(var3);
+   public static Throwable buildCause(Throwable throwable, StringBuilder sb) {
+      if (throwable instanceof RuleAssertException) {
+         RuleException ruleException = (RuleException)throwable;
+         String tipMsg = ruleException.getTipMsg();
+         if (tipMsg != null) {
+            sb.append(tipMsg);
          }
       }
 
-      return var0.getCause() != null ? buildCause(var0.getCause(), var1) : var0;
+      return throwable.getCause() != null ? buildCause(throwable.getCause(), sb) : throwable;
    }
 
-   public static String encodeURL(String var0) {
-      if (StringUtils.isBlank(var0)) {
-         return var0;
+   public static String encodeURL(String str) {
+      if (StringUtils.isBlank(str)) {
+         return str;
       }
 
       try {
-         return URLEncoder.encode(var0, "utf-8");
-      } catch (UnsupportedEncodingException var2) {
-         throw new RuleException(var2);
+         return URLEncoder.encode(str, "utf-8");
+      } catch (UnsupportedEncodingException unsupportedEncodingException) {
+         throw new RuleException(unsupportedEncodingException);
       }
    }
 
-   public static String toUTF8(String var0) {
+   public static String toUTF8(String text) {
       try {
-         if (var0 == null) {
+         if (text == null) {
             return null;
          }
 
-         byte[] var1 = var0.getBytes("iso8859-1");
-         boolean var2 = var0.equals(new String(var1, "iso8859-1"));
-         if (var2) {
-            var0 = new String(var1, "utf-8");
+         byte[] bytes = text.getBytes("iso8859-1");
+         boolean flag = text.equals(new String(bytes, "iso8859-1"));
+         if (flag) {
+            text = new String(bytes, "utf-8");
          }
 
-         var2 = var0.equals(new String(var0.getBytes("iso8859-1"), "iso8859-1"));
-         if (var2) {
-            var0 = new String(var1, "utf-8");
+         flag = text.equals(new String(text.getBytes("iso8859-1"), "iso8859-1"));
+         if (flag) {
+            text = new String(bytes, "utf-8");
          }
 
-         return var0;
-      } catch (Exception var3) {
-         throw new RuleException(var3);
+         return text;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public static Object getObjectProperty(Object var0, String var1) {
+   public static Object getObjectProperty(Object object, String property) {
       try {
-         return PropertyUtils.getProperty(var0, var1);
-      } catch (NoSuchMethodException var3) {
-         if (c) {
-            return null;
-         } else {
-            throw new RuleException(var3);
-         }
-      } catch (NestedNullException var4) {
-         if (c) {
+         return PropertyUtils.getProperty(object, property);
+      } catch (NoSuchMethodException noSuchMethodException) {
+         if (subPropertyNotExistToNull) {
             return null;
          } else {
-            throw new RuleException(var4);
+            throw new RuleException(noSuchMethodException);
          }
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+      } catch (NestedNullException nestedNullException) {
+         if (subPropertyNotExistToNull) {
+            return null;
+         } else {
+            throw new RuleException(nestedNullException);
+         }
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public static void setObjectProperty(Object var0, String var1, Object var2) {
+   public static void setObjectProperty(Object object, String property, Object value) {
       try {
-         e.setProperty(var0, var1, var2);
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         Utils.beanUtilsBean.setProperty(object, property, value);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public static void assignVariableObjectDefaultValue(GeneralEntity var0, WorkingMemory var1) {
-      String var2 = var0.getTargetClass();
-      KnowledgeSession var3 = (KnowledgeSession)var1;
-      List var4 = var3.getKnowledgePackageList();
-      VariableCategory var5 = null;
+   public static void assignVariableObjectDefaultValue(GeneralEntity ge, WorkingMemory workingMemory) {
+      String targetClass = ge.getTargetClass();
+      KnowledgeSession knowledgeSession = (KnowledgeSession)workingMemory;
+      List knowledgePackageList = knowledgeSession.getKnowledgePackageList();
+      VariableCategory variableCategory = null;
 
-      for (KnowledgePackage var7 : (Iterable<KnowledgePackage>)(Iterable<?>)(var4)) {
-         var5 = var7.getVariableCategoryWithDefaultValue(var2);
-         if (var5 != null) {
+      for (KnowledgePackage knowledgePackage : (Iterable<KnowledgePackage>)(Iterable<?>)(knowledgePackageList)) {
+         variableCategory = knowledgePackage.getVariableCategoryWithDefaultValue(targetClass);
+         if (variableCategory != null) {
             break;
          }
       }
 
-      if (var5 != null) {
-         for (Variable var12 : var5.getVariables()) {
-            String var8 = var12.getDefaultValue();
-            if (var8 != null) {
-               String var9 = var12.getName();
-               Object var10 = getObjectProperty(var0, var9);
-               if (var10 == null) {
-                  var10 = var12.getType().convert(var8);
-                  setObjectProperty(var0, var9, var10);
+      if (variableCategory != null) {
+         for (Variable variable : variableCategory.getVariables()) {
+            String defaultValue = variable.getDefaultValue();
+            if (defaultValue != null) {
+               String name = variable.getName();
+               Object objectProperty = getObjectProperty(ge, name);
+               if (objectProperty == null) {
+                  objectProperty = variable.getType().convert(defaultValue);
+                  setObjectProperty(ge, name, objectProperty);
                }
             }
          }
       }
    }
 
-   public static Datatype getDatatype(Object var0) {
-      Datatype var1 = null;
-      if (var0 == null) {
-         var1 = Datatype.Object;
-      } else if (var0 instanceof Integer) {
-         var1 = Datatype.Integer;
-      } else if (var0 instanceof Long) {
-         var1 = Datatype.Long;
-      } else if (var0 instanceof Double) {
-         var1 = Datatype.Double;
-      } else if (var0 instanceof Float) {
-         var1 = Datatype.Float;
-      } else if (var0 instanceof BigDecimal) {
-         var1 = Datatype.BigDecimal;
-      } else if (var0 instanceof Boolean) {
-         var1 = Datatype.Boolean;
-      } else if (var0 instanceof Date) {
-         var1 = Datatype.Date;
-      } else if (var0 instanceof List) {
-         var1 = Datatype.List;
-      } else if (var0 instanceof Set) {
-         var1 = Datatype.Set;
-      } else if (var0 instanceof Enum) {
-         var1 = Datatype.Enum;
-      } else if (var0 instanceof Map) {
-         var1 = Datatype.Map;
-      } else if (var0 instanceof String) {
-         var1 = Datatype.String;
-      } else if (var0 instanceof Character) {
-         var1 = Datatype.Char;
+   public static Datatype getDatatype(Object obj) {
+      Datatype datatype = null;
+      if (obj == null) {
+         datatype = Datatype.Object;
+      } else if (obj instanceof Integer) {
+         datatype = Datatype.Integer;
+      } else if (obj instanceof Long) {
+         datatype = Datatype.Long;
+      } else if (obj instanceof Double) {
+         datatype = Datatype.Double;
+      } else if (obj instanceof Float) {
+         datatype = Datatype.Float;
+      } else if (obj instanceof BigDecimal) {
+         datatype = Datatype.BigDecimal;
+      } else if (obj instanceof Boolean) {
+         datatype = Datatype.Boolean;
+      } else if (obj instanceof Date) {
+         datatype = Datatype.Date;
+      } else if (obj instanceof List) {
+         datatype = Datatype.List;
+      } else if (obj instanceof Set) {
+         datatype = Datatype.Set;
+      } else if (obj instanceof Enum) {
+         datatype = Datatype.Enum;
+      } else if (obj instanceof Map) {
+         datatype = Datatype.Map;
+      } else if (obj instanceof String) {
+         datatype = Datatype.String;
+      } else if (obj instanceof Character) {
+         datatype = Datatype.Char;
       } else {
-         var1 = Datatype.Object;
+         datatype = Datatype.Object;
       }
 
-      return var1;
+      return datatype;
    }
 
-   public static BigDecimal toBigDecimal(Object var0) {
+   public static BigDecimal toBigDecimal(Object val) {
       try {
-         if (var0 instanceof BigDecimal) {
-            return (BigDecimal)var0;
+         if (val instanceof BigDecimal) {
+            return (BigDecimal)val;
          }
 
-         if (var0 == null) {
+         if (val == null) {
             throw new IllegalArgumentException("Null can not to BigDecimal.");
          }
 
-         if (var0 instanceof String) {
-            String var3 = (String)var0;
-            if (b && "".equals(var3.trim())) {
+         if (val instanceof String) {
+            String trimmedText = (String)val;
+            if (spaceToZero && "".equals(trimmedText.trim())) {
                return BigDecimal.valueOf(0L);
             }
 
-            var3 = var3.trim();
-            return new BigDecimal(var3);
+            trimmedText = trimmedText.trim();
+            return new BigDecimal(trimmedText);
          }
 
-         if (var0 instanceof Number) {
-            return new BigDecimal(var0.toString());
+         if (val instanceof Number) {
+            return new BigDecimal(val.toString());
          }
 
-         if (var0 instanceof Character) {
-            char var1 = (Character)var0;
-            return new BigDecimal(var1);
+         if (val instanceof Character) {
+            char character = (Character)val;
+            return new BigDecimal(character);
          }
-      } catch (Exception var2) {
-         if (var0 != null && "".equals(var0.toString().trim())) {
+      } catch (Exception exception) {
+         if (val != null && "".equals(val.toString().trim())) {
             throw new NumberFormatException("Can not convert 空格 to number.");
          }
 
-         throw new NumberFormatException("Can not convert " + var0 + " to number.");
+         throw new NumberFormatException("Can not convert " + val + " to number.");
       }
 
-      throw new IllegalArgumentException(var0.getClass().getName() + " can not to BigDecimal.");
+      throw new IllegalArgumentException(val.getClass().getName() + " can not to BigDecimal.");
    }
 
-   public static byte[] compress(String var0) {
-      if (var0 == null) {
+   public static byte[] compress(String content) {
+      if (content == null) {
          return null;
       }
 
-      ByteArrayOutputStream var1 = new ByteArrayOutputStream();
-      GZIPOutputStream var2 = null;
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      GZIPOutputStream gZIPOutputStream = null;
 
       try {
-         var2 = new GZIPOutputStream(var1);
-         var2.write(var0.getBytes("UTF-8"));
-         IOUtils.closeQuietly(var2);
-         return var1.toByteArray();
-      } catch (IOException var4) {
-         throw new RuleException(var4);
+         gZIPOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+         gZIPOutputStream.write(content.getBytes("UTF-8"));
+         IOUtils.closeQuietly(gZIPOutputStream);
+         return byteArrayOutputStream.toByteArray();
+      } catch (IOException iOException) {
+         throw new RuleException(iOException);
       }
    }
 
-   public static String uncompress(byte[] var0) {
-      if (var0.length < 1) {
+   public static String uncompress(byte[] content) {
+      if (content.length < 1) {
          return null;
       }
 
-      ByteArrayOutputStream var1 = new ByteArrayOutputStream();
-      ByteArrayInputStream var2 = new ByteArrayInputStream(var0);
-      GZIPInputStream var3 = null;
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
+      GZIPInputStream gZIPInputStream = null;
 
       try {
-         var3 = new GZIPInputStream(var2);
-         byte[] var4 = IOUtils.toByteArray(var3);
-         return new String(var4, "UTF-8");
-      } catch (IOException var9) {
-         throw new RuleException(var9);
+         gZIPInputStream = new GZIPInputStream(byteArrayInputStream);
+         byte[] bytes = IOUtils.toByteArray(gZIPInputStream);
+         return new String(bytes, "UTF-8");
+      } catch (IOException iOException) {
+         throw new RuleException(iOException);
       } finally {
-         IOUtils.closeQuietly(var1);
-         IOUtils.closeQuietly(var2);
-         IOUtils.closeQuietly(var3);
+         IOUtils.closeQuietly(byteArrayOutputStream);
+         IOUtils.closeQuietly(byteArrayInputStream);
+         IOUtils.closeQuietly(gZIPInputStream);
       }
    }
 
-   public static Rule buildElseRule(Rule var0) {
-      if (var0.getElseRule() != null) {
-         return var0.getElseRule();
+   public static Rule buildElseRule(Rule rule) {
+      if (rule.getElseRule() != null) {
+         return rule.getElseRule();
       } else {
-         Other var1 = var0.getOther();
-         if (var1 != null && var1.getActions().size() != 0) {
-            Rule var2 = new Rule();
-            var2.setFile(var0.getFile());
-            var2.setName(var0.getName() + " - else");
-            var2.setMutexGroup(var0.getMutexGroup());
-            var2.setPendedGroup(var0.getPendedGroup());
-            var2.setAutoFocus(var0.getAutoFocus());
-            var2.setEffectiveDate(var0.getEffectiveDate());
-            var2.setExpiresDate(var0.getExpiresDate());
-            var2.setEnabled(var0.getEnabled());
-            var2.setDebug(var0.getDebug());
-            var2.setSalience(var0.getSalience());
-            Rhs var3 = new Rhs();
-            var2.setRhs(var3);
-            var3.setActions(var1.getActions());
-            var0.setElseRule(var2);
-            return var2;
+         Other other = rule.getOther();
+         if (other != null && other.getActions().size() != 0) {
+            Rule elseRule = new Rule();
+            elseRule.setFile(rule.getFile());
+            elseRule.setName(rule.getName() + " - else");
+            elseRule.setMutexGroup(rule.getMutexGroup());
+            elseRule.setPendedGroup(rule.getPendedGroup());
+            elseRule.setAutoFocus(rule.getAutoFocus());
+            elseRule.setEffectiveDate(rule.getEffectiveDate());
+            elseRule.setExpiresDate(rule.getExpiresDate());
+            elseRule.setEnabled(rule.getEnabled());
+            elseRule.setDebug(rule.getDebug());
+            elseRule.setSalience(rule.getSalience());
+            Rhs rhs = new Rhs();
+            elseRule.setRhs(rhs);
+            rhs.setActions(other.getActions());
+            rule.setElseRule(elseRule);
+            return elseRule;
          } else {
             return null;
          }
       }
    }
 
-   public static String knowledgePackageToString(KnowledgePackage var0) {
-      Builder var1 = JsonMapper.builder();
-      var1.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-      ObjectMapper var2 = var1.build();
-      var2.setSerializationInclusion(Include.NON_NULL);
-      var2.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
-      KnowledgePackageWrapper var3 = new KnowledgePackageWrapper(var0);
+   public static String knowledgePackageToString(KnowledgePackage knowledgePackage) {
+      Builder builder = JsonMapper.builder();
+      builder.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+      ObjectMapper objectMapper = builder.build();
+      objectMapper.setSerializationInclusion(Include.NON_NULL);
+      objectMapper.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
+      KnowledgePackageWrapper knowledgePackageWrapper = new KnowledgePackageWrapper(knowledgePackage);
 
       try {
-         return var2.writeValueAsString(var3);
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+         return objectMapper.writeValueAsString(knowledgePackageWrapper);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public static String knowledgePackageLibToString(KnowledgePackage var0) {
-      KnowledgePackageImpl var1 = (KnowledgePackageImpl)var0;
-      List var2 = var1.getVariableCategories();
-      Builder var3 = JsonMapper.builder();
-      var3.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-      ObjectMapper var4 = var3.build();
-      var4.setSerializationInclusion(Include.NON_NULL);
-      var4.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
+   public static String knowledgePackageLibToString(KnowledgePackage knowledgePackage) {
+      KnowledgePackageImpl knowledgePackageImpl = (KnowledgePackageImpl)knowledgePackage;
+      List variableCategories = knowledgePackageImpl.getVariableCategories();
+      Builder builder = JsonMapper.builder();
+      builder.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+      ObjectMapper objectMapper = builder.build();
+      objectMapper.setSerializationInclusion(Include.NON_NULL);
+      objectMapper.setDateFormat(new SimpleDateFormat(Configure.getDateFormat()));
 
       try {
-         return var4.writeValueAsString(var2);
-      } catch (Exception var6) {
-         throw new RuleException(var6);
+         return objectMapper.writeValueAsString(variableCategories);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public static List<VariableCategory> stringToKnowledgePackageLib(String var0) {
+   public static List<VariableCategory> stringToKnowledgePackageLib(String content) {
       try {
-         ObjectMapper var1 = JsonMapper.builder().build();
-         SimpleDateFormat var2 = new SimpleDateFormat(Configure.getDateFormat());
-         var1.getDeserializationConfig().with(var2);
-         var1.setDateFormat(var2);
-         return (List<VariableCategory>)var1.readValue(var0, new Utils$1());
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         ObjectMapper objectMapper = JsonMapper.builder().build();
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+         objectMapper.getDeserializationConfig().with(simpleDateFormat);
+         objectMapper.setDateFormat(simpleDateFormat);
+         return (List<VariableCategory>)objectMapper.readValue(content, new VariableCategoryListTypeReference());
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public static KnowledgePackage stringToKnowledgePackage(String var0) {
-      return stringToKnowledgePackageWrapper(var0).getKnowledgePackage();
+   public static KnowledgePackage stringToKnowledgePackage(String content) {
+      return stringToKnowledgePackageWrapper(content).getKnowledgePackage();
    }
 
-   public static KnowledgePackageWrapper stringToKnowledgePackageWrapper(String var0) {
+   public static KnowledgePackageWrapper stringToKnowledgePackageWrapper(String content) {
       try {
-         ObjectMapper var1 = JsonMapper.builder().build();
-         SimpleDateFormat var2 = new SimpleDateFormat(Configure.getDateFormat());
-         var1.getDeserializationConfig().with(var2);
-         var1.setDateFormat(var2);
-         KnowledgePackageWrapper var3 = (KnowledgePackageWrapper)var1.readValue(var0, KnowledgePackageWrapper.class);
-         var3.buildDeserialize();
-         KnowledgePackage var4 = var3.getKnowledgePackage();
-         Map var5 = var4.getFlowMap();
-         if (var5 != null && var5.size() > 0) {
-            for (FlowDefinition var7 : (Iterable<FlowDefinition>)(Iterable<?>)(var5.values())) {
-               var7.buildConnectionToNode();
+         ObjectMapper objectMapper = JsonMapper.builder().build();
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+         objectMapper.getDeserializationConfig().with(simpleDateFormat);
+         objectMapper.setDateFormat(simpleDateFormat);
+         KnowledgePackageWrapper knowledgePackageWrapper = (KnowledgePackageWrapper)objectMapper.readValue(content, KnowledgePackageWrapper.class);
+         knowledgePackageWrapper.buildDeserialize();
+         KnowledgePackage knowledgePackage = knowledgePackageWrapper.getKnowledgePackage();
+         Map flowMap = knowledgePackage.getFlowMap();
+         if (flowMap != null && flowMap.size() > 0) {
+            for (FlowDefinition flowDefinition : (Iterable<FlowDefinition>)(Iterable<?>)(flowMap.values())) {
+               flowDefinition.buildConnectionToNode();
             }
          }
 
-         return var3;
-      } catch (Exception var8) {
-         throw new DeserializeException(var8);
+         return knowledgePackageWrapper;
+      } catch (Exception exception) {
+         throw new DeserializeException(exception);
       }
    }
 
-   public static FunctionDescriptor findFunctionDescriptor(String var0) {
-      if (!f.containsKey(var0)) {
-         throw new RuleException("Function[" + var0 + "] not exist.");
+   public static FunctionDescriptor findFunctionDescriptor(String functionName) {
+      if (!functionDescriptorMap.containsKey(functionName)) {
+         throw new RuleException("Function[" + functionName + "] not exist.");
       } else {
-         return f.get(var0);
+         return functionDescriptorMap.get(functionName);
       }
    }
 
    public static Map<String, FunctionDescriptor> getFunctionDescriptorLabelMap() {
-      return g;
+      return functionDescriptorLabelMap;
    }
 
    public static Map<String, FunctionDescriptor> getFunctionDescriptorMap() {
-      return f;
+      return functionDescriptorMap;
    }
 
-   public void setDebug(boolean var1) {
-      a = var1;
+   public void setDebug(boolean debug) {
+      Utils.debug = debug;
    }
 
-   public static void setSpaceToZero(boolean var0) {
-      b = var0;
+   public static void setSpaceToZero(boolean spaceToZero) {
+      Utils.spaceToZero = spaceToZero;
    }
 
-   public static void setSubPropertyNotExistToNull(boolean var0) {
-      c = var0;
+   public static void setSubPropertyNotExistToNull(boolean subPropertyNotExistToNull) {
+      Utils.subPropertyNotExistToNull = subPropertyNotExistToNull;
    }
 
    public static boolean isDebug() {
-      return a;
+      return debug;
    }
 
    public static boolean isSpaceToZero() {
-      return b;
+      return spaceToZero;
    }
 
-   public static void resetApplicationContext(ApplicationContext var0) {
-      d = var0;
+   public static void resetApplicationContext(ApplicationContext applicationContext) {
+      Utils.applicationContext = applicationContext;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      f.clear();
-      g.clear();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      functionDescriptorMap.clear();
+      functionDescriptorLabelMap.clear();
 
-      for (FunctionDescriptor var4 : var1.getBeansOfType(FunctionDescriptor.class).values()) {
-         if (!var4.isDisabled()) {
-            if (f.containsKey(var4.getName())) {
-               throw new RuntimeException("Duplicate function [" + var4.getName() + "]");
+      for (FunctionDescriptor functionDescriptor : applicationContext.getBeansOfType(FunctionDescriptor.class).values()) {
+         if (!functionDescriptor.isDisabled()) {
+            if (functionDescriptorMap.containsKey(functionDescriptor.getName())) {
+               throw new RuntimeException("Duplicate function [" + functionDescriptor.getName() + "]");
             }
 
-            f.put(var4.getName(), var4);
-            g.put(var4.getLabel(), var4);
+            functionDescriptorMap.put(functionDescriptor.getName(), functionDescriptor);
+            functionDescriptorLabelMap.put(functionDescriptor.getLabel(), functionDescriptor);
          }
       }
 
-      d = var1;
+      Utils.applicationContext = applicationContext;
    }
 
    static {
-      ConvertUtilsBean var0 = e.getConvertUtils();
-      var0.register(new DateConverter(null), Date.class);
-      var0.register(new LongConverter(null), Long.class);
-      var0.register(new ShortConverter(null), Short.class);
-      var0.register(new IntegerConverter(null), Integer.class);
-      var0.register(new DoubleConverter(null), Double.class);
-      var0.register(new FloatConverter(null), Float.class);
-      var0.register(new BigDecimalConverter(null), BigDecimal.class);
-      var0.register(new BigIntegerConverter(null), BigInteger.class);
-      var0.register(new ByteConverter(null), Byte.class);
+      ConvertUtilsBean convertUtils = Utils.beanUtilsBean.getConvertUtils();
+      convertUtils.register(new DateConverter(null), Date.class);
+      convertUtils.register(new LongConverter(null), Long.class);
+      convertUtils.register(new ShortConverter(null), Short.class);
+      convertUtils.register(new IntegerConverter(null), Integer.class);
+      convertUtils.register(new DoubleConverter(null), Double.class);
+      convertUtils.register(new FloatConverter(null), Float.class);
+      convertUtils.register(new BigDecimalConverter(null), BigDecimal.class);
+      convertUtils.register(new BigIntegerConverter(null), BigInteger.class);
+      convertUtils.register(new ByteConverter(null), Byte.class);
    }
 }

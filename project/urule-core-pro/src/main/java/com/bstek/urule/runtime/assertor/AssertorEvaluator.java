@@ -11,20 +11,20 @@ import org.springframework.context.ApplicationContextAware;
 
 public class AssertorEvaluator implements ApplicationContextAware {
    public static final String BEAN_ID = "urule.assertorEvaluator";
-   private Map<Op, Assertor> a = new HashMap<>();
+   private Map<Op, Assertor> assertorsByOperator = new HashMap<>();
 
-   public boolean evaluate(Object var1, Object var2, Datatype var3, Op var4) {
-      Assertor var5 = this.a.get(var4);
-      if (var5 == null) {
-         throw new RuleException("Unsupport op:" + var4);
+   public boolean evaluate(Object left, Object right, Datatype datatype, Op op) {
+      Assertor assertor = this.assertorsByOperator.get(op);
+      if (assertor == null) {
+         throw new RuleException("Unsupport op:" + op);
       } else {
-         return var5.eval(var1, var2, var3);
+         return assertor.eval(left, right, datatype);
       }
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      for (Assertor var4 : var1.getBeansOfType(Assertor.class).values()) {
-         this.a.put(var4.supportOp(), var4);
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      for (Assertor assertor : applicationContext.getBeansOfType(Assertor.class).values()) {
+         this.assertorsByOperator.put(assertor.supportOp(), assertor);
       }
    }
 }

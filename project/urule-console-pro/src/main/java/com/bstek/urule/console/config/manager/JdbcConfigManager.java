@@ -13,89 +13,88 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class JdbcConfigManager extends DBConfigManager {
-   private static final Log b = LogFactory.getLog(JdbcConfigManager.class);
-   private DataSource c;
+   private static final Log logger = LogFactory.getLog(JdbcConfigManager.class);
+   private DataSource dataSource;
 
-   public JdbcConfigManager(ApplicationConfig var1) {
-      super(var1);
+   public JdbcConfigManager(ApplicationConfig applicationConfig) {
+      super(applicationConfig);
    }
-
    public void load() {
-      this.a();
+      this.initializeProperties();
       super.load();
    }
 
-   protected void d() {
-      b.debug("[URULE-CONSOLE]初始化规则DBCP数据源...");
-      BasicDataSourceWrapper var1 = new BasicDataSourceWrapper();
-      ((BasicDataSource)var1).setDriverClassName(this.getProperty("urule.store.database.driver"));
-      String var2 = this.getProperty("urule.store.database.url");
-      String var3 = "%URULE_HOME%";
-      if (StringUtils.isNotBlank(var2) && var2.contains(var3)) {
-         var2 = var2.replaceAll(var3, this.getURuleHome());
+   protected void initializeConnectionSource() {
+      JdbcConfigManager.logger.debug("[URULE-CONSOLE]初始化规则DBCP数据源...");
+      BasicDataSourceWrapper basicDataSourceWrapper = new BasicDataSourceWrapper();
+      ((BasicDataSource)basicDataSourceWrapper).setDriverClassName(this.getProperty("urule.store.database.driver"));
+      String property = this.getProperty("urule.store.database.url");
+      String text = "%URULE_HOME%";
+      if (StringUtils.isNotBlank(property) && property.contains(text)) {
+         property = property.replaceAll(text, this.getURuleHome());
       }
 
-      ((BasicDataSource)var1).setUrl(var2);
-      ((BasicDataSource)var1).setUsername(this.getProperty("urule.store.database.username"));
-      ((BasicDataSource)var1).setPassword(this.getProperty("urule.store.database.password"));
-      String var4 = this.getProperty("urule.store.database.initialsize");
-      if (StringUtils.isNotBlank(var4)) {
-         ((BasicDataSource)var1).setInitialSize(Integer.parseInt(var4));
+      ((BasicDataSource)basicDataSourceWrapper).setUrl(property);
+      ((BasicDataSource)basicDataSourceWrapper).setUsername(this.getProperty("urule.store.database.username"));
+      ((BasicDataSource)basicDataSourceWrapper).setPassword(this.getProperty("urule.store.database.password"));
+      String property2 = this.getProperty("urule.store.database.initialsize");
+      if (StringUtils.isNotBlank(property2)) {
+         ((BasicDataSource)basicDataSourceWrapper).setInitialSize(Integer.parseInt(property2));
       }
 
-      String var5 = this.getProperty("urule.store.database.maxTotal");
-      if (StringUtils.isNotBlank(var5)) {
-         ((BasicDataSource)var1).setMaxTotal(Integer.parseInt(var5));
+      String property3 = this.getProperty("urule.store.database.maxTotal");
+      if (StringUtils.isNotBlank(property3)) {
+         ((BasicDataSource)basicDataSourceWrapper).setMaxTotal(Integer.parseInt(property3));
       }
 
-      String var6 = this.getProperty("urule.store.database.maxIdle");
-      if (StringUtils.isNotBlank(var6)) {
-         ((BasicDataSource)var1).setMaxIdle(Integer.parseInt(var6));
+      String property4 = this.getProperty("urule.store.database.maxIdle");
+      if (StringUtils.isNotBlank(property4)) {
+         ((BasicDataSource)basicDataSourceWrapper).setMaxIdle(Integer.parseInt(property4));
       }
 
-      String var7 = this.getProperty("urule.store.database.minIdle");
-      if (StringUtils.isNotBlank(var7)) {
-         ((BasicDataSource)var1).setMinIdle(Integer.parseInt(var7));
+      String property5 = this.getProperty("urule.store.database.minIdle");
+      if (StringUtils.isNotBlank(property5)) {
+         ((BasicDataSource)basicDataSourceWrapper).setMinIdle(Integer.parseInt(property5));
       }
 
-      String var8 = this.getProperty("urule.store.database.validationQuery");
-      if (StringUtils.isNotBlank(var8)) {
-         ((BasicDataSource)var1).setValidationQuery(var8);
+      String property6 = this.getProperty("urule.store.database.validationQuery");
+      if (StringUtils.isNotBlank(property6)) {
+         ((BasicDataSource)basicDataSourceWrapper).setValidationQuery(property6);
       }
 
-      String var9 = this.getProperty("urule.store.database.testOnBorrow");
-      if (StringUtils.isNotBlank(var9)) {
-         ((BasicDataSource)var1).setTestOnBorrow(Boolean.getBoolean(var9));
+      String property7 = this.getProperty("urule.store.database.testOnBorrow");
+      if (StringUtils.isNotBlank(property7)) {
+         ((BasicDataSource)basicDataSourceWrapper).setTestOnBorrow(Boolean.getBoolean(property7));
       }
 
-      String var10 = this.getProperty("urule.store.database.testWhileIdle");
-      if (StringUtils.isNotBlank(var10)) {
-         ((BasicDataSource)var1).setTestWhileIdle(Boolean.getBoolean(var10));
+      String property8 = this.getProperty("urule.store.database.testWhileIdle");
+      if (StringUtils.isNotBlank(property8)) {
+         ((BasicDataSource)basicDataSourceWrapper).setTestWhileIdle(Boolean.getBoolean(property8));
       }
 
-      String var11 = this.getProperty("urule.store.database.timeBetweenEvictionRunsMillis");
-      if (StringUtils.isNotBlank(var11)) {
-         ((BasicDataSource)var1).setTimeBetweenEvictionRunsMillis(Long.parseLong(var11));
+      String property9 = this.getProperty("urule.store.database.timeBetweenEvictionRunsMillis");
+      if (StringUtils.isNotBlank(property9)) {
+         ((BasicDataSource)basicDataSourceWrapper).setTimeBetweenEvictionRunsMillis(Long.parseLong(property9));
       }
 
-      this.c = var1;
+      this.dataSource = basicDataSourceWrapper;
    }
 
    public Connection getConnection() throws Exception {
-      return this.c.getConnection();
+      return this.dataSource.getConnection();
    }
 
-   public void initConfig(SetupInfo var1) {
-      b.debug("生成规则DBCP配置参数配置文件...");
-      Properties var2 = this.b();
-      DataSourceInfo var3 = var1.getDataSourceInfo();
-      var2.put("urule.store.database.driver", var3.getDriver());
-      var2.put("urule.store.database.url", var3.getUrl());
-      var2.put("urule.store.database.username", var3.getUsername());
-      if (StringUtils.isNotBlank(var3.getPassword())) {
-         var2.put("urule.store.database.password", var3.getPassword());
+   public void initConfig(SetupInfo setupInfo) {
+      JdbcConfigManager.logger.debug("生成规则DBCP配置参数配置文件...");
+      Properties properties = this.getApplicationProperties();
+      DataSourceInfo dataSourceInfo = setupInfo.getDataSourceInfo();
+      properties.put("urule.store.database.driver", dataSourceInfo.getDriver());
+      properties.put("urule.store.database.url", dataSourceInfo.getUrl());
+      properties.put("urule.store.database.username", dataSourceInfo.getUsername());
+      if (StringUtils.isNotBlank(dataSourceInfo.getPassword())) {
+         properties.put("urule.store.database.password", dataSourceInfo.getPassword());
       }
 
-      var2.put("urule.store.database.platform", var3.getPlatform());
+      properties.put("urule.store.database.platform", dataSourceInfo.getPlatform());
    }
 }

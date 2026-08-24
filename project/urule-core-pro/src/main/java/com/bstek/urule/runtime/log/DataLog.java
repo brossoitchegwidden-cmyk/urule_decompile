@@ -3,51 +3,51 @@ package com.bstek.urule.runtime.log;
 import com.bstek.urule.LocaleHolder;
 
 public abstract class DataLog implements Log {
-   protected String a;
+   protected String msg;
 
    public String getMsg() {
-      return this.a;
+      return this.msg;
    }
 
    public String getHtmlMsg() {
-      String var1 = "#000";
+      String text = "#000";
       if (this instanceof CriteriaLog) {
-         var1 = "#6495ED";
+         text = "#6495ED";
       } else if (this instanceof MetLog) {
-         var1 = "#009688";
+         text = "#009688";
       } else if (this instanceof ConsoleOutputLog) {
-         var1 = "#000";
+         text = "#000";
       } else if (this instanceof ExecuteBeanMethodLog) {
-         var1 = "#8A2BE2";
+         text = "#8A2BE2";
       } else if (this instanceof ExecuteFunctionLog) {
-         var1 = "#008B8B";
+         text = "#008B8B";
       } else if (this instanceof FlowNodeLog) {
-         var1 = "#9932CC";
+         text = "#9932CC";
       } else if (this instanceof ValueAssignLog) {
-         var1 = "#FF7F50";
+         text = "#FF7F50";
       } else if (this instanceof ScoreCardBean) {
-         var1 = "#40E0D0";
+         text = "#40E0D0";
       } else if (this instanceof ExcecuteScoreCardLog) {
-         var1 = "#40E0D0";
+         text = "#40E0D0";
       } else if (this instanceof ScoreCardSumLog) {
-         var1 = "#40E0D0";
+         text = "#40E0D0";
       } else if (this instanceof MatchedRuleLog) {
-         var1 = "#d48746";
+         text = "#d48746";
       } else if (this instanceof IFErrorLog) {
-         var1 = "#FF0606";
+         text = "#FF0606";
       } else if (this instanceof AddRuleToExecuteQueueLog) {
-         AddRuleToExecuteQueueLog var2 = (AddRuleToExecuteQueueLog)this;
-         if (var2.isAdd()) {
-            var1 = "#13d8c6";
+         AddRuleToExecuteQueueLog addRuleToExecuteQueueLog = (AddRuleToExecuteQueueLog)this;
+         if (addRuleToExecuteQueueLog.isAdd()) {
+            text = "#13d8c6";
          } else {
-            var1 = "#FF5722";
+            text = "#FF5722";
          }
       }
 
-      return "<div style=\"color:" + var1 + ";margin-top:2px\">" + this.a + "</div>";
+      return "<div style=\"color:" + text + ";margin-top:2px\">" + this.msg + "</div>";
    }
 
-   protected boolean a() {
+   protected boolean isEnglishLanguage() {
       return LocaleHolder.isEnglish();
    }
 }

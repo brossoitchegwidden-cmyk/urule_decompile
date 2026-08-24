@@ -15,36 +15,36 @@ public class DecisionItem {
       return this.script;
    }
 
-   public void setScript(String var1) {
-      this.script = var1;
+   public void setScript(String script) {
+      this.script = script;
    }
 
    public String getTo() {
       return this.to;
    }
 
-   public void setTo(String var1) {
-      this.to = var1;
+   public void setTo(String to) {
+      this.to = to;
    }
 
    public int getPercent() {
       return this.percent;
    }
 
-   public void setPercent(int var1) {
-      this.percent = var1;
+   public void setPercent(int percent) {
+      this.percent = percent;
    }
 
    public String getConditionType() {
       return this.conditionType;
    }
 
-   public void setConditionType(String var1) {
-      this.conditionType = var1;
+   public void setConditionType(String conditionType) {
+      this.conditionType = conditionType;
    }
 
-   public void setLhs(Lhs var1) {
-      this.lhs = var1;
+   public void setLhs(Lhs lhs) {
+      this.lhs = lhs;
    }
 
    public Lhs getLhs() {
@@ -55,27 +55,27 @@ public class DecisionItem {
       return this.lhsXml;
    }
 
-   public void setLhsXml(String var1) {
-      this.lhsXml = var1;
+   public void setLhsXml(String lhsXml) {
+      this.lhsXml = lhsXml;
    }
 
-   public String buildDSLScript(int var1, boolean var2, String var3, String var4) {
-      StringBuffer var5 = new StringBuffer();
-      var5.append("rule \"" + var3 + "-" + var4 + "-decision" + var1 + "\"");
-      if (var2) {
-         var5.append(" debug=true ");
+   public String buildDSLScript(int index, boolean debug, String flowId, String nodeName) {
+      StringBuffer stringBuffer = new StringBuffer();
+      stringBuffer.append("rule \"" + flowId + "-" + nodeName + "-decision" + index + "\"");
+      if (debug) {
+         stringBuffer.append(" debug=true ");
       }
 
-      var5.append(" ");
-      var5.append("if");
-      var5.append(" ");
-      var5.append(this.script);
-      var5.append(" ");
-      var5.append("then");
-      var5.append(" ");
-      var5.append("parameter.return_to__=\"" + this.to + "\"");
-      var5.append(" ");
-      var5.append("end");
-      return var5.toString();
+      stringBuffer.append(" ");
+      stringBuffer.append("if");
+      stringBuffer.append(" ");
+      stringBuffer.append(this.script);
+      stringBuffer.append(" ");
+      stringBuffer.append("then");
+      stringBuffer.append(" ");
+      stringBuffer.append("parameter.return_to__=\"" + this.to + "\"");
+      stringBuffer.append(" ");
+      stringBuffer.append("end");
+      return stringBuffer.toString();
    }
 }

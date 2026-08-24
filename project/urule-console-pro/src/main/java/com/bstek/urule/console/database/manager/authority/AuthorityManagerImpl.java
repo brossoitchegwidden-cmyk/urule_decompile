@@ -12,171 +12,165 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuthorityManagerImpl implements AuthorityManager {
-   public List getAuthoritysByRole(String var1, long var2) {
-      Connection var4 = JdbcUtils.getConnection();
-      String var5 = "select ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_ from URULE_AUTHORITY where ROLE_ID_=? and ROLE_TYPE_=?";
+   public List getAuthoritysByRole(String roleType, long roleId) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_ from URULE_AUTHORITY where ROLE_ID_=? and ROLE_TYPE_=?";
 
-      ArrayList var15;
+      ArrayList authoritysByRole;
       try {
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setLong(1, var2);
-         var6.setString(2, var1);
-         ArrayList var7 = new ArrayList();
-         ResultSet var8 = var6.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, roleId);
+         preparedStatement.setString(2, roleType);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var8.next()) {
-            Authority var9 = new Authority();
-            var9.setId(var8.getLong(1));
-            var9.setRoleId(var8.getLong(2));
-            var9.setResourceCode(var8.getString(3));
-            var9.setAuth(var8.getInt(4));
-            var9.setRoleType(var8.getString(5));
-            var9.setResourceType(var8.getString(6));
-            var7.add(var9);
+         while(resultSet.next()) {
+            Authority authority = new Authority();
+            authority.setId(resultSet.getLong(1));
+            authority.setRoleId(resultSet.getLong(2));
+            authority.setResourceCode(resultSet.getString(3));
+            authority.setAuth(resultSet.getInt(4));
+            authority.setRoleType(resultSet.getString(5));
+            authority.setResourceType(resultSet.getString(6));
+            items.add(authority);
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var6);
-         var15 = var7;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         authoritysByRole = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var15;
+      return authoritysByRole;
    }
-
-   public void add(Connection var1, Authority var2) {
-      String var3 = "insert into URULE_AUTHORITY (ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_) values (?, ?, ?, ?, ?, ?)";
+   public void add(Connection conn, Authority authority) {
+      String text = "insert into URULE_AUTHORITY (ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_) values (?, ?, ?, ?, ?, ?)";
 
       try {
-         PreparedStatement var4 = var1.prepareStatement(var3);
-         long var5 = IDGenerator.getInstance().nextId(IDType.AUTHORITY);
-         var2.setId(var5);
-         var4.setLong(1, var2.getId());
-         var4.setLong(2, var2.getRoleId());
-         var4.setString(3, var2.getResourceCode());
-         var4.setInt(4, var2.getAuth());
-         var4.setString(5, var2.getRoleType());
-         var4.setString(6, var2.getResourceType());
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = conn.prepareStatement(text);
+         long longValue = IDGenerator.getInstance().nextId(IDType.AUTHORITY);
+         authority.setId(longValue);
+         preparedStatement.setLong(1, authority.getId());
+         preparedStatement.setLong(2, authority.getRoleId());
+         preparedStatement.setString(3, authority.getResourceCode());
+         preparedStatement.setInt(4, authority.getAuth());
+         preparedStatement.setString(5, authority.getRoleType());
+         preparedStatement.setString(6, authority.getResourceType());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
-
-   public void remove(Connection var1, long var2) {
+   public void remove(Connection conn, long id) {
       try {
-         PreparedStatement var4 = var1.prepareStatement("delete FROM URULE_AUTHORITY where ID_=?");
-         var4.setLong(1, var2);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var5) {
-         throw new RuleException(var5);
+         PreparedStatement preparedStatement = conn.prepareStatement("delete FROM URULE_AUTHORITY where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
-
-   public void removeByRole(String var1, long var2) {
-      Connection var4 = JdbcUtils.getConnection();
+   public void removeByRole(String roleType, long roleId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var5 = var4.prepareStatement("delete FROM URULE_AUTHORITY where ROLE_TYPE_=? and ROLE_ID_=?");
-         var5.setString(1, var1);
-         var5.setLong(2, var2);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_AUTHORITY where ROLE_TYPE_=? and ROLE_ID_=?");
+         preparedStatement.setString(1, roleType);
+         preparedStatement.setLong(2, roleId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public Authority get(String roleType, long roleId, String code) {
+      Authority authority = null;
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_ from URULE_AUTHORITY where ROLE_ID_=? and ROLE_TYPE_=? and RESOURCE_CODE_=?";
 
-   public Authority get(String var1, long var2, String var4) {
-      Authority var5 = null;
-      Connection var6 = JdbcUtils.getConnection();
-      String var7 = "select ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_ from URULE_AUTHORITY where ROLE_ID_=? and ROLE_TYPE_=? and RESOURCE_CODE_=?";
-
-      Authority var11;
+      Authority getResult;
       try {
-         PreparedStatement var8 = var6.prepareStatement(var7);
-         var8.setLong(1, var2);
-         var8.setString(2, var1);
-         var8.setString(3, var4);
-         ArrayList var9 = new ArrayList();
-         ResultSet var10 = var8.executeQuery();
-         if (var10.next()) {
-            var5 = new Authority();
-            var5.setId(var10.getLong(1));
-            var5.setRoleId(var10.getLong(2));
-            var5.setResourceCode(var10.getString(3));
-            var5.setAuth(var10.getInt(4));
-            var5.setRoleType(var10.getString(5));
-            var5.setResourceType(var10.getString(6));
-            var9.add(var5);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, roleId);
+         preparedStatement.setString(2, roleType);
+         preparedStatement.setString(3, code);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            authority = new Authority();
+            authority.setId(resultSet.getLong(1));
+            authority.setRoleId(resultSet.getLong(2));
+            authority.setResourceCode(resultSet.getString(3));
+            authority.setAuth(resultSet.getInt(4));
+            authority.setRoleType(resultSet.getString(5));
+            authority.setResourceType(resultSet.getString(6));
+            items.add(authority);
          }
 
-         JdbcUtils.closeResultSet(var10);
-         JdbcUtils.closeStatement(var8);
-         var11 = var5;
-      } catch (Exception var15) {
-         throw new RuleException(var15);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         getResult = authority;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var6);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var11;
+      return getResult;
    }
+   public List getAuthoritysByCode(String roleType, String code) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_ from URULE_AUTHORITY where RESOURCE_CODE_=? and ROLE_TYPE_=?";
 
-   public List getAuthoritysByCode(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
-      String var4 = "select ID_, ROLE_ID_, RESOURCE_CODE_, AUTH_, ROLE_TYPE_, RESOURCE_TYPE_ from URULE_AUTHORITY where RESOURCE_CODE_=? and ROLE_TYPE_=?";
-
-      ArrayList var14;
+      ArrayList authoritysByCode;
       try {
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setString(1, var2);
-         var5.setString(2, var1);
-         ArrayList var6 = new ArrayList();
-         ResultSet var7 = var5.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, code);
+         preparedStatement.setString(2, roleType);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var7.next()) {
-            Authority var8 = new Authority();
-            var8.setId(var7.getLong(1));
-            var8.setRoleId(var7.getLong(2));
-            var8.setResourceCode(var7.getString(3));
-            var8.setAuth(var7.getInt(4));
-            var8.setRoleType(var7.getString(5));
-            var8.setResourceType(var7.getString(6));
-            var6.add(var8);
+         while(resultSet.next()) {
+            Authority authority = new Authority();
+            authority.setId(resultSet.getLong(1));
+            authority.setRoleId(resultSet.getLong(2));
+            authority.setResourceCode(resultSet.getString(3));
+            authority.setAuth(resultSet.getInt(4));
+            authority.setRoleType(resultSet.getString(5));
+            authority.setResourceType(resultSet.getString(6));
+            items.add(authority);
          }
 
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var5);
-         var14 = var6;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         authoritysByCode = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return authoritysByCode;
    }
-
-   public void remove(Connection var1, String var2, long var3, String var5, String var6) {
+   public void remove(Connection conn, String roleType, long roleId, String resourceCode, String resourceType) {
       try {
-         PreparedStatement var7 = var1.prepareStatement("delete FROM URULE_AUTHORITY where ROLE_TYPE_=? and ROLE_ID_=? and RESOURCE_CODE_=?  and RESOURCE_TYPE_=?");
-         var7.setString(1, var2);
-         var7.setLong(2, var3);
-         var7.setString(3, var5);
-         var7.setString(4, var6);
-         var7.executeUpdate();
-         JdbcUtils.closeStatement(var7);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = conn.prepareStatement("delete FROM URULE_AUTHORITY where ROLE_TYPE_=? and ROLE_ID_=? and RESOURCE_CODE_=?  and RESOURCE_TYPE_=?");
+         preparedStatement.setString(1, roleType);
+         preparedStatement.setLong(2, roleId);
+         preparedStatement.setString(3, resourceCode);
+         preparedStatement.setString(4, resourceType);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 }

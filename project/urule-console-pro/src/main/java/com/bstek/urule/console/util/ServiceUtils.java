@@ -9,49 +9,49 @@ import com.bstek.urule.runtime.RemoteDynamicJarsBuilder;
 import java.util.Collection;
 
 public class ServiceUtils {
-   private static LhsParser a;
-   private static Collection b;
-   private static KnowledgeBuilder c;
-   private static RemoteDynamicJarsBuilder d;
-   private static DynamicSpringConfigLoader e;
+   private static LhsParser lhsParser;
+   private static Collection actionParsers;
+   private static KnowledgeBuilder knowledgeBuilder;
+   private static RemoteDynamicJarsBuilder remoteDynamicJarsBuilder;
+   private static DynamicSpringConfigLoader dynamicSpringConfigLoader;
 
    public static KnowledgeBuilder getKnowledgeBuilder() {
-      if (c == null) {
-         c = (KnowledgeBuilder)Utils.getApplicationContext().getBean("urule.knowledgeBuilder");
+      if (ServiceUtils.knowledgeBuilder == null) {
+         ServiceUtils.knowledgeBuilder = (KnowledgeBuilder)Utils.getApplicationContext().getBean("urule.knowledgeBuilder");
       }
 
-      return c;
+      return ServiceUtils.knowledgeBuilder;
    }
 
    public static LhsParser getLhsParser() {
-      if (a == null) {
-         a = (LhsParser)Utils.getApplicationContext().getBean("urule.lhsParser");
+      if (ServiceUtils.lhsParser == null) {
+         ServiceUtils.lhsParser = (LhsParser)Utils.getApplicationContext().getBean("urule.lhsParser");
       }
 
-      return a;
+      return ServiceUtils.lhsParser;
    }
 
    public static Collection getActionParsers() {
-      if (b == null) {
-         b = Utils.getApplicationContext().getBeansOfType(ActionParser.class).values();
+      if (ServiceUtils.actionParsers == null) {
+         ServiceUtils.actionParsers = Utils.getApplicationContext().getBeansOfType(ActionParser.class).values();
       }
 
-      return b;
+      return ServiceUtils.actionParsers;
    }
 
    public static RemoteDynamicJarsBuilder getRemoteDynamicJarsBuilder() {
-      if (d == null) {
-         d = (RemoteDynamicJarsBuilder)Utils.getApplicationContext().getBean("urule.remoteDynamicJarsBuilder");
+      if (ServiceUtils.remoteDynamicJarsBuilder == null) {
+         ServiceUtils.remoteDynamicJarsBuilder = (RemoteDynamicJarsBuilder)Utils.getApplicationContext().getBean("urule.remoteDynamicJarsBuilder");
       }
 
-      return d;
+      return ServiceUtils.remoteDynamicJarsBuilder;
    }
 
    public static DynamicSpringConfigLoader getDynamicSpringConfigLoader() {
-      if (e == null) {
-         e = (DynamicSpringConfigLoader)Utils.getApplicationContext().getBean("urule.dynamicSpringConfigLoader");
+      if (ServiceUtils.dynamicSpringConfigLoader == null) {
+         ServiceUtils.dynamicSpringConfigLoader = (DynamicSpringConfigLoader)Utils.getApplicationContext().getBean("urule.dynamicSpringConfigLoader");
       }
 
-      return e;
+      return ServiceUtils.dynamicSpringConfigLoader;
    }
 }

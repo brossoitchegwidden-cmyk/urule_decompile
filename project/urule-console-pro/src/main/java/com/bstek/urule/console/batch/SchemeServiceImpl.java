@@ -41,484 +41,485 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/** Persists, validates and hydrates batch data-provider/resolver schemes. */
 public class SchemeServiceImpl implements SchemeService {
-   private static Log a = LogFactory.getLog(SchemeServiceImpl.class);
+   private static Log logger = LogFactory.getLog(SchemeServiceImpl.class);
 
-   public void add(Batch var1, String var2) {
-      var1.setId(IDGenerator.getInstance().nextId(IDType.BATCH));
-      var1.setStatus(BatchStatus.none);
-      var1.setProjectId(ContextHolder.getProjectId());
-      var1.setCreateUser(var2);
-      var1.setCreateDate(new Date());
-      BatchManager.ins.add(var1);
-      if (var1.getPacketParams() != null) {
-         for(DataParam var4 : (Iterable<DataParam>)(Iterable<?>)(var1.getPacketParams())) {
-            if ((var4.getDataType().equals("Object") || var4.getDataType().equals("List")) && StringUtils.isBlank(var4.getBatchParamName())) {
-               this.a(var1, var4, var2);
+   public void add(Batch batchData, String account) {
+      batchData.setId(IDGenerator.getInstance().nextId(IDType.BATCH));
+      batchData.setStatus(BatchStatus.none);
+      batchData.setProjectId(ContextHolder.getProjectId());
+      batchData.setCreateUser(account);
+      batchData.setCreateDate(new Date());
+      BatchManager.ins.add(batchData);
+      if (batchData.getPacketParams() != null) {
+         for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batchData.getPacketParams())) {
+            if ((dataParam.getDataType().equals("Object") || dataParam.getDataType().equals("List")) && StringUtils.isBlank(dataParam.getBatchParamName())) {
+               this.addParameterProvider(batchData, dataParam, account);
             }
          }
       }
 
-      if (var1.getDataProvider() != null) {
-         this.a(var1, var2);
+      if (batchData.getDataProvider() != null) {
+         this.addBatchProvider(batchData, account);
       }
 
-      if (var1.getDataResolver() != null) {
-         this.b(var1, var2);
+      if (batchData.getDataResolver() != null) {
+         this.addResolver(batchData, account);
       }
 
-      if (var1.getDataProvider() != null || var1.getDataResolver() != null) {
-         var1.setUpdateUser(var2);
-         var1.setUpdateDate(new Date());
-         BatchManager.ins.update(var1);
+      if (batchData.getDataProvider() != null || batchData.getDataResolver() != null) {
+         batchData.setUpdateUser(account);
+         batchData.setUpdateDate(new Date());
+         BatchManager.ins.update(batchData);
       }
 
    }
 
-   public void update(Batch var1, String var2) {
-      var1.setUpdateUser(var2);
-      var1.setUpdateDate(new Date());
-      BatchManager.ins.update(var1);
-      if (var1.getPacketParams() != null) {
-         for(DataParam var4 : (Iterable<DataParam>)(Iterable<?>)(var1.getPacketParams())) {
-            if ((var4.getDataType().equals("Object") || var4.getDataType().equals("List")) && StringUtils.isBlank(var4.getBatchParamName())) {
-               this.a(var1, var2, var4, var4.getDataProvider());
+   public void update(Batch batch, String account) {
+      batch.setUpdateUser(account);
+      batch.setUpdateDate(new Date());
+      BatchManager.ins.update(batch);
+      if (batch.getPacketParams() != null) {
+         for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batch.getPacketParams())) {
+            if ((dataParam.getDataType().equals("Object") || dataParam.getDataType().equals("List")) && StringUtils.isBlank(dataParam.getBatchParamName())) {
+            this.updateParameterProvider(batch, account, dataParam, dataParam.getDataProvider());
             }
          }
       }
 
-      if (var1.getDataProvider() != null) {
-         BatchDataProvider var12 = var1.getDataProvider();
-         this.a(var1, var2, var12);
+      if (batch.getDataProvider() != null) {
+         BatchDataProvider dataProvider = batch.getDataProvider();
+         this.updateBatchProvider(batch, account, dataProvider);
       }
 
-      if (var1.getDataResolver() != null) {
-         BatchDataResolver var13 = var1.getDataResolver();
-         if (var13.getId() != null && var13.getId() != 0L) {
-            var13.setUpdateUser(var2);
-            var13.setUpdateDate(new Date());
-            ResolverManager.ins.update(var13);
-            ArrayList var14 = new ArrayList();
-            List var5 = ResolverItemManager.ins.createQuery().resolverId(var13.getId()).list();
+      if (batch.getDataResolver() != null) {
+         BatchDataResolver dataResolver = batch.getDataResolver();
+         if (dataResolver.getId() != null && dataResolver.getId() != 0L) {
+            dataResolver.setUpdateUser(account);
+            dataResolver.setUpdateDate(new Date());
+            ResolverManager.ins.update(dataResolver);
+            ArrayList items = new ArrayList();
+            List items2 = ResolverItemManager.ins.createQuery().resolverId(dataResolver.getId()).list();
 
-            for(BatchDataResolverItem var7 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var13.getItems())) {
-               if (var7.getId() != null && var7.getId() != 0L) {
-                  var7.setUpdateUser(var2);
-                  var7.setUpdateDate(new Date());
-                  ResolverItemManager.ins.update(var7);
-                  List var8 = ResolverFieldManager.ins.createQuery().itemId(var7.getId()).list();
-                  ArrayList var9 = new ArrayList();
+            for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(dataResolver.getItems())) {
+               if (batchDataResolverItem.getId() != null && batchDataResolverItem.getId() != 0L) {
+                  batchDataResolverItem.setUpdateUser(account);
+                  batchDataResolverItem.setUpdateDate(new Date());
+                  ResolverItemManager.ins.update(batchDataResolverItem);
+                  List items3 = ResolverFieldManager.ins.createQuery().itemId(batchDataResolverItem.getId()).list();
+                  ArrayList items4 = new ArrayList();
 
-                  for(BatchDataResolverItemField var11 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var7.getFields())) {
-                     if (var11.getId() != 0L && var11.getId() != null) {
-                        var11.setUpdateUser(var2);
-                        var11.setUpdateDate(new Date());
-                        ResolverFieldManager.ins.update(var11);
+                  for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(batchDataResolverItem.getFields())) {
+                     if (batchDataResolverItemField.getId() != 0L && batchDataResolverItemField.getId() != null) {
+                        batchDataResolverItemField.setUpdateUser(account);
+                        batchDataResolverItemField.setUpdateDate(new Date());
+                        ResolverFieldManager.ins.update(batchDataResolverItemField);
                      } else {
-                        this.a(var2, var7, var11);
+                        this.addResolverField(account, batchDataResolverItem, batchDataResolverItemField);
                      }
 
-                     var9.add(var11.getId());
+                     items4.add(batchDataResolverItemField.getId());
                   }
 
-                  for(BatchDataResolverItemField var18 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var8)) {
-                     if (!var9.contains(var18.getId())) {
-                        ResolverFieldManager.ins.remove(var18.getId());
+                  for(BatchDataResolverItemField batchDataResolverItemField2 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(items3)) {
+                     if (!items4.contains(batchDataResolverItemField2.getId())) {
+                        ResolverFieldManager.ins.remove(batchDataResolverItemField2.getId());
                      }
                   }
                } else {
-                  this.a(var2, var13, var7);
+                  this.addResolverItem(account, dataResolver, batchDataResolverItem);
                }
 
-               var14.add(var7.getId());
+               items.add(batchDataResolverItem.getId());
             }
 
-            for(BatchDataResolverItem var16 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var5)) {
-               if (!var14.contains(var16.getId())) {
-                  BatchManagerHelper.removeResolverItem(var16.getId());
+            for(BatchDataResolverItem batchDataResolverItem2 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(items2)) {
+               if (!items.contains(batchDataResolverItem2.getId())) {
+                  BatchManagerHelper.removeResolverItem(batchDataResolverItem2.getId());
                }
             }
          } else {
-            this.b(var1, var2);
+            this.addResolver(batch, account);
          }
       }
 
-      BatchManager.ins.update(var1);
+      BatchManager.ins.update(batch);
    }
 
-   private void a(Batch var1, String var2, DataParam var3, BatchDataProvider var4) {
-      if (var4.getId() != null && var4.getId() != 0L) {
-         var4.setSupportsPaging(false);
-         var4.setUpdateUser(var2);
-         var4.setUpdateDate(new Date());
-         ProviderManager.ins.update(var4);
-         List var5 = ProviderFieldManager.ins.createQuery().providerId(var4.getId()).list();
-         ArrayList var6 = new ArrayList();
+   private void updateParameterProvider(Batch batch, String account, DataParam dataParam, BatchDataProvider batchDataProvider) {
+      if (batchDataProvider.getId() != null && batchDataProvider.getId() != 0L) {
+         batchDataProvider.setSupportsPaging(false);
+         batchDataProvider.setUpdateUser(account);
+         batchDataProvider.setUpdateDate(new Date());
+         ProviderManager.ins.update(batchDataProvider);
+         List items = ProviderFieldManager.ins.createQuery().providerId(batchDataProvider.getId()).list();
+         ArrayList items2 = new ArrayList();
 
-         for(BatchDataProviderField var8 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var4.getFields())) {
-            if (var8.getId() != null && var8.getId() != 0L) {
-               var8.setUpdateUser(var2);
-               var8.setUpdateDate(new Date());
-               if (this.a(var8)) {
-                  if (var8.getDataProviderId() != null && var8.getDataProviderId() != 0L && var8.getDataProvider() != null) {
-                     this.a(var1, var2, var8, var8.getDataProvider());
+         for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(batchDataProvider.getFields())) {
+            if (batchDataProviderField.getId() != null && batchDataProviderField.getId() != 0L) {
+               batchDataProviderField.setUpdateUser(account);
+               batchDataProviderField.setUpdateDate(new Date());
+               if (this.isCompositeField(batchDataProviderField)) {
+                  if (batchDataProviderField.getDataProviderId() != null && batchDataProviderField.getDataProviderId() != 0L && batchDataProviderField.getDataProvider() != null) {
+                     this.updateNestedProvider(batch, account, batchDataProviderField, batchDataProviderField.getDataProvider());
                   } else {
-                     this.a(var1, var2, var8);
+                     this.addNestedProvider(batch, account, batchDataProviderField);
                   }
                }
 
-               ProviderFieldManager.ins.update(var8);
+               ProviderFieldManager.ins.update(batchDataProviderField);
             } else {
-               this.a(var1, var2, var4, var8);
+               this.addProviderField(batch, account, batchDataProvider, batchDataProviderField);
             }
 
-            var6.add(var8.getId());
+            items2.add(batchDataProviderField.getId());
          }
 
-         for(BatchDataProviderField var10 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var5)) {
-            if (!var6.contains(var10.getId())) {
-               if (var10.getDataProviderId() != null) {
-                  this.removeProvider(var10.getDataProviderId(), var1.getId());
+         for(BatchDataProviderField batchDataProviderField2 : (Iterable<BatchDataProviderField>)(Iterable<?>)(items)) {
+            if (!items2.contains(batchDataProviderField2.getId())) {
+               if (batchDataProviderField2.getDataProviderId() != null) {
+                  this.removeProvider(batchDataProviderField2.getDataProviderId(), batch.getId());
                }
 
-               ProviderFieldManager.ins.remove(var10.getId());
+               ProviderFieldManager.ins.remove(batchDataProviderField2.getId());
             }
          }
       } else {
-         this.a(var1, var3, var2);
+         this.addParameterProvider(batch, dataParam, account);
       }
 
    }
 
-   private void a(Batch var1, String var2, BatchDataProvider var3) {
-      if (var3.getId() != null && var3.getId() != 0L) {
-         var3.setUpdateUser(var2);
-         var3.setUpdateDate(new Date());
-         ProviderManager.ins.update(var3);
-         List var4 = ProviderFieldManager.ins.createQuery().providerId(var3.getId()).list();
-         ArrayList var5 = new ArrayList();
+   private void updateBatchProvider(Batch batch, String account, BatchDataProvider batchDataProvider) {
+      if (batchDataProvider.getId() != null && batchDataProvider.getId() != 0L) {
+         batchDataProvider.setUpdateUser(account);
+         batchDataProvider.setUpdateDate(new Date());
+         ProviderManager.ins.update(batchDataProvider);
+         List items = ProviderFieldManager.ins.createQuery().providerId(batchDataProvider.getId()).list();
+         ArrayList items2 = new ArrayList();
 
-         for(BatchDataProviderField var7 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var3.getFields())) {
-            if (var7.getId() != null && var7.getId() != 0L) {
-               var7.setUpdateUser(var2);
-               var7.setUpdateDate(new Date());
-               if (this.a(var7)) {
-                  if (var7.getDataProviderId() != null && var7.getDataProviderId() != 0L && var7.getDataProvider() != null) {
-                     this.a(var1, var2, var7, var7.getDataProvider());
+         for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(batchDataProvider.getFields())) {
+            if (batchDataProviderField.getId() != null && batchDataProviderField.getId() != 0L) {
+               batchDataProviderField.setUpdateUser(account);
+               batchDataProviderField.setUpdateDate(new Date());
+               if (this.isCompositeField(batchDataProviderField)) {
+                  if (batchDataProviderField.getDataProviderId() != null && batchDataProviderField.getDataProviderId() != 0L && batchDataProviderField.getDataProvider() != null) {
+                     this.updateNestedProvider(batch, account, batchDataProviderField, batchDataProviderField.getDataProvider());
                   } else {
-                     this.a(var1, var2, var7);
+                     this.addNestedProvider(batch, account, batchDataProviderField);
                   }
                }
 
-               ProviderFieldManager.ins.update(var7);
+               ProviderFieldManager.ins.update(batchDataProviderField);
             } else {
-               this.a(var1, var2, var3, var7);
+               this.addProviderField(batch, account, batchDataProvider, batchDataProviderField);
             }
 
-            var5.add(var7.getId());
+            items2.add(batchDataProviderField.getId());
          }
 
-         for(BatchDataProviderField var9 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var4)) {
-            if (!var5.contains(var9.getId())) {
-               if (var9.getDataProviderId() != null) {
-                  this.removeProvider(var9.getDataProviderId(), var1.getId());
+         for(BatchDataProviderField batchDataProviderField2 : (Iterable<BatchDataProviderField>)(Iterable<?>)(items)) {
+            if (!items2.contains(batchDataProviderField2.getId())) {
+               if (batchDataProviderField2.getDataProviderId() != null) {
+                  this.removeProvider(batchDataProviderField2.getDataProviderId(), batch.getId());
                }
 
-               ProviderFieldManager.ins.remove(var9.getId());
+               ProviderFieldManager.ins.remove(batchDataProviderField2.getId());
             }
          }
       } else {
-         this.a(var1, var2);
+         this.addBatchProvider(batch, account);
       }
 
    }
 
-   private void a(Batch var1, String var2, BatchDataProviderField var3, BatchDataProvider var4) {
-      if (var4.getId() != null && var4.getId() != 0L) {
-         var4.setSupportsPaging(false);
-         var4.setUpdateUser(var2);
-         var4.setUpdateDate(new Date());
-         ProviderManager.ins.update(var4);
-         List var5 = ProviderFieldManager.ins.createQuery().providerId(var4.getId()).list();
-         ArrayList var6 = new ArrayList();
+   private void updateNestedProvider(Batch batch, String account, BatchDataProviderField batchDataProviderField, BatchDataProvider batchDataProvider) {
+      if (batchDataProvider.getId() != null && batchDataProvider.getId() != 0L) {
+         batchDataProvider.setSupportsPaging(false);
+         batchDataProvider.setUpdateUser(account);
+         batchDataProvider.setUpdateDate(new Date());
+         ProviderManager.ins.update(batchDataProvider);
+         List items = ProviderFieldManager.ins.createQuery().providerId(batchDataProvider.getId()).list();
+         ArrayList items2 = new ArrayList();
 
-         for(BatchDataProviderField var8 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var4.getFields())) {
-            if (var8.getId() != null && var8.getId() != 0L) {
-               var8.setUpdateUser(var2);
-               var8.setUpdateDate(new Date());
-               ProviderFieldManager.ins.update(var8);
-               if (this.a(var8)) {
-                  if (var8.getDataProviderId() != null && var8.getDataProviderId() != 0L && var8.getDataProvider() != null) {
-                     this.a(var1, var2, var8, var8.getDataProvider());
+         for(BatchDataProviderField batchDataProviderField2 : (Iterable<BatchDataProviderField>)(Iterable<?>)(batchDataProvider.getFields())) {
+            if (batchDataProviderField2.getId() != null && batchDataProviderField2.getId() != 0L) {
+               batchDataProviderField2.setUpdateUser(account);
+               batchDataProviderField2.setUpdateDate(new Date());
+               ProviderFieldManager.ins.update(batchDataProviderField2);
+               if (this.isCompositeField(batchDataProviderField2)) {
+                  if (batchDataProviderField2.getDataProviderId() != null && batchDataProviderField2.getDataProviderId() != 0L && batchDataProviderField2.getDataProvider() != null) {
+                     this.updateNestedProvider(batch, account, batchDataProviderField2, batchDataProviderField2.getDataProvider());
                   } else {
-                     this.a(var1, var2, var8);
+                     this.addNestedProvider(batch, account, batchDataProviderField2);
                   }
                }
             } else {
-               this.a(var1, var2, var4, var8);
+               this.addProviderField(batch, account, batchDataProvider, batchDataProviderField2);
             }
 
-            var6.add(var8.getId());
+            items2.add(batchDataProviderField2.getId());
          }
 
-         for(BatchDataProviderField var10 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var5)) {
-            if (!var6.contains(var10.getId())) {
-               ProviderFieldManager.ins.remove(var10.getId());
-               if (var10.getDataProviderId() != null) {
-                  this.removeProvider(var10.getDataProviderId(), var1.getId());
+         for(BatchDataProviderField batchDataProviderField3 : (Iterable<BatchDataProviderField>)(Iterable<?>)(items)) {
+            if (!items2.contains(batchDataProviderField3.getId())) {
+               ProviderFieldManager.ins.remove(batchDataProviderField3.getId());
+               if (batchDataProviderField3.getDataProviderId() != null) {
+                  this.removeProvider(batchDataProviderField3.getDataProviderId(), batch.getId());
                }
             }
          }
       } else {
-         this.a(var1, var2, var3);
+         this.addNestedProvider(batch, account, batchDataProviderField);
       }
 
    }
 
-   public void removeProvider(long var1, long var3) {
-      for(BatchDataProviderField var7 : (Iterable<BatchDataProviderField>)(Iterable<?>)(ProviderFieldManager.ins.createQuery().providerId(var1).batchId(var3).list())) {
-         if (var7.getDataProviderId() != null) {
-            this.removeProvider(var7.getDataProviderId(), var3);
+   public void removeProvider(long id, long batchId) {
+      for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(ProviderFieldManager.ins.createQuery().providerId(id).batchId(batchId).list())) {
+         if (batchDataProviderField.getDataProviderId() != null) {
+            this.removeProvider(batchDataProviderField.getDataProviderId(), batchId);
          }
 
-         ProviderFieldManager.ins.remove(var7.getId());
+         ProviderFieldManager.ins.remove(batchDataProviderField.getId());
       }
 
-      ProviderManager.ins.remove(var1);
+      ProviderManager.ins.remove(id);
    }
 
-   public void remove(Long var1) {
-      ProviderFieldManager.ins.removeByBatchId(var1);
-      ProviderManager.ins.removeByBatchId(var1);
-      ResolverFieldManager.ins.removeByBatchId(var1);
-      ResolverItemManager.ins.removeByBatchId(var1);
-      ResolverManager.ins.removeByBatchId(var1);
-      BatchManager.ins.remove(var1);
+   public void remove(Long id) {
+      ProviderFieldManager.ins.removeByBatchId(id);
+      ProviderManager.ins.removeByBatchId(id);
+      ResolverFieldManager.ins.removeByBatchId(id);
+      ResolverItemManager.ins.removeByBatchId(id);
+      ResolverManager.ins.removeByBatchId(id);
+      BatchManager.ins.remove(id);
    }
 
-   private void a(Batch var1, String var2) {
-      BatchDataProvider var3 = var1.getDataProvider();
-      var3.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_PROVIDER));
-      var3.setBatchId(var1.getId());
-      var3.setProjectId(var1.getProjectId());
-      var3.setCreateUser(var2);
-      var3.setCreateDate(new Date());
-      var3.setName("DataProvider");
-      ProviderManager.ins.add(var3);
-      var1.setProviderId(var3.getId());
-      if (var3.getFields() != null) {
-         for(BatchDataProviderField var5 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var3.getFields())) {
-            this.a(var1, var2, var3, var5);
-         }
-      }
-
-   }
-
-   private void a(Batch var1, DataParam var2, String var3) {
-      BatchDataProvider var4 = var2.getDataProvider();
-      if (var4 == null) {
-         var4 = new BatchDataProvider();
-         var4.setDatasourceId(0L);
-         var4.setName("Packet Parameter Data Provider");
-         var2.setDataProvider(var4);
-      }
-
-      var4.setSupportsPaging(false);
-      var4.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_PROVIDER));
-      var4.setBatchId(var1.getId());
-      var4.setProjectId(var1.getProjectId());
-      var4.setCreateUser(var3);
-      var4.setCreateDate(new Date());
-      var4.setName("DataProvider");
-      ProviderManager.ins.add(var4);
-      var2.setDataProviderId(var4.getId());
-      if (var4.getFields() != null) {
-         for(BatchDataProviderField var6 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var4.getFields())) {
-            this.a(var1, var3, var4, var6);
+   private void addBatchProvider(Batch batch, String account) {
+      BatchDataProvider dataProvider = batch.getDataProvider();
+      dataProvider.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_PROVIDER));
+      dataProvider.setBatchId(batch.getId());
+      dataProvider.setProjectId(batch.getProjectId());
+      dataProvider.setCreateUser(account);
+      dataProvider.setCreateDate(new Date());
+      dataProvider.setName("DataProvider");
+      ProviderManager.ins.add(dataProvider);
+      batch.setProviderId(dataProvider.getId());
+      if (dataProvider.getFields() != null) {
+         for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(dataProvider.getFields())) {
+            this.addProviderField(batch, account, dataProvider, batchDataProviderField);
          }
       }
 
    }
 
-   private boolean a(BatchDataProviderField var1) {
-      return "Object".equals(var1.getDataType()) || "List".equals(var1.getDataType()) || "JsonObject".equals(var1.getDataType()) || "JsonArray".equals(var1.getDataType());
-   }
-
-   private void a(Batch var1, String var2, BatchDataProvider var3, BatchDataProviderField var4) {
-      var4.setBatchId(var1.getId());
-      var4.setProviderId(var3.getId());
-      var4.setProjectId(var1.getProjectId());
-      var4.setId(IDGenerator.getInstance().nextId(IDType.BATCH_PROVIDER_FIELD));
-      var4.setCreateUser(var2);
-      var4.setCreateDate(new Date());
-      if ((var4.getDataProviderId() == null || var4.getDataProviderId() == 0L) && this.a(var4)) {
-         this.a(var1, var2, var4);
+   private void addParameterProvider(Batch batch, DataParam dataParam, String account) {
+      BatchDataProvider dataProvider = dataParam.getDataProvider();
+      if (dataProvider == null) {
+         dataProvider = new BatchDataProvider();
+         dataProvider.setDatasourceId(0L);
+         dataProvider.setName("Packet Parameter Data Provider");
+         dataParam.setDataProvider(dataProvider);
       }
 
-      ProviderFieldManager.ins.add(var4);
-   }
-
-   private void a(Batch var1, String var2, BatchDataProviderField var3) {
-      BatchDataProvider var4 = var3.getDataProvider();
-      if (var4 == null) {
-         var4 = new BatchDataProvider();
-         var4.setDatasourceId(0L);
-         var4.setName("Field Data Provider");
-         var3.setDataProvider(var4);
-      }
-
-      var4.setSupportsPaging(false);
-      var4.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_PROVIDER));
-      var4.setBatchId(var1.getId());
-      var4.setProjectId(var1.getProjectId());
-      var4.setCreateUser(var2);
-      var4.setCreateDate(new Date());
-      ProviderManager.ins.add(var3.getDataProvider());
-      var3.setDataProviderId(var4.getId());
-      if (var4.getFields() != null) {
-         for(BatchDataProviderField var6 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var4.getFields())) {
-            this.a(var1, var2, var4, var6);
+      dataProvider.setSupportsPaging(false);
+      dataProvider.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_PROVIDER));
+      dataProvider.setBatchId(batch.getId());
+      dataProvider.setProjectId(batch.getProjectId());
+      dataProvider.setCreateUser(account);
+      dataProvider.setCreateDate(new Date());
+      dataProvider.setName("DataProvider");
+      ProviderManager.ins.add(dataProvider);
+      dataParam.setDataProviderId(dataProvider.getId());
+      if (dataProvider.getFields() != null) {
+         for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(dataProvider.getFields())) {
+            this.addProviderField(batch, account, dataProvider, batchDataProviderField);
          }
       }
 
    }
 
-   private void b(Batch var1, String var2) {
-      BatchDataResolver var3 = var1.getDataResolver();
-      var3.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_RESOLVER));
-      var3.setBatchId(var1.getId());
-      var3.setProjectId(var1.getProjectId());
-      var3.setCreateUser(var2);
-      var3.setCreateDate(new Date());
-      var3.setName("DataResolver");
-      ResolverManager.ins.add(var3);
-      var1.setResolverId(var3.getId());
-      if (var3.getItems() != null) {
-         for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var3.getItems())) {
-            this.a(var2, var3, var5);
+   private boolean isCompositeField(BatchDataProviderField batchDataProviderField) {
+      return "Object".equals(batchDataProviderField.getDataType()) || "List".equals(batchDataProviderField.getDataType()) || "JsonObject".equals(batchDataProviderField.getDataType()) || "JsonArray".equals(batchDataProviderField.getDataType());
+   }
+
+   private void addProviderField(Batch batch, String account, BatchDataProvider batchDataProvider, BatchDataProviderField batchDataProviderField) {
+      batchDataProviderField.setBatchId(batch.getId());
+      batchDataProviderField.setProviderId(batchDataProvider.getId());
+      batchDataProviderField.setProjectId(batch.getProjectId());
+      batchDataProviderField.setId(IDGenerator.getInstance().nextId(IDType.BATCH_PROVIDER_FIELD));
+      batchDataProviderField.setCreateUser(account);
+      batchDataProviderField.setCreateDate(new Date());
+      if ((batchDataProviderField.getDataProviderId() == null || batchDataProviderField.getDataProviderId() == 0L) && this.isCompositeField(batchDataProviderField)) {
+         this.addNestedProvider(batch, account, batchDataProviderField);
+      }
+
+      ProviderFieldManager.ins.add(batchDataProviderField);
+   }
+
+   private void addNestedProvider(Batch batch, String account, BatchDataProviderField batchDataProviderField) {
+      BatchDataProvider dataProvider = batchDataProviderField.getDataProvider();
+      if (dataProvider == null) {
+         dataProvider = new BatchDataProvider();
+         dataProvider.setDatasourceId(0L);
+         dataProvider.setName("Field Data Provider");
+         batchDataProviderField.setDataProvider(dataProvider);
+      }
+
+      dataProvider.setSupportsPaging(false);
+      dataProvider.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_PROVIDER));
+      dataProvider.setBatchId(batch.getId());
+      dataProvider.setProjectId(batch.getProjectId());
+      dataProvider.setCreateUser(account);
+      dataProvider.setCreateDate(new Date());
+      ProviderManager.ins.add(batchDataProviderField.getDataProvider());
+      batchDataProviderField.setDataProviderId(dataProvider.getId());
+      if (dataProvider.getFields() != null) {
+         for(BatchDataProviderField batchDataProviderField2 : (Iterable<BatchDataProviderField>)(Iterable<?>)(dataProvider.getFields())) {
+            this.addProviderField(batch, account, dataProvider, batchDataProviderField2);
          }
       }
 
    }
 
-   private void a(String var1, BatchDataResolver var2, BatchDataResolverItem var3) {
-      var3.setId(IDGenerator.getInstance().nextId(IDType.BATCH_RESOLVER_ITEM));
-      var3.setResolverId(var2.getId());
-      var3.setBatchId(var2.getBatchId());
-      var3.setProjectId(var2.getProjectId());
-      var3.setCreateUser(var1);
-      var3.setCreateDate(new Date());
-      ResolverItemManager.ins.add(var3);
-      if (var3.getFields() != null) {
-         for(BatchDataResolverItemField var5 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var3.getFields())) {
-            this.a(var1, var3, var5);
+   private void addResolver(Batch batch, String account) {
+      BatchDataResolver dataResolver = batch.getDataResolver();
+      dataResolver.setId(IDGenerator.getInstance().nextId(IDType.BATCH_DATA_RESOLVER));
+      dataResolver.setBatchId(batch.getId());
+      dataResolver.setProjectId(batch.getProjectId());
+      dataResolver.setCreateUser(account);
+      dataResolver.setCreateDate(new Date());
+      dataResolver.setName("DataResolver");
+      ResolverManager.ins.add(dataResolver);
+      batch.setResolverId(dataResolver.getId());
+      if (dataResolver.getItems() != null) {
+         for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(dataResolver.getItems())) {
+            this.addResolverItem(account, dataResolver, batchDataResolverItem);
          }
       }
 
    }
 
-   private void a(String var1, BatchDataResolverItem var2, BatchDataResolverItemField var3) {
-      var3.setBatchId(var2.getBatchId());
-      var3.setResolverItemId(var2.getId());
-      var3.setResolverId(var2.getResolverId());
-      var3.setProjectId(var2.getProjectId());
-      var3.setId(IDGenerator.getInstance().nextId(IDType.BATCH_RESOLVER_FIELD));
-      var3.setCreateUser(var1);
-      var3.setCreateDate(new Date());
-      ResolverFieldManager.ins.add(var3);
-   }
-
-   public void disable(Long var1, String var2) {
-      Batch var3 = BatchManager.ins.get(var1);
-      if (var3 != null) {
-         var3.setEnable(false);
-         var3.setUpdateDate(new Date());
-         var3.setUpdateUser(var2);
-         BatchManager.ins.update(var3);
+   private void addResolverItem(String account, BatchDataResolver batchDataResolver, BatchDataResolverItem batchDataResolverItem) {
+      batchDataResolverItem.setId(IDGenerator.getInstance().nextId(IDType.BATCH_RESOLVER_ITEM));
+      batchDataResolverItem.setResolverId(batchDataResolver.getId());
+      batchDataResolverItem.setBatchId(batchDataResolver.getBatchId());
+      batchDataResolverItem.setProjectId(batchDataResolver.getProjectId());
+      batchDataResolverItem.setCreateUser(account);
+      batchDataResolverItem.setCreateDate(new Date());
+      ResolverItemManager.ins.add(batchDataResolverItem);
+      if (batchDataResolverItem.getFields() != null) {
+         for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(batchDataResolverItem.getFields())) {
+            this.addResolverField(account, batchDataResolverItem, batchDataResolverItemField);
+         }
       }
 
    }
 
-   public void enable(Long var1, String var2) {
-      Batch var3 = this.getBatchData(var1);
-      if (var3 != null) {
-         if (StringUtils.isBlank(var3.getName())) {
+   private void addResolverField(String account, BatchDataResolverItem batchDataResolverItem, BatchDataResolverItemField batchDataResolverItemField) {
+      batchDataResolverItemField.setBatchId(batchDataResolverItem.getBatchId());
+      batchDataResolverItemField.setResolverItemId(batchDataResolverItem.getId());
+      batchDataResolverItemField.setResolverId(batchDataResolverItem.getResolverId());
+      batchDataResolverItemField.setProjectId(batchDataResolverItem.getProjectId());
+      batchDataResolverItemField.setId(IDGenerator.getInstance().nextId(IDType.BATCH_RESOLVER_FIELD));
+      batchDataResolverItemField.setCreateUser(account);
+      batchDataResolverItemField.setCreateDate(new Date());
+      ResolverFieldManager.ins.add(batchDataResolverItemField);
+   }
+
+   public void disable(Long id, String account) {
+      Batch batch = BatchManager.ins.get(id);
+      if (batch != null) {
+         batch.setEnable(false);
+         batch.setUpdateDate(new Date());
+         batch.setUpdateUser(account);
+         BatchManager.ins.update(batch);
+      }
+
+   }
+
+   public void enable(Long id, String account) {
+      Batch batchData = this.getBatchData(id);
+      if (batchData != null) {
+         if (StringUtils.isBlank(batchData.getName())) {
             throw new RuleException("批处理名称不能为空");
          }
 
-         if (var3.getPacketId() == null || var3.getPacketId() == 0L) {
+         if (batchData.getPacketId() == null || batchData.getPacketId() == 0L) {
             throw new RuleException("批处理知识包属性没有设置");
          }
 
-         if (var3.isRestEnable() && var3.isRestSecurityEnable() && (StringUtils.isBlank(var3.getRestSecurityUser()) || StringUtils.isBlank(var3.getRestSecurityPassword()))) {
+         if (batchData.isRestEnable() && batchData.isRestSecurityEnable() && (StringUtils.isBlank(batchData.getRestSecurityUser()) || StringUtils.isBlank(batchData.getRestSecurityPassword()))) {
             throw new RuleException("批处理启用Rest安全设置后需要设置对应的用户名和密码");
          }
 
-         if (var3.isThreadMulti() && (var3.getThreadSize() <= 0 || var3.getThreadDataSize() <= 0)) {
+         if (batchData.isThreadMulti() && (batchData.getThreadSize() <= 0 || batchData.getThreadDataSize() <= 0)) {
             throw new RuleException("批处理启用多线程后线程数或线程数据量大小必须大于0");
          }
 
-         for(DataParam var6 : (Iterable<DataParam>)(Iterable<?>)(var3.getPacketParams())) {
-            BatchDataProvider var7 = var6.getDataProvider();
-            if (var7 != null) {
-               this.a(var7);
+         for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(batchData.getPacketParams())) {
+            BatchDataProvider dataProvider = dataParam.getDataProvider();
+            if (dataProvider != null) {
+               this.validateProvider(dataProvider);
             }
          }
 
-         BatchDataProvider var8 = var3.getDataProvider();
-         if (var8 == null) {
+         BatchDataProvider dataProvider2 = batchData.getDataProvider();
+         if (dataProvider2 == null) {
             throw new RuleException("批处理未定义数据加载器");
          }
 
-         this.a(var8);
-         BatchDataResolver var9 = var3.getDataResolver();
-         if (var9 == null) {
+         this.validateProvider(dataProvider2);
+         BatchDataResolver dataResolver = batchData.getDataResolver();
+         if (dataResolver == null) {
             throw new RuleException("批处理未定义数据处理器");
          }
 
-         this.a(var9);
-         var3.setEnable(true);
-         var3.setUpdateDate(new Date());
-         var3.setUpdateUser(var2);
-         BatchManager.ins.update(var3);
+         this.validateResolver(dataResolver);
+         batchData.setEnable(true);
+         batchData.setUpdateDate(new Date());
+         batchData.setUpdateUser(account);
+         BatchManager.ins.update(batchData);
       }
 
    }
 
-   private void a(BatchDataProvider var1) {
-      if (StringUtils.isBlank(var1.getPacketVarName())) {
+   private void validateProvider(BatchDataProvider batchDataProvider) {
+      if (StringUtils.isBlank(batchDataProvider.getPacketVarName())) {
          throw new RuleException("数据加载器对象的知识包变量名未绑定");
-      } else if (StringUtils.isBlank(var1.getPageSql())) {
+      } else if (StringUtils.isBlank(batchDataProvider.getPageSql())) {
          throw new RuleException("数据加载器对象的分页SQL没有定义");
-      } else if (var1.isSupportsPaging() && StringUtils.isBlank(var1.getCountSql())) {
+      } else if (batchDataProvider.isSupportsPaging() && StringUtils.isBlank(batchDataProvider.getCountSql())) {
          throw new RuleException("数据加载器对象的总记录数SQL没有定义");
       } else {
-         DataSource var2 = var1.getDatasource();
-         if (var2 == null) {
+         DataSource dataSource = batchDataProvider.getDatasource();
+         if (dataSource == null) {
             throw new RuleException("数据加载器对象未绑定数据源");
          } else {
-            List var3 = var1.getFields();
-            if (var3 != null && var3.size() != 0) {
-               for(BatchDataProviderField var5 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var3)) {
-                  if (StringUtils.isBlank(var5.getDestProperty())) {
+            List fields = batchDataProvider.getFields();
+            if (fields != null && fields.size() != 0) {
+               for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(fields)) {
+                  if (StringUtils.isBlank(batchDataProviderField.getDestProperty())) {
                      throw new RuleException("数据加载器对象变量映射绑定属性设置不完整,未设置变量属性");
                   }
 
-                  if (StringUtils.isBlank(var5.getDataType())) {
+                  if (StringUtils.isBlank(batchDataProviderField.getDataType())) {
                      throw new RuleException("数据加载器对象变量映射绑定属性设置不完整,未设置变量数据类型");
                   }
 
-                  if (!var5.getDataType().equalsIgnoreCase("Object") && !var5.getDataType().equalsIgnoreCase("List")) {
-                     if (StringUtils.isBlank(var5.getDestProperty())) {
+                  if (!batchDataProviderField.getDataType().equalsIgnoreCase("Object") && !batchDataProviderField.getDataType().equalsIgnoreCase("List")) {
+                     if (StringUtils.isBlank(batchDataProviderField.getDestProperty())) {
                         throw new RuleException("数据加载器对象变量映射绑定属性设置不完整,未设置字段属性");
                      }
                   } else {
-                     BatchDataProvider var6 = var5.getDataProvider();
-                     if (var6 == null) {
+                     BatchDataProvider dataProvider = batchDataProviderField.getDataProvider();
+                     if (dataProvider == null) {
                         throw new RuleException("数据加载器对象变量未定义数据加载器");
                      }
 
-                     this.a(var6);
+                     this.validateProvider(dataProvider);
                   }
                }
 
@@ -529,64 +530,64 @@ public class SchemeServiceImpl implements SchemeService {
       }
    }
 
-   private void a(BatchDataResolver var1) {
-      DataSource var2 = var1.getDatasource();
-      if (var2 == null) {
+   private void validateResolver(BatchDataResolver batchDataResolver) {
+      DataSource dataSource = batchDataResolver.getDatasource();
+      if (dataSource == null) {
          throw new RuleException("数据处理器对象未绑定数据源");
       } else {
-         List var3 = var1.getItems();
-         if (var3 != null && var3.size() != 0) {
-            HashMap var4 = new HashMap();
+         List items = batchDataResolver.getItems();
+         if (items != null && items.size() != 0) {
+            HashMap valuesByKey = new HashMap();
 
-            for(BatchDataResolverItem var6 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var3)) {
-               if (StringUtils.isBlank(var6.getName())) {
+            for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(items)) {
+               if (StringUtils.isBlank(batchDataResolverItem.getName())) {
                   throw new RuleException("数据更新项的名称未设置");
                }
 
-               if (StringUtils.isBlank(var6.getTableName())) {
-                  throw new RuleException("数据更新项【" + var6.getName() + "】的目标物理表未设置");
+               if (StringUtils.isBlank(batchDataResolverItem.getTableName())) {
+                  throw new RuleException("数据更新项【" + batchDataResolverItem.getName() + "】的目标物理表未设置");
                }
 
-               List var7 = var6.getFields();
-               if (var7 == null || var7.size() == 0) {
-                  throw new RuleException("数据更新项【" + var6.getName() + "】未配置数据映射");
+               List fields = batchDataResolverItem.getFields();
+               if (fields == null || fields.size() == 0) {
+                  throw new RuleException("数据更新项【" + batchDataResolverItem.getName() + "】未配置数据映射");
                }
 
-               boolean var8 = false;
-               boolean var9 = false;
+               boolean flag = false;
+               boolean flag2 = false;
 
-               for(BatchDataResolverItemField var11 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var7)) {
-                  if (StringUtils.isBlank(var11.getSrcProperty())) {
+               for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(fields)) {
+                  if (StringUtils.isBlank(batchDataResolverItemField.getSrcProperty())) {
                      throw new RuleException("数据更新项的数据映射定义不完整,没有定义对应的变量属性名");
                   }
 
-                  if (StringUtils.isBlank(var11.getDataType())) {
+                  if (StringUtils.isBlank(batchDataResolverItemField.getDataType())) {
                      throw new RuleException("数据更新项的数据映射定义不完整,没有定义对应的变量数据类型");
                   }
 
-                  if (StringUtils.isBlank(var11.getDestProperty())) {
+                  if (StringUtils.isBlank(batchDataResolverItemField.getDestProperty())) {
                      throw new RuleException("数据更新项的数据映射定义不完整,没有定义对应的字段名");
                   }
 
-                  if (var11.isKey()) {
-                     var8 = true;
+                  if (batchDataResolverItemField.isKey()) {
+                     flag = true;
                   } else {
-                     var9 = true;
+                     flag2 = true;
                   }
                }
 
-               if ((var6.getUpdateMode() == BatchUpdateMode.update || var6.getUpdateMode() == BatchUpdateMode.delete) && !var8) {
-                  throw new RuleException("数据更新项【" + var6.getName() + "】数据映射配置中未定义主键");
+               if ((batchDataResolverItem.getUpdateMode() == BatchUpdateMode.update || batchDataResolverItem.getUpdateMode() == BatchUpdateMode.delete) && !flag) {
+                  throw new RuleException("数据更新项【" + batchDataResolverItem.getName() + "】数据映射配置中未定义主键");
                }
 
-               if (var6.getUpdateMode() == BatchUpdateMode.update && !var9) {
-                  throw new RuleException("数据更新项【" + var6.getName() + "】数据映射配置中未定义更新字段");
+               if (batchDataResolverItem.getUpdateMode() == BatchUpdateMode.update && !flag2) {
+                  throw new RuleException("数据更新项【" + batchDataResolverItem.getName() + "】数据映射配置中未定义更新字段");
                }
 
-               var4.put(var6.getName(), var6.getName());
+               valuesByKey.put(batchDataResolverItem.getName(), batchDataResolverItem.getName());
             }
 
-            if (var4.size() < var3.size()) {
+            if (valuesByKey.size() < items.size()) {
                throw new RuleException("数据更新项名称必须唯一");
             }
          } else {
@@ -595,231 +596,231 @@ public class SchemeServiceImpl implements SchemeService {
       }
    }
 
-   public Batch getBatchData(Long var1) {
-      Batch var2 = BatchManager.ins.get(var1);
-      if (StringUtils.isNotBlank(var2.getInputData())) {
+   public Batch getBatchData(Long id) {
+      Batch batch = BatchManager.ins.get(id);
+      if (StringUtils.isNotBlank(batch.getInputData())) {
          try {
-            List var3 = (List)JsonUtils.getObjectJsonMapper().readValue(var2.getInputData(), new TypeReference() {
+            List items = (List)JsonUtils.getObjectJsonMapper().readValue(batch.getInputData(), new TypeReference() {
             });
-            var2.setParams(var3);
-         } catch (Exception var19) {
-            var19.printStackTrace();
+            batch.setParams(items);
+         } catch (Exception exception) {
+            java.util.logging.Logger.getLogger(SchemeServiceImpl.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
          }
       }
 
-      if (StringUtils.isNotBlank(var2.getPacketInputData())) {
+      if (StringUtils.isNotBlank(batch.getPacketInputData())) {
          try {
-            List var22 = (List)JsonUtils.getObjectJsonMapper().readValue(var2.getPacketInputData(), new TypeReference() {
+            List items2 = (List)JsonUtils.getObjectJsonMapper().readValue(batch.getPacketInputData(), new TypeReference() {
             });
-            var2.setPacketParams(var22);
+            batch.setPacketParams(items2);
 
-            for(DataParam var5 : (Iterable<DataParam>)(Iterable<?>)(var22)) {
-               if (var5.getDataProviderId() != null && var5.getDataProviderId() > 0L) {
-                  BatchDataProvider var6 = this.getProviderData(var5.getDataProviderId());
-                  if (var6 != null) {
-                     var5.setDataProvider(var6);
+            for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(items2)) {
+               if (dataParam.getDataProviderId() != null && dataParam.getDataProviderId() > 0L) {
+                  BatchDataProvider providerData = this.getProviderData(dataParam.getDataProviderId());
+                  if (providerData != null) {
+                     dataParam.setDataProvider(providerData);
                   }
                }
             }
-         } catch (Exception var21) {
-            var21.printStackTrace();
+         } catch (Exception exception2) {
+            java.util.logging.Logger.getLogger(SchemeServiceImpl.class.getName()).log(java.util.logging.Level.SEVERE, exception2.getMessage(), exception2);
          }
       }
 
-      if (var2.getPacketId() != null && var2.getPacketId() > 0L) {
-         Packet var23 = PacketManager.ins.load(var2.getPacketId());
-         if (var23 != null) {
-            var2.setPacketName(var23.getName());
+      if (batch.getPacketId() != null && batch.getPacketId() > 0L) {
+         Packet packet = PacketManager.ins.load(batch.getPacketId());
+         if (packet != null) {
+            batch.setPacketName(packet.getName());
          }
       }
 
-      BatchDataProvider var24 = this.getProviderData(var2.getProviderId());
-      var2.setDataProvider(var24);
-      BatchDataResolver var25 = ResolverManager.ins.get(var2.getResolverId());
-      ResolverItemQuery var26 = ResolverItemManager.ins.createQuery();
-      List var27 = var26.resolverId(var25.getId()).list();
+      BatchDataProvider providerData2 = this.getProviderData(batch.getProviderId());
+      batch.setDataProvider(providerData2);
+      BatchDataResolver batchDataResolver = ResolverManager.ins.get(batch.getResolverId());
+      ResolverItemQuery query = ResolverItemManager.ins.createQuery();
+      List items3 = query.resolverId(batchDataResolver.getId()).list();
 
-      for(BatchDataResolverItem var8 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var27)) {
-         ResolverFieldQuery var9 = ResolverFieldManager.ins.createQuery();
-         List var10 = var9.itemId(var8.getId()).list();
-         var8.setFields(var10);
-         if (StringUtils.isNotBlank(var8.getFilterData())) {
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(items3)) {
+         ResolverFieldQuery query2 = ResolverFieldManager.ins.createQuery();
+         List items4 = query2.itemId(batchDataResolverItem.getId()).list();
+         batchDataResolverItem.setFields(items4);
+         if (StringUtils.isNotBlank(batchDataResolverItem.getFilterData())) {
             try {
-               List var11 = (List)JsonUtils.getObjectJsonMapper().readValue(var8.getFilterData(), new TypeReference() {
+               List items5 = (List)JsonUtils.getObjectJsonMapper().readValue(batchDataResolverItem.getFilterData(), new TypeReference() {
                });
 
-               for(Filter var13 : (Iterable<Filter>)(Iterable<?>)(var11)) {
-                  for(FilterItem var16 : (Iterable<FilterItem>)(Iterable<?>)(var13.getItems())) {
-                     String var17 = var16.getValue();
-                     if (!StringUtils.isBlank(var17)) {
-                        if (var16.getType() == FilterType.bean) {
-                           var16.setItemObject(Utils.getApplicationContext().getBean(var17));
-                        } else if (var16.getType() == FilterType.property) {
-                           PropertyFilter var18 = (PropertyFilter)JsonUtils.getObjectJsonMapper().readValue(var17, PropertyFilter.class);
-                           var16.setItemObject(var18);
+               for(Filter filter : (Iterable<Filter>)(Iterable<?>)(items5)) {
+                  for(FilterItem filterItem : (Iterable<FilterItem>)(Iterable<?>)(filter.getItems())) {
+                     String text = filterItem.getValue();
+                     if (!StringUtils.isBlank(text)) {
+                        if (filterItem.getType() == FilterType.bean) {
+                           filterItem.setItemObject(Utils.getApplicationContext().getBean(text));
+                        } else if (filterItem.getType() == FilterType.property) {
+                           PropertyFilter propertyFilter = (PropertyFilter)JsonUtils.getObjectJsonMapper().readValue(text, PropertyFilter.class);
+                           filterItem.setItemObject(propertyFilter);
                         }
                      }
                   }
                }
 
-               var8.setFilters(var11);
-            } catch (Exception var20) {
-               a.error(var20);
+               batchDataResolverItem.setFilters(items5);
+            } catch (Exception exception3) {
+               SchemeServiceImpl.logger.error(exception3);
             }
          }
 
-         ArrayList var29 = new ArrayList();
-         String var30 = null;
-         BatchUpdateMode var31 = var8.getUpdateMode();
-         if (BatchUpdateMode.insert == var31) {
-            var30 = this.c(var29, var8);
-            a.info(String.format("Resolver: %s, item: %s, insert sql: %s", var25.getName(), var8.getName(), var30));
-         } else if (BatchUpdateMode.update == var31) {
-            var30 = this.b((List)var29, (BatchDataResolverItem)var8);
-            a.info(String.format("Resolver: %s, item: %s, update sql: %s", var25.getName(), var8.getName(), var30));
-         } else if (BatchUpdateMode.delete == var31) {
-            var30 = this.a((List)var29, (BatchDataResolverItem)var8);
-            a.info(String.format("Resolver: %s, item: %s, delete sql: %s", var25.getName(), var8.getName(), var30));
+         ArrayList items6 = new ArrayList();
+         String text2 = null;
+         BatchUpdateMode updateMode = batchDataResolverItem.getUpdateMode();
+         if (BatchUpdateMode.insert == updateMode) {
+            text2 = this.buildInsertSql(items6, batchDataResolverItem);
+            SchemeServiceImpl.logger.info(String.format("Resolver: %s, item: %s, insert sql: %s", batchDataResolver.getName(), batchDataResolverItem.getName(), text2));
+         } else if (BatchUpdateMode.update == updateMode) {
+            text2 = this.buildUpdateSql(items6, batchDataResolverItem);
+            SchemeServiceImpl.logger.info(String.format("Resolver: %s, item: %s, update sql: %s", batchDataResolver.getName(), batchDataResolverItem.getName(), text2));
+         } else if (BatchUpdateMode.delete == updateMode) {
+            text2 = this.buildDeleteSql(items6, batchDataResolverItem);
+            SchemeServiceImpl.logger.info(String.format("Resolver: %s, item: %s, delete sql: %s", batchDataResolver.getName(), batchDataResolverItem.getName(), text2));
          }
 
-         var8.setUpdateSql(var30);
-         var8.setParams(var29);
+         batchDataResolverItem.setUpdateSql(text2);
+         batchDataResolverItem.setParams(items6);
       }
 
-      var25.setItems(var27);
-      DataSource var28 = DataSourceManager.ins.get(var25.getDatasourceId());
-      var25.setDatasource(var28);
-      var2.setDataResolver(var25);
-      return var2;
+      batchDataResolver.setItems(items3);
+      DataSource dataSource = DataSourceManager.ins.get(batchDataResolver.getDatasourceId());
+      batchDataResolver.setDatasource(dataSource);
+      batch.setDataResolver(batchDataResolver);
+      return batch;
    }
 
-   public BatchDataProvider getProviderData(Long var1) {
-      BatchDataProvider var2 = ProviderManager.ins.get(var1);
-      DataSource var3 = DataSourceManager.ins.get(var2.getDatasourceId());
-      var2.setDatasource(var3);
-      ProviderFieldQuery var4 = ProviderFieldManager.ins.createQuery();
-      if (StringUtils.isNotBlank(var2.getInputData())) {
+   public BatchDataProvider getProviderData(Long providerId) {
+      BatchDataProvider batchDataProvider = ProviderManager.ins.get(providerId);
+      DataSource dataSource = DataSourceManager.ins.get(batchDataProvider.getDatasourceId());
+      batchDataProvider.setDatasource(dataSource);
+      ProviderFieldQuery query = ProviderFieldManager.ins.createQuery();
+      if (StringUtils.isNotBlank(batchDataProvider.getInputData())) {
          try {
-            List var5 = (List)JsonUtils.getObjectJsonMapper().readValue(var2.getInputData(), new TypeReference() {
+            List items = (List)JsonUtils.getObjectJsonMapper().readValue(batchDataProvider.getInputData(), new TypeReference() {
             });
-            var2.setParams(var5);
-         } catch (Exception var9) {
-            a.error(var9);
+            batchDataProvider.setParams(items);
+         } catch (Exception exception) {
+            SchemeServiceImpl.logger.error(exception);
          }
       }
 
-      List var10 = var4.providerId(var2.getId()).list();
+      List items2 = query.providerId(batchDataProvider.getId()).list();
 
-      for(BatchDataProviderField var7 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var10)) {
-         if (var7.getDataProviderId() != null && var7.getDataProviderId() > 0L) {
-            BatchDataProvider var8 = this.getProviderData(var7.getDataProviderId());
-            if (var8 != null) {
-               var7.setDataProvider(var8);
+      for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(items2)) {
+         if (batchDataProviderField.getDataProviderId() != null && batchDataProviderField.getDataProviderId() > 0L) {
+            BatchDataProvider providerData = this.getProviderData(batchDataProviderField.getDataProviderId());
+            if (providerData != null) {
+               batchDataProviderField.setDataProvider(providerData);
             }
          }
       }
 
-      var2.setFields(var10);
-      return var2;
+      batchDataProvider.setFields(items2);
+      return batchDataProvider;
    }
 
-   protected String a(List var1, BatchDataResolverItem var2) {
-      String var3 = var2.getTableName();
-      List var4 = var2.getFields();
-      String var5 = "delete from " + var3 + " where ";
-      String var6 = "";
+   protected String buildDeleteSql(List parameters, BatchDataResolverItem resolverItem) {
+      String tableName = resolverItem.getTableName();
+      List fields = resolverItem.getFields();
+      String text = "delete from " + tableName + " where ";
+      String text2 = "";
 
-      for(BatchDataResolverItemField var8 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var4)) {
-         if (var8.isKey()) {
-            if (StringUtils.isNotEmpty(var6)) {
-               var6 = var6 + ", ";
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(fields)) {
+         if (batchDataResolverItemField.isKey()) {
+            if (StringUtils.isNotEmpty(text2)) {
+               text2 = text2 + ", ";
             }
 
-            var6 = var6 + var8.getDestProperty() + "=? ";
-            DataParam var9 = new DataParam();
-            var9.setDataType(var8.getDataType());
-            var9.setName(var8.getSrcProperty());
-            var9.setIndex(var1.size());
-            var1.add(var9);
+            text2 = text2 + batchDataResolverItemField.getDestProperty() + "=? ";
+            DataParam dataParam = new DataParam();
+            dataParam.setDataType(batchDataResolverItemField.getDataType());
+            dataParam.setName(batchDataResolverItemField.getSrcProperty());
+            dataParam.setIndex(parameters.size());
+            parameters.add(dataParam);
          }
       }
 
-      var5 = var5 + var6;
-      return var5;
+      text = text + text2;
+      return text;
    }
 
-   protected String b(List var1, BatchDataResolverItem var2) {
-      String var3 = var2.getTableName();
-      List var4 = var2.getFields();
-      String var5 = "update " + var3 + " set ";
-      String var6 = "";
-      String var7 = "";
+   protected String buildUpdateSql(List parameters, BatchDataResolverItem resolverItem) {
+      String tableName = resolverItem.getTableName();
+      List fields = resolverItem.getFields();
+      String text = "update " + tableName + " set ";
+      String text2 = "";
+      String text3 = "";
 
-      for(BatchDataResolverItemField var9 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var4)) {
-         if (!var9.isKey()) {
-            if (StringUtils.isNotEmpty(var6)) {
-               var6 = var6 + ", ";
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(fields)) {
+         if (!batchDataResolverItemField.isKey()) {
+            if (StringUtils.isNotEmpty(text2)) {
+               text2 = text2 + ", ";
             }
 
-            var6 = var6 + var9.getDestProperty() + "=? ";
-            DataParam var10 = new DataParam();
-            var10.setDataType(var9.getDataType());
-            var10.setName(var9.getSrcProperty());
-            var10.setIndex(var1.size());
-            var1.add(var10);
+            text2 = text2 + batchDataResolverItemField.getDestProperty() + "=? ";
+            DataParam dataParam = new DataParam();
+            dataParam.setDataType(batchDataResolverItemField.getDataType());
+            dataParam.setName(batchDataResolverItemField.getSrcProperty());
+            dataParam.setIndex(parameters.size());
+            parameters.add(dataParam);
          }
       }
 
-      for(BatchDataResolverItemField var13 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var4)) {
-         if (var13.isKey()) {
-            if (StringUtils.isNotEmpty(var7)) {
-               var7 = var7 + ", ";
+      for(BatchDataResolverItemField batchDataResolverItemField2 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(fields)) {
+         if (batchDataResolverItemField2.isKey()) {
+            if (StringUtils.isNotEmpty(text3)) {
+               text3 = text3 + ", ";
             }
 
-            var7 = var7 + var13.getDestProperty() + "=? ";
-            DataParam var14 = new DataParam();
-            var14.setDataType(var13.getDataType());
-            var14.setName(var13.getSrcProperty());
-            var14.setIndex(var1.size());
-            var1.add(var14);
+            text3 = text3 + batchDataResolverItemField2.getDestProperty() + "=? ";
+            DataParam dataParam2 = new DataParam();
+            dataParam2.setDataType(batchDataResolverItemField2.getDataType());
+            dataParam2.setName(batchDataResolverItemField2.getSrcProperty());
+            dataParam2.setIndex(parameters.size());
+            parameters.add(dataParam2);
          }
       }
 
-      if (StringUtils.isNotBlank(var7)) {
-         var7 = " where " + var7;
+      if (StringUtils.isNotBlank(text3)) {
+         text3 = " where " + text3;
       }
 
-      var5 = var5 + var6 + var7;
-      return var5;
+      text = text + text2 + text3;
+      return text;
    }
 
-   protected String c(List var1, BatchDataResolverItem var2) {
-      String var3 = var2.getTableName();
-      List var4 = var2.getFields();
-      String var5 = "insert into " + var3 + " ";
-      String var6 = "";
-      String var7 = "";
+   protected String buildInsertSql(List parameters, BatchDataResolverItem resolverItem) {
+      String tableName = resolverItem.getTableName();
+      List fields = resolverItem.getFields();
+      String text = "insert into " + tableName + " ";
+      String text2 = "";
+      String text3 = "";
 
-      for(BatchDataResolverItemField var9 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var4)) {
-         if (StringUtils.isNotEmpty(var6)) {
-            var6 = var6 + ", ";
-            var7 = var7 + ", ";
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(fields)) {
+         if (StringUtils.isNotEmpty(text2)) {
+            text2 = text2 + ", ";
+            text3 = text3 + ", ";
          }
 
-         var6 = var6 + var9.getDestProperty();
-         var7 = var7 + "?";
-         DataParam var10 = new DataParam();
-         var10.setDataType(var9.getDataType());
-         var10.setName(var9.getSrcProperty());
-         var10.setIndex(var1.size());
-         var1.add(var10);
+         text2 = text2 + batchDataResolverItemField.getDestProperty();
+         text3 = text3 + "?";
+         DataParam dataParam = new DataParam();
+         dataParam.setDataType(batchDataResolverItemField.getDataType());
+         dataParam.setName(batchDataResolverItemField.getSrcProperty());
+         dataParam.setIndex(parameters.size());
+         parameters.add(dataParam);
       }
 
-      var5 = var5 + "(" + var6 + ") values (" + var7 + ")";
-      return var5;
+      text = text + "(" + text2 + ") values (" + text3 + ")";
+      return text;
    }
 
-   public void stop(Long var1, String var2) {
-      BatchManager.ins.updateStatus(var1, BatchStatus.stop);
+   public void stop(Long id, String account) {
+      BatchManager.ins.updateStatus(id, BatchStatus.stop);
    }
 }

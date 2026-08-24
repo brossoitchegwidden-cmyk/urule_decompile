@@ -12,150 +12,150 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class BatchDataResolver {
-   private Long a;
-   private String b;
-   private Long c;
-   private Long d;
-   private Long e;
-   private TranScope f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private String k;
-   private Date l;
-   private Date m;
+   private Long id;
+   private String name;
+   private Long batchId;
+   private Long projectId;
+   private Long datasourceId;
+   private TranScope tranScope;
+   private String filterData;
+   private String desc;
+   private String listener;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
    @JsonIgnore
-   private DataSource n;
+   private DataSource datasource;
    @JsonIgnore
-   private Dialect o;
-   private List p = new ArrayList();
+   private Dialect dialect;
+   private List resolverItems = new ArrayList();
 
    public DataSource getDatasource() {
-      return this.n;
+      return this.datasource;
    }
 
-   public void setDatasource(DataSource var1) {
-      this.n = var1;
+   public void setDatasource(DataSource datasource) {
+      this.datasource = datasource;
    }
 
    public List getItems() {
-      return this.p;
+      return this.resolverItems;
    }
 
-   public void setItems(List var1) {
-      this.p = var1;
+   public void setItems(List items) {
+      this.resolverItems = items;
    }
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Long getBatchId() {
-      return this.c;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.c = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public Long getDatasourceId() {
-      return this.e;
+      return this.datasourceId;
    }
 
-   public void setDatasourceId(Long var1) {
-      this.e = var1;
+   public void setDatasourceId(Long datasourceId) {
+      this.datasourceId = datasourceId;
    }
 
    public TranScope getTranScope() {
-      return this.f;
+      return this.tranScope;
    }
 
-   public void setTranScope(TranScope var1) {
-      this.f = var1;
+   public void setTranScope(TranScope tranScope) {
+      this.tranScope = tranScope;
    }
 
    public Long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.d = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDesc() {
-      return this.h;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.h = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.k;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.k = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.l;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.l = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.m;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.m = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public Dialect getDialect() {
-      return this.o;
+      return this.dialect;
    }
 
-   public void setDialect(Dialect var1) {
-      this.o = var1;
+   public void setDialect(Dialect dialect) {
+      this.dialect = dialect;
    }
 
    public String getListener() {
-      return this.i;
+      return this.listener;
    }
 
-   public void setListener(String var1) {
-      this.i = var1;
+   public void setListener(String listener) {
+      this.listener = listener;
    }
 
    public String getFilterData() {
-      return this.g;
+      return this.filterData;
    }
 
-   public void setFilterData(String var1) {
-      this.g = var1;
+   public void setFilterData(String filterData) {
+      this.filterData = filterData;
    }
 }

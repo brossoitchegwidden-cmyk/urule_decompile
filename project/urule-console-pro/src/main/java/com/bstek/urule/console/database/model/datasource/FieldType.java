@@ -15,45 +15,45 @@ public enum FieldType {
    Date,
    Other;
 
-   public Object parseValue(String var1) {
-      if (var1 == null) {
+   public Object parseValue(String value) {
+      if (value == null) {
          return null;
       } else {
          switch (this) {
             case BigDecimal:
-               return Tools.toBigDecimal(var1);
+               return Tools.toBigDecimal(value);
             case Boolean:
-               if (var1.contentEquals("1")) {
+               if (value.contentEquals("1")) {
                   return true;
                } else {
-                  if (var1.contentEquals("0")) {
+                  if (value.contentEquals("0")) {
                      return false;
                   }
 
-                  return java.lang.Boolean.valueOf(var1);
+                  return java.lang.Boolean.valueOf(value);
                }
             case Date:
-               return Tools.toDateOrDatatime(var1);
+               return Tools.toDateOrDatatime(value);
             case Double:
-               BigDecimal var5 = Tools.toBigDecimal(var1);
-               return var5.doubleValue();
+               BigDecimal decimalValue = Tools.toBigDecimal(value);
+               return decimalValue.doubleValue();
             case Long:
-               return Tools.toBigDecimal(var1).longValue();
+               return Tools.toBigDecimal(value).longValue();
             case Float:
-               BigDecimal var4 = Tools.toBigDecimal(var1);
-               return var4.floatValue();
+               BigDecimal decimalValue2 = Tools.toBigDecimal(value);
+               return decimalValue2.floatValue();
             case Integer:
-               BigDecimal var3 = Tools.toBigDecimal(var1);
-               return var3.intValue();
+               BigDecimal decimalValue3 = Tools.toBigDecimal(value);
+               return decimalValue3.intValue();
             case Short:
-               BigDecimal var2 = Tools.toBigDecimal(var1);
-               return var2.shortValue();
+               BigDecimal decimalValue4 = Tools.toBigDecimal(value);
+               return decimalValue4.shortValue();
             case String:
-               return var1;
+               return value;
             case Other:
-               return var1;
+               return value;
             default:
-               return var1;
+               return value;
          }
       }
    }

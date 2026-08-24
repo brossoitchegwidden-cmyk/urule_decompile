@@ -4,15 +4,15 @@ import com.bstek.urule.model.flow.EndNode;
 import org.dom4j.Element;
 
 public class EndNodeParser extends FlowNodeParser<EndNode> {
-   public EndNode parse(Element var1) {
-      EndNode var2 = new EndNode(var1.attributeValue("name"));
-      var2.setConnections(this.a(var1));
-      var2.setEventBean(var1.attributeValue("event-bean"));
-      return var2;
+   public EndNode parse(Element element) {
+      EndNode endNode = new EndNode(element.attributeValue("name"));
+      endNode.setConnections(this.parseConnections(element));
+      endNode.setEventBean(element.attributeValue("event-bean"));
+      return endNode;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("end");
+   public boolean support(String name) {
+      return name.equals("end");
    }
 }

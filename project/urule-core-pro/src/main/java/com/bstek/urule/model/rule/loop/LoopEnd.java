@@ -10,7 +10,7 @@ public class LoopEnd {
       return this.actions;
    }
 
-   public void setActions(List<Action> var1) {
-      this.actions = var1;
+   public void setActions(List<Action> actions) {
+      this.actions = actions;
    }
 }

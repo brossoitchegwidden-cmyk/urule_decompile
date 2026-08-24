@@ -7,11 +7,11 @@ public class RuleParserParser$SingleNamedConditionSetContext extends RuleParserP
       return (RuleParserParser$NamedConditionSetContext)this.getRuleContext(RuleParserParser$NamedConditionSetContext.class, 0);
    }
 
-   public RuleParserParser$SingleNamedConditionSetContext(RuleParserParser$ConditionContext var1) {
-      this.copyFrom(var1);
+   public RuleParserParser$SingleNamedConditionSetContext(RuleParserParser$ConditionContext ruleParserParser$ConditionContext) {
+      this.copyFrom(ruleParserParser$ConditionContext);
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitSingleNamedConditionSet(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitSingleNamedConditionSet(this) : parseTreeVisitor.visitChildren(this));
    }
 }

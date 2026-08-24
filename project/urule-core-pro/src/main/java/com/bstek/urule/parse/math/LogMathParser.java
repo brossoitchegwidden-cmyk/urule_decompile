@@ -6,29 +6,29 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class LogMathParser extends MathParser {
-   public LogMathParser(ValueParser var1) {
-      super(var1);
+   public LogMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("log-sign");
+   public boolean support(String name) {
+      return name.equals("log-sign");
    }
 
-   public MathSign parse(Element var1) {
-      LogMath var2 = new LogMath();
+   public MathSign parse(Element element) {
+      LogMath logMath = new LogMath();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("base")) {
-               var2.setBaseValue(this.a(var5));
-            } else if (var5.getName().equals("real")) {
-               var2.setValue(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("base")) {
+               logMath.setBaseValue(this.parseValue(element2));
+            } else if (element2.getName().equals("real")) {
+               logMath.setValue(this.parseValue(element2));
             }
          }
       }
 
-      return var2;
+      return logMath;
    }
 }

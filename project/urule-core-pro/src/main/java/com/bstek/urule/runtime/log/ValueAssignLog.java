@@ -1,22 +1,20 @@
 package com.bstek.urule.runtime.log;
 
 public class ValueAssignLog extends DataLog {
-   private static final String b = "###赋值：%s=%s";
-   private static final String c = "###set value：%s=%s";
-   private String d;
-   private Object e;
+   private String left;
+   private Object right;
 
-   public ValueAssignLog(String var1, Object var2) {
-      this.d = var1;
-      String var3 = this.a() ? "###set value：%s=%s" : "###赋值：%s=%s";
-      this.a = String.format(var3, var1, var2);
+   public ValueAssignLog(String left, Object right) {
+      this.left = left;
+      String text = this.isEnglishLanguage() ? "###set value：%s=%s" : "###赋值：%s=%s";
+      this.msg = String.format(text, left, right);
    }
 
    public String getLeft() {
-      return this.d;
+      return this.left;
    }
 
    public Object getRight() {
-      return this.e;
+      return this.right;
    }
 }

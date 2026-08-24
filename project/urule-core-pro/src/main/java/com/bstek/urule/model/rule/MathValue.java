@@ -10,8 +10,8 @@ public class MathValue extends AbstractValue {
       return this.mathSign;
    }
 
-   public void setMathSign(MathSign var1) {
-      this.mathSign = var1;
+   public void setMathSign(MathSign mathSign) {
+      this.mathSign = mathSign;
    }
 
    @Override
@@ -21,18 +21,18 @@ public class MathValue extends AbstractValue {
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Math Value" : "数学符号";
-      String var2 = "[" + var1 + "](" + this.mathSign.getId() + ")";
+      String text = LocaleHolder.isEnglish() ? "Math Value" : "数学符号";
+      String id = "[" + text + "](" + this.mathSign.getId() + ")";
       if (this.arithmetic != null) {
-         var2 = var2 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var2;
+      return id;
    }
 
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Math Value" : "数学符号";
-      return "[" + var1 + "](" + this.mathSign.getId() + ")";
+      String text = LocaleHolder.isEnglish() ? "Math Value" : "数学符号";
+      return "[" + text + "](" + this.mathSign.getId() + ")";
    }
 }

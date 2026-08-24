@@ -15,90 +15,90 @@ import java.util.List;
 import java.util.Map;
 
 public class HostJarCacheAdapter extends JarCacheAdapter {
-   public List loadDynamicJars(String var1, UrlType var2) throws Exception {
-      ArrayList var3 = new ArrayList();
-      return var2 == UrlType.cluster ? this.a((String)var1, (List)var3) : this.b(var1, var3);
+   public List loadDynamicJars(String groupId, UrlType urlType) throws Exception {
+      ArrayList items = new ArrayList();
+      return urlType == UrlType.cluster ? this.notifyClusterNodes((String)groupId, (List)items) : this.pushJarsToClients(groupId, items);
    }
 
-   private List a(String var1, List var2) throws Exception {
-      for(UrlConfig var5 : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.cluster, var1).getList())) {
-         String var6 = var5.getUrl() + "/urule" + "/dynamic";
-         var6 = var6 + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8");
-         HashMap var7 = new HashMap();
-         var7.put("name", var5.getName());
-         var7.put("url", var5.getUrl());
+   private List notifyClusterNodes(String text, List items) throws Exception {
+      for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.cluster, text).getList())) {
+         String text2 = urlConfig.getUrl() + "/urule" + "/dynamic";
+         text2 = text2 + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8");
+         HashMap valuesByKey = new HashMap();
+         valuesByKey.put("name", urlConfig.getName());
+         valuesByKey.put("url", urlConfig.getUrl());
 
          try {
-            HttpUtils.sendPostRequest(var6, (byte[])null);
-            var7.put("result", true);
-         } catch (Exception var9) {
-            var7.put("result", false);
-            var7.put("error", this.a(var9));
+            HttpUtils.sendPostRequest(text2, (byte[])null);
+            valuesByKey.put("result", true);
+         } catch (Exception exception) {
+            valuesByKey.put("result", false);
+            valuesByKey.put("error", this.buildExceptionStack(exception));
          }
 
-         var2.add(var7);
+         items.add(valuesByKey);
       }
 
-      return var2;
+      return items;
    }
 
-   private List b(String var1, List var2) throws Exception {
-      DynamicSpringConfigLoader var3 = ServiceUtils.getDynamicSpringConfigLoader();
-      byte[] var4 = var3.zipDynamicJars();
+   private List pushJarsToClients(String text, List items) throws Exception {
+      DynamicSpringConfigLoader dynamicSpringConfigLoader = ServiceUtils.getDynamicSpringConfigLoader();
+      byte[] bytes = dynamicSpringConfigLoader.zipDynamicJars();
 
-      for(UrlConfig var7 : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.client, var1).getList())) {
-         Map var8 = this.a(var4, var7);
-         var2.add(var8);
+      for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.client, text).getList())) {
+         Map valuesByKey = this.pushJarsToClient(bytes, urlConfig);
+         items.add(valuesByKey);
       }
 
-      return var2;
+      return items;
    }
 
-   private Map a(byte[] var1, UrlConfig var2) {
-      String var3 = var2.getUrl();
-      String var4 = this.a(var1, var3);
-      HashMap var5 = new HashMap();
-      if (var4 != null) {
-         var5.put("error", "<div style='color:red;word-wrap:break-word'>" + var4 + "</div>");
-         var5.put("result", false);
+   private Map pushJarsToClient(byte[] bytes, UrlConfig urlConfig) {
+      String url = urlConfig.getUrl();
+      String text = this.sendDynamicJars(bytes, url);
+      HashMap valuesByKey = new HashMap();
+      if (text != null) {
+         valuesByKey.put("error", "<div style='color:red;word-wrap:break-word'>" + text + "</div>");
+         valuesByKey.put("result", false);
       } else {
-         var5.put("result", true);
+         valuesByKey.put("result", true);
       }
 
-      var5.put("url", var2.getUrl());
-      var5.put("name", var2.getName());
-      return var5;
+      valuesByKey.put("url", urlConfig.getUrl());
+      valuesByKey.put("name", urlConfig.getName());
+      return valuesByKey;
    }
 
-   private String a(byte[] var1, String var2) {
-      Object var3 = null;
+   private String sendDynamicJars(byte[] bytes, String text) {
+      Object objectValue = null;
 
-      String var7;
+      String text2;
       try {
-         if (var2.endsWith("/")) {
-            var2 = var2.substring(0, var2.length() - 1);
+         if (text.endsWith("/")) {
+            text = text.substring(0, text.length() - 1);
          }
 
-         String var4 = HttpUtils.buildRequestValidator();
-         var4 = var4 + "&dynamicjars=true";
-         String var14 = var2 + "/knowledgepackagereceiver" + "?" + var4;
-         String var6 = HttpUtils.sendPostRequest(var14, var1);
-         if (!var6.equals("ok")) {
-            var7 = "<strong>推送操作成功到达客户端，但客户端出错错误：</strong><br>" + var6;
-            return var7;
+         String requestValidator = HttpUtils.buildRequestValidator();
+         requestValidator = requestValidator + "&dynamicjars=true";
+         String text3 = text + "/knowledgepackagereceiver" + "?" + requestValidator;
+         String text4 = HttpUtils.sendPostRequest(text3, bytes);
+         if (!text4.equals("ok")) {
+            text2 = "<strong>推送操作成功到达客户端，但客户端出错错误：</strong><br>" + text4;
+            return text2;
          }
 
-         var7 = null;
-      } catch (Exception var11) {
-         String var5 = "<strong>服务端推送操作出现错误：</strong><br>" + this.a(var11);
-         return var5;
+         text2 = null;
+      } catch (Exception exception) {
+         String text5 = "<strong>服务端推送操作出现错误：</strong><br>" + this.buildExceptionStack(exception);
+         return text5;
       } finally {
-         if (var3 != null) {
-            ((HttpURLConnection)var3).disconnect();
+         if (objectValue != null) {
+            ((HttpURLConnection)objectValue).disconnect();
          }
 
       }
 
-      return var7;
+      return text2;
    }
 }

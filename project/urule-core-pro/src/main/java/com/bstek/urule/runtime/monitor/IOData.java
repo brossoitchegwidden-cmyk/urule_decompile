@@ -3,36 +3,36 @@ package com.bstek.urule.runtime.monitor;
 import java.util.List;
 
 public class IOData {
-   private String a;
-   private String b;
-   private List<IODataField> c;
+   private String name;
+   private String clazz;
+   private List<IODataField> fields;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getClazz() {
-      return this.b;
+      return this.clazz;
    }
 
-   public void setClazz(String var1) {
-      this.b = var1;
+   public void setClazz(String clazz) {
+      this.clazz = clazz;
    }
 
    public List<IODataField> getFields() {
-      return this.c;
+      return this.fields;
    }
 
-   public void setFields(List<IODataField> var1) {
-      this.c = var1;
+   public void setFields(List<IODataField> fields) {
+      this.fields = fields;
    }
 
    @Override
    public String toString() {
-      return "IOData [name=" + this.a + ", clazz=" + this.b + ", fields=" + this.c + "]";
+      return "IOData [name=" + this.name + ", clazz=" + this.clazz + ", fields=" + this.fields + "]";
    }
 }

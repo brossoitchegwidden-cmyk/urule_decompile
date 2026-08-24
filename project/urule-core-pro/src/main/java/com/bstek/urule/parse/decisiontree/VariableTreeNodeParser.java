@@ -10,45 +10,45 @@ import org.dom4j.Element;
 
 public class VariableTreeNodeParser implements Parser<VariableTreeNode> {
    public static final String BEAN_ID = "urule.variableTreeNodeParser";
-   private LeftParser a;
-   private ConditionTreeNodeParser b;
+   private LeftParser leftParser;
+   private ConditionTreeNodeParser conditionTreeNodeParser;
 
-   public VariableTreeNode parse(Element var1) {
-      VariableTreeNode var2 = new VariableTreeNode();
-      var2.setNodeType(TreeNodeType.variable);
-      ArrayList var3 = new ArrayList();
+   public VariableTreeNode parse(Element element) {
+      VariableTreeNode variableTreeNode = new VariableTreeNode();
+      variableTreeNode.setNodeType(TreeNodeType.variable);
+      ArrayList items = new ArrayList();
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            String var7 = var6.getName();
-            if (var7.equals("left")) {
-               var2.setLeft(this.a.parse(var6));
-            } else if (this.b.support(var7)) {
-               ConditionTreeNode var8 = this.b.parse(var6);
-               var8.setParentNode(var2);
-               var3.add(var8);
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (name.equals("left")) {
+               variableTreeNode.setLeft(this.leftParser.parse(element2));
+            } else if (this.conditionTreeNodeParser.support(name)) {
+               ConditionTreeNode conditionTreeNode = this.conditionTreeNodeParser.parse(element2);
+               conditionTreeNode.setParentNode(variableTreeNode);
+               items.add(conditionTreeNode);
             }
          }
       }
 
-      if (var3.size() > 0) {
-         var2.setConditionTreeNodes(var3);
+      if (items.size() > 0) {
+         variableTreeNode.setConditionTreeNodes(items);
       }
 
-      return var2;
+      return variableTreeNode;
    }
 
-   public void setConditionTreeNodeParser(ConditionTreeNodeParser var1) {
-      this.b = var1;
+   public void setConditionTreeNodeParser(ConditionTreeNodeParser conditionTreeNodeParser) {
+      this.conditionTreeNodeParser = conditionTreeNodeParser;
    }
 
-   public void setLeftParser(LeftParser var1) {
-      this.a = var1;
+   public void setLeftParser(LeftParser leftParser) {
+      this.leftParser = leftParser;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("variable-tree-node");
+   public boolean support(String name) {
+      return name.equals("variable-tree-node");
    }
 }

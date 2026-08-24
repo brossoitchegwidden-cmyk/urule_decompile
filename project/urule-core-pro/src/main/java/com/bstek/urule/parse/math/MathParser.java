@@ -8,22 +8,22 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public abstract class MathParser implements Parser<MathSign> {
-   protected ValueParser a;
+   protected ValueParser valueParser;
 
-   public MathParser(ValueParser var1) {
-      this.a = var1;
+   public MathParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 
-   protected Value a(Element var1) {
-      for (Object var3 : var1.elements()) {
-         if (var3 != null && var3 instanceof Element) {
-            Element var4 = (Element)var3;
-            if (this.a.support(var4.getName())) {
-               return this.a.parse(var4);
+   protected Value parseValue(Element element) {
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               return this.valueParser.parse(element2);
             }
          }
       }
 
-      throw new RuleException("Unknow value element[" + var1.asXML() + "]");
+      throw new RuleException("Unknow value element[" + element.asXML() + "]");
    }
 }

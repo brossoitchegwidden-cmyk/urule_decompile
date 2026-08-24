@@ -1,7 +1,7 @@
 package com.bstek.urule.console.config.dialect;
 
 public class PostgreSQLDialect extends Dialect {
-   public String getLimitString(String var1, int var2, int var3) {
-      return var2 == 0 ? var1 + " limit " + var3 : var1 + " limit " + var3 + " offset " + var2;
+   public String getLimitString(String query, int offset, int limit) {
+      return offset == 0 ? query + " limit " + limit : query + " limit " + limit + " offset " + offset;
    }
 }

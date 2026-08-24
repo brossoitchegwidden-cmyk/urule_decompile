@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class ComplexScorecardDeserializer implements Deserializer<ComplexScorecardDefinition> {
    public static final String BEAN_ID = "urule.complexScorecardDeserializer";
-   private ComplexScorecardParser a;
+   private ComplexScorecardParser complexScorecardParser;
 
-   public ComplexScorecardDefinition deserialize(Element var1) {
-      return this.a.parse(var1);
+   public ComplexScorecardDefinition deserialize(Element root) {
+      return this.complexScorecardParser.parse(root);
    }
 
-   public void setComplexScorecardParser(ComplexScorecardParser var1) {
-      this.a = var1;
+   public void setComplexScorecardParser(ComplexScorecardParser complexScorecardParser) {
+      this.complexScorecardParser = complexScorecardParser;
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.complexScorecardParser.support(root.getName());
    }
 }

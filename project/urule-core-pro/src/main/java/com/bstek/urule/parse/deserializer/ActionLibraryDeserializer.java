@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class ActionLibraryDeserializer implements Deserializer<ActionLibrary> {
    public static final String BEAN_ID = "urule.actionLibraryDeserializer";
-   private ActionLibraryParser a;
+   private ActionLibraryParser actionLibraryParser;
 
-   public ActionLibrary deserialize(Element var1) {
-      return this.a.parse(var1);
+   public ActionLibrary deserialize(Element root) {
+      return this.actionLibraryParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.actionLibraryParser.support(root.getName());
    }
 
-   public void setActionLibraryParser(ActionLibraryParser var1) {
-      this.a = var1;
+   public void setActionLibraryParser(ActionLibraryParser actionLibraryParser) {
+      this.actionLibraryParser = actionLibraryParser;
    }
 }

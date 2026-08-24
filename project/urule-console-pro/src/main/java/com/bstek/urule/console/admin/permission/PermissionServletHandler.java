@@ -24,126 +24,132 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class PermissionServletHandler extends ApiServletHandler {
+   /**保存团队权限配置*/
    @URuleAuthorization(
       authType = "group",
       model = "permissions",
       code = "manager"
    )
-   public void groupStore(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      GroupRole var5 = GroupRoleManager.ins.get(var3);
-      if (var5.getGroupId().equals(ContextHolder.getGroupId())) {
-         this.a(var3, var1);
-         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", var3, String.format("Modify the permissions of role %s[%s]", var5.getName(), var5.getId()));
+   public void groupStore(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      GroupRole groupRole = GroupRoleManager.ins.get(longValue);
+      if (groupRole.getGroupId().equals(ContextHolder.getGroupId())) {
+         this.storePermissions(longValue, req);
+         SystemLogUtils.addGroupOperationLog(GroupModule.permissions.name(), "manager", longValue, String.format("Modify the permissions of role %s[%s]", groupRole.getName(), groupRole.getId()));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**保存项目权限配置*/
    @URuleAuthorization(
       authType = "project",
       model = "permissions",
       code = "manager"
    )
-   public void projectStore(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      ProjectRole var5 = ProjectRoleManager.ins.get(var3);
-      if (var5.getProjectId() == ContextHolder.getProjectId()) {
-         this.a(var3, var1);
-         SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", var5.getId(), String.format("Modify %s[%s] permissions", var5.getName(), var5.getId()));
+   public void projectStore(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      ProjectRole projectRole = ProjectRoleManager.ins.get(longValue);
+      if (projectRole.getProjectId() == ContextHolder.getProjectId()) {
+         this.storePermissions(longValue, req);
+         SystemLogUtils.addProjectOperationLog(ProjectModule.permissions.name(), "manager", projectRole.getId(), String.format("Modify %s[%s] permissions", projectRole.getName(), projectRole.getId()));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   private void a(long var1, HttpServletRequest var3) throws Exception {
-      List var4 = (List)this.a().readValue(var3.getParameter("models"), new TypeReference() {
+   private void storePermissions(long longValue, HttpServletRequest httpServletRequest) throws Exception {
+      List items = (List)this.createObjectMapper().readValue(httpServletRequest.getParameter("models"), new TypeReference() {
       });
-      AuthorityService.ins.storePermissions(var1, var4);
+      AuthorityService.ins.storePermissions(longValue, items);
    }
 
+   /**获取团队角色的权限配置*/
    @URuleAuthorization(
       authType = "group",
       model = "permissions",
       code = "manager"
    )
-   public void groupModels(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      GroupRole var5 = GroupRoleManager.ins.get(var3);
-      if (var5.getGroupId().equals(ContextHolder.getGroupId())) {
-         this.a(var2, AuthorityService.ins.getGroupModels(var5));
+   public void groupModels(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      GroupRole groupRole = GroupRoleManager.ins.get(longValue);
+      if (groupRole.getGroupId().equals(ContextHolder.getGroupId())) {
+         this.writeObjectToJson(resp, AuthorityService.ins.getGroupModels(groupRole));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
+   /**获取项目角色的权限配置*/
    @URuleAuthorization(
       authType = "project",
       model = "permissions",
       code = "manager"
    )
-   public void projectModels(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("roleId"));
-      ProjectRole var5 = ProjectRoleManager.ins.get(var3);
-      if (var5.getProjectId() == ContextHolder.getProjectId()) {
-         this.a(var2, AuthorityService.ins.getProjectModels(var5));
+   public void projectModels(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("roleId"));
+      ProjectRole projectRole = ProjectRoleManager.ins.get(longValue);
+      if (projectRole.getProjectId() == ContextHolder.getProjectId()) {
+         this.writeObjectToJson(resp, AuthorityService.ins.getProjectModels(projectRole));
       } else {
          throw new ParameterInvaidException();
       }
    }
 
-   public void group(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      User var4 = SecurityUtils.getLoginUser(var1);
-      List var5 = GroupRoleManager.ins.loadUserRoles(var3, var4.getName());
-      Object var6 = new ArrayList();
+   /**获取登录用户的团队权限信息*/
+   public void group(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      User loginUser = SecurityUtils.getLoginUser(req);
+      List userRoles = GroupRoleManager.ins.loadUserRoles(groupId, loginUser.getName());
+      Object groupModels2 = new ArrayList();
 
-      for(Role var8 : (Iterable<Role>)(Iterable<?>)(var5)) {
-         List var9 = AuthorityService.ins.getGroupModels(var8);
-         if (((List)var6).size() == 0) {
-            var6 = var9;
+      for(Role role : (Iterable<Role>)(Iterable<?>)(userRoles)) {
+         List groupModels = AuthorityService.ins.getGroupModels(role);
+         if (((List)groupModels2).size() == 0) {
+            groupModels2 = groupModels;
          } else {
-            this.a(var9, (List)var6);
+            this.mergeModulePermissions(groupModels, (List)groupModels2);
          }
       }
 
-      this.a(var2, var6);
+      this.writeObjectToJson(resp, groupModels2);
    }
 
-   public void project(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Long var3 = ContextHolder.getProjectId();
-      User var4 = SecurityUtils.getLoginUser(var1);
-      List var5 = ProjectRoleManager.ins.loadUserRoles(var3, var4.getName());
-      Object var6 = new ArrayList();
+   /**获取登录用户对应项目的权限信息*/
+   public void project(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Long projectId = ContextHolder.getProjectId();
+      User loginUser = SecurityUtils.getLoginUser(req);
+      List userRoles = ProjectRoleManager.ins.loadUserRoles(projectId, loginUser.getName());
+      Object projectModels2 = new ArrayList();
 
-      for(Role var8 : (Iterable<Role>)(Iterable<?>)(var5)) {
-         List var9 = AuthorityService.ins.getProjectModels(var8);
-         if (((List)var6).size() == 0) {
-            var6 = var9;
+      for(Role role : (Iterable<Role>)(Iterable<?>)(userRoles)) {
+         List projectModels = AuthorityService.ins.getProjectModels(role);
+         if (((List)projectModels2).size() == 0) {
+            projectModels2 = projectModels;
          } else {
-            this.a(var9, (List)var6);
+            this.mergeModulePermissions(projectModels, (List)projectModels2);
          }
       }
 
-      this.a(var2, var6);
+      this.writeObjectToJson(resp, projectModels2);
    }
 
-   private void a(List var1, List var2) {
-      for(Module var4 : (Iterable<Module>)(Iterable<?>)(var2)) {
-         for(Module var6 : (Iterable<Module>)(Iterable<?>)(var1)) {
-            if (var4.getCode().equals(var6.getCode())) {
-               this.b(var6.getItems(), var4.getItems());
+   private void mergeModulePermissions(List items, List items2) {
+      for(Module module : (Iterable<Module>)(Iterable<?>)(items2)) {
+         for(Module module2 : (Iterable<Module>)(Iterable<?>)(items)) {
+            if (module.getCode().equals(module2.getCode())) {
+               this.mergePermissionChecks(module2.getItems(), module.getItems());
             }
          }
       }
 
    }
 
-   private void b(List var1, List var2) {
-      for(Permission var4 : (Iterable<Permission>)(Iterable<?>)(var2)) {
-         for(Permission var6 : (Iterable<Permission>)(Iterable<?>)(var1)) {
-            if (var4.getCode().equals(var6.getCode()) && var6.isChecked()) {
-               var4.setChecked(true);
+   private void mergePermissionChecks(List items, List items2) {
+      for(Permission permission : (Iterable<Permission>)(Iterable<?>)(items2)) {
+         for(Permission permission2 : (Iterable<Permission>)(Iterable<?>)(items)) {
+            if (permission.getCode().equals(permission2.getCode()) && permission2.isChecked()) {
+               permission.setChecked(true);
             }
          }
       }

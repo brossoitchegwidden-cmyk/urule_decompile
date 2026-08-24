@@ -12,249 +12,249 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class BatchDataProvider {
-   private Long a;
-   private String b;
-   private Long c;
-   private Long d;
-   private String e;
-   private String f;
-   private Long g;
-   private String h;
-   private String i;
-   private String j;
-   private Integer k = 100;
-   private Boolean l = false;
-   private String m;
-   private String n;
-   private String o;
-   private String p;
-   private String q;
-   private String r;
-   private String s;
-   private String t;
-   private Date u;
-   private Date v;
-   private List w;
+   private Long id;
+   private String name;
+   private Long batchId;
+   private Long projectId;
+   private String desc;
+   private String type;
+   private Long datasourceId;
+   private String listener;
+   private String inputData;
+   private String packetVarName;
+   private Integer pageSize = 100;
+   private Boolean supportsPaging = false;
+   private String pageSql;
+   private String countSql;
+   private String pageLimitType;
+   private String orderField;
+   private String orderFieldParamName;
+   private String filterData;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private List params;
    @JsonIgnore
-   private Dialect x;
-   private List y = new ArrayList();
+   private Dialect dialect;
+   private List filters = new ArrayList();
    @JsonIgnore
-   private DataSource z;
-   private List A = new ArrayList();
+   private DataSource datasource;
+   private List fields = new ArrayList();
 
    public DataSource getDatasource() {
-      return this.z;
+      return this.datasource;
    }
 
    public List getParams() {
-      return this.w;
+      return this.params;
    }
 
-   public void setParams(List var1) {
-      this.w = var1;
+   public void setParams(List params) {
+      this.params = params;
    }
 
-   public void setDatasource(DataSource var1) {
-      this.z = var1;
+   public void setDatasource(DataSource datasource) {
+      this.datasource = datasource;
    }
 
    public List getFields() {
-      return this.A;
+      return this.fields;
    }
 
-   public void setFields(List var1) {
-      this.A = var1;
+   public void setFields(List fields) {
+      this.fields = fields;
    }
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Long getBatchId() {
-      return this.c;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.c = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public Long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.d = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDesc() {
-      return this.e;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.e = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getType() {
-      return this.f;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.f = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String getInputData() {
-      return this.i;
+      return this.inputData;
    }
 
-   public void setInputData(String var1) {
-      this.i = var1;
+   public void setInputData(String inputData) {
+      this.inputData = inputData;
    }
 
    public String getCountSql() {
-      return this.n;
+      return this.countSql;
    }
 
-   public void setCountSql(String var1) {
-      this.n = var1;
+   public void setCountSql(String countSql) {
+      this.countSql = countSql;
    }
 
    public String getCreateUser() {
-      return this.s;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.s = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.t;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.t = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.u;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.u = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.v;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.v = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getPageSql() {
-      return this.m;
+      return this.pageSql;
    }
 
-   public void setPageSql(String var1) {
-      this.m = var1;
+   public void setPageSql(String pageSql) {
+      this.pageSql = pageSql;
    }
 
    public Long getDatasourceId() {
-      return this.g;
+      return this.datasourceId;
    }
 
-   public void setDatasourceId(Long var1) {
-      this.g = var1;
+   public void setDatasourceId(Long datasourceId) {
+      this.datasourceId = datasourceId;
    }
 
    public Integer getPageSize() {
-      return this.k;
+      return this.pageSize;
    }
 
-   public void setPageSize(Integer var1) {
-      this.k = var1;
+   public void setPageSize(Integer pageSize) {
+      this.pageSize = pageSize;
    }
 
    public Boolean isSupportsPaging() {
-      return this.l;
+      return this.supportsPaging;
    }
 
-   public void setSupportsPaging(Boolean var1) {
-      this.l = var1;
+   public void setSupportsPaging(Boolean supportsPaging) {
+      this.supportsPaging = supportsPaging;
    }
 
    public String getPacketVarName() {
-      return this.j;
+      return this.packetVarName;
    }
 
-   public void setPacketVarName(String var1) {
-      this.j = var1;
+   public void setPacketVarName(String packetVarName) {
+      this.packetVarName = packetVarName;
    }
 
    public Dialect getDialect() {
-      return this.x;
+      return this.dialect;
    }
 
-   public void setDialect(Dialect var1) {
-      this.x = var1;
+   public void setDialect(Dialect dialect) {
+      this.dialect = dialect;
    }
 
    public String getFilterData() {
-      return this.r;
+      return this.filterData;
    }
 
-   public void setFilterData(String var1) {
-      this.r = var1;
+   public void setFilterData(String filterData) {
+      this.filterData = filterData;
    }
 
    public List getFilters() {
-      return this.y;
+      return this.filters;
    }
 
-   public void setFilters(List var1) {
-      this.y = var1;
+   public void setFilters(List filters) {
+      this.filters = filters;
    }
 
    public String getOrderField() {
-      return this.p;
+      return this.orderField;
    }
 
-   public void setOrderField(String var1) {
-      this.p = var1;
+   public void setOrderField(String orderField) {
+      this.orderField = orderField;
    }
 
    public String getPageLimitType() {
-      return this.o;
+      return this.pageLimitType;
    }
 
-   public void setPageLimitType(String var1) {
-      this.o = var1;
+   public void setPageLimitType(String pageLimitType) {
+      this.pageLimitType = pageLimitType;
    }
 
    public String getOrderFieldParamName() {
-      return this.q;
+      return this.orderFieldParamName;
    }
 
-   public void setOrderFieldParamName(String var1) {
-      this.q = var1;
+   public void setOrderFieldParamName(String orderFieldParamName) {
+      this.orderFieldParamName = orderFieldParamName;
    }
 
    public String getListener() {
-      return this.h;
+      return this.listener;
    }
 
-   public void setListener(String var1) {
-      this.h = var1;
+   public void setListener(String listener) {
+      this.listener = listener;
    }
 }

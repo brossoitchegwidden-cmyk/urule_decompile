@@ -8,27 +8,27 @@ public class ConditionTemplate {
    private List<Library> libraries;
    private List<ConditionTemplateUnit> templates;
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 
    public List<Library> getLibraries() {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
    public List<ConditionTemplateUnit> getTemplates() {
       return this.templates;
    }
 
-   public void setTemplates(List<ConditionTemplateUnit> var1) {
-      this.templates = var1;
+   public void setTemplates(List<ConditionTemplateUnit> templates) {
+      this.templates = templates;
    }
 }

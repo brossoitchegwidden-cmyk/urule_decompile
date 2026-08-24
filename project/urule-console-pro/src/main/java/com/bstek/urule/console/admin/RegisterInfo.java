@@ -6,76 +6,76 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class RegisterInfo {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
+   private String account;
+   private String username;
+   private String password;
+   private String captcha;
+   private String confirm;
+   private String groupId;
+   private String groupName;
+   private String secretKey;
 
    public String getAccount() {
-      return this.a;
+      return this.account;
    }
 
-   public void setAccount(String var1) {
-      this.a = var1;
+   public void setAccount(String account) {
+      this.account = account;
    }
 
    public String getUsername() {
-      return this.b;
+      return this.username;
    }
 
-   public void setUsername(String var1) {
-      this.b = var1;
+   public void setUsername(String username) {
+      this.username = username;
    }
 
    public String getPassword() {
-      return this.c;
+      return this.password;
    }
 
-   public void setPassword(String var1) {
-      this.c = var1;
+   public void setPassword(String password) {
+      this.password = password;
    }
 
    public String getCaptcha() {
-      return this.d;
+      return this.captcha;
    }
 
-   public void setCaptcha(String var1) {
-      this.d = var1;
+   public void setCaptcha(String captcha) {
+      this.captcha = captcha;
    }
 
    public String getConfirm() {
-      return this.e;
+      return this.confirm;
    }
 
-   public void setConfirm(String var1) {
-      this.e = var1;
+   public void setConfirm(String confirm) {
+      this.confirm = confirm;
    }
 
    public String getGroupId() {
-      return this.f;
+      return this.groupId;
    }
 
-   public void setGroupId(String var1) {
-      this.f = var1;
+   public void setGroupId(String groupId) {
+      this.groupId = groupId;
    }
 
    public String getGroupName() {
-      return this.g;
+      return this.groupName;
    }
 
-   public void setGroupName(String var1) {
-      this.g = var1;
+   public void setGroupName(String groupName) {
+      this.groupName = groupName;
    }
 
    public String getSecretKey() {
-      return this.h;
+      return this.secretKey;
    }
 
-   public void setSecretKey(String var1) {
-      this.h = var1;
+   public void setSecretKey(String secretKey) {
+      this.secretKey = secretKey;
    }
 }

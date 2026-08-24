@@ -8,16 +8,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class VariableCategoryValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      VariableCategoryValue var2 = new VariableCategoryValue();
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      var2.setUuid(JsonUtils.getJsonValue(var1, "uuid"));
-      var2.setVariableCategory(JsonUtils.getJsonValue(var1, "variableCategory"));
-      return var2;
+   public Value deserialize(JsonNode jsonNode) {
+      VariableCategoryValue variableCategoryValue = new VariableCategoryValue();
+      variableCategoryValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      variableCategoryValue.setUuid(JsonUtils.getJsonValue(jsonNode, "uuid"));
+      variableCategoryValue.setVariableCategory(JsonUtils.getJsonValue(jsonNode, "variableCategory"));
+      return variableCategoryValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.VariableCategory);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.VariableCategory);
    }
 }

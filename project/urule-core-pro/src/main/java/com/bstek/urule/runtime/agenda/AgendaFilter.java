@@ -1,5 +1,5 @@
 package com.bstek.urule.runtime.agenda;
 
 public interface AgendaFilter {
-   boolean accept(Activation var1);
+   boolean accept(Activation activation);
 }

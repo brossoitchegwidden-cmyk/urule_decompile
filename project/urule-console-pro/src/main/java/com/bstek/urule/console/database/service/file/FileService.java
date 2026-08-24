@@ -8,23 +8,32 @@ public interface FileService {
    FileService ins = new FileServiceImpl();
    String COPY_FILE_KEY = "urule_file_copy";
 
-   List menus(Long var1);
+   /**获取文件目录树顶层节点*/
+   List menus(Long projectId);
 
-   List tree(Long var1, Long var2);
+   /**获取文件树*/
+   List tree(Long projectId, Long parentId);
 
-   List tree(Long var1, RuleFileType var2);
+   /**获取指定类型的文件树*/
+   List tree(Long projectId, RuleFileType type);
 
-   void updateFileDeleteFlag(Long var1, boolean var2, String var3);
+   void updateFileDeleteFlag(Long id, boolean deleted, String account);
 
-   List tree(Long var1, Long var2, String var3);
+   /**获取指定类型的文件树*/
+   List tree(Long projectId, Long parentId, String type);
 
-   void removeDir(RuleFile var1);
+   /**删除指定目录*/
+   void removeDir(RuleFile ruleFile);
 
-   void removeDir(RuleFile var1, boolean var2);
+   /**删除指定目录*/
+   void removeDir(RuleFile ruleFile, boolean force);
 
-   RuleFile copyFile(long var1, long var3, long var5, String var7, String var8);
+   /**复制文件*/
+   RuleFile copyFile(long projectId, long parentId, long id, String name, String account);
 
-   List copyFiles(long var1, long var3, List var5, String var6);
+   /**复制多个文件*/
+   List copyFiles(long projectId, long parentId, List idList, String account);
 
-   RuleFile copyDir(long var1, long var3, long var5, String var7, String var8);
+   /**复制目录*/
+   RuleFile copyDir(long projectId, long parentId, long id, String name, String account);
 }

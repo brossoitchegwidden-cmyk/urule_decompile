@@ -12,45 +12,45 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 
 public class PropertiesUtils {
-   public static Properties loadConfigFile(String var0) {
-      if (StringUtils.isEmpty(var0)) {
+   public static Properties loadConfigFile(String file) {
+      if (StringUtils.isEmpty(file)) {
          return null;
       } else {
-         Object var1 = null;
+         Object objectValue = null;
 
          try {
-            var1 = new FileInputStream(var0);
-         } catch (FileNotFoundException var10) {
-            var1 = Configure.class.getClassLoader().getResourceAsStream(var0);
+            objectValue = new FileInputStream(file);
+         } catch (FileNotFoundException fileNotFoundException) {
+            objectValue = Configure.class.getClassLoader().getResourceAsStream(file);
          }
 
-         if (var1 == null) {
+         if (objectValue == null) {
             return null;
          } else {
-            Properties var3;
+            Properties properties;
             try {
-               Properties var2 = new Properties();
-               var2.load((InputStream)var1);
-               var3 = var2;
-            } catch (IOException var8) {
-               throw new RuleException(var8);
+               Properties properties2 = new Properties();
+               properties2.load((InputStream)objectValue);
+               properties = properties2;
+            } catch (IOException iOException) {
+               throw new RuleException(iOException);
             } finally {
-               IOUtils.closeQuietly((InputStream)var1);
+               IOUtils.closeQuietly((InputStream)objectValue);
             }
 
-            return var3;
+            return properties;
          }
       }
    }
 
-   public static void writeConfigFile(String var0, Properties var1) {
+   public static void writeConfigFile(String file, Properties properties) {
       try {
-         FileOutputStream var2 = new FileOutputStream(var0);
-         OutputStreamWriter var3 = new OutputStreamWriter(var2, "utf-8");
-         var1.store(var3, "系统自动生成的配置文件");
-         var2.close();
-      } catch (IOException var4) {
-         var4.printStackTrace();
+         FileOutputStream fileOutputStream = new FileOutputStream(file);
+         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, "utf-8");
+         properties.store(outputStreamWriter, "系统自动生成的配置文件");
+         fileOutputStream.close();
+      } catch (IOException iOException) {
+         java.util.logging.Logger.getLogger(PropertiesUtils.class.getName()).log(java.util.logging.Level.SEVERE, iOException.getMessage(), iOException);
       }
 
    }

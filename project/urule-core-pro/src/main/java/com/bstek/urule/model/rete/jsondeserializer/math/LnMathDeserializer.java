@@ -8,10 +8,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class LnMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      LnMath var2 = new LnMath();
-      var2.setValue(JsonUtils.parseValueNode(var1.get("value")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      LnMath lnMath = new LnMath();
+      lnMath.setValue(JsonUtils.parseValueNode(jsonNode.get("value")));
+      return lnMath;
    }
 
    @Override

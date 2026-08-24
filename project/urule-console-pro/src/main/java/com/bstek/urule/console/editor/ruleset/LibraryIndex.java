@@ -11,66 +11,66 @@ import java.util.List;
 import java.util.Map;
 
 public class LibraryIndex {
-   private Map a = new HashMap();
-   private Map b = new HashMap();
-   private Map c = new HashMap();
-   private Map d = new HashMap();
+   private Map variableLibrariesByCategory = new HashMap();
+   private Map constantLibrariesByCategory = new HashMap();
+   private Map actionLibrariesByBeanName = new HashMap();
+   private Map templatesById = new HashMap();
 
-   public void buildIndex(ResourceLibrary var1, Map var2, LibraryType var3) {
-      List var4 = var1.getVariableCategories();
-      List var5 = var1.getConstantCategories();
-      List var6 = var1.getActionLibraries();
-      if (!var3.equals(LibraryType.Variable) && !var3.equals(LibraryType.Parameter)) {
-         if (var3.equals(LibraryType.Constant)) {
-            for(ConstantCategory var13 : (Iterable<ConstantCategory>)(Iterable<?>)(var5)) {
-               this.b.put(var13.getLabel(), var2);
+   public void buildIndex(ResourceLibrary library, Map libPath, LibraryType type) {
+      List variableCategories = library.getVariableCategories();
+      List constantCategories = library.getConstantCategories();
+      List actionLibraries = library.getActionLibraries();
+      if (!type.equals(LibraryType.Variable) && !type.equals(LibraryType.Parameter)) {
+         if (type.equals(LibraryType.Constant)) {
+            for(ConstantCategory constantCategory : (Iterable<ConstantCategory>)(Iterable<?>)(constantCategories)) {
+               this.constantLibrariesByCategory.put(constantCategory.getLabel(), libPath);
             }
-         } else if (var3.equals(LibraryType.Action)) {
-            for(ActionLibrary var14 : (Iterable<ActionLibrary>)(Iterable<?>)(var6)) {
-               for(SpringBean var10 : var14.getSpringBeans()) {
-                  this.c.put(var10.getName(), var2);
+         } else if (type.equals(LibraryType.Action)) {
+            for(ActionLibrary actionLibrary : (Iterable<ActionLibrary>)(Iterable<?>)(actionLibraries)) {
+               for(SpringBean springBean : actionLibrary.getSpringBeans()) {
+                  this.actionLibrariesByBeanName.put(springBean.getName(), libPath);
                }
             }
          }
       } else {
-         for(VariableCategory var8 : (Iterable<VariableCategory>)(Iterable<?>)(var4)) {
-            this.a.put(var8.getName(), var2);
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableCategories)) {
+            this.variableLibrariesByCategory.put(variableCategory.getName(), libPath);
          }
       }
 
    }
 
-   public void buildTemplateIndex(String var1, Map var2) {
-      this.d.put(var1, var2);
+   public void buildTemplateIndex(String id, Map map) {
+      this.templatesById.put(id, map);
    }
 
-   public LibInfo variableContains(String var1) {
-      Map var2 = (Map)this.a.get(var1);
-      if (var2 == null) {
+   public LibInfo variableContains(String category) {
+      Map valuesByKey = (Map)this.variableLibrariesByCategory.get(category);
+      if (valuesByKey == null) {
          return null;
       } else {
-         String var3 = var2.get("path").toString();
-         return var3.startsWith("ParameterLibrary") ? new LibInfo("parameters", var2) : new LibInfo("variables", var2);
+         String text = valuesByKey.get("path").toString();
+         return text.startsWith("ParameterLibrary") ? new LibInfo("parameters", valuesByKey) : new LibInfo("variables", valuesByKey);
       }
    }
 
-   public LibInfo constantContains(String var1) {
-      Map var2 = (Map)this.b.get(var1);
-      return var2 == null ? null : new LibInfo("constants", var2);
+   public LibInfo constantContains(String category) {
+      Map valuesByKey = (Map)this.constantLibrariesByCategory.get(category);
+      return valuesByKey == null ? null : new LibInfo("constants", valuesByKey);
    }
 
-   public LibInfo actionContains(String var1) {
-      Map var2 = (Map)this.c.get(var1);
-      return var2 == null ? null : new LibInfo("actions", var2);
+   public LibInfo actionContains(String category) {
+      Map valuesByKey = (Map)this.actionLibrariesByBeanName.get(category);
+      return valuesByKey == null ? null : new LibInfo("actions", valuesByKey);
    }
 
-   public LibInfo templateContains(String var1) {
-      Map var2 = (Map)this.d.get(var1);
-      if (var2 == null) {
+   public LibInfo templateContains(String id) {
+      Map valuesByKey = (Map)this.templatesById.get(id);
+      if (valuesByKey == null) {
          return null;
       } else {
-         String var3 = var2.get("path").toString();
-         return var3.startsWith("ConditionTemplate") ? new LibInfo("conditionTemplates", var2) : new LibInfo("actionTemplates", var2);
+         String text = valuesByKey.get("path").toString();
+         return text.startsWith("ConditionTemplate") ? new LibInfo("conditionTemplates", valuesByKey) : new LibInfo("actionTemplates", valuesByKey);
       }
    }
 }

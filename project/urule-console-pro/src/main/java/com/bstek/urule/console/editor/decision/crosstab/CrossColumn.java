@@ -1,40 +1,40 @@
 package com.bstek.urule.console.editor.decision.crosstab;
 
 public class CrossColumn {
-   private int a;
-   private Type b;
-   private String c;
-   private boolean d;
+   private int columnNumber;
+   private Type type;
+   private String content;
+   private boolean predefine;
 
    public int getNumber() {
-      return this.a;
+      return this.columnNumber;
    }
 
-   public void setNumber(int var1) {
-      this.a = var1;
+   public void setNumber(int number) {
+      this.columnNumber = number;
    }
 
    public Type getType() {
-      return this.b;
+      return this.type;
    }
 
-   public void setType(Type var1) {
-      this.b = var1;
+   public void setType(Type type) {
+      this.type = type;
    }
 
    public String getContent() {
-      return this.c;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.c = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public boolean isPredefine() {
-      return this.d;
+      return this.predefine;
    }
 
-   public void setPredefine(boolean var1) {
-      this.d = var1;
+   public void setPredefine(boolean predefine) {
+      this.predefine = predefine;
    }
 }

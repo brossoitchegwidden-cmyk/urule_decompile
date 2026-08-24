@@ -4,30 +4,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtils {
-   public static boolean isEmpty(Object var0) {
-      return var0 == null || "".equals(var0);
+   public static boolean isEmpty(Object str) {
+      return str == null || "".equals(str);
    }
 
-   public static boolean isNotEmpty(Object var0) {
-      return var0 != null && !"".equals(var0);
+   public static boolean isNotEmpty(Object str) {
+      return str != null && !"".equals(str);
    }
 
-   public static boolean isBlank(Object var0) {
-      return var0 == null || "".equals(var0.toString().trim());
+   public static boolean isBlank(Object str) {
+      return str == null || "".equals(str.toString().trim());
    }
 
-   public static boolean isNotBlank(Object var0) {
-      return var0 != null && !"".equals(var0.toString().trim());
+   public static boolean isNotBlank(Object str) {
+      return str != null && !"".equals(str.toString().trim());
    }
 
-   public static boolean containsWhitespace(CharSequence var0) {
-      if (!hasLength(var0)) {
+   public static boolean containsWhitespace(CharSequence str) {
+      if (!hasLength(str)) {
          return false;
       } else {
-         int var1 = var0.length();
+         int number = str.length();
 
-         for(int var2 = 0; var2 < var1; ++var2) {
-            if (Character.isWhitespace(var0.charAt(var2))) {
+         for(int index = 0; index < number; ++index) {
+            if (Character.isWhitespace(str.charAt(index))) {
                return true;
             }
          }
@@ -36,44 +36,45 @@ public class StringUtils {
       }
    }
 
-   public static boolean containsWhitespace(String var0) {
-      return containsWhitespace((CharSequence)var0);
+   public static boolean containsWhitespace(String str) {
+      return containsWhitespace((CharSequence)str);
    }
 
-   public static boolean hasLength(CharSequence var0) {
-      return var0 != null && var0.length() > 0;
+   public static boolean hasLength(CharSequence str) {
+      return str != null && str.length() > 0;
    }
 
-   public static boolean hasChineseChar(String var0) {
-      boolean var1 = false;
+   public static boolean hasChineseChar(String value) {
+      boolean hasChineseCharResult = false;
 
-      for(char var5 : var0.toCharArray()) {
-         if (var5 >= 19968 && var5 <= '龥') {
-            var1 = true;
+      for(char text : value.toCharArray()) {
+         if (text >= 19968 && text <= '龥') {
+            hasChineseCharResult = true;
             break;
          }
       }
 
-      return var1;
+      return hasChineseCharResult;
    }
 
-   public static String trim(String var0) {
-      return var0 == null ? null : var0.trim();
+   public static String trim(String str) {
+      return str == null ? null : str.trim();
    }
 
-   public static String trimToEmpty(String var0) {
-      return var0 == null ? "" : var0.trim();
+   public static String trimToEmpty(String str) {
+      return str == null ? "" : str.trim();
    }
 
-   public static boolean isLetterDigitOrChinese(String var0) {
-      String var1 = "^[_a-z0-9A-Z\\(\\)\\（\\）一-龥]+$";
-      return var0.matches(var1);
+   /**判断是不是中英文数字及下划线*/
+   public static boolean isLetterDigitOrChinese(String str) {
+      String text = "^[_a-z0-9A-Z\\(\\)\\（\\）一-龥]+$";
+      return str.matches(text);
    }
 
-   public static boolean hasSpecialChar(String var0) {
-      String var1 = "[ `~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
-      Pattern var2 = Pattern.compile(var1);
-      Matcher var3 = var2.matcher(var0);
-      return var3.find();
+   public static boolean hasSpecialChar(String str) {
+      String text = "[ `~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
+      Pattern pattern = Pattern.compile(text);
+      Matcher matcher = pattern.matcher(str);
+      return matcher.find();
    }
 }

@@ -1,23 +1,21 @@
 package com.bstek.urule.runtime.log;
 
 public class ExcecuteScoreCardLog extends DataLog {
-   private static final String b = "---行 %s,得分：%s";
-   private static final String c = "---row %s,score：%s";
-   private int d;
-   private Object e;
+   private int rowNumber;
+   private Object value;
 
-   public ExcecuteScoreCardLog(int var1, Object var2) {
-      this.d = var1;
-      this.e = var2;
-      String var3 = this.a() ? "---row %s,score：%s" : "---行 %s,得分：%s";
-      this.a = String.format(var3, var1, var2);
+   public ExcecuteScoreCardLog(int rowNumber, Object value) {
+      this.rowNumber = rowNumber;
+      this.value = value;
+      String text = this.isEnglishLanguage() ? "---row %s,score：%s" : "---行 %s,得分：%s";
+      this.msg = String.format(text, rowNumber, value);
    }
 
    public int getRowNumber() {
-      return this.d;
+      return this.rowNumber;
    }
 
    public Object getValue() {
-      return this.e;
+      return this.value;
    }
 }

@@ -11,101 +11,101 @@ import java.util.Date;
 import java.util.List;
 
 public class PacketApplyDetailQueryImpl implements PacketApplyDetailQuery {
-   private Long a;
-   private Long b;
-   private Long c;
-   private List d = new ArrayList();
+   private Long id;
+   private Long applyId;
+   private Long projectId;
+   private List queryParameters = new ArrayList();
 
    public List list() {
-      String var1 = "select ID_,APPLY_ID_,PROJECT_ID_,DESC_,CREATE_USER_,CREATE_DATE_ from URULE_PACKET_APPLY_DETAIL";
-      StringBuilder var2 = this.a();
-      if (var2.length() > 0) {
-         var1 = var1 + " where" + var2.toString();
+      String text = "select ID_,APPLY_ID_,PROJECT_ID_,DESC_,CREATE_USER_,CREATE_DATE_ from URULE_PACKET_APPLY_DETAIL";
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      var1 = var1 + " order by CREATE_DATE_ desc";
-      Connection var3 = JdbcUtils.getConnection();
+      text = text + " order by CREATE_DATE_ desc";
+      Connection connection = JdbcUtils.getConnection();
 
-      List var7;
+      List listResult;
       try {
-         PreparedStatement var4 = var3.prepareStatement(var1);
-         JdbcUtils.fillPreparedStatementParameters(this.d, var4);
-         ResultSet var5 = var4.executeQuery();
-         List var6 = this.a(var5);
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readApplicationDetails(resultSet);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listResult;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readApplicationDetails(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         PacketApplyDetail var3 = new PacketApplyDetail();
-         var3.setId(var1.getLong(1));
-         var3.setApplyId(var1.getLong(2));
-         var3.setProjectId(var1.getLong(3));
-         var3.setDesc(var1.getString(4));
-         var3.setCreateUser(var1.getString(5));
-         var3.setCreateDate(new Date(var1.getTimestamp(6).getTime()));
-         var2.add(var3);
+      while(resultSet.next()) {
+         PacketApplyDetail packetApplyDetail = new PacketApplyDetail();
+         packetApplyDetail.setId(resultSet.getLong(1));
+         packetApplyDetail.setApplyId(resultSet.getLong(2));
+         packetApplyDetail.setProjectId(resultSet.getLong(3));
+         packetApplyDetail.setDesc(resultSet.getString(4));
+         packetApplyDetail.setCreateUser(resultSet.getString(5));
+         packetApplyDetail.setCreateDate(new Date(resultSet.getTimestamp(6).getTime()));
+         items.add(packetApplyDetail);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a() {
-      this.d.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.d.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.applyId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" APPLY_ID_=?");
-         this.d.add(this.b);
+         stringBuilder.append(" APPLY_ID_=?");
+         this.queryParameters.add(this.applyId);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_=?");
-         this.d.add(this.c);
+         stringBuilder.append(" PROJECT_ID_=?");
+         this.queryParameters.add(this.projectId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public PacketApplyDetailQuery id(long var1) {
-      this.a = var1;
+   public PacketApplyDetailQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public PacketApplyDetailQuery applyId(long var1) {
-      this.b = var1;
+   public PacketApplyDetailQuery applyId(long applyId) {
+      this.applyId = applyId;
       return this;
    }
 
-   public PacketApplyDetailQuery projectId(long var1) {
-      this.c = var1;
+   public PacketApplyDetailQuery projectId(long projectId) {
+      this.projectId = projectId;
       return this;
    }
 }

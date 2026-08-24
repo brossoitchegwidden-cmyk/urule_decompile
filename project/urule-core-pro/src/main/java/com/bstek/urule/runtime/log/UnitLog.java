@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UnitLog implements Log {
-   private List<Log> a = new ArrayList<>();
+   private List<Log> logs = new ArrayList<>();
 
-   public void addLog(Log var1) {
-      this.a.add(var1);
+   public void addLog(Log log) {
+      this.logs.add(log);
    }
 
    public List<Log> getLogs() {
-      return this.a;
+      return this.logs;
    }
 }

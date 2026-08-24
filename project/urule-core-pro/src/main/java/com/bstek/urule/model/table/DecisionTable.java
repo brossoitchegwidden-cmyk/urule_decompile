@@ -27,112 +27,112 @@ public class DecisionTable {
       return this.salience;
    }
 
-   public void setSalience(Integer var1) {
-      this.salience = var1;
+   public void setSalience(Integer salience) {
+      this.salience = salience;
    }
 
    public String getMutexGroup() {
       return this.mutexGroup;
    }
 
-   public void setMutexGroup(String var1) {
-      this.mutexGroup = var1;
+   public void setMutexGroup(String mutexGroup) {
+      this.mutexGroup = mutexGroup;
    }
 
    public Date getEffectiveDate() {
       return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public Boolean getEnabled() {
       return this.enabled;
    }
 
-   public void setEnabled(Boolean var1) {
-      this.enabled = var1;
+   public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
    }
 
    public Boolean getDebug() {
       return this.debug;
    }
 
-   public void setDebug(Boolean var1) {
-      this.debug = var1;
+   public void setDebug(Boolean debug) {
+      this.debug = debug;
    }
 
    public String getRemark() {
       return this.remark;
    }
 
-   public void setRemark(String var1) {
-      this.remark = var1;
+   public void setRemark(String remark) {
+      this.remark = remark;
    }
 
    public String getQuickTestData() {
       return this.quickTestData;
    }
 
-   public void setQuickTestData(String var1) {
-      this.quickTestData = var1;
+   public void setQuickTestData(String quickTestData) {
+      this.quickTestData = quickTestData;
    }
 
    public List<Row> getRows() {
       return this.rows;
    }
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 
-   public void addRow(Row var1) {
+   public void addRow(Row row) {
       if (this.rows == null) {
          this.rows = new ArrayList<>();
       }
 
-      this.rows.add(var1);
+      this.rows.add(row);
    }
 
-   public void addColumn(Column var1) {
+   public void addColumn(Column col) {
       if (this.columns == null) {
          this.columns = new ArrayList<>();
       }
 
-      this.columns.add(var1);
+      this.columns.add(col);
    }
 
-   public void addCell(Cell var1) {
+   public void addCell(Cell cell) {
       if (this.cellMap == null) {
          this.cellMap = new HashMap<>();
       }
 
-      this.cellMap.put(this.buildCellKey(var1.getRow(), var1.getCol()), var1);
+      this.cellMap.put(this.buildCellKey(cell.getRow(), cell.getCol()), cell);
    }
 
-   public void setRows(List<Row> var1) {
-      this.rows = var1;
+   public void setRows(List<Row> rows) {
+      this.rows = rows;
    }
 
    public List<Column> getColumns() {
       return this.columns;
    }
 
-   public void setColumns(List<Column> var1) {
-      this.columns = var1;
+   public void setColumns(List<Column> columns) {
+      this.columns = columns;
    }
 
    public Map<String, Cell> getCellMap() {
@@ -143,19 +143,19 @@ public class DecisionTable {
       return this.predefineGroup;
    }
 
-   public void setPredefineGroup(PredefineGroupDefinition var1) {
-      this.predefineGroup = var1;
+   public void setPredefineGroup(PredefineGroupDefinition predefineGroup) {
+      this.predefineGroup = predefineGroup;
    }
 
    public List<Library> getLibraries() {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
-   public String buildCellKey(int var1, int var2) {
-      return var1 + "," + var2;
+   public String buildCellKey(int row, int col) {
+      return row + "," + col;
    }
 }

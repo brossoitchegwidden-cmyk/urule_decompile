@@ -30,212 +30,212 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class CrosstabServletHandler extends ApiServletHandler {
-   public void excel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      InputStream var3 = FileUtils.uploadFile(var1).getInputStream();
-      List var4 = ExcelImportUtils.parseSheets(var3);
-      CrossData var5 = this.a((XSSFSheet)var4.get(0));
-      var3.close();
-      CrossTableXmlBuilder var6 = new CrossTableXmlBuilder(var5);
-      CrosstabDefinition var7 = var6.doBuild();
-      this.a(var2, var7);
+   public void excel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      InputStream inputStream = FileUtils.uploadFile(req).getInputStream();
+      List sheets = ExcelImportUtils.parseSheets(inputStream);
+      CrossData crossData = this.parseCrossData((XSSFSheet)sheets.get(0));
+      inputStream.close();
+      CrossTableXmlBuilder crossTableXmlBuilder = new CrossTableXmlBuilder(crossData);
+      CrosstabDefinition crosstabDefinition = crossTableXmlBuilder.doBuild();
+      this.writeObjectToJson(resp, crosstabDefinition);
    }
 
-   public void doExport(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      RuleFile var5 = FileManager.ins.get(var3);
-      Project var6 = ProjectManager.ins.get(var5.getProjectId());
-      ContextHolder.setGroupId(var6.getGroupId());
-      ContextHolder.setProjectId(var6.getId());
-      var5.setContent(FileManager.ins.loadContent(var3));
-      String var7 = FileManager.ins.loadContent(var3);
-      CrosstabExcelBuilder var8 = new CrosstabExcelBuilder();
-      CrosstabDefinition var9 = var8.buildTable(var7);
-      SimpleDateFormat var10 = new SimpleDateFormat("yyyyMMddHHmmss");
-      String var11 = var5.getName() + "-" + var10.format(new Date()) + ".xlsx";
-      var2.setContentType("application/octet-stream;charset=ISO8859-1");
-      var11 = new String(var11.getBytes("UTF-8"), "ISO8859-1");
-      var2.setHeader("Content-Disposition", "attachment;filename=\"" + var11 + "\"");
-      ServletOutputStream var12 = var2.getOutputStream();
-      var8.buildExcel(var9, var12);
-      var12.flush();
-      var12.close();
+   public void doExport(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      RuleFile ruleFile = FileManager.ins.get(longValue);
+      Project project = ProjectManager.ins.get(ruleFile.getProjectId());
+      ContextHolder.setGroupId(project.getGroupId());
+      ContextHolder.setProjectId(project.getId());
+      ruleFile.setContent(FileManager.ins.loadContent(longValue));
+      String content = FileManager.ins.loadContent(longValue);
+      CrosstabExcelBuilder crosstabExcelBuilder = new CrosstabExcelBuilder();
+      CrosstabDefinition table = crosstabExcelBuilder.buildTable(content);
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+      String string = ruleFile.getName() + "-" + simpleDateFormat.format(new Date()) + ".xlsx";
+      resp.setContentType("application/octet-stream;charset=ISO8859-1");
+      string = new String(string.getBytes("UTF-8"), "ISO8859-1");
+      resp.setHeader("Content-Disposition", "attachment;filename=\"" + string + "\"");
+      ServletOutputStream outputStream = resp.getOutputStream();
+      crosstabExcelBuilder.buildExcel(table, outputStream);
+      outputStream.flush();
+      outputStream.close();
    }
 
-   private CrossData a(XSSFSheet var1) throws Exception {
-      XSSFWorkbook var2 = var1.getWorkbook();
-      List var3 = ExcelImportUtils.parsePredefines(var2);
-      Map var4 = ExcelImportUtils.parseProperties(var2);
-      ArrayList var5 = new ArrayList();
-      ArrayList var6 = new ArrayList();
-      XSSFSheet var7 = ExcelImportUtils.findDataSheet(var2);
-      CrossHeader var8 = this.b(var7);
-      XSSFRow var9 = var7.getRow(0);
-      short var10 = var9.getLastCellNum();
-      XSSFRow var11 = var7.getRow(var8.getRowSpan());
-      String var12 = "predefine:";
-      String var13 = "预定义变量:";
+   private CrossData parseCrossData(XSSFSheet xSSFSheet) throws Exception {
+      XSSFWorkbook workbook = xSSFSheet.getWorkbook();
+      List predefines = ExcelImportUtils.parsePredefines(workbook);
+      Map properties = ExcelImportUtils.parseProperties(workbook);
+      ArrayList items = new ArrayList();
+      ArrayList items2 = new ArrayList();
+      XSSFSheet dataSheet = ExcelImportUtils.findDataSheet(workbook);
+      CrossHeader crossHeader = this.resolveCrossHeader(dataSheet);
+      XSSFRow row = dataSheet.getRow(0);
+      short lastCellNum = row.getLastCellNum();
+      XSSFRow row2 = dataSheet.getRow(crossHeader.getRowSpan());
+      String text = "predefine:";
+      String text2 = "预定义变量:";
 
-      for(int var14 = 0; var14 < var10; ++var14) {
-         CrossColumn var15 = new CrossColumn();
-         var15.setNumber(var14 + 1);
-         if (var14 < var8.getColSpan()) {
-            var15.setType(Type.left);
-            XSSFCell var16 = var11.getCell(var14);
-            XSSFComment var17 = var16.getCellComment();
-            if (var17 != null) {
-               String var18 = var17.getString().toString().toLowerCase().trim();
-               if (var18.startsWith(var12) || var18.startsWith(var13)) {
-                  var15.setPredefine(true);
-                  var18 = var18.substring(var12.length());
+      for(int index = 0; index < lastCellNum; ++index) {
+         CrossColumn crossColumn = new CrossColumn();
+         crossColumn.setNumber(index + 1);
+         if (index < crossHeader.getColSpan()) {
+            crossColumn.setType(Type.left);
+            XSSFCell cell = row2.getCell(index);
+            XSSFComment cellComment = cell.getCellComment();
+            if (cellComment != null) {
+               String substring = cellComment.getString().toString().toLowerCase().trim();
+               if (substring.startsWith(text) || substring.startsWith(text2)) {
+                  crossColumn.setPredefine(true);
+                  substring = substring.substring(text.length());
                }
 
-               var15.setContent(var18);
+               crossColumn.setContent(substring);
             }
          } else {
-            var15.setType(Type.top);
+            crossColumn.setType(Type.top);
          }
 
-         var6.add(var15);
+         items2.add(crossColumn);
       }
 
-      int var23 = var7.getLastRowNum();
+      int lastRowNum = dataSheet.getLastRowNum();
 
-      for(int var24 = 0; var24 <= var23; ++var24) {
-         XSSFRow var26 = var7.getRow(var24);
-         CrossRow var29 = new CrossRow();
-         var29.setNumber(var24 + 1);
-         if (var24 < var8.getRowSpan()) {
-            var29.setType(Type.top);
-            XSSFCell var31 = var26.getCell(var8.getColSpan());
-            XSSFComment var19 = var31.getCellComment();
-            if (var19 != null) {
-               String var20 = var19.getString().toString().toLowerCase().trim();
-               if (var20.startsWith(var12) || var20.startsWith(var13)) {
-                  var29.setPredefine(true);
-                  var20 = var20.substring(var12.length());
+      for(int index2 = 0; index2 <= lastRowNum; ++index2) {
+         XSSFRow row3 = dataSheet.getRow(index2);
+         CrossRow crossRow = new CrossRow();
+         crossRow.setNumber(index2 + 1);
+         if (index2 < crossHeader.getRowSpan()) {
+            crossRow.setType(Type.top);
+            XSSFCell cell2 = row3.getCell(crossHeader.getColSpan());
+            XSSFComment cellComment2 = cell2.getCellComment();
+            if (cellComment2 != null) {
+               String substring2 = cellComment2.getString().toString().toLowerCase().trim();
+               if (substring2.startsWith(text) || substring2.startsWith(text2)) {
+                  crossRow.setPredefine(true);
+                  substring2 = substring2.substring(text.length());
                }
 
-               var29.setContent(var20);
+               crossRow.setContent(substring2);
             }
          } else {
-            var29.setType(Type.left);
+            crossRow.setType(Type.left);
          }
 
-         var5.add(var29);
+         items.add(crossRow);
       }
 
-      ArrayList var25 = new ArrayList();
+      ArrayList items3 = new ArrayList();
 
-      for(int var27 = 0; var27 <= var23; ++var27) {
-         XSSFRow var30 = var7.getRow(var27);
+      for(int index3 = 0; index3 <= lastRowNum; ++index3) {
+         XSSFRow row4 = dataSheet.getRow(index3);
 
-         for(int var32 = 0; var32 < var10; ++var32) {
-            if (var27 != 0 || var32 != 0) {
-               XSSFCell var33 = var30.getCell(var32);
-               if (var33 != null) {
-                  Span var34 = this.a(var27, var32, var7);
-                  if (var34 != null) {
-                     String var21 = this.a(var33);
-                     CellContent var22 = new CellContent();
-                     var22.setCol(var32 + 1);
-                     var22.setRow(var27 + 1);
-                     var22.setContent(var21);
-                     if (var27 < var8.getRowSpan()) {
-                        var22.setType("condition");
-                        var22.setSpan(var34.getCol());
+         for(int index4 = 0; index4 < lastCellNum; ++index4) {
+            if (index3 != 0 || index4 != 0) {
+               XSSFCell cell3 = row4.getCell(index4);
+               if (cell3 != null) {
+                  Span span = this.resolveCellSpan(index3, index4, dataSheet);
+                  if (span != null) {
+                     String text3 = this.getCellText(cell3);
+                     CellContent cellContent = new CellContent();
+                     cellContent.setCol(index4 + 1);
+                     cellContent.setRow(index3 + 1);
+                     cellContent.setContent(text3);
+                     if (index3 < crossHeader.getRowSpan()) {
+                        cellContent.setType("condition");
+                        cellContent.setSpan(span.getCol());
                      }
 
-                     if (var32 < var8.getColSpan()) {
-                        var22.setType("condition");
-                        var22.setSpan(var34.getRow());
+                     if (index4 < crossHeader.getColSpan()) {
+                        cellContent.setType("condition");
+                        cellContent.setSpan(span.getRow());
                      }
 
-                     var25.add(var22);
+                     items3.add(cellContent);
                   }
                }
             }
          }
       }
 
-      var7.getWorkbook().close();
-      CrossData var28 = new CrossData();
-      var28.setProperties(var4);
-      var28.setCells(var25);
-      var28.setColumns(var6);
-      var28.setRows(var5);
-      var28.setHeader(var8);
-      var28.setPredefineRows(var3);
-      return var28;
+      dataSheet.getWorkbook().close();
+      CrossData crossData = new CrossData();
+      crossData.setProperties(properties);
+      crossData.setCells(items3);
+      crossData.setColumns(items2);
+      crossData.setRows(items);
+      crossData.setHeader(crossHeader);
+      crossData.setPredefineRows(predefines);
+      return crossData;
    }
 
-   private CrossHeader b(XSSFSheet var1) {
-      Span var2 = this.a(0, 0, var1);
-      if (var2 == null) {
+   private CrossHeader resolveCrossHeader(XSSFSheet xSSFSheet) {
+      Span span = this.resolveCellSpan(0, 0, xSSFSheet);
+      if (span == null) {
          throw new InfoException("导入的Excel不合法!");
       } else {
-         CrossHeader var3 = new CrossHeader();
-         var3.setRowSpan(var2.getRow());
-         var3.setColSpan(var2.getCol());
-         XSSFRow var4 = var1.getRow(0);
-         XSSFCell var5 = var4.getCell(0);
-         if (var5 == null) {
+         CrossHeader crossHeader = new CrossHeader();
+         crossHeader.setRowSpan(span.getRow());
+         crossHeader.setColSpan(span.getCol());
+         XSSFRow row = xSSFSheet.getRow(0);
+         XSSFCell cell = row.getCell(0);
+         if (cell == null) {
             throw new InfoException("导入的Excel表头不合法!");
          } else {
-            var3.setContent(this.a(var5));
-            return var3;
+            crossHeader.setContent(this.getCellText(cell));
+            return crossHeader;
          }
       }
    }
 
-   private Span a(int var1, int var2, XSSFSheet var3) {
-      for(CellRangeAddress var6 : var3.getMergedRegions()) {
-         if (var6.getFirstColumn() == var2 && var6.getFirstRow() == var1) {
-            int var7 = var6.getLastRow() - var6.getFirstRow();
-            if (var7 > 0) {
-               ++var7;
+   private Span resolveCellSpan(int number, int number2, XSSFSheet xSSFSheet) {
+      for(CellRangeAddress cellRangeAddress : xSSFSheet.getMergedRegions()) {
+         if (cellRangeAddress.getFirstColumn() == number2 && cellRangeAddress.getFirstRow() == number) {
+            int number3 = cellRangeAddress.getLastRow() - cellRangeAddress.getFirstRow();
+            if (number3 > 0) {
+               ++number3;
             }
 
-            Span var8 = new Span();
-            var8.setRow(var7);
-            int var9 = var6.getLastColumn() - var6.getFirstColumn();
-            if (var9 > 0) {
-               ++var9;
+            Span span = new Span();
+            span.setRow(number3);
+            int number4 = cellRangeAddress.getLastColumn() - cellRangeAddress.getFirstColumn();
+            if (number4 > 0) {
+               ++number4;
             }
 
-            var8.setCol(var9);
-            return var8;
+            span.setCol(number4);
+            return span;
          }
 
-         if (var2 >= var6.getFirstColumn() && var2 <= var6.getLastColumn() && var1 >= var6.getFirstRow() && var1 <= var6.getLastRow()) {
+         if (number2 >= cellRangeAddress.getFirstColumn() && number2 <= cellRangeAddress.getLastColumn() && number >= cellRangeAddress.getFirstRow() && number <= cellRangeAddress.getLastRow()) {
             return null;
          }
       }
 
-      Span var10 = new Span();
-      var10.setRow(1);
-      var10.setCol(1);
-      return var10;
+      Span span2 = new Span();
+      span2.setRow(1);
+      span2.setCol(1);
+      return span2;
    }
 
-   private String a(XSSFCell var1) {
-      String var2 = null;
-      CellType var3 = var1.getCellTypeEnum();
-      switch (var3) {
+   private String getCellText(XSSFCell xSSFCell) {
+      String stringCellValue = null;
+      CellType cellTypeEnum = xSSFCell.getCellTypeEnum();
+      switch (cellTypeEnum) {
          case STRING:
-            var2 = var1.getStringCellValue();
+            stringCellValue = xSSFCell.getStringCellValue();
             break;
          case BOOLEAN:
-            var2 = String.valueOf(var1.getBooleanCellValue());
+            stringCellValue = String.valueOf(xSSFCell.getBooleanCellValue());
             break;
          case NUMERIC:
-            var2 = String.valueOf(NumberToTextConverter.toText(var1.getNumericCellValue()));
+            stringCellValue = String.valueOf(NumberToTextConverter.toText(xSSFCell.getNumericCellValue()));
          case _NONE:
          case BLANK:
          case ERROR:
          case FORMULA:
       }
 
-      return var2;
+      return stringCellValue;
    }
 
    public String url() {

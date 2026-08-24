@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 
 public class RuleJsonDeserializer extends AbstractJsonDeserializer<Rule> {
-   public Rule deserialize(JsonParser var1, DeserializationContext var2) throws IOException, JsonProcessingException {
-      ObjectCodec var3 = var1.getCodec();
-      JsonNode var4 = (JsonNode)var3.readTree(var1);
-      return this.parseRule(var1, var4);
+   public Rule deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+      ObjectCodec codec = jp.getCodec();
+      JsonNode tree = (JsonNode)codec.readTree(jp);
+      return this.parseRule(jp, tree);
    }
 }

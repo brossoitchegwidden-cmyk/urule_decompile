@@ -9,15 +9,15 @@ public class RuleParserParser$ActivationGroupAttributeContext extends ParserRule
       return this.getToken(97, 0);
    }
 
-   public RuleParserParser$ActivationGroupAttributeContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$ActivationGroupAttributeContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 27;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitActivationGroupAttribute(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitActivationGroupAttribute(this) : parseTreeVisitor.visitChildren(this));
    }
 }

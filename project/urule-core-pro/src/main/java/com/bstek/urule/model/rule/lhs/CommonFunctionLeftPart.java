@@ -15,17 +15,17 @@ public class CommonFunctionLeftPart implements LeftPart {
    private String label;
    private CommonFunctionParameter parameter;
 
-   public Object evaluate(EvaluationContext var1, Map<String, Object> var2) {
-      FunctionDescriptor var3 = Utils.findFunctionDescriptor(this.name);
-      Value var4 = this.parameter.getObjectParameter();
-      Object var5 = var1.getValueCompute().complexValueCompute(var4, var1, var2);
-      Argument var6 = var3.getArgument();
-      String var7 = null;
-      if (var6.isNeedProperty()) {
-         var7 = this.parameter.getProperty();
+   public Object evaluate(EvaluationContext context, Map<String, Object> factMap) {
+      FunctionDescriptor functionDescriptor = Utils.findFunctionDescriptor(this.name);
+      Value objectParameter = this.parameter.getObjectParameter();
+      Object objectValue = context.getValueCompute().complexValueCompute(objectParameter, context, factMap);
+      Argument argument = functionDescriptor.getArgument();
+      String property = null;
+      if (argument.isNeedProperty()) {
+         property = this.parameter.getProperty();
       }
 
-      return var3.doFunction(var5, var7, var1.getWorkingMemory());
+      return functionDescriptor.doFunction(objectValue, property, context.getWorkingMemory());
    }
 
    @Override
@@ -41,23 +41,23 @@ public class CommonFunctionLeftPart implements LeftPart {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
       return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.label = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public CommonFunctionParameter getParameter() {
       return this.parameter;
    }
 
-   public void setParameter(CommonFunctionParameter var1) {
-      this.parameter = var1;
+   public void setParameter(CommonFunctionParameter parameter) {
+      this.parameter = parameter;
    }
 }

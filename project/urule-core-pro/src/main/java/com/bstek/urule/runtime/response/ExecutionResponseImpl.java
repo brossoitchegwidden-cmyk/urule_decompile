@@ -4,44 +4,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExecutionResponseImpl implements FlowExecutionResponse, RuleExecutionResponse {
-   private long a;
-   private String b;
-   private List<RuleExecutionResponse> c = new ArrayList<>();
-   private List<FlowExecutionResponse> d = new ArrayList<>();
+   private long duration;
+   private String flowId;
+   private List<RuleExecutionResponse> ruleExecutionResponses = new ArrayList<>();
+   private List<FlowExecutionResponse> flowExecutionResponses = new ArrayList<>();
 
    @Override
    public String getFlowId() {
-      return this.b;
+      return this.flowId;
    }
 
-   public void setFlowId(String var1) {
-      this.b = var1;
+   public void setFlowId(String flowId) {
+      this.flowId = flowId;
    }
 
-   public void addFlowExecutionResponse(FlowExecutionResponse var1) {
-      this.d.add(var1);
+   public void addFlowExecutionResponse(FlowExecutionResponse response) {
+      this.flowExecutionResponses.add(response);
    }
 
    @Override
    public List<FlowExecutionResponse> getFlowExecutionResponses() {
-      return this.d;
+      return this.flowExecutionResponses;
    }
 
    @Override
    public List<RuleExecutionResponse> getRuleExecutionResponses() {
-      return this.c;
+      return this.ruleExecutionResponses;
    }
 
-   public void addRuleExecutionResponse(RuleExecutionResponse var1) {
-      this.c.add(var1);
+   public void addRuleExecutionResponse(RuleExecutionResponse response) {
+      this.ruleExecutionResponses.add(response);
    }
 
    @Override
    public long getDuration() {
-      return this.a;
+      return this.duration;
    }
 
-   public void setDuration(long var1) {
-      this.a = var1;
+   public void setDuration(long duration) {
+      this.duration = duration;
    }
 }

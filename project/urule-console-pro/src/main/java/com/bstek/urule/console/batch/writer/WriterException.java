@@ -4,19 +4,19 @@ import com.bstek.urule.console.batch.exception.BatchException;
 import com.bstek.urule.model.GeneralEntity;
 
 public class WriterException extends BatchException {
-   private static final long a = -2816573863669976595L;
-   private Object b;
+   private static final long serialVersionUID = -2816573863669976595L;
+   private Object data;
 
-   public WriterException(String var1, Exception var2, GeneralEntity var3) {
-      super(var1, var2);
-      this.b = var3;
+   public WriterException(String msg, Exception ex, GeneralEntity data) {
+      super(msg, ex);
+      this.data = data;
    }
 
    public Object getData() {
-      return this.b;
+      return this.data;
    }
 
-   public void setData(Object var1) {
-      this.b = var1;
+   public void setData(Object data) {
+      this.data = data;
    }
 }

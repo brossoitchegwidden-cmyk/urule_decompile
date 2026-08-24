@@ -5,25 +5,25 @@ import com.bstek.urule.console.database.model.Packet;
 public interface PacketManager {
    PacketManager ins = new PacketManagerImpl();
 
-   Packet load(long var1);
+   Packet load(long id);
 
-   Packet load(String var1);
+   Packet load(String code);
 
-   void delete(long var1);
+   void delete(long id);
 
-   void add(Packet var1);
+   void add(Packet packet);
 
-   void update(Packet var1);
+   void update(Packet packet);
 
-   void update(long var1, boolean var3);
+   void update(long id, boolean enable);
 
-   void updateRestConfig(Packet var1);
+   void updateRestConfig(Packet packet);
 
-   void updateAuditConfig(Packet var1);
+   void updateAuditConfig(Packet packet);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   int getCount(long var1);
+   int getCount(long projectId);
 
    PacketQuery newQuery();
 }

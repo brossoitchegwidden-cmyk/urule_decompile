@@ -4,47 +4,47 @@ import com.bstek.urule.exception.RuleException;
 import com.bstek.urule.model.rule.Op;
 
 public class DSLUtils {
-   public static Op parseOp(RuleParserParser$OpContext var0) {
-      if (var0 == null) {
+   public static Op parseOp(RuleParserParser$OpContext ctx) {
+      if (ctx == null) {
          return Op.Equals;
-      } else if (var0.GreaterThen() != null) {
+      } else if (ctx.GreaterThen() != null) {
          return Op.GreaterThen;
-      } else if (var0.GreaterThenOrEquals() != null) {
+      } else if (ctx.GreaterThenOrEquals() != null) {
          return Op.GreaterThenEquals;
-      } else if (var0.LessThen() != null) {
+      } else if (ctx.LessThen() != null) {
          return Op.LessThen;
-      } else if (var0.LessThenOrEquals() != null) {
+      } else if (ctx.LessThenOrEquals() != null) {
          return Op.LessThenEquals;
-      } else if (var0.Equals() != null) {
+      } else if (ctx.Equals() != null) {
          return Op.Equals;
-      } else if (var0.NotEquals() != null) {
+      } else if (ctx.NotEquals() != null) {
          return Op.NotEquals;
-      } else if (var0.EndWith() != null) {
+      } else if (ctx.EndWith() != null) {
          return Op.EndWith;
-      } else if (var0.NotEndWith() != null) {
+      } else if (ctx.NotEndWith() != null) {
          return Op.NotEndWith;
-      } else if (var0.StartWith() != null) {
+      } else if (ctx.StartWith() != null) {
          return Op.StartWith;
-      } else if (var0.NotStartWith() != null) {
+      } else if (ctx.NotStartWith() != null) {
          return Op.NotStartWith;
-      } else if (var0.In() != null) {
+      } else if (ctx.In() != null) {
          return Op.In;
-      } else if (var0.NotIn() != null) {
+      } else if (ctx.NotIn() != null) {
          return Op.NotIn;
-      } else if (var0.Match() != null) {
+      } else if (ctx.Match() != null) {
          return Op.Match;
-      } else if (var0.NotMatch() != null) {
+      } else if (ctx.NotMatch() != null) {
          return Op.NotMatch;
-      } else if (var0.EqualsIgnoreCase() != null) {
+      } else if (ctx.EqualsIgnoreCase() != null) {
          return Op.EqualsIgnoreCase;
-      } else if (var0.NotEqualsIgnoreCase() != null) {
+      } else if (ctx.NotEqualsIgnoreCase() != null) {
          return Op.NotEqualsIgnoreCase;
-      } else if (var0.Contain() != null) {
+      } else if (ctx.Contain() != null) {
          return Op.Contain;
-      } else if (var0.NotContain() != null) {
+      } else if (ctx.NotContain() != null) {
          return Op.NotContain;
       } else {
-         throw new RuleException("Operator [" + var0 + "] is invalid.");
+         throw new RuleException("Operator [" + ctx + "] is invalid.");
       }
    }
 }

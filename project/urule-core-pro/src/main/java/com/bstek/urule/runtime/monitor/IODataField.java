@@ -1,36 +1,36 @@
 package com.bstek.urule.runtime.monitor;
 
 public class IODataField {
-   private String a;
-   private String b;
-   private Object c;
+   private String name;
+   private String label;
+   private Object value;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.b;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.b = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public Object getValue() {
-      return this.c;
+      return this.value;
    }
 
-   public void setValue(Object var1) {
-      this.c = var1;
+   public void setValue(Object value) {
+      this.value = value;
    }
 
    @Override
    public String toString() {
-      return "IODataField [name=" + this.a + ", label=" + this.b + ", value=" + this.c + "]";
+      return "IODataField [name=" + this.name + ", label=" + this.label + ", value=" + this.value + "]";
    }
 }

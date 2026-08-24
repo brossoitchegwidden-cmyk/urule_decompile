@@ -1,7 +1,7 @@
 package com.bstek.urule.runtime.log;
 
 public class MessageLog extends DataLog {
-   public MessageLog(String var1) {
-      this.a = var1;
+   public MessageLog(String msg) {
+      this.msg = msg;
    }
 }

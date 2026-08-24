@@ -6,79 +6,91 @@ import java.util.Base64;
 import java.util.Map;
 
 public class KnowledgeSessionFactory {
-   private static long a;
-   private static boolean b;
+   private static long licenseLimit;
+   private static boolean registered;
 
-   protected static void a(boolean var0) {
-      b = var0;
+   protected static void resetReg(boolean reg) {
+      registered = reg;
    }
 
-   protected static void a(Map<?, ?> var0) {
-      a = Long.valueOf(var0.get(new String(Base64.getDecoder().decode("bGltaXQ=".getBytes()))).toString());
+   protected static void resetLimit(Map<?, ?> map) {
+      licenseLimit = Long.valueOf(map.get(new String(Base64.getDecoder().decode("bGltaXQ=".getBytes()))).toString());
    }
 
-   public static KnowledgeSession newKnowledgeSession(KnowledgePackage var0) {
-      return new KnowledgeSessionImpl(var0, b, a);
+   /**创建一个普通的KnowledgeSession对象*/
+   public static KnowledgeSession newKnowledgeSession(KnowledgePackage knowledgePackage) {
+      return new KnowledgeSessionImpl(knowledgePackage, registered, licenseLimit);
    }
 
-   public static KnowledgeSession newKnowledgeSession(KnowledgePackage var0, KnowledgeSession var1) {
-      return new KnowledgeSessionImpl(var0, var1, b, a);
+   /**创建一个普通的KnowledgeSession对象，同时将父级KnowledgeSession传入*/
+   public static KnowledgeSession newKnowledgeSession(KnowledgePackage knowledgePackage, KnowledgeSession parentSession) {
+      return new KnowledgeSessionImpl(knowledgePackage, parentSession, registered, licenseLimit);
    }
 
-   public static KnowledgeSession newKnowledgeSession(KnowledgePackageWrapper var0, Context var1, KnowledgeSession var2) {
-      if (var1 == null) {
+   /**根据KnowledgePackageWrapper、Context以及父KnowledgeSession创建一个新的（或从缓存里取）KnowledgeSession对象*/
+   public static KnowledgeSession newKnowledgeSession(KnowledgePackageWrapper wrapper, Context context, KnowledgeSession parentSession) {
+      if (context == null) {
          throw new RuleException("Context cannot be null.");
       }
 
-      if (var0 == null) {
+      if (wrapper == null) {
          throw new RuleException("KnowledgePackageWrapper cannot be null.");
       }
 
-      String var3 = var0.getId();
-      KnowledgeSession var4 = var1.getWorkingMemory().getKnowledgeSession(var3);
-      if (var4 == null) {
-         var4 = newKnowledgeSession(var0.getKnowledgePackage(), var2);
-         var1.getWorkingMemory().putKnowledgeSession(var3, var4);
+      String packageId = wrapper.getId();
+      KnowledgeSession knowledgeSession = context.getWorkingMemory().getKnowledgeSession(packageId);
+      if (knowledgeSession == null) {
+         knowledgeSession = newKnowledgeSession(wrapper.getKnowledgePackage(), parentSession);
+         context.getWorkingMemory().putKnowledgeSession(packageId, knowledgeSession);
       } else {
-         var4.initFromParentSession(var2);
+         knowledgeSession.initFromParentSession(parentSession);
       }
 
-      return var4;
+      return knowledgeSession;
    }
 
-   public static KnowledgeSession newKnowledgeSession(KnowledgePackage[] var0) {
-      return new KnowledgeSessionImpl(var0, null, b, a);
+   /**创建一个普通的KnowledgeSession对象*/
+   public static KnowledgeSession newKnowledgeSession(KnowledgePackage[] knowledgePackages) {
+      return new KnowledgeSessionImpl(knowledgePackages, null, registered, licenseLimit);
    }
 
-   public static BatchSession newBatchSession(KnowledgePackage var0) {
-      return new BatchSessionImpl(var0, 10, 100);
+   /**创建一个用于批处理的BatchSession对象，这里默认将开启10个普通的线程池来运行提交的批处理任务，默认将每100个任务放在一个线程里处理*/
+   public static BatchSession newBatchSession(KnowledgePackage knowledgePackage) {
+      return new BatchSessionImpl(knowledgePackage, 10, 100);
    }
 
-   public static BatchSession newBatchSessionByThreadSize(KnowledgePackage var0, int var1) {
-      return new BatchSessionImpl(var0, var1, 100);
+   /**创建一个用于批处理的BatchSession对象，第二个参数来指定线程池中可用线程个数，默认将每100个任务放在一个线程里处理*/
+   public static BatchSession newBatchSessionByThreadSize(KnowledgePackage knowledgePackage, int threadSize) {
+      return new BatchSessionImpl(knowledgePackage, threadSize, 100);
    }
 
-   public static BatchSession newBatchSessionByBatchSize(KnowledgePackage var0, int var1) {
-      return new BatchSessionImpl(var0, 10, var1);
+   /**创建一个用于批处理的BatchSession对象，这里默认将开启10个普通的线程池来运行提交的批处理任务，第二个参数用来决定单个线程处理的任务数*/
+   public static BatchSession newBatchSessionByBatchSize(KnowledgePackage knowledgePackage, int batchSize) {
+      return new BatchSessionImpl(knowledgePackage, 10, batchSize);
    }
 
-   public static BatchSession newBatchSession(KnowledgePackage var0, int var1, int var2) {
-      return new BatchSessionImpl(var0, var1, var2);
+   /**创建一个用于批处理的BatchSession对象，第二个参数来指定线程池中可用线程个数，第三个参数用来决定单个线程处理的任务数*/
+   public static BatchSession newBatchSession(KnowledgePackage knowledgePackage, int threadSize, int batchSize) {
+      return new BatchSessionImpl(knowledgePackage, threadSize, batchSize);
    }
 
-   public static BatchSession newBatchSession(KnowledgePackage[] var0) {
-      return new BatchSessionImpl(var0, 10, 100);
+   /**创建一个用于批处理的BatchSession对象，这里默认将开启10个普通的线程池来运行提交的批处理任务，默认将每100个任务放在一个线程里处理*/
+   public static BatchSession newBatchSession(KnowledgePackage[] knowledgePackages) {
+      return new BatchSessionImpl(knowledgePackages, 10, 100);
    }
 
-   public static BatchSession newBatchSessionByThreadSize(KnowledgePackage[] var0, int var1) {
-      return new BatchSessionImpl(var0, var1, 100);
+   /**创建一个用于批处理的BatchSession对象，第二个参数来指定线程池中可用线程个数，默认将每100个任务放在一个线程里处理*/
+   public static BatchSession newBatchSessionByThreadSize(KnowledgePackage[] knowledgePackages, int threadSize) {
+      return new BatchSessionImpl(knowledgePackages, threadSize, 100);
    }
 
-   public static BatchSession newBatchSessionByBatchSize(KnowledgePackage[] var0, int var1) {
-      return new BatchSessionImpl(var0, 10, var1);
+   /**创建一个用于批处理的BatchSession对象，这里默认将开启10个普通的线程池来运行提交的批处理任务，第二个参数用来决定单个线程处理的任务数*/
+   public static BatchSession newBatchSessionByBatchSize(KnowledgePackage[] knowledgePackages, int batchSize) {
+      return new BatchSessionImpl(knowledgePackages, 10, batchSize);
    }
 
-   public static BatchSession newBatchSession(KnowledgePackage[] var0, int var1, int var2) {
-      return new BatchSessionImpl(var0, var1, var2);
+   /**创建一个用于批处理的BatchSession对象，第二个参数来指定线程池中可用线程个数，第三个参数用来决定单个线程处理的任务数*/
+   public static BatchSession newBatchSession(KnowledgePackage[] knowledgePackages, int threadSize, int batchSize) {
+      return new BatchSessionImpl(knowledgePackages, threadSize, batchSize);
    }
 }

@@ -5,17 +5,17 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class LogQueue {
-   private static BlockingQueue a = new LinkedBlockingQueue(10000);
+   private static BlockingQueue linkedBlockingQueue = new LinkedBlockingQueue(10000);
 
    public static URuleLog pollLog() {
-      return (URuleLog)a.poll();
+      return (URuleLog)LogQueue.linkedBlockingQueue.poll();
    }
 
-   protected static void a(URuleLog var0) throws InterruptedException {
-      a.put(var0);
+   protected static void putLog(URuleLog log) throws InterruptedException {
+      LogQueue.linkedBlockingQueue.put(log);
    }
 
    public static boolean isQueueEmpty() {
-      return a.isEmpty();
+      return LogQueue.linkedBlockingQueue.isEmpty();
    }
 }

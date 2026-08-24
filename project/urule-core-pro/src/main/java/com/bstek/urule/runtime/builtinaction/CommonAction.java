@@ -11,7 +11,7 @@ public class CommonAction {
 
    @ActionMethod(name = "IF_ERROR")
    @ActionMethodParameter(names = {"值", "出错后值"}, enames = {"value", "returnValue"})
-   public Object iferror(Object var1, Object var2) {
-      return var1 instanceof Exception ? var2 : var1;
+   public Object iferror(Object value1, Object obj) {
+      return value1 instanceof Exception ? obj : value1;
    }
 }

@@ -27,211 +27,211 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public abstract class AbstractBatchService implements BatchService {
-   private static Log a = LogFactory.getLog(AbstractBatchService.class);
-   private static ItemReader b;
-   private static RuleProcessor c;
+   private static Log logger = LogFactory.getLog(AbstractBatchService.class);
+   private static ItemReader defaultItemReader;
+   private static RuleProcessor defaultRuleProcessor;
 
-   private ItemReader b() {
-      if (b == null) {
-         b = new DefaultItemReader();
+   private ItemReader resolveItemReader() {
+      if (AbstractBatchService.defaultItemReader == null) {
+         AbstractBatchService.defaultItemReader = new DefaultItemReader();
       }
 
-      return b;
+      return AbstractBatchService.defaultItemReader;
    }
 
-   protected RuleProcessor a() {
-      if (c == null) {
-         c = new DefaultRuleProcessor();
+   protected RuleProcessor getRuleProcessor() {
+      if (AbstractBatchService.defaultRuleProcessor == null) {
+         AbstractBatchService.defaultRuleProcessor = new DefaultRuleProcessor();
       }
 
-      return c;
+      return AbstractBatchService.defaultRuleProcessor;
    }
 
-   protected boolean a(BatchContext var1) {
-      Batch var2 = var1.getBatch();
-      BatchResult var3 = var1.getResult();
+   protected boolean beforeExecute(BatchContext context) {
+      Batch batch = context.getBatch();
+      BatchResult batchResult = context.getResult();
 
       try {
-         int var4 = this.getTotleRows(var2.getDataProvider());
-         var1.setReadCount(var4);
-         var3.setReadCount(var4);
-         if (var4 == 0) {
-            var3.setStatus(BatchStatus.completed);
-            var3.setMsg(BatchStatus.completed.name());
+         int totleRows = this.getTotleRows(batch.getDataProvider());
+         context.setReadCount(totleRows);
+         batchResult.setReadCount(totleRows);
+         if (totleRows == 0) {
+            batchResult.setStatus(BatchStatus.completed);
+            batchResult.setMsg(BatchStatus.completed.name());
             return false;
          } else {
-            int var5 = Double.valueOf(Math.ceil(Double.valueOf((double)var4) / (double)this.a(var2))).intValue();
-            var1.setPageCount(var5);
-            if (var2.isThreadMulti()) {
-               int var6 = Double.valueOf(Math.ceil(Double.valueOf((double)var4) / (double)(var2.getThreadDataSize() * var2.getThreadSize()))).intValue();
-               var1.setBatchCount(var6);
+            int number = Double.valueOf(Math.ceil(Double.valueOf((double)totleRows) / (double)this.resolvePageSize(batch))).intValue();
+            context.setPageCount(number);
+            if (batch.isThreadMulti()) {
+               int number2 = Double.valueOf(Math.ceil(Double.valueOf((double)totleRows) / (double)(batch.getThreadDataSize() * batch.getThreadSize()))).intValue();
+               context.setBatchCount(number2);
             }
 
-            Connection var8 = this.getReadDataSource(var1.getBatch()).getConnection();
-            var1.setReadConnection(var8);
+            Connection connection = this.getReadDataSource(context.getBatch()).getConnection();
+            context.setReadConnection(connection);
             return true;
          }
-      } catch (Exception var7) {
-         this.closeConnection(var1.getReadConnection());
-         a.error(var7);
-         var3.setStatus(BatchStatus.failed);
-         var3.setException(var7);
+      } catch (Exception exception) {
+         this.closeConnection(context.getReadConnection());
+         AbstractBatchService.logger.error(exception);
+         batchResult.setStatus(BatchStatus.failed);
+         batchResult.setException(exception);
          return false;
       }
    }
 
-   public void rollbackConnection(Connection var1) {
+   public void rollbackConnection(Connection conn) {
       try {
-         var1.rollback();
-      } catch (SQLException var3) {
-         throw new RuleException(var3);
+         conn.rollback();
+      } catch (SQLException sQLException) {
+         throw new RuleException(sQLException);
       }
    }
 
-   public void closeConnection(Connection var1) {
+   public void closeConnection(Connection conn) {
       try {
-         if (var1 != null) {
-            var1.close();
+         if (conn != null) {
+            conn.close();
          }
 
-      } catch (SQLException var3) {
-         throw new RuleException(var3);
+      } catch (SQLException sQLException) {
+         throw new RuleException(sQLException);
       }
    }
 
-   protected int a(Batch var1) {
-      int var2 = 0;
-      if (var1.isThreadMulti()) {
-         var2 = var1.getThreadDataSize();
-      } else if (var1.getDataProvider().isSupportsPaging()) {
-         var2 = var1.getDataProvider().getPageSize();
+   protected int resolvePageSize(Batch batch) {
+      int number = 0;
+      if (batch.isThreadMulti()) {
+         number = batch.getThreadDataSize();
+      } else if (batch.getDataProvider().isSupportsPaging()) {
+         number = batch.getDataProvider().getPageSize();
       }
 
-      if (var2 <= 0) {
-         var2 = 100;
+      if (number <= 0) {
+         number = 100;
       }
 
-      return var2;
+      return number;
    }
 
-   protected Map a(BatchDataResolver var1) {
-      HashMap var2 = new HashMap();
+   protected Map prepareItemResult(BatchDataResolver resolver) {
+      HashMap prepareItemResultResult = new HashMap();
 
-      for(BatchDataResolverItem var4 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var1.getItems())) {
-         String var5 = var4.getName();
-         BatchItemResult var6 = new BatchItemResult();
-         var6.setTableName(var4.getTableName());
-         var6.setUpdateMode(var4.getUpdateMode());
-         var6.setName(var5);
-         var2.put(var5, var6);
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(resolver.getItems())) {
+         String name = batchDataResolverItem.getName();
+         BatchItemResult batchItemResult = new BatchItemResult();
+         batchItemResult.setTableName(batchDataResolverItem.getTableName());
+         batchItemResult.setUpdateMode(batchDataResolverItem.getUpdateMode());
+         batchItemResult.setName(name);
+         prepareItemResultResult.put(name, batchItemResult);
       }
 
-      return var2;
+      return prepareItemResultResult;
    }
 
-   public int getTotleRows(BatchDataProvider var1) throws Exception {
-      return this.b().getTotleRows(var1);
+   public int getTotleRows(BatchDataProvider dataProvider) throws Exception {
+      return this.resolveItemReader().getTotleRows(dataProvider);
    }
 
-   public List loadDatas(Connection var1, BatchContext var2, int var3) throws Exception {
-      Batch var4 = var2.getBatch();
-      if (var3 >= 0) {
-         int var5 = this.a(var4);
-         return this.b().getPageDatas(var1, var2, var3, var5);
+   public List loadDatas(Connection loadConnection, BatchContext context, int pageIndex) throws Exception {
+      Batch batch = context.getBatch();
+      if (pageIndex >= 0) {
+         int number = this.resolvePageSize(batch);
+         return this.resolveItemReader().getPageDatas(loadConnection, context, pageIndex, number);
       } else {
-         return this.b().getDatas(var1, var2);
+         return this.resolveItemReader().getDatas(loadConnection, context);
       }
    }
 
-   protected int a(BatchResult var1, Map var2) {
-      Iterator var3 = var2.values().iterator();
+   protected int sumResultCounts(BatchResult batchResult, Map valuesByKey) {
+      Iterator iterator = valuesByKey.values().iterator();
 
-      int var4;
-      for(var4 = 0; var3.hasNext(); var4 += (Integer)var3.next()) {
+      int number;
+      for(number = 0; iterator.hasNext(); number += (Integer)iterator.next()) {
       }
 
-      return var4;
+      return number;
    }
 
-   protected void a(BatchResult var1, List var2) {
-      for(BatchResult var4 : (Iterable<BatchResult>)(Iterable<?>)(var2)) {
-         var1.setFilterCount(var1.getFilterCount() + var4.getFilterCount());
+   protected void mergeFilterCounts(BatchResult batchResult2, List items) {
+      for(BatchResult batchResult : (Iterable<BatchResult>)(Iterable<?>)(items)) {
+         batchResult2.setFilterCount(batchResult2.getFilterCount() + batchResult.getFilterCount());
       }
 
    }
 
-   protected void a(Batch var1, BatchResult var2, Map var3) {
-      for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var1.getDataResolver().getItems())) {
-         String var6 = var5.getName();
-         BatchItemResult var7 = null;
-         if (var2.getItemResults().containsKey(var6)) {
-            var7 = (BatchItemResult)var2.getItemResults().get(var6);
+   protected void mergeItemResults(Batch batch, BatchResult batchResult, Map valuesByKey2) {
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(batch.getDataResolver().getItems())) {
+         String name = batchDataResolverItem.getName();
+         BatchItemResult batchItemResult = null;
+         if (batchResult.getItemResults().containsKey(name)) {
+            batchItemResult = (BatchItemResult)batchResult.getItemResults().get(name);
          } else {
-            var7 = new BatchItemResult();
-            var7.setTableName(var5.getTableName());
-            var7.setUpdateMode(var5.getUpdateMode());
-            var7.setName(var6);
-            var2.getItemResults().put(var6, var7);
+            batchItemResult = new BatchItemResult();
+            batchItemResult.setTableName(batchDataResolverItem.getTableName());
+            batchItemResult.setUpdateMode(batchDataResolverItem.getUpdateMode());
+            batchItemResult.setName(name);
+            batchResult.getItemResults().put(name, batchItemResult);
          }
 
-         for(Map var9 : (Iterable<Map>)(Iterable<?>)(var3.values())) {
-            if (var9.containsKey(var6)) {
-               BatchItemResult var10 = (BatchItemResult)var9.get(var6);
-               var7.setReadCount(var7.getReadCount() + var10.getReadCount());
-               var7.setWriteCount(var7.getWriteCount() + var10.getWriteCount());
-               var7.setFilterCount(var7.getFilterCount() + var10.getFilterCount());
+         for(Map valuesByKey : (Iterable<Map>)(Iterable<?>)(valuesByKey2.values())) {
+            if (valuesByKey.containsKey(name)) {
+               BatchItemResult batchItemResult2 = (BatchItemResult)valuesByKey.get(name);
+               batchItemResult.setReadCount(batchItemResult.getReadCount() + batchItemResult2.getReadCount());
+               batchItemResult.setWriteCount(batchItemResult.getWriteCount() + batchItemResult2.getWriteCount());
+               batchItemResult.setFilterCount(batchItemResult.getFilterCount() + batchItemResult2.getFilterCount());
             }
          }
       }
 
    }
 
-   protected void a(Batch var1, BatchResult var2, List var3) {
-      for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var1.getDataResolver().getItems())) {
-         String var6 = var5.getName();
-         BatchItemResult var7 = null;
-         if (var2.getItemResults().containsKey(var6)) {
-            var7 = (BatchItemResult)var2.getItemResults().get(var6);
+   protected void mergeBatchResults(Batch batch, BatchResult batchResult2, List items) {
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(batch.getDataResolver().getItems())) {
+         String name = batchDataResolverItem.getName();
+         BatchItemResult batchItemResult = null;
+         if (batchResult2.getItemResults().containsKey(name)) {
+            batchItemResult = (BatchItemResult)batchResult2.getItemResults().get(name);
          } else {
-            var7 = new BatchItemResult();
-            var7.setTableName(var5.getTableName());
-            var7.setUpdateMode(var5.getUpdateMode());
-            var7.setName(var6);
-            var2.getItemResults().put(var6, var7);
+            batchItemResult = new BatchItemResult();
+            batchItemResult.setTableName(batchDataResolverItem.getTableName());
+            batchItemResult.setUpdateMode(batchDataResolverItem.getUpdateMode());
+            batchItemResult.setName(name);
+            batchResult2.getItemResults().put(name, batchItemResult);
          }
 
-         for(BatchResult var9 : (Iterable<BatchResult>)(Iterable<?>)(var3)) {
-            if (var9.getItemResults().containsKey(var6)) {
-               BatchItemResult var10 = (BatchItemResult)var9.getItemResults().get(var6);
-               var7.setReadCount(var7.getReadCount() + var10.getReadCount());
-               var7.setWriteCount(var7.getWriteCount() + var10.getWriteCount());
-               var7.setFilterCount(var7.getFilterCount() + var10.getFilterCount());
+         for(BatchResult batchResult : (Iterable<BatchResult>)(Iterable<?>)(items)) {
+            if (batchResult.getItemResults().containsKey(name)) {
+               BatchItemResult batchItemResult2 = (BatchItemResult)batchResult.getItemResults().get(name);
+               batchItemResult.setReadCount(batchItemResult.getReadCount() + batchItemResult2.getReadCount());
+               batchItemResult.setWriteCount(batchItemResult.getWriteCount() + batchItemResult2.getWriteCount());
+               batchItemResult.setFilterCount(batchItemResult.getFilterCount() + batchItemResult2.getFilterCount());
             }
          }
       }
 
-      Object var11 = var2.getExceptions();
-      if (var11 == null) {
-         var11 = new ArrayList();
+      Object exceptions = batchResult2.getExceptions();
+      if (exceptions == null) {
+         exceptions = new ArrayList();
       }
 
-      for(BatchResult var13 : (Iterable<BatchResult>)(Iterable<?>)(var3)) {
-         ((List)var11).addAll(var13.getExceptions());
+      for(BatchResult batchResult3 : (Iterable<BatchResult>)(Iterable<?>)(items)) {
+         ((List)exceptions).addAll(batchResult3.getExceptions());
       }
 
-      var2.setExceptions((List)var11);
+      batchResult2.setExceptions((List)exceptions);
    }
 
-   public DataSource getReadDataSource(Batch var1) throws Exception {
-      return DataSourceHandlerManager.getDataSource(var1.getDataProvider().getDatasource());
+   public DataSource getReadDataSource(Batch batch) throws Exception {
+      return DataSourceHandlerManager.getDataSource(batch.getDataProvider().getDatasource());
    }
 
-   public DataSource getWriteDataSource(Batch var1) throws Exception {
-      return DataSourceHandlerManager.getDataSource(var1.getDataResolver().getDatasource());
+   public DataSource getWriteDataSource(Batch batch) throws Exception {
+      return DataSourceHandlerManager.getDataSource(batch.getDataResolver().getDatasource());
    }
 
-   public BatchStatus getBatchStatus(Long var1) {
-      Batch var2 = BatchManager.ins.get(var1);
-      return var2.getStatus();
+   public BatchStatus getBatchStatus(Long batchId) {
+      Batch batch = BatchManager.ins.get(batchId);
+      return batch.getStatus();
    }
 }

@@ -10,5 +10,5 @@ public interface MathSign {
 
    MathType getType();
 
-   Object calculate(Context var1, Map<String, Object> var2);
+   Object calculate(Context context, Map<String, Object> factMap);
 }

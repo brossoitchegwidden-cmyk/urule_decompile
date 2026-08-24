@@ -16,54 +16,54 @@ public class KnowledgePacketBuilder {
    private KnowledgePacketBuilder() {
    }
 
-   public List referenceFiles(Project var1, long var2) {
-      ArrayList var4 = new ArrayList();
+   public List referenceFiles(Project project, long fileId) {
+      ArrayList referenceFilesResult = new ArrayList();
 
-      for(Packet var7 : (Iterable<Packet>)(Iterable<?>)(PacketManager.ins.newQuery().projectId(var1.getId()).list())) {
-         List var8 = var7.getFiles();
-         boolean var9 = false;
+      for(Packet packet : (Iterable<Packet>)(Iterable<?>)(PacketManager.ins.newQuery().projectId(project.getId()).list())) {
+         List files = packet.getFiles();
+         boolean flag = false;
 
-         for(PacketFile var11 : (Iterable<PacketFile>)(Iterable<?>)(var8)) {
-            if (var11.getFileId() == var2) {
-               var9 = true;
+         for(PacketFile packetFile : (Iterable<PacketFile>)(Iterable<?>)(files)) {
+            if (packetFile.getFileId() == fileId) {
+               flag = true;
                break;
             }
          }
 
-         if (var9) {
-            RuleFile var12 = new RuleFile();
-            var12.setType(ResourceType.Packet.name());
-            var12.setName("知识包");
-            var12.setPath(var1.getName() + ":" + var7.getName() + "(" + var7.getId() + ")");
-            var12.setCreateDate(var7.getCreateDate());
-            var4.add(var12);
+         if (flag) {
+            RuleFile ruleFile = new RuleFile();
+            ruleFile.setType(ResourceType.Packet.name());
+            ruleFile.setName("知识包");
+            ruleFile.setPath(project.getName() + ":" + packet.getName() + "(" + packet.getId() + ")");
+            ruleFile.setCreateDate(packet.getCreateDate());
+            referenceFilesResult.add(ruleFile);
          }
       }
 
-      return var4;
+      return referenceFilesResult;
    }
 
-   public FileReference build(long var1) {
-      Packet var3 = PacketManager.ins.load(var1);
-      FileReference var4 = new FileReference();
-      var4.setType(ResourceType.Packet);
-      var4.setId(var1);
-      var4.setName(var3.getName());
-      var4.setPathInfo(var4.getType() + ":" + var4.getName());
-      ArrayList var5 = new ArrayList();
-      var4.setChildren(var5);
+   public FileReference build(long packetId) {
+      Packet packet = PacketManager.ins.load(packetId);
+      FileReference fileReference = new FileReference();
+      fileReference.setType(ResourceType.Packet);
+      fileReference.setId(packetId);
+      fileReference.setName(packet.getName());
+      fileReference.setPathInfo(fileReference.getType() + ":" + fileReference.getName());
+      ArrayList items = new ArrayList();
+      fileReference.setChildren(items);
 
-      for(PacketFile var8 : (Iterable<PacketFile>)(Iterable<?>)(var3.getFiles())) {
-         RuleFile var9 = FileManager.ins.get(var8.getFileId());
-         FileReference var10 = new FileReference();
-         var10.setId(var9.getId());
-         var10.setName(var9.getName());
-         var10.setType(ResourceType.valueOf(var9.getType()));
-         var10.setPathInfo(var9.getPath());
-         var10.setVersion(var8.getVersion());
-         var5.add(var10);
+      for(PacketFile packetFile : (Iterable<PacketFile>)(Iterable<?>)(packet.getFiles())) {
+         RuleFile ruleFile = FileManager.ins.get(packetFile.getFileId());
+         FileReference fileReference2 = new FileReference();
+         fileReference2.setId(ruleFile.getId());
+         fileReference2.setName(ruleFile.getName());
+         fileReference2.setType(ResourceType.valueOf(ruleFile.getType()));
+         fileReference2.setPathInfo(ruleFile.getPath());
+         fileReference2.setVersion(packetFile.getVersion());
+         items.add(fileReference2);
       }
 
-      return var4;
+      return fileReference;
    }
 }

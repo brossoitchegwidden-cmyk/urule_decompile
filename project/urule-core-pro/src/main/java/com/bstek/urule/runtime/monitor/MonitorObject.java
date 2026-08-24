@@ -3,31 +3,31 @@ package com.bstek.urule.runtime.monitor;
 import java.util.List;
 
 public class MonitorObject {
-   private String a;
-   private String b;
-   private List<MonitorObjectField> c;
+   private String name;
+   private String clazz;
+   private List<MonitorObjectField> fields;
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getClazz() {
-      return this.b;
+      return this.clazz;
    }
 
-   public void setClazz(String var1) {
-      this.b = var1;
+   public void setClazz(String clazz) {
+      this.clazz = clazz;
    }
 
    public List<MonitorObjectField> getFields() {
-      return this.c;
+      return this.fields;
    }
 
-   public void setFields(List<MonitorObjectField> var1) {
-      this.c = var1;
+   public void setFields(List<MonitorObjectField> fields) {
+      this.fields = fields;
    }
 }

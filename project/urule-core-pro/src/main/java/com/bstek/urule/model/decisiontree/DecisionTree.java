@@ -21,79 +21,79 @@ public class DecisionTree {
       return this.salience;
    }
 
-   public void setSalience(Integer var1) {
-      this.salience = var1;
+   public void setSalience(Integer salience) {
+      this.salience = salience;
    }
 
    public Date getEffectiveDate() {
       return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public Boolean getEnabled() {
       return this.enabled;
    }
 
-   public void setEnabled(Boolean var1) {
-      this.enabled = var1;
+   public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
    }
 
    public Boolean getDebug() {
       return this.debug;
    }
 
-   public void setDebug(Boolean var1) {
-      this.debug = var1;
+   public void setDebug(Boolean debug) {
+      this.debug = debug;
    }
 
    public String getRemark() {
       return this.remark;
    }
 
-   public void setRemark(String var1) {
-      this.remark = var1;
+   public void setRemark(String remark) {
+      this.remark = remark;
    }
 
    public String getQuickTestData() {
       return this.quickTestData;
    }
 
-   public void setQuickTestData(String var1) {
-      this.quickTestData = var1;
+   public void setQuickTestData(String quickTestData) {
+      this.quickTestData = quickTestData;
    }
 
    public List<Library> getLibraries() {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
    public VariableTreeNode getVariableTreeNode() {
       return this.variableTreeNode;
    }
 
-   public void setVariableTreeNode(VariableTreeNode var1) {
-      this.variableTreeNode = var1;
+   public void setVariableTreeNode(VariableTreeNode variableTreeNode) {
+      this.variableTreeNode = variableTreeNode;
    }
 
    public PredefineGroupDefinition getPredefineGroup() {
       return this.predefineGroup;
    }
 
-   public void setPredefineGroup(PredefineGroupDefinition var1) {
-      this.predefineGroup = var1;
+   public void setPredefineGroup(PredefineGroupDefinition predefineGroup) {
+      this.predefineGroup = predefineGroup;
    }
 }

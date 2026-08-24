@@ -14,24 +14,24 @@ public class Left {
       return this.leftPart;
    }
 
-   public void setLeftPart(LeftPart var1) {
-      this.leftPart = var1;
+   public void setLeftPart(LeftPart leftPart) {
+      this.leftPart = leftPart;
    }
 
    public ComplexArithmetic getArithmetic() {
       return this.arithmetic;
    }
 
-   public void setArithmetic(ComplexArithmetic var1) {
-      this.arithmetic = var1;
+   public void setArithmetic(ComplexArithmetic arithmetic) {
+      this.arithmetic = arithmetic;
    }
 
    public LeftType getType() {
       return this.type;
    }
 
-   public void setType(LeftType var1) {
-      this.type = var1;
+   public void setType(LeftType type) {
+      this.type = type;
    }
 
    public String getId() {

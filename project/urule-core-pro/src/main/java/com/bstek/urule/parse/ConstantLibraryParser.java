@@ -10,52 +10,52 @@ import org.dom4j.Element;
 public class ConstantLibraryParser implements Parser<ConstantLibrary> {
    public static final String BEAN_ID = "urule.constantLibraryParser";
 
-   public ConstantLibrary parse(Element var1) {
-      ArrayList var2 = new ArrayList();
+   public ConstantLibrary parse(Element element) {
+      ArrayList items = new ArrayList();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("category")) {
-               var2.add(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("category")) {
+               items.add(this.resolveConstantCategory(element2));
             }
          }
       }
 
-      ConstantLibrary var6 = new ConstantLibrary();
-      var6.setCategories(var2);
-      return var6;
+      ConstantLibrary constantLibrary = new ConstantLibrary();
+      constantLibrary.setCategories(items);
+      return constantLibrary;
    }
 
-   private ConstantCategory a(Element var1) {
-      ConstantCategory var2 = new ConstantCategory();
-      var2.setName(var1.attributeValue("name"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setLabel(var1.attributeValue("label"));
+   private ConstantCategory resolveConstantCategory(Element element) {
+      ConstantCategory constantCategory = new ConstantCategory();
+      constantCategory.setName(element.attributeValue("name"));
+      constantCategory.setUuid(element.attributeValue("uuid"));
+      constantCategory.setLabel(element.attributeValue("label"));
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("constant")) {
-               var2.addConstant(this.b(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("constant")) {
+               constantCategory.addConstant(this.resolveConstant(element2));
             }
          }
       }
 
-      return var2;
+      return constantCategory;
    }
 
-   private Constant b(Element var1) {
-      Constant var2 = new Constant();
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setName(var1.attributeValue("name"));
-      var2.setLabel(var1.attributeValue("label"));
-      var2.setType(Datatype.valueOf(var1.attributeValue("type")));
-      return var2;
+   private Constant resolveConstant(Element element) {
+      Constant constant = new Constant();
+      constant.setUuid(element.attributeValue("uuid"));
+      constant.setName(element.attributeValue("name"));
+      constant.setLabel(element.attributeValue("label"));
+      constant.setType(Datatype.valueOf(element.attributeValue("type")));
+      return constant;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("constant-library");
+   public boolean support(String name) {
+      return name.equals("constant-library");
    }
 }

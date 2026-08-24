@@ -4,59 +4,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParsedSql {
-   private String a;
-   private List b = new ArrayList();
-   private List c = new ArrayList();
-   private int d;
-   private int e;
-   private int f;
+   private String originalSql;
+   private List parameterNames = new ArrayList();
+   private List parameterIndexes = new ArrayList();
+   private int namedParameterCount;
+   private int unnamedParameterCount;
+   private int totalParameterCount;
 
-   ParsedSql(String var1) {
-      this.a = var1;
+   ParsedSql(String text) {
+      this.originalSql = text;
    }
 
    public String getOriginalSql() {
-      return this.a;
+      return this.originalSql;
    }
 
-   void a(String var1, int var2, int var3) {
-      this.b.add(var1);
-      this.c.add(new int[]{var2, var3});
+   void addNamedParameter(String parameterName, int startIndex, int endIndex) {
+      this.parameterNames.add(parameterName);
+      this.parameterIndexes.add(new int[]{startIndex, endIndex});
    }
 
+   /**Repeated occurrences of the same parameter name are included here.*/
    public List getParameterNames() {
-      return this.b;
+      return this.parameterNames;
    }
 
-   public int[] getParameterIndexes(int var1) {
-      return (int[])this.c.get(var1);
+   /**Return the parameter indexes for the specified parameter.*/
+   public int[] getParameterIndexes(int parameterPosition) {
+      return (int[])this.parameterIndexes.get(parameterPosition);
    }
 
-   void a(int var1) {
-      this.d = var1;
+   void setNamedParameterCount(int count) {
+      this.namedParameterCount = count;
    }
 
+   /**Each parameter name counts once; repeated occurrences do not count here.*/
    public int getNamedParameterCount() {
-      return this.d;
+      return this.namedParameterCount;
    }
 
-   void b(int var1) {
-      this.e = var1;
+   void setUnnamedParameterCount(int count) {
+      this.unnamedParameterCount = count;
    }
 
    public int getUnnamedParameterCount() {
-      return this.e;
+      return this.unnamedParameterCount;
    }
 
-   void c(int var1) {
-      this.f = var1;
+   void setTotalParameterCount(int count) {
+      this.totalParameterCount = count;
    }
 
+   /**Repeated occurrences of the same parameter name do count here.*/
    public int getTotalParameterCount() {
-      return this.f;
+      return this.totalParameterCount;
    }
 
+   /**Exposes the original SQL String.*/
    public String toString() {
-      return this.a;
+      return this.originalSql;
    }
 }

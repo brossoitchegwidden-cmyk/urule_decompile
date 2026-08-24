@@ -2,158 +2,236 @@ package com.bstek.urule.dsl;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
+/**This interface defines a complete generic visitor for a parse tree produced by RuleParserParser.*/
 public interface RuleParserVisitor<T> extends ParseTreeVisitor<T> {
-   T visitRuleSet(RuleParserParser$RuleSetContext var1);
+   /**Visit a parse tree produced by RuleParserParser.ruleSet().*/
+   T visitRuleSet(RuleParserParser$RuleSetContext ctx);
 
-   T visitRuleSetHeader(RuleParserParser$RuleSetHeaderContext var1);
+   /**Visit a parse tree produced by RuleParserParser.ruleSetHeader().*/
+   T visitRuleSetHeader(RuleParserParser$RuleSetHeaderContext ctx);
 
-   T visitRuleSetBody(RuleParserParser$RuleSetBodyContext var1);
+   /**Visit a parse tree produced by RuleParserParser.ruleSetBody().*/
+   T visitRuleSetBody(RuleParserParser$RuleSetBodyContext ctx);
 
-   T visitRules(RuleParserParser$RulesContext var1);
+   /**Visit a parse tree produced by RuleParserParser.rules().*/
+   T visitRules(RuleParserParser$RulesContext ctx);
 
-   T visitFunctionImport(RuleParserParser$FunctionImportContext var1);
+   /**Visit a parse tree produced by RuleParserParser.functionImport().*/
+   T visitFunctionImport(RuleParserParser$FunctionImportContext ctx);
 
-   T visitPackageDef(RuleParserParser$PackageDefContext var1);
+   /**Visit a parse tree produced by RuleParserParser.packageDef().*/
+   T visitPackageDef(RuleParserParser$PackageDefContext ctx);
 
-   T visitResource(RuleParserParser$ResourceContext var1);
+   /**Visit a parse tree produced by RuleParserParser.resource().*/
+   T visitResource(RuleParserParser$ResourceContext ctx);
 
-   T visitImportParameterLibrary(RuleParserParser$ImportParameterLibraryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.importParameterLibrary().*/
+   T visitImportParameterLibrary(RuleParserParser$ImportParameterLibraryContext ctx);
 
-   T visitImportVariableLibrary(RuleParserParser$ImportVariableLibraryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.importVariableLibrary().*/
+   T visitImportVariableLibrary(RuleParserParser$ImportVariableLibraryContext ctx);
 
-   T visitImportConstantLibrary(RuleParserParser$ImportConstantLibraryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.importConstantLibrary().*/
+   T visitImportConstantLibrary(RuleParserParser$ImportConstantLibraryContext ctx);
 
-   T visitImportActionLibrary(RuleParserParser$ImportActionLibraryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.importActionLibrary().*/
+   T visitImportActionLibrary(RuleParserParser$ImportActionLibraryContext ctx);
 
-   T visitFunctionDef(RuleParserParser$FunctionDefContext var1);
+   /**Visit a parse tree produced by RuleParserParser.functionDef().*/
+   T visitFunctionDef(RuleParserParser$FunctionDefContext ctx);
 
-   T visitFunctionParameters(RuleParserParser$FunctionParametersContext var1);
+   /**Visit a parse tree produced by RuleParserParser.functionParameters().*/
+   T visitFunctionParameters(RuleParserParser$FunctionParametersContext ctx);
 
-   T visitFunctionParameter(RuleParserParser$FunctionParameterContext var1);
+   /**Visit a parse tree produced by RuleParserParser.functionParameter().*/
+   T visitFunctionParameter(RuleParserParser$FunctionParameterContext ctx);
 
-   T visitRuleDef(RuleParserParser$RuleDefContext var1);
+   /**Visit a parse tree produced by RuleParserParser.ruleDef().*/
+   T visitRuleDef(RuleParserParser$RuleDefContext ctx);
 
-   T visitLoopRuleDef(RuleParserParser$LoopRuleDefContext var1);
+   /**Visit a parse tree produced by RuleParserParser.loopRuleDef().*/
+   T visitLoopRuleDef(RuleParserParser$LoopRuleDefContext ctx);
 
-   T visitLoopRuleUnit(RuleParserParser$LoopRuleUnitContext var1);
+   /**Visit a parse tree produced by RuleParserParser.loopRuleUnit().*/
+   T visitLoopRuleUnit(RuleParserParser$LoopRuleUnitContext ctx);
 
-   T visitLoopTarget(RuleParserParser$LoopTargetContext var1);
+   /**Visit a parse tree produced by RuleParserParser.loopTarget().*/
+   T visitLoopTarget(RuleParserParser$LoopTargetContext ctx);
 
-   T visitLoopStart(RuleParserParser$LoopStartContext var1);
+   /**Visit a parse tree produced by RuleParserParser.loopStart().*/
+   T visitLoopStart(RuleParserParser$LoopStartContext ctx);
 
-   T visitLoopEnd(RuleParserParser$LoopEndContext var1);
+   /**Visit a parse tree produced by RuleParserParser.loopEnd().*/
+   T visitLoopEnd(RuleParserParser$LoopEndContext ctx);
 
-   T visitAttribute(RuleParserParser$AttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.attribute().*/
+   T visitAttribute(RuleParserParser$AttributeContext ctx);
 
-   T visitLoopAttribute(RuleParserParser$LoopAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.loopAttribute().*/
+   T visitLoopAttribute(RuleParserParser$LoopAttributeContext ctx);
 
-   T visitSalienceAttribute(RuleParserParser$SalienceAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.salienceAttribute().*/
+   T visitSalienceAttribute(RuleParserParser$SalienceAttributeContext ctx);
 
-   T visitEffectiveDateAttribute(RuleParserParser$EffectiveDateAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.effectiveDateAttribute().*/
+   T visitEffectiveDateAttribute(RuleParserParser$EffectiveDateAttributeContext ctx);
 
-   T visitExpiresDateAttribute(RuleParserParser$ExpiresDateAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.expiresDateAttribute().*/
+   T visitExpiresDateAttribute(RuleParserParser$ExpiresDateAttributeContext ctx);
 
-   T visitEnabledAttribute(RuleParserParser$EnabledAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.enabledAttribute().*/
+   T visitEnabledAttribute(RuleParserParser$EnabledAttributeContext ctx);
 
-   T visitDebugAttribute(RuleParserParser$DebugAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.debugAttribute().*/
+   T visitDebugAttribute(RuleParserParser$DebugAttributeContext ctx);
 
-   T visitActivationGroupAttribute(RuleParserParser$ActivationGroupAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.activationGroupAttribute().*/
+   T visitActivationGroupAttribute(RuleParserParser$ActivationGroupAttributeContext ctx);
 
-   T visitAgendaGroupAttribute(RuleParserParser$AgendaGroupAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.agendaGroupAttribute().*/
+   T visitAgendaGroupAttribute(RuleParserParser$AgendaGroupAttributeContext ctx);
 
-   T visitAutoFocusAttribute(RuleParserParser$AutoFocusAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.autoFocusAttribute().*/
+   T visitAutoFocusAttribute(RuleParserParser$AutoFocusAttributeContext ctx);
 
-   T visitRuleflowGroupAttribute(RuleParserParser$RuleflowGroupAttributeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.ruleflowGroupAttribute().*/
+   T visitRuleflowGroupAttribute(RuleParserParser$RuleflowGroupAttributeContext ctx);
 
-   T visitLeft(RuleParserParser$LeftContext var1);
+   /**Visit a parse tree produced by RuleParserParser.left().*/
+   T visitLeft(RuleParserParser$LeftContext ctx);
 
-   T visitParenConditions(RuleParserParser$ParenConditionsContext var1);
+   /**Visit a parse tree produced by the parenConditions labeled alternative in RuleParserParser.condition().*/
+   T visitParenConditions(RuleParserParser$ParenConditionsContext ctx);
 
-   T visitMultiConditions(RuleParserParser$MultiConditionsContext var1);
+   /**Visit a parse tree produced by the multiConditions labeled alternative in RuleParserParser.condition().*/
+   T visitMultiConditions(RuleParserParser$MultiConditionsContext ctx);
 
-   T visitSingleCondition(RuleParserParser$SingleConditionContext var1);
+   /**Visit a parse tree produced by the singleCondition labeled alternative in RuleParserParser.condition().*/
+   T visitSingleCondition(RuleParserParser$SingleConditionContext ctx);
 
-   T visitSingleNamedConditionSet(RuleParserParser$SingleNamedConditionSetContext var1);
+   /**Visit a parse tree produced by the singleNamedConditionSet labeled alternative in RuleParserParser.condition().*/
+   T visitSingleNamedConditionSet(RuleParserParser$SingleNamedConditionSetContext ctx);
 
-   T visitNamedConditionSet(RuleParserParser$NamedConditionSetContext var1);
+   /**Visit a parse tree produced by RuleParserParser.namedConditionSet().*/
+   T visitNamedConditionSet(RuleParserParser$NamedConditionSetContext ctx);
 
-   T visitParenNamedConditions(RuleParserParser$ParenNamedConditionsContext var1);
+   /**Visit a parse tree produced by the parenNamedConditions labeled alternative in RuleParserParser.namedCondition().*/
+   T visitParenNamedConditions(RuleParserParser$ParenNamedConditionsContext ctx);
 
-   T visitMultiNamedConditions(RuleParserParser$MultiNamedConditionsContext var1);
+   /**Visit a parse tree produced by the multiNamedConditions labeled alternative in RuleParserParser.namedCondition().*/
+   T visitMultiNamedConditions(RuleParserParser$MultiNamedConditionsContext ctx);
 
-   T visitSingleNamedConditions(RuleParserParser$SingleNamedConditionsContext var1);
+   /**Visit a parse tree produced by the singleNamedConditions labeled alternative in RuleParserParser.namedCondition().*/
+   T visitSingleNamedConditions(RuleParserParser$SingleNamedConditionsContext ctx);
 
-   T visitSingleCellCondition(RuleParserParser$SingleCellConditionContext var1);
+   /**Visit a parse tree produced by the singleCellCondition labeled alternative in RuleParserParser.decisionTableCellCondition().*/
+   T visitSingleCellCondition(RuleParserParser$SingleCellConditionContext ctx);
 
-   T visitMultiCellConditions(RuleParserParser$MultiCellConditionsContext var1);
+   /**Visit a parse tree produced by the multiCellConditions labeled alternative in RuleParserParser.decisionTableCellCondition().*/
+   T visitMultiCellConditions(RuleParserParser$MultiCellConditionsContext ctx);
 
-   T visitParenCellConditions(RuleParserParser$ParenCellConditionsContext var1);
+   /**Visit a parse tree produced by the parenCellConditions labeled alternative in RuleParserParser.decisionTableCellCondition().*/
+   T visitParenCellConditions(RuleParserParser$ParenCellConditionsContext ctx);
 
-   T visitRefName(RuleParserParser$RefNameContext var1);
+   /**Visit a parse tree produced by RuleParserParser.refName().*/
+   T visitRefName(RuleParserParser$RefNameContext ctx);
 
-   T visitRefObject(RuleParserParser$RefObjectContext var1);
+   /**Visit a parse tree produced by RuleParserParser.refObject().*/
+   T visitRefObject(RuleParserParser$RefObjectContext ctx);
 
-   T visitNullValue(RuleParserParser$NullValueContext var1);
+   /**Visit a parse tree produced by RuleParserParser.nullValue().*/
+   T visitNullValue(RuleParserParser$NullValueContext ctx);
 
-   T visitConditionLeft(RuleParserParser$ConditionLeftContext var1);
+   /**Visit a parse tree produced by RuleParserParser.conditionLeft().*/
+   T visitConditionLeft(RuleParserParser$ConditionLeftContext ctx);
 
-   T visitCommonFunction(RuleParserParser$CommonFunctionContext var1);
+   /**Visit a parse tree produced by RuleParserParser.commonFunction().*/
+   T visitCommonFunction(RuleParserParser$CommonFunctionContext ctx);
 
-   T visitExprCondition(RuleParserParser$ExprConditionContext var1);
+   /**Visit a parse tree produced by RuleParserParser.exprCondition().*/
+   T visitExprCondition(RuleParserParser$ExprConditionContext ctx);
 
-   T visitExpressionBody(RuleParserParser$ExpressionBodyContext var1);
+   /**Visit a parse tree produced by RuleParserParser.expressionBody().*/
+   T visitExpressionBody(RuleParserParser$ExpressionBodyContext ctx);
 
-   T visitPercent(RuleParserParser$PercentContext var1);
+   /**Visit a parse tree produced by RuleParserParser.percent().*/
+   T visitPercent(RuleParserParser$PercentContext ctx);
 
-   T visitLeftParen(RuleParserParser$LeftParenContext var1);
+   /**Visit a parse tree produced by RuleParserParser.leftParen().*/
+   T visitLeftParen(RuleParserParser$LeftParenContext ctx);
 
-   T visitRightParen(RuleParserParser$RightParenContext var1);
+   /**Visit a parse tree produced by RuleParserParser.rightParen().*/
+   T visitRightParen(RuleParserParser$RightParenContext ctx);
 
-   T visitColon(RuleParserParser$ColonContext var1);
+   /**Visit a parse tree produced by RuleParserParser.colon().*/
+   T visitColon(RuleParserParser$ColonContext ctx);
 
-   T visitJoin(RuleParserParser$JoinContext var1);
+   /**Visit a parse tree produced by RuleParserParser.join().*/
+   T visitJoin(RuleParserParser$JoinContext ctx);
 
-   T visitRight(RuleParserParser$RightContext var1);
+   /**Visit a parse tree produced by RuleParserParser.right().*/
+   T visitRight(RuleParserParser$RightContext ctx);
 
-   T visitOther(RuleParserParser$OtherContext var1);
+   /**Visit a parse tree produced by RuleParserParser.other().*/
+   T visitOther(RuleParserParser$OtherContext ctx);
 
-   T visitActions(RuleParserParser$ActionsContext var1);
+   /**Visit a parse tree produced by RuleParserParser.actions().*/
+   T visitActions(RuleParserParser$ActionsContext ctx);
 
-   T visitAction(RuleParserParser$ActionContext var1);
+   /**Visit a parse tree produced by RuleParserParser.action().*/
+   T visitAction(RuleParserParser$ActionContext ctx);
 
-   T visitAssignAction(RuleParserParser$AssignActionContext var1);
+   /**Visit a parse tree produced by RuleParserParser.assignAction().*/
+   T visitAssignAction(RuleParserParser$AssignActionContext ctx);
 
-   T visitOutAction(RuleParserParser$OutActionContext var1);
+   /**Visit a parse tree produced by RuleParserParser.outAction().*/
+   T visitOutAction(RuleParserParser$OutActionContext ctx);
 
-   T visitMethodInvoke(RuleParserParser$MethodInvokeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.methodInvoke().*/
+   T visitMethodInvoke(RuleParserParser$MethodInvokeContext ctx);
 
-   T visitFunctionInvoke(RuleParserParser$FunctionInvokeContext var1);
+   /**Visit a parse tree produced by RuleParserParser.functionInvoke().*/
+   T visitFunctionInvoke(RuleParserParser$FunctionInvokeContext ctx);
 
-   T visitActionParameters(RuleParserParser$ActionParametersContext var1);
+   /**Visit a parse tree produced by RuleParserParser.actionParameters().*/
+   T visitActionParameters(RuleParserParser$ActionParametersContext ctx);
 
-   T visitBeanMethod(RuleParserParser$BeanMethodContext var1);
+   /**Visit a parse tree produced by RuleParserParser.beanMethod().*/
+   T visitBeanMethod(RuleParserParser$BeanMethodContext ctx);
 
-   T visitComplexValue(RuleParserParser$ComplexValueContext var1);
+   /**Visit a parse tree produced by RuleParserParser.complexValue().*/
+   T visitComplexValue(RuleParserParser$ComplexValueContext ctx);
 
-   T visitParameter(RuleParserParser$ParameterContext var1);
+   /**Visit a parse tree produced by RuleParserParser.parameter().*/
+   T visitParameter(RuleParserParser$ParameterContext ctx);
 
-   T visitParameterName(RuleParserParser$ParameterNameContext var1);
+   /**Visit a parse tree produced by RuleParserParser.parameterName().*/
+   T visitParameterName(RuleParserParser$ParameterNameContext ctx);
 
-   T visitConstant(RuleParserParser$ConstantContext var1);
+   /**Visit a parse tree produced by RuleParserParser.constant().*/
+   T visitConstant(RuleParserParser$ConstantContext ctx);
 
-   T visitVariable(RuleParserParser$VariableContext var1);
+   /**Visit a parse tree produced by RuleParserParser.variable().*/
+   T visitVariable(RuleParserParser$VariableContext ctx);
 
-   T visitNamedVariable(RuleParserParser$NamedVariableContext var1);
+   /**Visit a parse tree produced by RuleParserParser.namedVariable().*/
+   T visitNamedVariable(RuleParserParser$NamedVariableContext ctx);
 
-   T visitProperty(RuleParserParser$PropertyContext var1);
+   /**Visit a parse tree produced by RuleParserParser.property().*/
+   T visitProperty(RuleParserParser$PropertyContext ctx);
 
-   T visitVariableCategory(RuleParserParser$VariableCategoryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.variableCategory().*/
+   T visitVariableCategory(RuleParserParser$VariableCategoryContext ctx);
 
-   T visitNamedVariableCategory(RuleParserParser$NamedVariableCategoryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.namedVariableCategory().*/
+   T visitNamedVariableCategory(RuleParserParser$NamedVariableCategoryContext ctx);
 
-   T visitConstantCategory(RuleParserParser$ConstantCategoryContext var1);
+   /**Visit a parse tree produced by RuleParserParser.constantCategory().*/
+   T visitConstantCategory(RuleParserParser$ConstantCategoryContext ctx);
 
-   T visitValue(RuleParserParser$ValueContext var1);
+   /**Visit a parse tree produced by RuleParserParser.value().*/
+   T visitValue(RuleParserParser$ValueContext ctx);
 
-   T visitOp(RuleParserParser$OpContext var1);
+   /**Visit a parse tree produced by RuleParserParser.op().*/
+   T visitOp(RuleParserParser$OpContext ctx);
 }

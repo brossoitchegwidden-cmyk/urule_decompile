@@ -6,7 +6,7 @@ import java.io.IOException;
 public interface DynamicSpringConfigLoader {
    String BEAN_ID = "urule.dynamicSpringConfigLoader";
 
-   void loadDynamicJars(String var1) throws Exception;
+   void loadDynamicJars(String storePath) throws Exception;
 
    byte[] zipDynamicJars() throws IOException, FileNotFoundException;
 
@@ -16,5 +16,5 @@ public interface DynamicSpringConfigLoader {
 
    String getDynamicJarsIdDigest();
 
-   void resetDynamicJarsIdDigest(String var1);
+   void resetDynamicJarsIdDigest(String jarsIdDigest);
 }

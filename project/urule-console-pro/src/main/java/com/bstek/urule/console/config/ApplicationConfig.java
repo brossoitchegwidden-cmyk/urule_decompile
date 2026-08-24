@@ -5,73 +5,73 @@ import java.util.Properties;
 import org.springframework.context.ApplicationContext;
 
 public class ApplicationConfig {
-   private Properties a = new Properties();
-   private String b;
-   private String c;
-   private boolean d;
-   private String e;
-   private String f;
-   private ApplicationContext g;
+   private Properties properties = new Properties();
+   private String setupStep;
+   private String configType;
+   private boolean setupComplete;
+   private String applicationHome;
+   private String configurationFileName;
+   private ApplicationContext applicationContext;
 
    public String getApplicationHome() {
-      return this.e;
+      return this.applicationHome;
    }
 
-   public void setApplicationHome(String var1) {
-      this.e = var1;
+   public void setApplicationHome(String applicationHome) {
+      this.applicationHome = applicationHome;
    }
 
    public String getConfigurationFileName() {
-      return this.f;
+      return this.configurationFileName;
    }
 
-   public void setConfigurationFileName(String var1) {
-      this.f = var1;
+   public void setConfigurationFileName(String configurationFileName) {
+      this.configurationFileName = configurationFileName;
    }
 
    public String getSetupStep() {
-      return this.b;
+      return this.setupStep;
    }
 
-   public void setSetupStep(String var1) {
-      this.b = var1;
+   public void setSetupStep(String setupStep) {
+      this.setupStep = setupStep;
    }
 
    public boolean isSetupComplete() {
-      return this.d;
+      return this.setupComplete;
    }
 
-   public void setSetupComplete(boolean var1) {
-      this.d = var1;
+   public void setSetupComplete(boolean setupComplete) {
+      this.setupComplete = setupComplete;
    }
 
    public boolean configFileExists() {
-      File var1 = new File(this.e + "/" + this.f);
-      return var1.exists();
+      File file = new File(this.applicationHome + "/" + this.configurationFileName);
+      return file.exists();
    }
 
    public String getConfigType() {
-      return this.c;
+      return this.configType;
    }
 
-   public void setConfigType(String var1) {
-      this.c = var1;
+   public void setConfigType(String configType) {
+      this.configType = configType;
    }
 
    public ApplicationContext getApplicationContext() {
-      return this.g;
+      return this.applicationContext;
    }
 
-   public void setApplicationContext(ApplicationContext var1) {
-      this.g = var1;
+   public void setApplicationContext(ApplicationContext applicationContext) {
+      this.applicationContext = applicationContext;
    }
 
    public void load() {
-      this.a = PropertiesUtils.loadConfigFile(this.e + "/" + this.f);
-      this.c = this.a.getProperty("urule.config.type");
+      this.properties = PropertiesUtils.loadConfigFile(this.applicationHome + "/" + this.configurationFileName);
+      this.configType = this.properties.getProperty("urule.config.type");
    }
 
    public Properties getProperties() {
-      return this.a;
+      return this.properties;
    }
 }

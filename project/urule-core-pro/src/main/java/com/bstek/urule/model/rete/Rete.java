@@ -26,9 +26,9 @@ public class Rete implements Node {
    public Rete() {
    }
 
-   public Rete(List<ObjectTypeNode> var1, ResourceLibrary var2) {
-      this.objectTypeNodes = var1;
-      this.resourceLibrary = var2;
+   public Rete(List<ObjectTypeNode> objectTypeNodes, ResourceLibrary resourceLibrary) {
+      this.objectTypeNodes = objectTypeNodes;
+      this.resourceLibrary = resourceLibrary;
    }
 
    public List<ObjectTypeNode> getObjectTypeNodes() {
@@ -43,24 +43,24 @@ public class Rete implements Node {
       return this.mutexGroupRetesMap;
    }
 
-   public void setMutexGroupRetesMap(Map<String, List<ReteUnit>> var1) {
-      this.mutexGroupRetesMap = var1;
+   public void setMutexGroupRetesMap(Map<String, List<ReteUnit>> mutexGroupRetesMap) {
+      this.mutexGroupRetesMap = mutexGroupRetesMap;
    }
 
    public Map<String, List<ReteUnit>> getPendedGroupRetesMap() {
       return this.pendedGroupRetesMap;
    }
 
-   public void setPendedGroupRetesMap(Map<String, List<ReteUnit>> var1) {
-      this.pendedGroupRetesMap = var1;
+   public void setPendedGroupRetesMap(Map<String, List<ReteUnit>> pendedGroupRetesMap) {
+      this.pendedGroupRetesMap = pendedGroupRetesMap;
    }
 
    public List<RuleData> getAllRuleData() {
       return this.allRuleData;
    }
 
-   public void setAllRuleData(List<RuleData> var1) {
-      this.allRuleData = var1;
+   public void setAllRuleData(List<RuleData> allRuleData) {
+      this.allRuleData = allRuleData;
    }
 
    public synchronized void initReteInstance() {
@@ -78,60 +78,60 @@ public class Rete implements Node {
    }
 
    private ReteInstance buildNewReteInstance() {
-      ArrayList var1 = new ArrayList();
-      HashMap var2 = new HashMap();
+      ArrayList items = new ArrayList();
+      HashMap valuesByKey = new HashMap();
 
-      for (ObjectTypeNode var4 : this.objectTypeNodes) {
-         var1.add((ObjectTypeActivity)var4.newActivity(var2));
+      for (ObjectTypeNode objectTypeNode : this.objectTypeNodes) {
+         items.add((ObjectTypeActivity)objectTypeNode.newActivity(valuesByKey));
       }
 
-      Map var5 = this.buildGroupRetesInstance(this.mutexGroupRetesMap);
-      Map var6 = this.buildGroupRetesInstance(this.pendedGroupRetesMap);
-      return new ReteInstance(var1, var5, var6, this.allRuleData);
+      Map groupRetesInstance = this.buildGroupRetesInstance(this.mutexGroupRetesMap);
+      Map groupRetesInstance2 = this.buildGroupRetesInstance(this.pendedGroupRetesMap);
+      return new ReteInstance(items, groupRetesInstance, groupRetesInstance2, this.allRuleData);
    }
 
-   private Map<String, List<ReteInstanceUnit>> buildGroupRetesInstance(Map<String, List<ReteUnit>> var1) {
-      if (var1 == null) {
+   private Map<String, List<ReteInstanceUnit>> buildGroupRetesInstance(Map<String, List<ReteUnit>> valuesByKey) {
+      if (valuesByKey == null) {
          return null;
       }
 
-      HashMap var2 = new HashMap();
+      HashMap groupRetesInstance = new HashMap();
 
-      for (String var4 : var1.keySet()) {
-         for (ReteUnit var7 : (Iterable<ReteUnit>)(Iterable<?>)((List)var1.get(var4))) {
-            List var8 = (List)var2.get(var4);
-            if (var8 == null) {
-               var8 = new ArrayList();
-               var2.put(var4, var8);
+      for (String text : valuesByKey.keySet()) {
+         for (ReteUnit reteUnit : (Iterable<ReteUnit>)(Iterable<?>)((List)valuesByKey.get(text))) {
+            List items = (List)groupRetesInstance.get(text);
+            if (items == null) {
+               items = new ArrayList();
+               groupRetesInstance.put(text, items);
             }
 
-            Rete var9 = var7.getRete();
-            if (var9 != null) {
-               ReteInstance var17 = var9.getReteInstance();
-               ReteInstanceUnit var18 = new ReteInstanceUnit(var17, var7.getRuleName());
-               var18.setEffectiveDate(var7.getEffectiveDate());
-               var18.setExpiresDate(var7.getExpiresDate());
-               var8.add(var18);
-            } else if (var7 instanceof MutexReteUnit) {
-               MutexReteUnit var10 = (MutexReteUnit)var7;
-               List var11 = var10.getList();
-               ArrayList var12 = new ArrayList();
+            Rete rete = reteUnit.getRete();
+            if (rete != null) {
+               ReteInstance reteInstance = rete.getReteInstance();
+               ReteInstanceUnit reteInstanceUnit = new ReteInstanceUnit(reteInstance, reteUnit.getRuleName());
+               reteInstanceUnit.setEffectiveDate(reteUnit.getEffectiveDate());
+               reteInstanceUnit.setExpiresDate(reteUnit.getExpiresDate());
+               items.add(reteInstanceUnit);
+            } else if (reteUnit instanceof MutexReteUnit) {
+               MutexReteUnit mutexReteUnit = (MutexReteUnit)reteUnit;
+               List list = mutexReteUnit.getList();
+               ArrayList items2 = new ArrayList();
 
-               for (ReteUnit var14 : (Iterable<ReteUnit>)(Iterable<?>)(var11)) {
-                  Rete var15 = var14.getRete();
-                  ReteInstance var16 = var15.getReteInstance();
-                  var12.add(var16);
+               for (ReteUnit reteUnit2 : (Iterable<ReteUnit>)(Iterable<?>)(list)) {
+                  Rete rete2 = reteUnit2.getRete();
+                  ReteInstance reteInstance2 = rete2.getReteInstance();
+                  items2.add(reteInstance2);
                }
 
-               String var19 = var10.getMutexGroupName();
-               MutexReteInstanceUnit var20 = new MutexReteInstanceUnit(var19, var12);
-               var20.setEffectiveDate(var7.getEffectiveDate());
-               var20.setExpiresDate(var7.getExpiresDate());
-               var8.add(var20);
+               String mutexGroupName = mutexReteUnit.getMutexGroupName();
+               MutexReteInstanceUnit mutexReteInstanceUnit = new MutexReteInstanceUnit(mutexGroupName, items2);
+               mutexReteInstanceUnit.setEffectiveDate(reteUnit.getEffectiveDate());
+               mutexReteInstanceUnit.setExpiresDate(reteUnit.getExpiresDate());
+               items.add(mutexReteInstanceUnit);
             }
          }
       }
 
-      return var2;
+      return groupRetesInstance;
    }
 }

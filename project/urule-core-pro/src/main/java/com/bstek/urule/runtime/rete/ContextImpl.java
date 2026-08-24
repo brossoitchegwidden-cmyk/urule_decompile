@@ -21,22 +21,22 @@ public class ContextImpl extends ExecutionContextImpl implements Context, Execut
    private boolean parentIsObjectInstanceMethod;
    private StringBuilder tipMsgBuilder = new StringBuilder();
 
-   public ContextImpl(WorkingMemory var1, Map<String, String> var2) {
-      this.workingMemory = var1;
+   public ContextImpl(WorkingMemory workingMemory, Map<String, String> variableCategoryMap) {
+      this.workingMemory = workingMemory;
       this.applicationContext = Utils.getApplicationContext();
       this.assertorEvaluator = (AssertorEvaluator)this.applicationContext.getBean("urule.assertorEvaluator");
-      this.variableCategoryMap = var2;
+      this.variableCategoryMap = variableCategoryMap;
       this.valueCompute = (ValueCompute)this.applicationContext.getBean("urule.valueCompute");
-      this.ruleDataList = var1.getLogManager().getRuleData();
+      this.ruleDataList = workingMemory.getLogManager().getRuleData();
    }
 
    @Override
-   public void addTipMsg(String var1) {
+   public void addTipMsg(String msg) {
       if (this.tipMsgBuilder.length() > 0) {
          this.tipMsgBuilder.append(">>");
       }
 
-      this.tipMsgBuilder.append(var1);
+      this.tipMsgBuilder.append(msg);
    }
 
    @Override
@@ -60,18 +60,18 @@ public class ContextImpl extends ExecutionContextImpl implements Context, Execut
    }
 
    @Override
-   public String getVariableCategoryClass(String var1) {
-      String var2 = this.variableCategoryMap.get(var1);
-      if (StringUtils.isEmpty(var2)) {
-         var2 = HashMap.class.getName();
+   public String getVariableCategoryClass(String variableCategory) {
+      String variableCategoryClass = this.variableCategoryMap.get(variableCategory);
+      if (StringUtils.isEmpty(variableCategoryClass)) {
+         variableCategoryClass = HashMap.class.getName();
       }
 
-      return var2;
+      return variableCategoryClass;
    }
 
    @Override
-   public synchronized void addRuleData(List<RuleData> var1) {
-      this.ruleDataList.addAll(var1);
+   public synchronized void addRuleData(List<RuleData> ruleData) {
+      this.ruleDataList.addAll(ruleData);
    }
 
    @Override
@@ -90,8 +90,8 @@ public class ContextImpl extends ExecutionContextImpl implements Context, Execut
    }
 
    @Override
-   public void resetParentIsObjectInstanceMethod(boolean var1) {
-      this.parentIsObjectInstanceMethod = var1;
+   public void resetParentIsObjectInstanceMethod(boolean parentIsObjectInstanceMethod) {
+      this.parentIsObjectInstanceMethod = parentIsObjectInstanceMethod;
    }
 
    @Override

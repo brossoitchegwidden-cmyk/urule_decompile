@@ -5,50 +5,50 @@ import com.bstek.urule.model.GeneralEntity;
 import java.util.Collection;
 
 public class ObjectTypeActivity extends AbstractActivity {
-   private Class<?> b;
-   private String c;
+   private Class<?> typeClass;
+   private String clazz;
 
-   public ObjectTypeActivity(String var1) {
-      this.c = var1;
+   public ObjectTypeActivity(String clazz) {
+      this.clazz = clazz;
    }
 
-   public ObjectTypeActivity(Class<?> var1) {
-      this.b = var1;
+   public ObjectTypeActivity(Class<?> typeClass) {
+      this.typeClass = typeClass;
    }
 
    @Override
-   public Collection<FactTracker> enter(EvaluationContext var1, Object var2, FactTracker var3) {
+   public Collection<FactTracker> enter(EvaluationContext context, Object obj, FactTracker tracker) {
       try {
-         var3.setToken(var1.nextToken());
-         return this.a(var1, var2, var3);
-      } catch (Exception var6) {
-         String var5 = var1.getTipMsg();
-         throw new RuleAssertException(var5, var6);
+         tracker.setToken(context.nextToken());
+         return this.visitPahs(context, obj, tracker);
+      } catch (Exception exception) {
+         String tipMsg = context.getTipMsg();
+         throw new RuleAssertException(tipMsg, exception);
       }
    }
 
-   public boolean support(Object var1) {
-      if (this.c != null && this.c.equals("__*__") && this.c.equals(var1)) {
+   public boolean support(Object object) {
+      if (this.clazz != null && this.clazz.equals("__*__") && this.clazz.equals(object)) {
          return true;
       }
 
-      if (this.b == null && this.c == null) {
+      if (this.typeClass == null && this.clazz == null) {
          return true;
       }
 
-      if (var1 instanceof GeneralEntity) {
-         GeneralEntity var2 = (GeneralEntity)var1;
-         String var3 = var2.getTargetClass();
-         if (this.c != null) {
-            if (var3.equals(this.c)) {
+      if (object instanceof GeneralEntity) {
+         GeneralEntity generalEntity = (GeneralEntity)object;
+         String targetClass = generalEntity.getTargetClass();
+         if (this.clazz != null) {
+            if (targetClass.equals(this.clazz)) {
                return true;
             }
-         } else if (var3.equals(this.b.getName())) {
+         } else if (targetClass.equals(this.typeClass.getName())) {
             return true;
          }
-      } else if (this.b != null) {
-         Class var4 = var1.getClass();
-         if (this.b.isAssignableFrom(var4) || this.b.getName().equals(var4.getName())) {
+      } else if (this.typeClass != null) {
+         Class actualClass = object.getClass();
+         if (this.typeClass.isAssignableFrom(actualClass) || this.typeClass.getName().equals(actualClass.getName())) {
             return true;
          }
       }

@@ -14,278 +14,278 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+/** Assigns a computed rule value to a fact, parameter map, or nested property. */
 public class VariableAssignAction extends AbstractAction {
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
-   private String j;
-   private Datatype k;
-   private Value l;
-   private LeftType m;
-   private ActionType n = ActionType.VariableAssign;
+   private String keyName;
+   private String keyLabel;
+   private String keyCategoryUuid;
+   private String keyUuid;
+   private String variableName;
+   private String variableLabel;
+   private String variableCategory;
+   private String categoryUuid;
+   private String uuid;
+   private Datatype datatype;
+   private Value value;
+   private LeftType type;
+   private ActionType actionType = ActionType.VariableAssign;
 
    @Override
-   public ActionValue execute(Context var1, Map<String, Object> var2) {
-      Object var3 = null;
-      ValueCompute var4 = var1.getValueCompute();
-      Object var5 = null;
-      if (this.l == null) {
+   public ActionValue execute(Context context, Map<String, Object> factMap) {
+      Object targetObject = null;
+      ValueCompute valueCompute = context.getValueCompute();
+      Object assignedValue = null;
+      if (this.value == null) {
          return null;
       }
 
-      var5 = var4.complexValueCompute(this.l, var1, var2);
-      String var6 = var1.getVariableCategoryClass(this.h);
-      if (var6.equals(HashMap.class.getName())) {
-         var3 = var1.getWorkingMemory().getParameters();
+      assignedValue = valueCompute.complexValueCompute(this.value, context, factMap);
+      String variableCategoryClass = context.getVariableCategoryClass(this.variableCategory);
+      if (variableCategoryClass.equals(HashMap.class.getName())) {
+         targetObject = context.getWorkingMemory().getParameters();
       } else {
-         var3 = var4.findObject(var6, var2, var1);
+         targetObject = valueCompute.findObject(variableCategoryClass, factMap, context);
       }
 
-      if (var3 == null) {
-         throw new RuleException("The object【" + var6 + "】does not exist or is not initialized");
+      if (targetObject == null) {
+         throw new RuleException("The object【" + variableCategoryClass + "】does not exist or is not initialized");
       }
 
-      if (this.k.equals(Datatype.Enum) && var5 != null && StringUtils.isNotBlank(var5.toString())) {
-         PropertyDescriptor var7 = BeanUtils.getPropertyDescriptor(var3.getClass(), this.f);
-         if (var7 == null) {
+      if (this.datatype.equals(Datatype.Enum) && assignedValue != null && StringUtils.isNotBlank(assignedValue.toString())) {
+         PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(targetObject.getClass(), this.variableName);
+         if (propertyDescriptor == null) {
             throw new RuleException("赋值操作无法获取当前枚举类型！");
          }
 
-         Class var8 = var7.getPropertyType();
-         var5 = Enum.valueOf(var8, var5.toString());
-      } else if (var5 != null) {
-         var5 = this.k.convert(var5);
+         Class propertyType = propertyDescriptor.getPropertyType();
+         assignedValue = Enum.valueOf(propertyType, assignedValue.toString());
+      } else if (assignedValue != null) {
+         assignedValue = this.datatype.convert(assignedValue);
       }
 
-      String var11 = this.h;
-      if (this.c == null && this.b == null) {
-         var11 = var11 + "." + (this.g == null ? this.f : this.g);
+      String assignmentPath = this.variableCategory;
+      if (this.keyLabel == null && this.keyName == null) {
+         assignmentPath = assignmentPath + "." + (this.variableLabel == null ? this.variableName : this.variableLabel);
       } else {
-         var11 = var11 + "." + (this.c == null ? this.b : this.c) + "." + (this.g == null ? this.f : this.g);
+         assignmentPath = assignmentPath + "." + (this.keyLabel == null ? this.keyName : this.keyLabel) + "." + (this.variableLabel == null ? this.variableName : this.variableLabel);
       }
 
-      if (this.a) {
-         var1.getLogger().logValueAssign(var11, var5);
+      if (this.debug) {
+         context.getLogger().logValueAssign(assignmentPath, assignedValue);
       }
 
-      if (this.b != null) {
-         var3 = Utils.getObjectProperty(var3, this.b);
-         if (var3 == null) {
-            throw new RuleException("要赋值的对象【" + this.c + "】在参数中不存在");
+      if (this.keyName != null) {
+         targetObject = Utils.getObjectProperty(targetObject, this.keyName);
+         if (targetObject == null) {
+            throw new RuleException("要赋值的对象【" + this.keyLabel + "】在参数中不存在");
          }
       }
 
-      if (var5 instanceof Map) {
-         Map var14 = (Map)var5;
-         this.a(var3, var14, var11);
+      if (assignedValue instanceof Map) {
+         Map<String, Object> valuesByKey = (Map<String, Object>)assignedValue;
+         this.assignMap(targetObject, valuesByKey, assignmentPath);
          return null;
       }
 
-      if (var5 instanceof String && this.k.equals(Datatype.Object)) {
-         String var13 = (String)var5;
-         this.a(var3, var13, var11);
+      if (assignedValue instanceof String && this.datatype.equals(Datatype.Object)) {
+         String jsonValue = (String)assignedValue;
+         this.assignObjectJson(targetObject, jsonValue, assignmentPath);
       } else {
-         this.a(var3, this.f, var5);
+         this.setNestedProperty(targetObject, this.variableName, assignedValue);
       }
 
       return null;
    }
 
-   private void a(Object var1, String var2, String var3) {
-      if (var2.startsWith("{") && var2.endsWith("}")) {
-         ObjectMapper var4 = new ObjectMapper();
+   private void assignObjectJson(Object targetObject, String jsonValue, String assignmentPath) {
+      if (jsonValue.startsWith("{") && jsonValue.endsWith("}")) {
+         ObjectMapper objectMapper = new ObjectMapper();
 
          try {
-            Map var5 = (Map)var4.readValue(var2, HashMap.class);
-            this.a(var1, var5, var3);
-         } catch (Exception var6) {
-            throw new RuleException("赋值操作值为Map类型:" + var2 + ",但无法将其转换为Map，请检查输入字符格式.");
+            Map<String, Object> valuesByKey = objectMapper.readValue(jsonValue, HashMap.class);
+            this.assignMap(targetObject, valuesByKey, assignmentPath);
+         } catch (Exception exception) {
+            throw new RuleException("赋值操作值为Map类型:" + jsonValue + ",但无法将其转换为Map，请检查输入字符格式.");
          }
       } else {
-         this.a(var1, this.f, (Object)var2);
+         this.setNestedProperty(targetObject, this.variableName, jsonValue);
       }
    }
 
-   private void a(Object var1, Map<String, Object> var2, String var3) {
-      String var4 = this.f;
-      PropertyDescriptor var5 = BeanUtils.getPropertyDescriptor(var1.getClass(), this.f);
-      if (var5 == null) {
-         this.a(var1, var4, var2);
+   private void assignMap(Object targetObject, Map<String, Object> valuesByKey, String assignmentPath) {
+      String propertyName = this.variableName;
+      PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(targetObject.getClass(), this.variableName);
+      if (propertyDescriptor == null) {
+         this.setNestedProperty(targetObject, propertyName, valuesByKey);
       } else {
-         Class var6 = var5.getPropertyType();
-         if (Map.class.isAssignableFrom(var6)) {
-            this.a(var1, var4, var2);
+         Class propertyType = propertyDescriptor.getPropertyType();
+         if (Map.class.isAssignableFrom(propertyType)) {
+            this.setNestedProperty(targetObject, propertyName, valuesByKey);
          } else {
-            Object var7 = Utils.getObjectProperty(var1, var4);
-            if (var7 == null) {
+            Object objectProperty = Utils.getObjectProperty(targetObject, propertyName);
+            if (objectProperty == null) {
                try {
-                  Object var8 = var6.newInstance();
+                  Object propertyObject = propertyType.newInstance();
 
-                  for (String var10 : var2.keySet()) {
-                     this.a(var8, var10, var2.get(var10));
+                  for (String key : valuesByKey.keySet()) {
+                     this.setNestedProperty(propertyObject, key, valuesByKey.get(key));
                   }
 
-                  this.a(var1, var4, var8);
-               } catch (InstantiationException | IllegalAccessException var12) {
-                  throw new RuleException("赋值操作值为Map类型，赋值对象[" + var3 + "]类型为" + var6.getName() + "，无法对" + var6.getName() + "进行实例化");
-               } catch (Exception var13) {
-                  throw new RuleException("赋值操作值为Map类型，赋值对象[" + var3 + "]类型为" + var6.getName() + "，Map中key与[" + var6.getName() + "]类型对象属性存在不匹配情况");
+                  this.setNestedProperty(targetObject, propertyName, propertyObject);
+               } catch (InstantiationException | IllegalAccessException exception) {
+                  throw new RuleException("赋值操作值为Map类型，赋值对象[" + assignmentPath + "]类型为" + propertyType.getName() + "，无法对" + propertyType.getName() + "进行实例化");
+               } catch (Exception exception) {
+                  throw new RuleException("赋值操作值为Map类型，赋值对象[" + assignmentPath + "]类型为" + propertyType.getName() + "，Map中key与[" + propertyType.getName() + "]类型对象属性存在不匹配情况");
                }
             } else {
                try {
-                  for (String var15 : var2.keySet()) {
-                     this.a(var7, var15, var2.get(var15));
+                  for (String key : valuesByKey.keySet()) {
+                     this.setNestedProperty(objectProperty, key, valuesByKey.get(key));
                   }
-               } catch (Exception var11) {
-                  throw new RuleException("赋值操作值为Map类型，赋值对象[" + var3 + "]类型为" + var6.getName() + "，Map中key与[" + var6.getName() + "]类型对象属性存在不匹配情况");
+               } catch (Exception exception) {
+                  throw new RuleException("赋值操作值为Map类型，赋值对象[" + assignmentPath + "]类型为" + propertyType.getName() + "，Map中key与[" + propertyType.getName() + "]类型对象属性存在不匹配情况");
                }
             }
          }
       }
    }
 
-   private void a(Object var1, String var2, Object var3) {
-      String[] var4 = var2.split("\\.");
-      Object var5 = var1;
+   private void setNestedProperty(Object targetObject, String propertyPath, Object value) {
+      String[] parts = propertyPath.split("\\.");
+      Object currentObject = targetObject;
 
-      for (int var6 = 0; var6 < var4.length; var6++) {
-         String var7 = var4[var6];
-         if (var6 == var4.length - 1) {
-            Utils.setObjectProperty(var5, var7, var3);
+      for (int index = 0; index < parts.length; index++) {
+         String propertyName = parts[index];
+         if (index == parts.length - 1) {
+            Utils.setObjectProperty(currentObject, propertyName, value);
             break;
          }
 
-         Object var8 = Utils.getObjectProperty(var5, var7);
-         if (var8 == null) {
-            PropertyDescriptor var9 = BeanUtils.getPropertyDescriptor(var5.getClass(), var7);
-            if (var9 == null) {
-               var8 = new HashMap();
+         Object objectProperty = Utils.getObjectProperty(currentObject, propertyName);
+         if (objectProperty == null) {
+            PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(currentObject.getClass(), propertyName);
+            if (propertyDescriptor == null) {
+               objectProperty = new HashMap();
             } else {
-               Class var10 = var9.getPropertyType();
-               if (Map.class.isAssignableFrom(var10)) {
-                  var8 = new HashMap();
+               Class propertyType = propertyDescriptor.getPropertyType();
+               if (Map.class.isAssignableFrom(propertyType)) {
+                  objectProperty = new HashMap();
                } else {
                   try {
-                     var8 = var10.newInstance();
-                  } catch (InstantiationException | IllegalAccessException var12) {
-                     var12.printStackTrace();
+                     objectProperty = propertyType.newInstance();
+                  } catch (InstantiationException | IllegalAccessException exception) {
                      throw new RuleException(
-                        "尝试对[" + var1.getClass().getName() + "]对象实例的[" + var2 + "]里的子对象[" + var10.getName() + "]实例化失败，请确认子对象[" + var10.getName() + "]有空的构造函数"
+                        "尝试对[" + targetObject.getClass().getName() + "]对象实例的[" + propertyPath + "]里的子对象[" + propertyType.getName() + "]实例化失败，请确认子对象[" + propertyType.getName() + "]有空的构造函数"
                      );
                   }
                }
             }
 
-            Utils.setObjectProperty(var5, var7, var8);
+            Utils.setObjectProperty(currentObject, propertyName, objectProperty);
          }
 
-         var5 = var8;
+         currentObject = objectProperty;
       }
    }
 
    public LeftType getType() {
-      return this.m;
+      return this.type;
    }
 
-   public void setType(LeftType var1) {
-      this.m = var1;
+   public void setType(LeftType type) {
+      this.type = type;
    }
 
    public String getVariableName() {
-      return this.f;
+      return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.f = var1;
+   public void setVariableName(String variableName) {
+      this.variableName = variableName;
    }
 
    public String getVariableLabel() {
-      return this.g;
+      return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.g = var1;
+   public void setVariableLabel(String variableLabel) {
+      this.variableLabel = variableLabel;
    }
 
    public String getVariableCategory() {
-      return this.h;
+      return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.h = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    public String getCategoryUuid() {
-      return this.i;
+      return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.i = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getUuid() {
-      return this.j;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.j = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getKeyName() {
-      return this.b;
+      return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.b = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 
    public String getKeyLabel() {
-      return this.c;
+      return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.c = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyCategoryUuid() {
-      return this.d;
+      return this.keyCategoryUuid;
    }
 
-   public void setKeyCategoryUuid(String var1) {
-      this.d = var1;
+   public void setKeyCategoryUuid(String keyCategoryUuid) {
+      this.keyCategoryUuid = keyCategoryUuid;
    }
 
    public String getKeyUuid() {
-      return this.e;
+      return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.e = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
    public Value getValue() {
-      return this.l;
+      return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.l = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public Datatype getDatatype() {
-      return this.k;
+      return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.k = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    @Override
    public ActionType getActionType() {
-      return this.n;
+      return this.actionType;
    }
 }

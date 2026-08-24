@@ -4,9 +4,9 @@ public class CellItem {
    private String colName;
    private Object value;
 
-   public CellItem(String var1, Object var2) {
-      this.colName = var1;
-      this.value = var2;
+   public CellItem(String colName, Object value) {
+      this.colName = colName;
+      this.value = value;
    }
 
    public String getColName() {

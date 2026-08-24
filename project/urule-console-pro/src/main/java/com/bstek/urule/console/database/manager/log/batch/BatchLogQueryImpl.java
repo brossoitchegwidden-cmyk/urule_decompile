@@ -15,260 +15,259 @@ import java.util.Date;
 import java.util.List;
 
 public class BatchLogQueryImpl implements BatchLogQuery {
-   private String a;
-   private Long b;
-   private Long c;
-   private String d;
-   private String e;
-   private Date f;
-   private Date g;
-   private Boolean h;
-   private String i;
-   private String j;
-   private List k = new ArrayList();
+   private String groupId;
+   private Long projectId;
+   private Long batchId;
+   private String user;
+   private String batchName;
+   private Date date;
+   private Date endDate;
+   private Boolean orderByExecutionTime;
+   private String ip;
+   private String status;
+   private List queryParameters = new ArrayList();
 
-   public BatchLogQuery groupId(String var1) {
-      this.a = var1;
+   public BatchLogQuery groupId(String groupId) {
+      this.groupId = groupId;
       return this;
    }
 
-   public BatchLogQuery projectId(Long var1) {
-      this.b = var1;
+   public BatchLogQuery projectId(Long projectId) {
+      this.projectId = projectId;
       return this;
    }
 
-   public BatchLogQuery batchId(Long var1) {
-      this.c = var1;
+   public BatchLogQuery batchId(Long batchId) {
+      this.batchId = batchId;
       return this;
    }
 
-   public BatchLogQuery user(String var1) {
-      this.d = var1;
+   public BatchLogQuery user(String user) {
+      this.user = user;
       return this;
    }
 
-   public BatchLogQuery batchNameLike(String var1) {
-      this.e = var1;
+   public BatchLogQuery batchNameLike(String batchName) {
+      this.batchName = batchName;
       return this;
    }
 
-   public BatchLogQuery dateBegin(Date var1) {
-      this.f = var1;
+   public BatchLogQuery dateBegin(Date date) {
+      this.date = date;
       return this;
    }
 
-   public BatchLogQuery dateEnd(Date var1) {
-      this.g = var1;
+   public BatchLogQuery dateEnd(Date date) {
+      this.endDate = date;
       return this;
    }
 
-   public Page paging(int var1, int var2) {
-      String var3 = "select ID_, USER_, BATCH_ID_, BATCH_NAME_, STATUS_, TIME_, PROJECT_ID_, GROUP_ID_, IP_, USER_AGENT_, START_TIME_, END_TIME_, CREATE_DATE_, READ_COUNT_, FILTER_COUNT_ from URULE_LOG_BATCH";
-      Connection var4 = JdbcUtils.getConnection();
+   public Page paging(int pageIndex, int pageSize) {
+      String pageSql = "select ID_, USER_, BATCH_ID_, BATCH_NAME_, STATUS_, TIME_, PROJECT_ID_, GROUP_ID_, IP_, USER_AGENT_, START_TIME_, END_TIME_, CREATE_DATE_, READ_COUNT_, FILTER_COUNT_ from URULE_LOG_BATCH";
+      Connection connection = JdbcUtils.getConnection();
 
-      Page var10;
+      Page page;
       try {
-         StringBuilder var5 = this.a();
-         if (var5.length() > 0) {
-            var3 = var3 + " where" + var5.toString();
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         if (this.h != null) {
-            var3 = var3 + " order by TIME_ desc";
+         if (this.orderByExecutionTime != null) {
+            pageSql = pageSql + " order by TIME_ desc";
          } else {
-            var3 = var3 + " order by CREATE_DATE_ desc";
+            pageSql = pageSql + " order by CREATE_DATE_ desc";
          }
 
-         Page var6 = new Page(var1, var2);
-         var3 = JdbcUtils.getPageSql(var4, var3, var6.getStartRow(), var2);
-         PreparedStatement var7 = var4.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.k, var7);
-         ResultSet var8 = var7.executeQuery();
-         List var9 = this.a(var8);
-         var6.setData(var9);
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var3 = "select count(*) from URULE_LOG_BATCH";
-         if (var5.length() > 0) {
-            var3 = var3 + " where" + var5.toString();
+         Page page2 = new Page(pageIndex, pageSize);
+         pageSql = JdbcUtils.getPageSql(connection, pageSql, page2.getStartRow(), pageSize);
+         PreparedStatement preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readBatchLogs(resultSet);
+         page2.setData(items);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         pageSql = "select count(*) from URULE_LOG_BATCH";
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var7 = var4.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.k, var7);
-         var8 = var7.executeQuery();
-         if (var8.next()) {
-            var6.setTotalRows(var8.getLong(1));
+         preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page2.setTotalRows(resultSet.getLong(1));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var10 = var6;
-      } catch (Exception var14) {
-         throw new RuleException(var14);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         page = page2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var10;
+      return page;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readBatchLogs(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         BatchLog var3 = new BatchLog();
-         var3.setId(var1.getLong(1));
-         var3.setUserId(var1.getString(2));
-         var3.setUsername(var3.getUserId());
-         var3.setBatchId(var1.getLong(3));
-         var3.setBatchName(var1.getString(4));
-         var3.setStatus(BatchStatus.valueOf(var1.getString(5)));
-         var3.setTime(var1.getLong(6));
-         var3.setProjectId(var1.getLong(7));
-         var3.setGroupId(var1.getString(8));
-         var3.setIp(var1.getString(9));
-         var3.setUserAgent(var1.getString(10));
-         var3.setStartTime(var1.getTimestamp(11));
-         var3.setEndTime(var1.getTimestamp(12));
-         var3.setCreateDate(var1.getTimestamp(13));
-         var3.setReadCount(var1.getInt(14));
-         var3.setFilterCount(var1.getInt(15));
-         var2.add(var3);
+      while(resultSet.next()) {
+         BatchLog batchLog = new BatchLog();
+         batchLog.setId(resultSet.getLong(1));
+         batchLog.setUserId(resultSet.getString(2));
+         batchLog.setUsername(batchLog.getUserId());
+         batchLog.setBatchId(resultSet.getLong(3));
+         batchLog.setBatchName(resultSet.getString(4));
+         batchLog.setStatus(BatchStatus.valueOf(resultSet.getString(5)));
+         batchLog.setTime(resultSet.getLong(6));
+         batchLog.setProjectId(resultSet.getLong(7));
+         batchLog.setGroupId(resultSet.getString(8));
+         batchLog.setIp(resultSet.getString(9));
+         batchLog.setUserAgent(resultSet.getString(10));
+         batchLog.setStartTime(resultSet.getTimestamp(11));
+         batchLog.setEndTime(resultSet.getTimestamp(12));
+         batchLog.setCreateDate(resultSet.getTimestamp(13));
+         batchLog.setReadCount(resultSet.getInt(14));
+         batchLog.setFilterCount(resultSet.getInt(15));
+         items.add(batchLog);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a() throws SQLException {
-      this.k.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (StringUtils.isNotBlank(this.d)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() throws SQLException {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (StringUtils.isNotBlank(this.user)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" USER_ like ?");
-         this.k.add("%" + this.d + "%");
+         stringBuilder.append(" USER_ like ?");
+         this.queryParameters.add("%" + this.user + "%");
       }
 
-      if (StringUtils.isNotBlank(this.i)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.ip)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" IP_ = ?");
-         this.k.add(this.i);
+         stringBuilder.append(" IP_ = ?");
+         this.queryParameters.add(this.ip);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_ = ?");
-         this.k.add(this.b);
+         stringBuilder.append(" PROJECT_ID_ = ?");
+         this.queryParameters.add(this.projectId);
       }
 
-      if (StringUtils.isNotBlank(this.a)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.groupId)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" GROUP_ID_ = ?");
-         this.k.add(this.a);
+         stringBuilder.append(" GROUP_ID_ = ?");
+         this.queryParameters.add(this.groupId);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.batchId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" BATCH_ID_ = ?");
-         this.k.add(this.c);
+         stringBuilder.append(" BATCH_ID_ = ?");
+         this.queryParameters.add(this.batchId);
       }
 
-      if (this.j != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.status != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" STATUS_ = ?");
-         this.k.add(this.j);
+         stringBuilder.append(" STATUS_ = ?");
+         this.queryParameters.add(this.status);
       }
 
-      if (StringUtils.isNotBlank(this.e)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.batchName)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" BATCH_NAME_ like ?");
-         this.k.add("%" + this.e + "%");
+         stringBuilder.append(" BATCH_NAME_ like ?");
+         this.queryParameters.add("%" + this.batchName + "%");
       }
 
-      if (this.f != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.date != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" START_TEIM_ > ?");
-         this.k.add(this.f);
+         stringBuilder.append(" START_TEIM_ > ?");
+         this.queryParameters.add(this.date);
       }
 
-      if (this.g != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.endDate != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" END_TIME_ < ?");
-         this.k.add(this.g);
+         stringBuilder.append(" END_TIME_ < ?");
+         this.queryParameters.add(this.endDate);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
    public BatchLogQuery orderTime() {
-      this.h = true;
+      this.orderByExecutionTime = true;
       return this;
    }
 
-   public BatchLogQuery ip(String var1) {
-      this.i = var1;
+   public BatchLogQuery ip(String ip) {
+      this.ip = ip;
       return this;
    }
 
-   public BatchLogQuery status(String var1) {
-      this.j = var1;
+   public BatchLogQuery status(String status) {
+      this.status = status;
       return this;
    }
+   public BatchLog details(Long id) {
+      String text = "select IN_PARAMS_, MSG_, DETAIL_, ITEM_DATA_, PACKET_ID_, PACKET_PARAMS_ from URULE_LOG_BATCH WHERE ID_=?";
+      Connection connection = JdbcUtils.getConnection();
 
-   public BatchLog details(Long var1) {
-      String var2 = "select IN_PARAMS_, MSG_, DETAIL_, ITEM_DATA_, PACKET_ID_, PACKET_PARAMS_ from URULE_LOG_BATCH WHERE ID_=?";
-      Connection var3 = JdbcUtils.getConnection();
-
-      BatchLog var7;
+      BatchLog batchLog;
       try {
-         PreparedStatement var4 = var3.prepareStatement(var2);
-         var4.setLong(1, var1);
-         ResultSet var5 = var4.executeQuery();
-         BatchLog var6 = new BatchLog();
-         if (var5.next()) {
-            var6.setInParams(var5.getString(1));
-            var6.setMsg(var5.getString(2));
-            var6.setDetail(var5.getString(3));
-            var6.setItemData(var5.getString(4));
-            var6.setPacketId(var5.getLong(5));
-            var6.setPacketParams(var5.getString(6));
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, id);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         BatchLog batchLog2 = new BatchLog();
+         if (resultSet.next()) {
+            batchLog2.setInParams(resultSet.getString(1));
+            batchLog2.setMsg(resultSet.getString(2));
+            batchLog2.setDetail(resultSet.getString(3));
+            batchLog2.setItemData(resultSet.getString(4));
+            batchLog2.setPacketId(resultSet.getLong(5));
+            batchLog2.setPacketParams(resultSet.getString(6));
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         batchLog = batchLog2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return batchLog;
    }
 }

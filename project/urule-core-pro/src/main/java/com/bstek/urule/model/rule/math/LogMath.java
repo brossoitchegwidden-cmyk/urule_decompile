@@ -11,12 +11,12 @@ public class LogMath implements MathSign {
    private Value value;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
-      Object var4 = var1.getValueCompute().complexValueCompute(this.baseValue, var1, var2);
-      double var5 = Utils.toBigDecimal(var3).doubleValue();
-      double var7 = Utils.toBigDecimal(var4).doubleValue();
-      return new BigDecimal(Math.log(var5) / Math.log(var7)).stripTrailingZeros();
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.value, context, factMap);
+      Object objectValue2 = context.getValueCompute().complexValueCompute(this.baseValue, context, factMap);
+      double doubleValue = Utils.toBigDecimal(objectValue).doubleValue();
+      double doubleValue2 = Utils.toBigDecimal(objectValue2).doubleValue();
+      return new BigDecimal(Math.log(doubleValue) / Math.log(doubleValue2)).stripTrailingZeros();
    }
 
    @Override
@@ -28,16 +28,16 @@ public class LogMath implements MathSign {
       return this.baseValue;
    }
 
-   public void setBaseValue(Value var1) {
-      this.baseValue = var1;
+   public void setBaseValue(Value baseValue) {
+      this.baseValue = baseValue;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override

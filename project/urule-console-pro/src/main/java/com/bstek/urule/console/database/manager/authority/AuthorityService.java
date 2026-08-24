@@ -7,21 +7,28 @@ import java.util.List;
 public interface AuthorityService {
    AuthorityService ins = new AuthorityServiceImpl();
 
-   List getAuthoritysByRole(String var1, long var2);
+   /**获取角色的授权信息*/
+   List getAuthoritysByRole(String roleType, long roleId);
 
-   Authority get(String var1, long var2, String var4);
+   /**获取权限配置对象*/
+   Authority get(String roleType, long roleId, String code);
 
-   void add(Authority var1);
+   /**添加资源的授权信息*/
+   void add(Authority authority);
 
-   void remove(long var1);
+   /**删除资源的授权信息*/
+   void remove(long authId);
 
-   void removeByRole(String var1, long var2);
+   /**删除角色对应的所有授权信息*/
+   void removeByRole(String roleType, long roleId);
 
-   List getGroupModels(Role var1);
+   /**获取团队角色的权限配置*/
+   List getGroupModels(Role role);
 
-   List getProjectModels(Role var1);
+   /**获取项目角色的权限配置*/
+   List getProjectModels(Role role);
 
-   void storePermissions(long var1, List var3);
+   void storePermissions(long roleId, List models);
 
-   void initPermissions(long var1, List var3);
+   void initPermissions(long roleId, List models);
 }

@@ -8,24 +8,24 @@ public class SimpleArithmeticValue {
       return this.content;
    }
 
-   public void setContent(String var1) {
-      this.content = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public SimpleArithmetic getArithmetic() {
       return this.arithmetic;
    }
 
-   public void setArithmetic(SimpleArithmetic var1) {
-      this.arithmetic = var1;
+   public void setArithmetic(SimpleArithmetic arithmetic) {
+      this.arithmetic = arithmetic;
    }
 
    public String getId() {
-      String var1 = this.content;
+      String id = this.content;
       if (this.arithmetic != null) {
-         var1 = var1 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var1;
+      return id;
    }
 }

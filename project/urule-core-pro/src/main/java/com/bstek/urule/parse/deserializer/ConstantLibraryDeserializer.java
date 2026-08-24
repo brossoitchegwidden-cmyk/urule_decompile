@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class ConstantLibraryDeserializer implements Deserializer<ConstantLibrary> {
    public static final String BEAN_ID = "urule.constantLibraryDeserializer";
-   private ConstantLibraryParser a;
+   private ConstantLibraryParser constantLibraryParser;
 
-   public ConstantLibrary deserialize(Element var1) {
-      return this.a.parse(var1);
+   public ConstantLibrary deserialize(Element root) {
+      return this.constantLibraryParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.constantLibraryParser.support(root.getName());
    }
 
-   public void setConstantLibraryParser(ConstantLibraryParser var1) {
-      this.a = var1;
+   public void setConstantLibraryParser(ConstantLibraryParser constantLibraryParser) {
+      this.constantLibraryParser = constantLibraryParser;
    }
 }

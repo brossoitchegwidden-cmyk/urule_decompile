@@ -7,18 +7,18 @@ import org.dom4j.Element;
 
 public class VariableLibraryDeserializer implements Deserializer<List<VariableCategory>> {
    public static final String BEAN_ID = "urule.variableLibraryDeserializer";
-   private VariableLibraryParser a;
+   private VariableLibraryParser variableLibraryParser;
 
-   public List<VariableCategory> deserialize(Element var1) {
-      return this.a.parse(var1);
+   public List<VariableCategory> deserialize(Element root) {
+      return this.variableLibraryParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.variableLibraryParser.support(root.getName());
    }
 
-   public void setVariableLibraryParser(VariableLibraryParser var1) {
-      this.a = var1;
+   public void setVariableLibraryParser(VariableLibraryParser variableLibraryParser) {
+      this.variableLibraryParser = variableLibraryParser;
    }
 }

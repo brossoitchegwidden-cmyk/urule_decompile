@@ -4,10 +4,11 @@
 import Styles from '../Styles.js';
 import * as event from './event.js';
 import * as componentEvent from '../components/componentEvent.js';
+import {showRequestError} from '../Utils.js';
 
 export const ADD='add';
 export const DEL='del';
-export const UPDATE='upload';
+export const UPDATE='update';
 export const LOAD_END='load_end';
 export const FILE_RENAME='file_rename';
 export const CREATE_NEW_PROJECT='create_new_project';
@@ -47,13 +48,7 @@ export function createNewFile(newFileName,fileType,parentNodeData){
                 event.eventEmitter.emit(event.EXPAND_TREE_NODE,parentNodeData);
                 event.eventEmitter.emit(event.CLOSE_CREATE_FILE_DIALOG);
             },
-            error:function (req) {
-                if(req.status===401){
-                    alert("权限不足，不能进行此操作.");
-                }else{
-                    alert('服务端错误，操作失败!');
-                }
-            }
+            error:showRequestError
         });
     }
 };
@@ -72,13 +67,7 @@ export function rename(path, newPath) {
                 event.eventEmitter.emit(event.HIDE_RENAME_DIALOG);
                 componentEvent.eventEmitter.emit(componentEvent.HIDE_LOADING);
             },
-            error:function (req) {
-                if(req.status===401){
-                    alert("权限不足，不能进行此操作.");
-                }else{
-                    alert('服务端错误，操作失败!');
-                }
-            }
+            error:showRequestError
         });
     }
 };
@@ -96,13 +85,7 @@ export function createNewProject(newProjectName,parentNodeData) {
                 event.eventEmitter.emit(event.CLOSE_NEW_PROJECT_DIALOG);
                 componentEvent.eventEmitter.emit(componentEvent.HIDE_LOADING);
             },
-            error:function (req) {
-                if(req.status===401){
-                    alert("权限不足，不能进行此操作.");
-                }else{
-                    alert('服务端错误，操作失败!');
-                }
-            }
+            error:showRequestError
         });
     };
 };
@@ -121,13 +104,7 @@ export function createNewFolder(newFolderName,parentNodeData) {
                 event.eventEmitter.emit(event.CLOSE_CREATE_FOLDER_DIALOG);
                 componentEvent.eventEmitter.emit(componentEvent.HIDE_LOADING);
             },
-            error:function (req) {
-                if(req.status===401){
-                    alert("权限不足，不能进行此操作.");
-                }else{
-                    alert('服务端错误，操作失败!');
-                }
-            }
+            error:showRequestError
         });
     };
 };
@@ -159,11 +136,7 @@ export function fileRename(itemData, newName) {
             },
             error:function (req) {
                 componentEvent.eventEmitter.emit(componentEvent.HIDE_LOADING);
-                if(req.status===401){
-                    alert("权限不足，不能进行此操作.");
-                }else{
-                    alert('服务端错误，操作失败!');
-                }
+                showRequestError(req);
             }
         });
     }
@@ -184,11 +157,7 @@ function moveFile(path, newPath , dispatch) {
         },
         error:function (req) {
             componentEvent.eventEmitter.emit(componentEvent.HIDE_LOADING);
-            if(req.status===401){
-                alert("权限不足，不能进行此操作.");
-            }else{
-                alert('服务端错误，操作失败!');
-            }
+            showRequestError(req);
         }
     });
 }
@@ -206,7 +175,7 @@ export function update(index, data) {
 };
 
 export function loadData(classify,projectName,types,searchFileName) {
-    if(classify===null || classify==='undefined'){
+    if(classify===null || typeof classify==='undefined' || classify==='undefined'){
         classify=true;
     }
     return function (dispatch) {
@@ -886,13 +855,7 @@ export function saveFileSource(file,content){
         success:function () {
             bootbox.alert('保存成功!');
         },
-        error:function (req) {
-            if(req.status===401){
-                alert("权限不足，不能进行此操作.");
-            }else{
-                alert('服务端错误，操作失败!');
-            }
-        }
+        error:showRequestError
     });
 };
 
@@ -905,13 +868,7 @@ export function seeFileSource(data) {
         success:function (result) {
             event.eventEmitter.emit(event.OPEN_SOURCE_DIALOG,data.fullPath,result.content);
         },
-        error:function (req) {
-            if(req.status===401){
-                alert("权限不足，不能进行此操作.");
-            }else{
-                alert('服务端错误，操作失败!');
-            }
-        }
+        error:showRequestError
     });
 };
 
@@ -924,13 +881,7 @@ function seeFileVersions(data) {
         success:function (list) {
             event.eventEmitter.emit(event.OPEN_FILE_VERSION_DIALOG,{list,data});
         },
-        error:function (req) {
-            if(req.status===401){
-                alert("权限不足，不能进行此操作.");
-            }else{
-                alert('服务端错误，操作失败!');
-            }
-        }
+        error:showRequestError
     });
 };
 
@@ -954,11 +905,7 @@ function fileDelete(item, dispatch,isFolder) {
             },
             error:function (req) {
                 componentEvent.eventEmitter.emit(componentEvent.HIDE_LOADING);
-                if(req.status===401){
-                    alert("权限不足，不能进行此操作.");
-                }else{
-                    alert('服务端错误，操作失败!');
-                }
+                showRequestError(req);
             }
         });
     },150);

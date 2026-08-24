@@ -3,19 +3,19 @@ package com.bstek.urule.console.editor.execute;
 import java.util.Map;
 
 public class SubObject {
-   private String a;
-   private Map b;
+   private String name;
+   private Map properties;
 
-   public SubObject(String var1, Map var2) {
-      this.a = var1;
-      this.b = var2;
+   public SubObject(String name, Map map) {
+      this.name = name;
+      this.properties = map;
    }
 
    public Map getMap() {
-      return this.b;
+      return this.properties;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 }

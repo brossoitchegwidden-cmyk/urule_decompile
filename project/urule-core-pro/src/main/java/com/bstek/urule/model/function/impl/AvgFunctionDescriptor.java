@@ -16,50 +16,46 @@ public class AvgFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
-
    @Override
    public String getName() {
       return "Avg";
    }
-
    @Override
    public String getLabel() {
       return "求平均值";
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      Collection var4 = null;
-      if (var1 instanceof Collection) {
-         var4 = (Collection)var1;
-         BigDecimal var5 = null;
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      Collection items = null;
+      if (object instanceof Collection) {
+         items = (Collection)object;
+         BigDecimal decimalValue = null;
 
-         for (Object var7 : var4) {
-            Object var8 = Utils.getObjectProperty(var7, var2);
-            BigDecimal var9 = Utils.toBigDecimal(var8);
-            if (var5 == null) {
-               var5 = var9;
+         for (Object objectValue : items) {
+            Object objectProperty = Utils.getObjectProperty(objectValue, property);
+            BigDecimal decimalValue2 = Utils.toBigDecimal(objectProperty);
+            if (decimalValue == null) {
+               decimalValue = decimalValue2;
             } else {
-               var5 = var5.add(var9);
+               decimalValue = decimalValue.add(decimalValue2);
             }
          }
 
-         BigDecimal var11 = var5 == null ? new BigDecimal(0) : var5.divide(new BigDecimal(var4.size()), 12, 4);
-         return var11.doubleValue();
+         BigDecimal decimalValue3 = decimalValue == null ? new BigDecimal(0) : decimalValue.divide(new BigDecimal(items.size()), 12, 4);
+         return decimalValue3.doubleValue();
       } else {
          throw new RuleException("Function[avg] parameter must be java.util.Collection type.");
       }
    }
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("集合对象");
-      var1.setEname("Collection");
-      var1.setNeedProperty(true);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("集合对象");
+      argument.setEname("Collection");
+      argument.setNeedProperty(true);
+      return argument;
    }
 }

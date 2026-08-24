@@ -10,57 +10,57 @@ import java.util.List;
 import org.dom4j.Element;
 
 public class ConditionTemplateParser extends LibrariesParser<ConditionTemplate> {
-   private RulesRebuilder a;
-   private LhsParser b;
+   private RulesRebuilder rulesRebuilder;
+   private LhsParser lhsParser;
 
-   public ConditionTemplate parse(Element var1) {
-      ConditionTemplate var2 = new ConditionTemplate();
-      ArrayList var3 = new ArrayList();
-      var2.setTemplates(var3);
+   public ConditionTemplate parse(Element element) {
+      ConditionTemplate conditionTemplate = new ConditionTemplate();
+      ArrayList items = new ArrayList();
+      conditionTemplate.setTemplates(items);
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            String var7 = var6.getName();
-            Library var8 = this.a(var6);
-            if (var8 != null) {
-               var2.addLibrary(var8);
-            } else if (var7.equals("template")) {
-               var3.add(this.b(var6));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            Library library = this.parseLibrary(element2);
+            if (library != null) {
+               conditionTemplate.addLibrary(library);
+            } else if (name.equals("template")) {
+               items.add(this.resolveConditionTemplateUnit(element2));
             }
          }
       }
 
-      List var9 = var2.getLibraries();
-      if (var9 != null) {
-         ResourceLibrary var10 = this.a.getResourceLibraryBuilder().buildResourceLibrary(var9, null);
+      List libraries = conditionTemplate.getLibraries();
+      if (libraries != null) {
+         ResourceLibrary resourceLibrary = this.rulesRebuilder.getResourceLibraryBuilder().buildResourceLibrary(libraries, null);
 
-         for (ConditionTemplateUnit var12 : var2.getTemplates()) {
-            this.a.rebuildCriterion(var12.getCriterion(), var10, false);
+         for (ConditionTemplateUnit conditionTemplateUnit : conditionTemplate.getTemplates()) {
+            this.rulesRebuilder.rebuildCriterion(conditionTemplateUnit.getCriterion(), resourceLibrary, false);
          }
       }
 
-      return var2;
+      return conditionTemplate;
    }
 
-   private ConditionTemplateUnit b(Element var1) {
-      ConditionTemplateUnit var2 = new ConditionTemplateUnit();
-      var2.setId(var1.attributeValue("id"));
-      var2.setName(var1.attributeValue("name"));
-      var2.setCriterion(this.b.parseCriterion(var1));
-      return var2;
+   private ConditionTemplateUnit resolveConditionTemplateUnit(Element element) {
+      ConditionTemplateUnit conditionTemplateUnit = new ConditionTemplateUnit();
+      conditionTemplateUnit.setId(element.attributeValue("id"));
+      conditionTemplateUnit.setName(element.attributeValue("name"));
+      conditionTemplateUnit.setCriterion(this.lhsParser.parseCriterion(element));
+      return conditionTemplateUnit;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("templates");
+   public boolean support(String name) {
+      return name.equals("templates");
    }
 
-   public void setLhsParser(LhsParser var1) {
-      this.b = var1;
+   public void setLhsParser(LhsParser lhsParser) {
+      this.lhsParser = lhsParser;
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.a = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 }

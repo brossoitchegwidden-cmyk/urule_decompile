@@ -3,48 +3,48 @@ package com.bstek.urule.runtime.rete;
 import java.util.Date;
 
 public class ReteInstanceUnit {
-   private String a;
-   private Date b;
-   private Date c;
-   private ReteInstance d;
+   private String ruleName;
+   private Date effectiveDate;
+   private Date expiresDate;
+   private ReteInstance reteInstance;
 
    public ReteInstanceUnit() {
    }
 
-   public ReteInstanceUnit(ReteInstance var1, String var2) {
-      this.d = var1;
-      this.a = var2;
+   public ReteInstanceUnit(ReteInstance reteInstance, String ruleName) {
+      this.reteInstance = reteInstance;
+      this.ruleName = ruleName;
    }
 
    public String getRuleName() {
-      return this.a;
+      return this.ruleName;
    }
 
-   public void setRuleName(String var1) {
-      this.a = var1;
+   public void setRuleName(String ruleName) {
+      this.ruleName = ruleName;
    }
 
    public Date getEffectiveDate() {
-      return this.b;
+      return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.b = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
-      return this.c;
+      return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.c = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public ReteInstance getReteInstance() {
-      return this.d;
+      return this.reteInstance;
    }
 
-   public void setReteInstance(ReteInstance var1) {
-      this.d = var1;
+   public void setReteInstance(ReteInstance reteInstance) {
+      this.reteInstance = reteInstance;
    }
 }

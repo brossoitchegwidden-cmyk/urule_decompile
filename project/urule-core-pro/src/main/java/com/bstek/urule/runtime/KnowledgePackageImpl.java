@@ -51,81 +51,81 @@ public class KnowledgePackageImpl implements KnowledgePackage {
    public void initForActiveVersion() {
       this.initSingleReteForActiveVersion(this.rete);
       if (this.flowMap != null) {
-         for (FlowDefinition var2 : this.flowMap.values()) {
-            var2.initForActiveVersion();
+         for (FlowDefinition flowDefinition : this.flowMap.values()) {
+            flowDefinition.initForActiveVersion();
          }
       }
 
       if (this.aloneRetes != null) {
-         for (Rete var8 : this.aloneRetes) {
-            this.initSingleReteForActiveVersion(var8);
+         for (Rete rete : this.aloneRetes) {
+            this.initSingleReteForActiveVersion(rete);
          }
       }
 
       if (this.predefineExecutionUnits != null) {
-         for (PredefineExecutionUnit var9 : this.predefineExecutionUnits) {
-            PredefineGroup var3 = var9.getGroup();
-            KnowledgePackageWrapper var4 = var3.getKnowledgePackageWrapper();
-            if (var4 != null) {
-               KnowledgePackageImpl var5 = (KnowledgePackageImpl)var4.getKnowledgePackage();
-               var5.initForActiveVersion();
+         for (PredefineExecutionUnit predefineExecutionUnit : this.predefineExecutionUnits) {
+            PredefineGroup group = predefineExecutionUnit.getGroup();
+            KnowledgePackageWrapper knowledgePackageWrapper = group.getKnowledgePackageWrapper();
+            if (knowledgePackageWrapper != null) {
+               KnowledgePackageImpl knowledgePackage = (KnowledgePackageImpl)knowledgePackageWrapper.getKnowledgePackage();
+               knowledgePackage.initForActiveVersion();
             }
          }
       }
    }
 
-   private void initSingleReteForActiveVersion(Rete var1) {
-      this.initReteForActiveVersion(var1);
-      this.initReteUnitsForActiveVersion(var1.getMutexGroupRetesMap());
-      this.initReteUnitsForActiveVersion(var1.getPendedGroupRetesMap());
+   private void initSingleReteForActiveVersion(Rete rete) {
+      this.initReteForActiveVersion(rete);
+      this.initReteUnitsForActiveVersion(rete.getMutexGroupRetesMap());
+      this.initReteUnitsForActiveVersion(rete.getPendedGroupRetesMap());
    }
 
-   private void initReteUnitsForActiveVersion(Map<String, List<ReteUnit>> var1) {
-      if (var1 != null) {
-         for (List var3 : var1.values()) {
-            for (ReteUnit var5 : (Iterable<ReteUnit>)(Iterable<?>)(var3)) {
-               if (var5 instanceof MutexReteUnit) {
-                  MutexReteUnit var10 = (MutexReteUnit)var5;
+   private void initReteUnitsForActiveVersion(Map<String, List<ReteUnit>> valuesByKey) {
+      if (valuesByKey != null) {
+         for (List items : valuesByKey.values()) {
+            for (ReteUnit reteUnit : (Iterable<ReteUnit>)(Iterable<?>)(items)) {
+               if (reteUnit instanceof MutexReteUnit) {
+                  MutexReteUnit mutexReteUnit = (MutexReteUnit)reteUnit;
 
-                  for (ReteUnit var8 : var10.getList()) {
-                     Rete var9 = var8.getRete();
-                     if (var9 != null) {
-                        this.initReteForActiveVersion(var9);
+                  for (ReteUnit reteUnit2 : mutexReteUnit.getList()) {
+                     Rete rete = reteUnit2.getRete();
+                     if (rete != null) {
+                        this.initReteForActiveVersion(rete);
                      }
                   }
                } else {
-                  Rete var6 = var5.getRete();
-                  this.initReteForActiveVersion(var6);
+                  Rete rete2 = reteUnit.getRete();
+                  this.initReteForActiveVersion(rete2);
                }
             }
          }
       }
    }
 
-   private void initReteForActiveVersion(Rete var1) {
-      for (BaseReteNode var4 : var1.getObjectTypeNodes()) {
-         this.buildChildrenNodes(var4);
+   private void initReteForActiveVersion(Rete rete) {
+      for (BaseReteNode baseReteNode : rete.getObjectTypeNodes()) {
+         this.buildChildrenNodes(baseReteNode);
       }
 
       if (this.flowMap != null) {
-         for (FlowDefinition var6 : this.flowMap.values()) {
-            var6.initForActiveVersion();
+         for (FlowDefinition flowDefinition : this.flowMap.values()) {
+            flowDefinition.initForActiveVersion();
          }
       }
    }
 
-   private void buildChildrenNodes(BaseReteNode var1) {
-      List var2 = var1.getLines();
-      if (var2 != null) {
-         for (Line var4 : (Iterable<Line>)(Iterable<?>)(var2)) {
-            Node var5 = var4.getTo();
-            if (var5 instanceof ReteNode) {
-               var1.getChildrenNodes().add((ReteNode)var5);
+   private void buildChildrenNodes(BaseReteNode baseReteNode) {
+      List lines = baseReteNode.getLines();
+      if (lines != null) {
+         for (Line line : (Iterable<Line>)(Iterable<?>)(lines)) {
+            Node to = line.getTo();
+            if (to instanceof ReteNode) {
+               baseReteNode.getChildrenNodes().add((ReteNode)to);
             }
 
-            if (var5 instanceof BaseReteNode) {
-               BaseReteNode var6 = (BaseReteNode)var5;
-               this.buildChildrenNodes(var6);
+            if (to instanceof BaseReteNode) {
+               BaseReteNode baseReteNode2 = (BaseReteNode)to;
+               this.buildChildrenNodes(baseReteNode2);
             }
          }
       }
@@ -141,8 +141,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.rete;
    }
 
-   public void setRete(Rete var1) {
-      this.rete = var1;
+   public void setRete(Rete rete) {
+      this.rete = rete;
    }
 
    @Override
@@ -150,8 +150,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.aloneRetes;
    }
 
-   public void setAloneRetes(List<Rete> var1) {
-      this.aloneRetes = var1;
+   public void setAloneRetes(List<Rete> aloneRetes) {
+      this.aloneRetes = aloneRetes;
    }
 
    @Override
@@ -159,8 +159,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.timestamp;
    }
 
-   public void setTimestamp(long var1) {
-      this.timestamp = var1;
+   public void setTimestamp(long timestamp) {
+      this.timestamp = timestamp;
    }
 
    @Override
@@ -173,12 +173,12 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.packageInfo;
    }
 
-   public void setPackageInfo(String var1) {
-      this.packageInfo = var1;
+   public void setPackageInfo(String packageInfo) {
+      this.packageInfo = packageInfo;
    }
 
-   public void setMonitor(boolean var1) {
-      this.monitor = var1;
+   public void setMonitor(boolean monitor) {
+      this.monitor = monitor;
    }
 
    @Override
@@ -191,8 +191,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.inputData;
    }
 
-   public void setInputData(List<MonitorObject> var1) {
-      this.inputData = var1;
+   public void setInputData(List<MonitorObject> inputData) {
+      this.inputData = inputData;
    }
 
    @Override
@@ -200,8 +200,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.outputData;
    }
 
-   public void setOutputData(List<MonitorObject> var1) {
-      this.outputData = var1;
+   public void setOutputData(List<MonitorObject> outputData) {
+      this.outputData = outputData;
    }
 
    @Override
@@ -209,8 +209,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.version = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    @Override
@@ -218,8 +218,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.versionComment;
    }
 
-   public void setVersionComment(String var1) {
-      this.versionComment = var1;
+   public void setVersionComment(String versionComment) {
+      this.versionComment = versionComment;
    }
 
    @Override
@@ -227,8 +227,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.versionCreateDate;
    }
 
-   public void setVersionCreateDate(Date var1) {
-      this.versionCreateDate = var1;
+   public void setVersionCreateDate(Date versionCreateDate) {
+      this.versionCreateDate = versionCreateDate;
    }
 
    @Override
@@ -236,8 +236,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.versionCreateUser;
    }
 
-   public void setVersionCreateUser(String var1) {
-      this.versionCreateUser = var1;
+   public void setVersionCreateUser(String versionCreateUser) {
+      this.versionCreateUser = versionCreateUser;
    }
 
    @Override
@@ -245,8 +245,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.variableCategoryMap;
    }
 
-   public void setVariableCategoryMap(Map<String, String> var1) {
-      this.variableCategoryMap = var1;
+   public void setVariableCategoryMap(Map<String, String> variableCategoryMap) {
+      this.variableCategoryMap = variableCategoryMap;
    }
 
    @Override
@@ -254,15 +254,15 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.flowMap;
    }
 
-   public void setFlowMap(Map<String, FlowDefinition> var1) {
-      this.flowMap = var1;
+   public void setFlowMap(Map<String, FlowDefinition> flowMap) {
+      this.flowMap = flowMap;
    }
 
    private void initAloneReteInstances() {
       this.aloneReteInstances = new ArrayList<>();
       if (this.aloneRetes != null) {
-         for (Rete var2 : this.aloneRetes) {
-            this.aloneReteInstances.add(var2.getReteInstance());
+         for (Rete rete : this.aloneRetes) {
+            this.aloneReteInstances.add(rete.getReteInstance());
          }
       }
    }
@@ -281,12 +281,12 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.aloneReteInstances;
    }
 
-   public void setParameters(Map<String, String> var1) {
-      this.parameters = var1;
+   public void setParameters(Map<String, String> parameters) {
+      this.parameters = parameters;
    }
 
-   public void setVariableCategories(List<VariableCategory> var1) {
-      this.variableCategories = var1;
+   public void setVariableCategories(List<VariableCategory> variableCategories) {
+      this.variableCategories = variableCategories;
    }
 
    @Override
@@ -295,12 +295,12 @@ public class KnowledgePackageImpl implements KnowledgePackage {
    }
 
    @Override
-   public VariableCategory getVariableCategoryWithDefaultValue(String var1) {
-      return this.variableCategoryWithDefaultValueClassMap.get(var1);
+   public VariableCategory getVariableCategoryWithDefaultValue(String clazz) {
+      return this.variableCategoryWithDefaultValueClassMap.get(clazz);
    }
 
-   public void setVariableCategoryWithDefaultValueClassMap(Map<String, VariableCategory> var1) {
-      this.variableCategoryWithDefaultValueClassMap = var1;
+   public void setVariableCategoryWithDefaultValueClassMap(Map<String, VariableCategory> variableCategoryClassMap) {
+      this.variableCategoryWithDefaultValueClassMap = variableCategoryClassMap;
    }
 
    @Override
@@ -308,8 +308,8 @@ public class KnowledgePackageImpl implements KnowledgePackage {
       return this.predefineExecutionUnits;
    }
 
-   public void setPredefineExecutionUnits(List<PredefineExecutionUnit> var1) {
-      this.predefineExecutionUnits = var1;
+   public void setPredefineExecutionUnits(List<PredefineExecutionUnit> predefineExecutionUnits) {
+      this.predefineExecutionUnits = predefineExecutionUnits;
    }
 
    @Override

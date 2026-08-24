@@ -5,13 +5,13 @@ import com.bstek.urule.console.database.model.datasource.DataSource;
 public interface DataSourceManager {
    DataSourceManager ins = new DataSourceManagerImpl();
 
-   DataSource get(Long var1);
+   DataSource get(Long id);
 
-   void add(DataSource var1);
+   void add(DataSource dataSource);
 
-   void update(DataSource var1);
+   void update(DataSource dataSource);
 
-   void remove(Long var1);
+   void remove(Long id);
 
    DataSourceQuery createQuery();
 }

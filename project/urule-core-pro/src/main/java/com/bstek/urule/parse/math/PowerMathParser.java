@@ -6,29 +6,29 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class PowerMathParser extends MathParser {
-   public PowerMathParser(ValueParser var1) {
-      super(var1);
+   public PowerMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("power-sign");
+   public boolean support(String name) {
+      return name.equals("power-sign");
    }
 
-   public MathSign parse(Element var1) {
-      PowerMath var2 = new PowerMath();
+   public MathSign parse(Element element) {
+      PowerMath powerMath = new PowerMath();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("base")) {
-               var2.setBase(this.a(var5));
-            } else if (var5.getName().equals("power")) {
-               var2.setPower(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("base")) {
+               powerMath.setBase(this.parseValue(element2));
+            } else if (element2.getName().equals("power")) {
+               powerMath.setPower(this.parseValue(element2));
             }
          }
       }
 
-      return var2;
+      return powerMath;
    }
 }

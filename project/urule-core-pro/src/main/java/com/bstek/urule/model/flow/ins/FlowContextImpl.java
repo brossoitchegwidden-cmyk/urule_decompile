@@ -15,8 +15,8 @@ public class FlowContextImpl extends ContextImpl implements FlowContext {
    private List<FlowInstance> flowInstances = new ArrayList<>();
    private ExecutionResponseImpl response = new ExecutionResponseImpl();
 
-   public FlowContextImpl(WorkingMemory var1, Map<String, String> var2) {
-      super(var1, var2);
+   public FlowContextImpl(WorkingMemory workingMemory, Map<String, String> variableCategoryMap) {
+      super(workingMemory, variableCategoryMap);
    }
 
    @Override
@@ -34,27 +34,27 @@ public class FlowContextImpl extends ContextImpl implements FlowContext {
    }
 
    @Override
-   public Object getVariable(String var1) {
-      return this.variableMap.get(var1);
+   public Object getVariable(String key) {
+      return this.variableMap.get(key);
    }
 
    @Override
-   public void removeVariable(String var1) {
-      this.variableMap.remove(var1);
+   public void removeVariable(String key) {
+      this.variableMap.remove(key);
    }
 
    @Override
-   public void addVariable(String var1, Object var2) {
-      this.variableMap.put(var1, var2);
+   public void addVariable(String key, Object object) {
+      this.variableMap.put(key, object);
    }
 
-   public void setVariableMap(Map<String, Object> var1) {
-      this.variableMap = var1;
+   public void setVariableMap(Map<String, Object> variableMap) {
+      this.variableMap = variableMap;
    }
 
    @Override
-   public void addFlowInstance(FlowInstance var1) {
-      this.flowInstances.add(var1);
+   public void addFlowInstance(FlowInstance instance) {
+      this.flowInstances.add(instance);
    }
 
    @Override

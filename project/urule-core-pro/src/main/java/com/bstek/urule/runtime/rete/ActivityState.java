@@ -4,27 +4,27 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class ActivityState {
-   private String a;
-   private boolean b;
-   private Set<Integer> c = new HashSet<>();
+   private String id;
+   private boolean passed;
+   private Set<Integer> tokensSet = new HashSet<>();
 
-   public ActivityState(String var1) {
-      this.a = var1;
+   public ActivityState(String id) {
+      this.id = id;
    }
 
    public String getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setPassed(boolean var1) {
-      this.b = var1;
+   public void setPassed(boolean passed) {
+      this.passed = passed;
    }
 
    public boolean isPassed() {
-      return this.b;
+      return this.passed;
    }
 
    public Set<Integer> getTokensSet() {
-      return this.c;
+      return this.tokensSet;
    }
 }

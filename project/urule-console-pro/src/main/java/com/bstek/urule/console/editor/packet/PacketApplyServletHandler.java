@@ -37,30 +37,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class PacketApplyServletHandler extends ApiServletHandler {
-   public void get(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("applyId"));
-      this.a(var2, PacketApplyManager.ins.load(var3));
+   public void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("applyId"));
+      this.writeObjectToJson(resp, PacketApplyManager.ins.load(longValue));
    }
 
-   public void load(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("packetId"));
-      ApplyType var5 = ApplyType.valueOf(var1.getParameter("type"));
-      int var6 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var7 = Integer.valueOf(var1.getParameter("pageSize"));
-      PacketApplyQuery var8 = PacketApplyManager.ins.newQuery();
-      var8.titleLike(var1.getParameter("title"));
-      var8.createUserLike(var1.getParameter("createUser"));
-      Page var9 = var8.packetId(var3).type(var5).projectId(ContextHolder.getProjectId()).paging(var6, var7);
-      List var10 = PacketApplyManager.ins.newQuery().packetId(var3).projectId(ContextHolder.getProjectId()).type(var5).statusIn(new ApplyStatus[]{ApplyStatus.pending, ApplyStatus.reject}).list();
-      HashMap var11 = new HashMap();
-      var11.put("page", var9);
-      if (var10.size() == 0) {
-         var11.put("add", true);
+   public void load(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("packetId"));
+      ApplyType applyType = ApplyType.valueOf(req.getParameter("type"));
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      PacketApplyQuery packetApplyQuery = PacketApplyManager.ins.newQuery();
+      packetApplyQuery.titleLike(req.getParameter("title"));
+      packetApplyQuery.createUserLike(req.getParameter("createUser"));
+      Page page = packetApplyQuery.packetId(longValue).type(applyType).projectId(ContextHolder.getProjectId()).paging(number, number2);
+      List items = PacketApplyManager.ins.newQuery().packetId(longValue).projectId(ContextHolder.getProjectId()).type(applyType).statusIn(new ApplyStatus[]{ApplyStatus.pending, ApplyStatus.reject}).list();
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("page", page);
+      if (items.size() == 0) {
+         valuesByKey.put("add", true);
       } else {
-         var11.put("add", false);
+         valuesByKey.put("add", false);
       }
 
-      this.a(var2, var11);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    @Transactional
@@ -69,72 +69,72 @@ public class PacketApplyServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("packetId"));
-      Packet var5 = PacketManager.ins.load(var3);
-      PacketApply var6 = new PacketApply();
-      ApplyType var7 = ApplyType.valueOf(var1.getParameter("type"));
-      var6.setType(var7);
-      var6.setTitle(var1.getParameter("title"));
-      var6.setDesc(var1.getParameter("desc"));
-      var6.setPacketId(var3);
-      var6.setProjectId(var5.getProjectId());
-      long var8 = IDGenerator.getInstance().nextId(IDType.DEPLOYED_PACKET);
-      var6.setDeployedPacketId(var8);
-      var6.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      var6.setApprover(ProjectManager.ins.getApproveUser(PacketManager.ins.load(var3).getProjectId(), var7));
-      PacketApplyManager.ins.add(var6);
-      if (var7.equals(ApplyType.deploy)) {
-         KnowledgePackage var10 = PacketBuilder.ins.buildKnowledgePackage(var3);
-         String var11 = Utils.knowledgePackageToString(var10);
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("packetId"));
+      Packet packet = PacketManager.ins.load(longValue);
+      PacketApply packetApply = new PacketApply();
+      ApplyType applyType = ApplyType.valueOf(req.getParameter("type"));
+      packetApply.setType(applyType);
+      packetApply.setTitle(req.getParameter("title"));
+      packetApply.setDesc(req.getParameter("desc"));
+      packetApply.setPacketId(longValue);
+      packetApply.setProjectId(packet.getProjectId());
+      long longValue2 = IDGenerator.getInstance().nextId(IDType.DEPLOYED_PACKET);
+      packetApply.setDeployedPacketId(longValue2);
+      packetApply.setCreateUser(SecurityUtils.getLoginUsername(req));
+      packetApply.setApprover(ProjectManager.ins.getApproveUser(PacketManager.ins.load(longValue).getProjectId(), applyType));
+      PacketApplyManager.ins.add(packetApply);
+      if (applyType.equals(ApplyType.deploy)) {
+         KnowledgePackage knowledgePackage = PacketBuilder.ins.buildKnowledgePackage(longValue);
+         String text = Utils.knowledgePackageToString(knowledgePackage);
 
          try {
-            Utils.stringToKnowledgePackageWrapper(var11);
-         } catch (RuleException var18) {
-            Exception var13 = (Exception)var18.getCause();
-            throw new RuleAssertException("知识包[" + var3 + "]对应的规则格式非法!", var13);
+            Utils.stringToKnowledgePackageWrapper(text);
+         } catch (RuleException ruleException) {
+            Exception cause = (Exception)ruleException.getCause();
+            throw new RuleAssertException("知识包[" + longValue + "]对应的规则格式非法!", cause);
          }
 
-         PacketDeploy var12 = new PacketDeploy();
-         var12.setId(var8);
-         var12.setApplyId(var6.getId());
-         var12.setDigest(MD5Utils.stringToMD5(var11));
-         var12.setContent(var11);
-         var12.setCreateUser(var6.getCreateUser());
-         var12.setDesc(var1.getParameter("deployDesc"));
-         var12.setPacketId(var3);
-         var12.setStatus(ApplyStatus.pending);
-         var12.setProjectId(var5.getProjectId());
-         PacketDeployManager.ins.add(var12);
+         PacketDeploy packetDeploy = new PacketDeploy();
+         packetDeploy.setId(longValue2);
+         packetDeploy.setApplyId(packetApply.getId());
+         packetDeploy.setDigest(MD5Utils.stringToMD5(text));
+         packetDeploy.setContent(text);
+         packetDeploy.setCreateUser(packetApply.getCreateUser());
+         packetDeploy.setDesc(req.getParameter("deployDesc"));
+         packetDeploy.setPacketId(longValue);
+         packetDeploy.setStatus(ApplyStatus.pending);
+         packetDeploy.setProjectId(packet.getProjectId());
+         PacketDeployManager.ins.add(packetDeploy);
 
-         for(PacketFile var14 : (Iterable<PacketFile>)(Iterable<?>)(var5.getFiles())) {
-            RuleFile var15 = FileManager.ins.get(var14.getFileId());
-            PacketDeployFile var16 = new PacketDeployFile();
-            var16.setPacketDeployId(var12.getId());
-            var16.setFileId(var14.getFileId());
-            var16.setProjectId(var5.getProjectId());
-            var16.setDigest(var15.getDigest());
-            var16.setPath(var14.getPath());
-            var16.setVersion(var14.getVersion());
-            String var17 = FileManager.ins.loadContent(var14.getFileId());
-            var16.setContent(var17);
-            var16.setCreateUser(var6.getCreateUser());
-            var16.setDigest(MD5Utils.stringToMD5(var17));
-            PacketDeployFileManager.ins.add(var16);
+         for(PacketFile packetFile : (Iterable<PacketFile>)(Iterable<?>)(packet.getFiles())) {
+            RuleFile ruleFile = FileManager.ins.get(packetFile.getFileId());
+            PacketDeployFile packetDeployFile = new PacketDeployFile();
+            packetDeployFile.setPacketDeployId(packetDeploy.getId());
+            packetDeployFile.setFileId(packetFile.getFileId());
+            packetDeployFile.setProjectId(packet.getProjectId());
+            packetDeployFile.setDigest(ruleFile.getDigest());
+            packetDeployFile.setPath(packetFile.getPath());
+            packetDeployFile.setVersion(packetFile.getVersion());
+            String content = FileManager.ins.loadContent(packetFile.getFileId());
+            packetDeployFile.setContent(content);
+            packetDeployFile.setCreateUser(packetApply.getCreateUser());
+            packetDeployFile.setDigest(MD5Utils.stringToMD5(content));
+            PacketDeployFileManager.ins.add(packetDeployFile);
          }
       }
 
-      String var19 = "";
-      if (var7.equals(ApplyType.deploy)) {
-         var19 = "Apply for release of packet %s[%s]";
-      } else if (var7.equals(ApplyType.disable)) {
-         var19 = "Request to disable packet %s[%s]";
-      } else if (var7.equals(ApplyType.enable)) {
-         var19 = "Request to enable packet %s[%s]";
+      String text2 = "";
+      if (applyType.equals(ApplyType.deploy)) {
+         text2 = "Apply for release of packet %s[%s]";
+      } else if (applyType.equals(ApplyType.disable)) {
+         text2 = "Request to disable packet %s[%s]";
+      } else if (applyType.equals(ApplyType.enable)) {
+         text2 = "Request to enable packet %s[%s]";
       }
 
-      SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), var7.name(), var5.getId(), String.format(var19, var5.getName(), var5.getCode()));
-      this.a(var2, var6);
+      SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), applyType.name(), packet.getId(), String.format(text2, packet.getName(), packet.getCode()));
+      this.writeObjectToJson(resp, packetApply);
    }
 
    @Transactional
@@ -143,15 +143,15 @@ public class PacketApplyServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      PacketApply var5 = PacketApplyManager.ins.load(var3);
-      if (!var5.getStatus().equals(ApplyStatus.pending)) {
-         throw new RuleException("当前申请【" + var5.getTitle() + "】不处于【待审批】状态，不能被删除！");
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      PacketApply packetApply = PacketApplyManager.ins.load(longValue);
+      if (!packetApply.getStatus().equals(ApplyStatus.pending)) {
+         throw new RuleException("当前申请【" + packetApply.getTitle() + "】不处于【待审批】状态，不能被删除！");
       } else {
-         PacketApplyManager.ins.delete(var3);
-         if (var5.getType().equals(ApplyType.deploy)) {
-            PacketDeployManager.ins.deleteByApplyId(var3);
+         PacketApplyManager.ins.delete(longValue);
+         if (packetApply.getType().equals(ApplyType.deploy)) {
+            PacketDeployManager.ins.deleteByApplyId(longValue);
          }
 
       }

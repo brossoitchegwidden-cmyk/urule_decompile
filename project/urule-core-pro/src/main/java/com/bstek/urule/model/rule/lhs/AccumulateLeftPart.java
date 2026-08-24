@@ -23,126 +23,126 @@ public class AccumulateLeftPart implements LeftPart {
    private String id;
    private static final Logger log = Logger.getLogger(AccumulateLeftPart.class.getName());
 
-   public EvaluateResponse evaluate(EvaluationContext var1, Map<String, Object> var2) {
-      List var3 = this.buildLoopTarget(var1, var2);
-      if (var3 == null) {
+   public EvaluateResponse evaluate(EvaluationContext context, Map<String, Object> factMap) {
+      List loopTarget = this.buildLoopTarget(context, factMap);
+      if (loopTarget == null) {
          log.warning("AccumulateLeftPart collection value is null,return false.");
-         EvaluateResponse var13 = new EvaluateResponse();
-         var13.setResult(false);
-         return var13;
+         EvaluateResponse evaluateResponse = new EvaluateResponse();
+         evaluateResponse.setResult(false);
+         return evaluateResponse;
       }
 
-      HashMap var4 = new HashMap();
-      var4.putAll(var2);
-      HashMap var5 = new HashMap();
-      boolean var6 = false;
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.putAll(factMap);
+      HashMap valuesByKey2 = new HashMap();
+      boolean flag = false;
 
-      for (Object var8 : var3) {
-         String var9 = Utils.getClassName(var8);
-         var4.put(var9, var8);
-         boolean var10 = this.evalCondition(var1, var4);
-         if (var10) {
-            var6 = true;
+      for (Object objectValue : loopTarget) {
+         String className = Utils.getClassName(objectValue);
+         valuesByKey.put(className, objectValue);
+         boolean flag2 = this.evalCondition(context, valuesByKey);
+         if (flag2) {
+            flag = true;
 
-            for (CalculateItem var12 : this.calculateItems) {
-               var12.calculate(var1, var4, var8, var5);
+            for (CalculateItem calculateItem : this.calculateItems) {
+               calculateItem.calculate(context, valuesByKey, objectValue, valuesByKey2);
             }
          }
       }
 
-      if (!var6) {
-         for (CalculateItem var17 : this.calculateItems) {
-            var17.init(var5);
+      if (!flag) {
+         for (CalculateItem calculateItem2 : this.calculateItems) {
+            calculateItem2.init(valuesByKey2);
          }
       }
 
-      for (CalculateData var18 : (Iterable<CalculateData>)(Iterable<?>)(var5.values())) {
-         var18.buildValue(var1, var2);
+      for (CalculateData calculateData : (Iterable<CalculateData>)(Iterable<?>)(valuesByKey2.values())) {
+         calculateData.buildValue(context, factMap);
       }
 
-      EvaluateResponse var16 = null;
+      EvaluateResponse evaluateResult = null;
 
-      for (ConditionItem var20 : this.conditionItems) {
-         EvaluateResponse var21 = var20.eval(var5, var1, var2);
-         if (!var21.getResult()) {
-            var16 = var21;
+      for (ConditionItem conditionItem : this.conditionItems) {
+         EvaluateResponse evaluateResponse2 = conditionItem.eval(valuesByKey2, context, factMap);
+         if (!evaluateResponse2.getResult()) {
+            evaluateResult = evaluateResponse2;
             break;
          }
       }
 
-      if (var16 == null) {
-         var16 = new EvaluateResponse();
-         var16.setResult(true);
+      if (evaluateResult == null) {
+         evaluateResult = new EvaluateResponse();
+         evaluateResult.setResult(true);
       }
 
-      return var16;
+      return evaluateResult;
    }
 
-   private boolean evalCondition(EvaluationContext var1, Map<String, Object> var2) {
+   private boolean evalCondition(EvaluationContext evaluationContext, Map<String, Object> valuesByKey) {
       if (this.junction == null) {
          return true;
       }
 
-      List var3 = this.junction.getCriterions();
-      if (var3 != null && var3.size() != 0) {
-         boolean var4 = true;
+      List criterions = this.junction.getCriterions();
+      if (criterions != null && criterions.size() != 0) {
+         boolean flag = true;
          if (this.junction instanceof Or) {
-            var4 = false;
+            flag = false;
          }
 
-         boolean var5 = false;
+         boolean evalConditionResult = false;
 
-         for (Criterion var7 : (Iterable<Criterion>)(Iterable<?>)(var3)) {
-            Criteria var8 = (Criteria)var7;
-            EvaluateResponse var9 = var8.evaluate(var1, var2);
-            if (var4) {
-               if (!var9.getResult()) {
-                  var5 = false;
+         for (Criterion criterion : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+            Criteria criteria = (Criteria)criterion;
+            EvaluateResponse evaluateResponse = criteria.evaluate(evaluationContext, valuesByKey);
+            if (flag) {
+               if (!evaluateResponse.getResult()) {
+                  evalConditionResult = false;
                   break;
                }
 
-               var5 = true;
+               evalConditionResult = true;
             } else {
-               if (var9.getResult()) {
-                  var5 = true;
+               if (evaluateResponse.getResult()) {
+                  evalConditionResult = true;
                   break;
                }
 
-               var5 = false;
+               evalConditionResult = false;
             }
          }
 
-         return var5;
+         return evalConditionResult;
       } else {
          return true;
       }
    }
 
-   private List<Object> buildLoopTarget(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.loopTarget.getValue(), var1, var2);
+   private List<Object> buildLoopTarget(Context context, Map<String, Object> valuesByKey) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.loopTarget.getValue(), context, valuesByKey);
       if (this.loopTargetType.equals(LoopTargetType.list)) {
-         if (var3 instanceof Collection) {
-            ArrayList var11 = new ArrayList();
-            Collection var12 = (Collection)var3;
-            var11.addAll(var12);
-            return var11;
+         if (objectValue instanceof Collection) {
+            ArrayList loopTarget = new ArrayList();
+            Collection objectValue2 = (Collection)objectValue;
+            loopTarget.addAll(objectValue2);
+            return loopTarget;
          } else {
             return null;
          }
       } else {
-         KnowledgeSession var4 = (KnowledgeSession)var1.getWorkingMemory();
-         List var5 = var4.getFactList();
-         String var6 = Utils.getClassName(var3);
-         ArrayList var7 = new ArrayList();
+         KnowledgeSession workingMemory = (KnowledgeSession)context.getWorkingMemory();
+         List factList = workingMemory.getFactList();
+         String className = Utils.getClassName(objectValue);
+         ArrayList loopTarget2 = new ArrayList();
 
-         for (Object var9 : var5) {
-            String var10 = Utils.getClassName(var9);
-            if (var10.equals(var6)) {
-               var7.add(var9);
+         for (Object objectValue3 : factList) {
+            String className2 = Utils.getClassName(objectValue3);
+            if (className2.equals(className)) {
+               loopTarget2.add(objectValue3);
             }
          }
 
-         return var7;
+         return loopTarget2;
       }
    }
 
@@ -150,40 +150,40 @@ public class AccumulateLeftPart implements LeftPart {
       return this.loopTargetType;
    }
 
-   public void setLoopTargetType(LoopTargetType var1) {
-      this.loopTargetType = var1;
+   public void setLoopTargetType(LoopTargetType loopTargetType) {
+      this.loopTargetType = loopTargetType;
    }
 
    public LoopTarget getLoopTarget() {
       return this.loopTarget;
    }
 
-   public void setLoopTarget(LoopTarget var1) {
-      this.loopTarget = var1;
+   public void setLoopTarget(LoopTarget loopTarget) {
+      this.loopTarget = loopTarget;
    }
 
    public List<ConditionItem> getConditionItems() {
       return this.conditionItems;
    }
 
-   public void setConditionItems(List<ConditionItem> var1) {
-      this.conditionItems = var1;
+   public void setConditionItems(List<ConditionItem> conditionItems) {
+      this.conditionItems = conditionItems;
    }
 
    public List<CalculateItem> getCalculateItems() {
       return this.calculateItems;
    }
 
-   public void setCalculateItems(List<CalculateItem> var1) {
-      this.calculateItems = var1;
+   public void setCalculateItems(List<CalculateItem> calculateItems) {
+      this.calculateItems = calculateItems;
    }
 
    public Junction getJunction() {
       return this.junction;
    }
 
-   public void setJunction(Junction var1) {
-      this.junction = var1;
+   public void setJunction(Junction junction) {
+      this.junction = junction;
    }
 
    @Override
@@ -192,51 +192,51 @@ public class AccumulateLeftPart implements LeftPart {
          return this.id;
       }
 
-      String var1 = LocaleHolder.isEnglish() ? "Accumulate" : "聚合";
-      this.id = var1 + "," + this.loopTargetType.toString() + ":" + this.loopTarget.getValue().getId();
-      int var2 = 0;
+      String text = LocaleHolder.isEnglish() ? "Accumulate" : "聚合";
+      this.id = text + "," + this.loopTargetType.toString() + ":" + this.loopTarget.getValue().getId();
+      int number = 0;
 
-      for (ConditionItem var4 : this.conditionItems) {
-         if (var2 == 0) {
-            String var5 = LocaleHolder.isEnglish() ? "condition" : "条件";
-            this.id = this.id + "；" + var5 + ":";
+      for (ConditionItem conditionItem : this.conditionItems) {
+         if (number == 0) {
+            String text2 = LocaleHolder.isEnglish() ? "condition" : "条件";
+            this.id = this.id + "；" + text2 + ":";
          } else {
             this.id = this.id + ",";
          }
 
-         this.id = this.id + var4.getLeft() + var4.getOp() + var4.getValue().getId();
-         var2++;
+         this.id = this.id + conditionItem.getLeft() + conditionItem.getOp() + conditionItem.getValue().getId();
+         number++;
       }
 
-      boolean var7 = false;
+      boolean flag = false;
 
-      for (CalculateItem var10 : this.calculateItems) {
-         if (!var7) {
-            String var12 = LocaleHolder.isEnglish() ? "compute" : "计算";
-            this.id = this.id + ";" + var12 + ":";
+      for (CalculateItem calculateItem : this.calculateItems) {
+         if (!flag) {
+            String text3 = LocaleHolder.isEnglish() ? "compute" : "计算";
+            this.id = this.id + ";" + text3 + ":";
          } else {
             this.id = this.id + ",";
          }
 
-         this.id = this.id + var10.getType();
-         if (var10.getValue() != null) {
-            this.id = this.id + "(" + var10.getValue().getId() + ")";
+         this.id = this.id + calculateItem.getType();
+         if (calculateItem.getValue() != null) {
+            this.id = this.id + "(" + calculateItem.getValue().getId() + ")";
          }
 
-         if (var10.isEnableAssignment()) {
-            String var13 = LocaleHolder.isEnglish() ? "set" : "赋给";
-            this.id = this.id + var13 + var10.getAssignTargetType() + ":" + var10.getAssignVariableCategory() + "." + var10.getAssignVariableLabel();
-            if (var10.getKeyLabel() != null) {
-               this.id = this.id + "." + var10.getKeyLabel();
+         if (calculateItem.isEnableAssignment()) {
+            String text4 = LocaleHolder.isEnglish() ? "set" : "赋给";
+            this.id = this.id + text4 + calculateItem.getAssignTargetType() + ":" + calculateItem.getAssignVariableCategory() + "." + calculateItem.getAssignVariableLabel();
+            if (calculateItem.getKeyLabel() != null) {
+               this.id = this.id + "." + calculateItem.getKeyLabel();
             }
          }
       }
 
       if (this.junction != null && this.junction.getCriterions() != null) {
-         for (Criterion var14 : this.junction.getCriterions()) {
-            if (var14 instanceof Criteria) {
-               Criteria var6 = (Criteria)var14;
-               this.id = this.id + var6.getId();
+         for (Criterion criterion : this.junction.getCriterions()) {
+            if (criterion instanceof Criteria) {
+               Criteria criteria = (Criteria)criterion;
+               this.id = this.id + criteria.getId();
             }
          }
       }

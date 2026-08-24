@@ -3,58 +3,58 @@ package com.bstek.urule.console.editor.decision;
 import com.bstek.urule.console.editor.decision.table.Header;
 
 public class CellContent {
-   private int a;
-   private int b;
-   private int c;
-   private Header d;
-   private String e;
-   private String f = "value";
+   private int span;
+   private int row;
+   private int col;
+   private Header header;
+   private String content;
+   private String type = "value";
 
    public int getSpan() {
-      return this.a;
+      return this.span;
    }
 
-   public void setSpan(int var1) {
-      this.a = var1;
+   public void setSpan(int span) {
+      this.span = span;
    }
 
    public int getRow() {
-      return this.b;
+      return this.row;
    }
 
-   public void setRow(int var1) {
-      this.b = var1;
+   public void setRow(int row) {
+      this.row = row;
    }
 
    public int getCol() {
-      return this.c;
+      return this.col;
    }
 
-   public void setCol(int var1) {
-      this.c = var1;
+   public void setCol(int col) {
+      this.col = col;
    }
 
    public String getContent() {
-      return this.e;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.e = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public Header getHeader() {
-      return this.d;
+      return this.header;
    }
 
-   public void setHeader(Header var1) {
-      this.d = var1;
+   public void setHeader(Header header) {
+      this.header = header;
    }
 
    public String getType() {
-      return this.f;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.f = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 }

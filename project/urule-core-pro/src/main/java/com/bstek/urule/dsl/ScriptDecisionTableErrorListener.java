@@ -5,18 +5,18 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 public class ScriptDecisionTableErrorListener extends BaseErrorListener {
-   private StringBuffer a;
+   private StringBuffer stringBuffer;
 
-   public void syntaxError(Recognizer<?, ?> var1, Object var2, int var3, int var4, String var5, RecognitionException var6) {
-      if (this.a == null) {
-         this.a = new StringBuffer();
+   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException recognitionException) {
+      if (this.stringBuffer == null) {
+         this.stringBuffer = new StringBuffer();
       }
 
-      this.a.append("[" + var2 + "] is invalid:" + var5);
-      this.a.append("\r\n");
+      this.stringBuffer.append("[" + offendingSymbol + "] is invalid:" + msg);
+      this.stringBuffer.append("\r\n");
    }
 
    public String getErrorMessage() {
-      return this.a == null ? null : this.a.toString();
+      return this.stringBuffer == null ? null : this.stringBuffer.toString();
    }
 }

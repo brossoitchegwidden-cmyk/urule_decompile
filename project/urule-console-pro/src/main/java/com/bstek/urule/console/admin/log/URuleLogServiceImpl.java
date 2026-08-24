@@ -9,25 +9,25 @@ import com.bstek.urule.console.util.IPUtils;
 
 public class URuleLogServiceImpl implements URuleLogService {
    public OperationLog getOperationLog() {
-      OperationLog var1 = new OperationLog();
-      var1.setUserId(SecurityUtils.getLoginUsername(RequestHolder.getRequest()));
-      var1.setUsername(SecurityUtils.getLoginUser(RequestHolder.getRequest()).getDesc());
-      return var1;
+      OperationLog operationLog = new OperationLog();
+      operationLog.setUserId(SecurityUtils.getLoginUsername(RequestHolder.getRequest()));
+      operationLog.setUsername(SecurityUtils.getLoginUser(RequestHolder.getRequest()).getDesc());
+      return operationLog;
    }
 
    public LoginLog getLoginLog() {
-      LoginLog var1 = new LoginLog();
-      var1.setUserId(SecurityUtils.getLoginUsername(RequestHolder.getRequest()));
-      var1.setUsername(SecurityUtils.getLoginUser(RequestHolder.getRequest()).getDesc());
-      var1.setIp(IPUtils.getIpAddress(RequestHolder.getRequest()));
-      var1.setUserAgent(RequestHolder.getRequest().getHeader("User-Agent"));
-      return var1;
+      LoginLog loginLog = new LoginLog();
+      loginLog.setUserId(SecurityUtils.getLoginUsername(RequestHolder.getRequest()));
+      loginLog.setUsername(SecurityUtils.getLoginUser(RequestHolder.getRequest()).getDesc());
+      loginLog.setIp(IPUtils.getIpAddress(RequestHolder.getRequest()));
+      loginLog.setUserAgent(RequestHolder.getRequest().getHeader("User-Agent"));
+      return loginLog;
    }
 
    public KnowledgeLog getKnowledgeLog() {
-      KnowledgeLog var1 = new KnowledgeLog();
-      var1.setIp(IPUtils.getIpAddress(RequestHolder.getRequest()));
-      var1.setUserAgent(RequestHolder.getRequest().getHeader("User-Agent"));
-      return var1;
+      KnowledgeLog knowledgeLog = new KnowledgeLog();
+      knowledgeLog.setIp(IPUtils.getIpAddress(RequestHolder.getRequest()));
+      knowledgeLog.setUserAgent(RequestHolder.getRequest().getHeader("User-Agent"));
+      return knowledgeLog;
    }
 }

@@ -5,108 +5,108 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NodeInfo {
-   private int a;
+   private int id;
    @JsonIgnore
-   private int b;
-   private String c;
-   private String d;
-   private String e;
-   private int f;
-   private int g;
-   private int h;
-   private int i;
-   private int j;
-   private List k;
+   private int level;
+   private String label;
+   private String title;
+   private String color;
+   private int xCoordinate;
+   private int yCoordinate;
+   private int width;
+   private int height;
+   private int roundCorner;
+   private List children;
 
    public int getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(int var1) {
-      this.a = var1;
+   public void setId(int id) {
+      this.id = id;
    }
 
    public int getLevel() {
-      return this.b;
+      return this.level;
    }
 
-   public void setLevel(int var1) {
-      this.b = var1;
+   public void setLevel(int level) {
+      this.level = level;
    }
 
    public String getLabel() {
-      return this.c;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.c = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public String getColor() {
-      return this.e;
+      return this.color;
    }
 
-   public void setColor(String var1) {
-      this.e = var1;
+   public void setColor(String color) {
+      this.color = color;
    }
 
    public String getTitle() {
-      return this.d;
+      return this.title;
    }
 
-   public void setTitle(String var1) {
-      this.d = var1;
+   public void setTitle(String title) {
+      this.title = title;
    }
 
    public int getX() {
-      return this.f;
+      return this.xCoordinate;
    }
 
-   public void setX(int var1) {
-      this.f = var1;
+   public void setX(int xCoordinate) {
+      this.xCoordinate = xCoordinate;
    }
 
    public int getY() {
-      return this.g;
+      return this.yCoordinate;
    }
 
-   public void setY(int var1) {
-      this.g = var1;
+   public void setY(int yCoordinate) {
+      this.yCoordinate = yCoordinate;
    }
 
    public int getWidth() {
-      return this.h;
+      return this.width;
    }
 
-   public void setWidth(int var1) {
-      this.h = var1;
+   public void setWidth(int width) {
+      this.width = width;
    }
 
    public int getHeight() {
-      return this.i;
+      return this.height;
    }
 
-   public void setHeight(int var1) {
-      this.i = var1;
+   public void setHeight(int height) {
+      this.height = height;
    }
 
    public int getRoundCorner() {
-      return this.j;
+      return this.roundCorner;
    }
 
-   public void setRoundCorner(int var1) {
-      this.j = var1;
+   public void setRoundCorner(int roundCorner) {
+      this.roundCorner = roundCorner;
    }
 
    public List getChildren() {
-      return this.k;
+      return this.children;
    }
 
-   public void addChild(NodeInfo var1) {
-      if (this.k == null) {
-         this.k = new ArrayList();
+   public void addChild(NodeInfo nodeInfo) {
+      if (this.children == null) {
+         this.children = new ArrayList();
       }
 
-      this.k.add(var1);
+      this.children.add(nodeInfo);
    }
 }

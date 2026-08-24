@@ -6,42 +6,42 @@ import java.util.List;
 import java.util.Map;
 
 public class TableData {
-   private Map a;
-   private List b;
-   private List c;
-   private List d;
-   private Map e;
+   private Map properties;
+   private List headers;
+   private List rows;
+   private List predefineRows;
+   private Map predefineNameMap;
 
-   public TableData(Map var1, List var2, List var3, List var4) {
-      this.a = var1;
-      this.b = var2;
-      this.c = var3;
-      this.d = var4;
-      this.e = new HashMap();
+   public TableData(Map properties, List headers, List rows, List predefineRows) {
+      this.properties = properties;
+      this.headers = headers;
+      this.rows = rows;
+      this.predefineRows = predefineRows;
+      this.predefineNameMap = new HashMap();
 
-      for(PredefineRow var6 : (Iterable<PredefineRow>)(Iterable<?>)(var4)) {
-         this.e.put(var6.getName(), var6);
+      for(PredefineRow predefineRow : (Iterable<PredefineRow>)(Iterable<?>)(predefineRows)) {
+         this.predefineNameMap.put(predefineRow.getName(), predefineRow);
       }
 
    }
 
    public Map getProperties() {
-      return this.a;
+      return this.properties;
    }
 
    public List getHeaders() {
-      return this.b;
+      return this.headers;
    }
 
    public List getRows() {
-      return this.c;
+      return this.rows;
    }
 
    public List getPredefineRows() {
-      return this.d;
+      return this.predefineRows;
    }
 
    public Map getPredefineNameMap() {
-      return this.e;
+      return this.predefineNameMap;
    }
 }

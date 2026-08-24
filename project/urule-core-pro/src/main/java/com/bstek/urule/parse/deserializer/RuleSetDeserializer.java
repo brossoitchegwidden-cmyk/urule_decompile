@@ -6,18 +6,18 @@ import org.dom4j.Element;
 
 public class RuleSetDeserializer implements Deserializer<RuleSet> {
    public static final String BEAN_ID = "urule.ruleSetDeserializer";
-   private RuleSetParser a;
+   private RuleSetParser ruleSetParser;
 
-   public RuleSet deserialize(Element var1) {
-      return this.a.parse(var1);
+   public RuleSet deserialize(Element root) {
+      return this.ruleSetParser.parse(root);
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1.getName());
+   public boolean support(Element root) {
+      return this.ruleSetParser.support(root.getName());
    }
 
-   public void setRuleSetParser(RuleSetParser var1) {
-      this.a = var1;
+   public void setRuleSetParser(RuleSetParser ruleSetParser) {
+      this.ruleSetParser = ruleSetParser;
    }
 }

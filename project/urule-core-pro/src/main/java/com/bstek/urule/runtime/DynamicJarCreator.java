@@ -1,5 +1,5 @@
 package com.bstek.urule.runtime;
 
 public interface DynamicJarCreator {
-   boolean doCreate(String var1);
+   boolean doCreate(String path);
 }

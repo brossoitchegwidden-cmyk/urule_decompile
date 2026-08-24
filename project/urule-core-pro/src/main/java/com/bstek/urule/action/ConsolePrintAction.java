@@ -8,42 +8,42 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public class ConsolePrintAction extends AbstractAction {
-   private Value b;
-   private ActionType c = ActionType.ConsolePrint;
+   private Value value;
+   private ActionType actionType = ActionType.ConsolePrint;
 
    @Override
-   public ActionValue execute(Context var1, Map<String, Object> var2) {
+   public ActionValue execute(Context context, Map<String, Object> factMap) {
       if (!Utils.isDebug()) {
          return null;
       }
 
-      ValueCompute var3 = (ValueCompute)var1.getApplicationContext().getBean("urule.valueCompute");
-      Object var4 = var3.complexValueCompute(this.b, var1, var2);
-      if (var4 != null && var4 instanceof Number) {
-         BigDecimal var5 = Utils.toBigDecimal(var4);
-         var4 = var5;
+      ValueCompute valueCompute = (ValueCompute)context.getApplicationContext().getBean("urule.valueCompute");
+      Object objectValue = valueCompute.complexValueCompute(this.value, context, factMap);
+      if (objectValue != null && objectValue instanceof Number) {
+         BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+         objectValue = decimalValue;
       }
 
-      if (var4 instanceof BigDecimal) {
-         BigDecimal var6 = (BigDecimal)var4;
-         var1.getLogger().logConsoleOutput(var6.stripTrailingZeros().toPlainString());
+      if (objectValue instanceof BigDecimal) {
+         BigDecimal objectValue2 = (BigDecimal)objectValue;
+         context.getLogger().logConsoleOutput(objectValue2.stripTrailingZeros().toPlainString());
       } else {
-         var1.getLogger().logConsoleOutput(var4);
+         context.getLogger().logConsoleOutput(objectValue);
       }
 
       return null;
    }
 
    public Value getValue() {
-      return this.b;
+      return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.b = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override
    public ActionType getActionType() {
-      return this.c;
+      return this.actionType;
    }
 }

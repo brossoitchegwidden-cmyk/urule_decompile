@@ -9,7 +9,7 @@ public class AttributeRow extends CardRow {
       return this.conditionRows;
    }
 
-   public void setConditionRows(List<ConditionRow> var1) {
-      this.conditionRows = var1;
+   public void setConditionRows(List<ConditionRow> conditionRows) {
+      this.conditionRows = conditionRows;
    }
 }

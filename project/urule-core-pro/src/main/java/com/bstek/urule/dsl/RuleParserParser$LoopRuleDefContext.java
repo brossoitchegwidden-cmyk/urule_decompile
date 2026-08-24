@@ -18,8 +18,8 @@ public class RuleParserParser$LoopRuleDefContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$AttributeContext.class);
    }
 
-   public RuleParserParser$AttributeContext attribute(int var1) {
-      return (RuleParserParser$AttributeContext)this.getRuleContext(RuleParserParser$AttributeContext.class, var1);
+   public RuleParserParser$AttributeContext attribute(int number) {
+      return (RuleParserParser$AttributeContext)this.getRuleContext(RuleParserParser$AttributeContext.class, number);
    }
 
    public RuleParserParser$LoopStartContext loopStart() {
@@ -30,23 +30,23 @@ public class RuleParserParser$LoopRuleDefContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$LoopRuleUnitContext.class);
    }
 
-   public RuleParserParser$LoopRuleUnitContext loopRuleUnit(int var1) {
-      return (RuleParserParser$LoopRuleUnitContext)this.getRuleContext(RuleParserParser$LoopRuleUnitContext.class, var1);
+   public RuleParserParser$LoopRuleUnitContext loopRuleUnit(int number) {
+      return (RuleParserParser$LoopRuleUnitContext)this.getRuleContext(RuleParserParser$LoopRuleUnitContext.class, number);
    }
 
    public RuleParserParser$LoopEndContext loopEnd() {
       return (RuleParserParser$LoopEndContext)this.getRuleContext(RuleParserParser$LoopEndContext.class, 0);
    }
 
-   public RuleParserParser$LoopRuleDefContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$LoopRuleDefContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 15;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitLoopRuleDef(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitLoopRuleDef(this) : parseTreeVisitor.visitChildren(this));
    }
 }

@@ -42,7 +42,7 @@ final class LicenseIssuer {
          RSAPublicKey publicKey = readPublicKey();
          return privateKey.getModulus().equals(publicKey.getModulus())
             && privateKey.getPublicExponent().equals(publicKey.getPublicExponent());
-      } catch (Exception var2) {
+      } catch (Exception exception) {
          return false;
       }
    }

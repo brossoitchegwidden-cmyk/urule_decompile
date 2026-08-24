@@ -3,62 +3,59 @@ package com.bstek.urule.dsl;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class CellScriptRuleParserBaseVisitor extends RuleParserBaseVisitor<String> {
-   private String a;
+   private String propertyName;
 
-   public CellScriptRuleParserBaseVisitor(String var1) {
-      this.a = var1;
+   public CellScriptRuleParserBaseVisitor(String propertyName) {
+      this.propertyName = propertyName;
    }
-
-   public String visitSingleCellCondition(RuleParserParser$SingleCellConditionContext var1) {
-      StringBuffer var2 = new StringBuffer();
-      var2.append(this.a);
-      var2.append(" ");
-      String var3 = var1.op().getText();
-      var2.append(var3);
-      var2.append(" ");
-      if (var1.complexValue() != null) {
-         var2.append(var1.complexValue().getText());
+   public String visitSingleCellCondition(RuleParserParser$SingleCellConditionContext ctx) {
+      StringBuffer stringBuffer = new StringBuffer();
+      stringBuffer.append(this.propertyName);
+      stringBuffer.append(" ");
+      String text = ctx.op().getText();
+      stringBuffer.append(text);
+      stringBuffer.append(" ");
+      if (ctx.complexValue() != null) {
+         stringBuffer.append(ctx.complexValue().getText());
       } else {
-         var2.append(var1.nullValue().getText());
+         stringBuffer.append(ctx.nullValue().getText());
       }
 
-      var2.append(" ");
-      return var2.toString();
+      stringBuffer.append(" ");
+      return stringBuffer.toString();
    }
+   public String visitMultiCellConditions(RuleParserParser$MultiCellConditionsContext ctx) {
+      StringBuffer stringBuffer = new StringBuffer();
 
-   public String visitMultiCellConditions(RuleParserParser$MultiCellConditionsContext var1) {
-      StringBuffer var2 = new StringBuffer();
-
-      for (ParseTree var5 : var1.children) {
-         var2.append(" ");
-         this.a(var2, var5);
+      for (ParseTree parseTree : ctx.children) {
+         stringBuffer.append(" ");
+         this.buildChildren(stringBuffer, parseTree);
       }
 
-      return var2.toString();
+      return stringBuffer.toString();
+   }
+   public String visitParenCellConditions(RuleParserParser$ParenCellConditionsContext ctx) {
+      StringBuffer stringBuffer = new StringBuffer();
+      stringBuffer.append(" ");
+      stringBuffer.append(ctx.leftParen().getText());
+      RuleParserParser$DecisionTableCellConditionContext ruleParserParser$DecisionTableCellConditionContext = ctx.decisionTableCellCondition();
+      this.buildChildren(stringBuffer, ruleParserParser$DecisionTableCellConditionContext);
+      stringBuffer.append(ctx.rightParen().getText());
+      return stringBuffer.toString();
    }
 
-   public String visitParenCellConditions(RuleParserParser$ParenCellConditionsContext var1) {
-      StringBuffer var2 = new StringBuffer();
-      var2.append(" ");
-      var2.append(var1.leftParen().getText());
-      RuleParserParser$DecisionTableCellConditionContext var3 = var1.decisionTableCellCondition();
-      this.a(var2, var3);
-      var2.append(var1.rightParen().getText());
-      return var2.toString();
-   }
-
-   private void a(StringBuffer var1, ParseTree var2) {
-      if (var2 instanceof RuleParserParser$SingleCellConditionContext) {
-         RuleParserParser$SingleCellConditionContext var3 = (RuleParserParser$SingleCellConditionContext)var2;
-         var1.append(this.visitSingleCellCondition(var3));
-      } else if (var2 instanceof RuleParserParser$ParenCellConditionsContext) {
-         RuleParserParser$ParenCellConditionsContext var4 = (RuleParserParser$ParenCellConditionsContext)var2;
-         var1.append(this.visitParenCellConditions(var4));
-      } else if (var2 instanceof RuleParserParser$MultiCellConditionsContext) {
-         RuleParserParser$MultiCellConditionsContext var5 = (RuleParserParser$MultiCellConditionsContext)var2;
-         var1.append(this.visitMultiCellConditions(var5));
+   private void buildChildren(StringBuffer stringBuffer, ParseTree parseTree) {
+      if (parseTree instanceof RuleParserParser$SingleCellConditionContext) {
+         RuleParserParser$SingleCellConditionContext ruleParserParser$SingleCellConditionContext = (RuleParserParser$SingleCellConditionContext)parseTree;
+         stringBuffer.append(this.visitSingleCellCondition(ruleParserParser$SingleCellConditionContext));
+      } else if (parseTree instanceof RuleParserParser$ParenCellConditionsContext) {
+         RuleParserParser$ParenCellConditionsContext ruleParserParser$ParenCellConditionsContext = (RuleParserParser$ParenCellConditionsContext)parseTree;
+         stringBuffer.append(this.visitParenCellConditions(ruleParserParser$ParenCellConditionsContext));
+      } else if (parseTree instanceof RuleParserParser$MultiCellConditionsContext) {
+         RuleParserParser$MultiCellConditionsContext ruleParserParser$MultiCellConditionsContext = (RuleParserParser$MultiCellConditionsContext)parseTree;
+         stringBuffer.append(this.visitMultiCellConditions(ruleParserParser$MultiCellConditionsContext));
       } else {
-         var1.append(var2.getText());
+         stringBuffer.append(parseTree.getText());
       }
    }
 }

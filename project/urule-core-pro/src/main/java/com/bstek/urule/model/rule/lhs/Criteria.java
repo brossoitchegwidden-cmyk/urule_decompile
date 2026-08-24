@@ -33,129 +33,129 @@ public class Criteria extends BaseCriterion implements BaseCriteria {
    private Set<String> necessaryClassList = new HashSet<>();
 
    @Override
-   public boolean doEval(EvaluationContext var1, boolean var2) {
-      Map var3 = var1.getWorkingMemory().getFactManager().getFactMap();
-      EvaluateResponse var4 = this.evaluate(var1, var3);
-      if (var2) {
-         var1.getLogger().logCriteria(this, var4);
+   public boolean doEval(EvaluationContext context, boolean debug) {
+      Map factMap = context.getWorkingMemory().getFactManager().getFactMap();
+      EvaluateResponse evaluateResponse = this.evaluate(context, factMap);
+      if (debug) {
+         context.getLogger().logCriteria(this, evaluateResponse);
       }
 
-      return var4.getResult();
+      return evaluateResponse.getResult();
    }
 
    @Override
-   public EvaluateResponse evaluate(EvaluationContext var1, Map<String, Object> var2) {
-      Datatype var3 = null;
-      Object var4 = null;
-      var1.cleanTipMsg();
+   public EvaluateResponse evaluate(EvaluationContext context, Map<String, Object> factMap) {
+      Datatype datatype = null;
+      Object objectValue = null;
+      context.cleanTipMsg();
       if (this.file != null) {
-         var1.addTipMsg("计算条件(" + this.file + ")：" + this.getId());
+         context.addTipMsg("计算条件(" + this.file + ")：" + this.getId());
       } else {
-         var1.addTipMsg("计算条件：" + this.getId());
+         context.addTipMsg("计算条件：" + this.getId());
       }
 
-      ValueCompute var5 = var1.getValueCompute();
-      LeftPart var6 = this.left.getLeftPart();
-      if (var6 instanceof AccumulateLeftPart) {
-         AccumulateLeftPart var15 = (AccumulateLeftPart)var6;
-         return var15.evaluate(var1, var2);
+      ValueCompute valueCompute = context.getValueCompute();
+      LeftPart leftPart = this.left.getLeftPart();
+      if (leftPart instanceof AccumulateLeftPart) {
+         AccumulateLeftPart accumulateLeftPart = (AccumulateLeftPart)leftPart;
+         return accumulateLeftPart.evaluate(context, factMap);
       }
 
-      String var7 = this.left.getId();
-      var1.addTipMsg("左值：" + var7);
-      Object var8 = null;
-      if (var6 instanceof VariableLeftPart) {
-         VariableLeftPart var9 = (VariableLeftPart)var6;
-         String var10 = var1.getVariableCategoryClass(var9.getVariableCategory());
-         if ("参数".equals(var9.getVariableCategory())) {
-            var10 = HashMap.class.getName();
+      String id = this.left.getId();
+      context.addTipMsg("左值：" + id);
+      Object objectValue2 = null;
+      if (leftPart instanceof VariableLeftPart) {
+         VariableLeftPart variableLeftPart = (VariableLeftPart)leftPart;
+         String variableCategoryClass = context.getVariableCategoryClass(variableLeftPart.getVariableCategory());
+         if ("参数".equals(variableLeftPart.getVariableCategory())) {
+            variableCategoryClass = HashMap.class.getName();
          }
 
-         Object var11 = var1.getValueCompute().findObject(var10, var2, var1);
-         var3 = var9.getDatatype();
-         if (StringUtils.isNotBlank(var9.getVariableName())) {
-            if (var11 != null) {
-               String var12 = var9.getKeyName();
-               if (StringUtils.isNotBlank(var12)) {
-                  Object var13 = Utils.getObjectProperty(var11, var12);
-                  if (var13 == null) {
-                     throw new RuleException("[参数]中的[" + var9.getKeyLabel() + "]不存在！");
+         Object objectValue3 = context.getValueCompute().findObject(variableCategoryClass, factMap, context);
+         datatype = variableLeftPart.getDatatype();
+         if (StringUtils.isNotBlank(variableLeftPart.getVariableName())) {
+            if (objectValue3 != null) {
+               String keyName = variableLeftPart.getKeyName();
+               if (StringUtils.isNotBlank(keyName)) {
+                  Object objectProperty = Utils.getObjectProperty(objectValue3, keyName);
+                  if (objectProperty == null) {
+                     throw new RuleException("[参数]中的[" + variableLeftPart.getKeyLabel() + "]不存在！");
                   }
 
-                  var8 = Utils.getObjectProperty(var13, var9.getVariableName());
+                  objectValue2 = Utils.getObjectProperty(objectProperty, variableLeftPart.getVariableName());
                } else {
-                  var8 = Utils.getObjectProperty(var11, var9.getVariableName());
+                  objectValue2 = Utils.getObjectProperty(objectValue3, variableLeftPart.getVariableName());
                }
             } else {
-               log.warning("Object [" + var10 + "] not exist.");
-               var8 = var11;
+               log.warning("Object [" + variableCategoryClass + "] not exist.");
+               objectValue2 = objectValue3;
             }
          } else {
-            var8 = var11;
+            objectValue2 = objectValue3;
          }
-      } else if (var6 instanceof PredefineLeftPart) {
-         AbstractWorkingMemory var16 = (AbstractWorkingMemory)var1.getWorkingMemory();
-         PredefineLeftPart var20 = (PredefineLeftPart)var6;
-         Object var23 = var16.getPredefineValue(var20.getUuid());
-         if (var20.getPropertyName() != null) {
-            var23 = Utils.getObjectProperty(var23, var20.getPropertyName());
-         }
-
-         var8 = var23;
-      } else if (var6 instanceof MethodLeftPart) {
-         MethodLeftPart var17 = (MethodLeftPart)var6;
-         ExecuteMethodAction var21 = new ExecuteMethodAction();
-         var21.setBeanId(var17.getBeanId());
-         var21.setBeanLabel(var17.getBeanLabel());
-         var21.setMethodLabel(var17.getMethodLabel());
-         var21.setMethodName(var17.getMethodName());
-         var21.setParameters(var17.getParameters());
-         SpringBean var24 = ActionUtils.getBuiltinAction(var17.getBeanId());
-         if (var24 != null) {
-            var21.setBeanELabel(var24.getEname());
+      } else if (leftPart instanceof PredefineLeftPart) {
+         AbstractWorkingMemory workingMemory = (AbstractWorkingMemory)context.getWorkingMemory();
+         PredefineLeftPart predefineLeftPart = (PredefineLeftPart)leftPart;
+         Object predefineValue = workingMemory.getPredefineValue(predefineLeftPart.getUuid());
+         if (predefineLeftPart.getPropertyName() != null) {
+            predefineValue = Utils.getObjectProperty(predefineValue, predefineLeftPart.getPropertyName());
          }
 
-         ActionValue var26 = var21.execute(var1, var2);
-         if (var26 == null) {
-            var8 = null;
+         objectValue2 = predefineValue;
+      } else if (leftPart instanceof MethodLeftPart) {
+         MethodLeftPart methodLeftPart = (MethodLeftPart)leftPart;
+         ExecuteMethodAction executeMethodAction = new ExecuteMethodAction();
+         executeMethodAction.setBeanId(methodLeftPart.getBeanId());
+         executeMethodAction.setBeanLabel(methodLeftPart.getBeanLabel());
+         executeMethodAction.setMethodLabel(methodLeftPart.getMethodLabel());
+         executeMethodAction.setMethodName(methodLeftPart.getMethodName());
+         executeMethodAction.setParameters(methodLeftPart.getParameters());
+         SpringBean builtinAction = ActionUtils.getBuiltinAction(methodLeftPart.getBeanId());
+         if (builtinAction != null) {
+            executeMethodAction.setBeanELabel(builtinAction.getEname());
+         }
+
+         ActionValue actionValue = executeMethodAction.execute(context, factMap);
+         if (actionValue == null) {
+            objectValue2 = null;
          } else {
-            var8 = var26.getValue();
+            objectValue2 = actionValue.getValue();
          }
-      } else if (var6 instanceof CommonFunctionLeftPart) {
-         CommonFunctionLeftPart var18 = (CommonFunctionLeftPart)var6;
-         var8 = var18.evaluate(var1, var2);
+      } else if (leftPart instanceof CommonFunctionLeftPart) {
+         CommonFunctionLeftPart commonFunctionLeftPart = (CommonFunctionLeftPart)leftPart;
+         objectValue2 = commonFunctionLeftPart.evaluate(context, factMap);
       }
 
-      var4 = var8;
-      ComplexArithmetic var19 = this.left.getArithmetic();
-      if (var19 != null) {
-         var4 = var5.complexArithmeticCompute(var1, var2, var19, var8, var7);
+      objectValue = objectValue2;
+      ComplexArithmetic arithmetic = this.left.getArithmetic();
+      if (arithmetic != null) {
+         objectValue = valueCompute.complexArithmeticCompute(context, factMap, arithmetic, objectValue2, id);
       }
 
-      EvaluateResponse var22 = new EvaluateResponse();
-      var22.setLeftResult(var4);
-      Object var25 = null;
+      EvaluateResponse evaluateResponse = new EvaluateResponse();
+      evaluateResponse.setLeftResult(objectValue);
+      Object objectValue4 = null;
       if (this.value != null) {
-         String var27 = this.value.getId();
-         var1.addTipMsg("右值：" + var27);
-         var25 = var5.complexValueCompute(this.value, var1, var2);
-         var22.setRightResult(var25);
+         String id2 = this.value.getId();
+         context.addTipMsg("右值：" + id2);
+         objectValue4 = valueCompute.complexValueCompute(this.value, context, factMap);
+         evaluateResponse.setRightResult(objectValue4);
       }
 
-      if (var3 == null) {
-         var3 = Utils.getDatatype(var4);
+      if (datatype == null) {
+         datatype = Utils.getDatatype(objectValue);
       }
 
-      var1.addTipMsg("执行比较：" + this.op.toString());
-      boolean var28 = var1.getAssertorEvaluator().evaluate(var4, var25, var3, this.op);
-      var22.setResult(var28);
-      var1.cleanTipMsg();
-      return var22;
+      context.addTipMsg("执行比较：" + this.op.toString());
+      boolean flag = context.getAssertorEvaluator().evaluate(objectValue, objectValue4, datatype, this.op);
+      evaluateResponse.setResult(flag);
+      context.cleanTipMsg();
+      return evaluateResponse;
    }
 
-   public boolean necessaryClassEval(Set<String> var1) {
-      for (String var3 : this.necessaryClassList) {
-         if (!var3.equals("*") && !var1.contains(var3)) {
+   public boolean necessaryClassEval(Set<String> classSet) {
+      for (String text : this.necessaryClassList) {
+         if (!text.equals("*") && !classSet.contains(text)) {
             return false;
          }
       }
@@ -163,12 +163,12 @@ public class Criteria extends BaseCriterion implements BaseCriteria {
       return true;
    }
 
-   public void addNecessaryClass(String var1) {
-      this.necessaryClassList.add(var1);
+   public void addNecessaryClass(String clazz) {
+      this.necessaryClassList.add(clazz);
    }
 
-   public void addNecessaryClasses(List<String> var1) {
-      this.necessaryClassList.addAll(var1);
+   public void addNecessaryClasses(List<String> classes) {
+      this.necessaryClassList.addAll(classes);
    }
 
    public Set<String> getNecessaryClassList() {
@@ -191,39 +191,39 @@ public class Criteria extends BaseCriterion implements BaseCriteria {
       return this.id;
    }
 
-   public void setId(String var1) {
-      this.id = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getFile() {
       return this.file;
    }
 
-   public void setFile(String var1) {
-      this.file = var1;
+   public void setFile(String file) {
+      this.file = file;
    }
 
    public Op getOp() {
       return this.op;
    }
 
-   public void setOp(Op var1) {
-      this.op = var1;
+   public void setOp(Op op) {
+      this.op = op;
    }
 
    public Left getLeft() {
       return this.left;
    }
 
-   public void setLeft(Left var1) {
-      this.left = var1;
+   public void setLeft(Left left) {
+      this.left = left;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 }

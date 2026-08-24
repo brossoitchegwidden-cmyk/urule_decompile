@@ -6,31 +6,31 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class SigmaMathParser extends MathParser {
-   public SigmaMathParser(ValueParser var1) {
-      super(var1);
+   public SigmaMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("sigma-sign");
+   public boolean support(String name) {
+      return name.equals("sigma-sign");
    }
 
-   public MathSign parse(Element var1) {
-      SigmaMath var2 = new SigmaMath();
+   public MathSign parse(Element element) {
+      SigmaMath sigmaMath = new SigmaMath();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("expr")) {
-               var2.setExpr(this.a(var5));
-            } else if (var5.getName().equals("ivalue")) {
-               var2.setIvalue(this.a(var5));
-            } else if (var5.getName().equals("superior")) {
-               var2.setSuperior(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("expr")) {
+               sigmaMath.setExpr(this.parseValue(element2));
+            } else if (element2.getName().equals("ivalue")) {
+               sigmaMath.setIvalue(this.parseValue(element2));
+            } else if (element2.getName().equals("superior")) {
+               sigmaMath.setSuperior(this.parseValue(element2));
             }
          }
       }
 
-      return var2;
+      return sigmaMath;
    }
 }

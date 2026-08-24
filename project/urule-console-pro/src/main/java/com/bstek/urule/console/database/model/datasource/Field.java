@@ -1,19 +1,19 @@
 package com.bstek.urule.console.database.model.datasource;
 
 public class Field {
-   private String a;
-   private FieldType b;
+   private String name;
+   private FieldType type;
 
-   public Field(String var1, FieldType var2) {
-      this.a = var1;
-      this.b = var2;
+   public Field(String name, FieldType type) {
+      this.name = name;
+      this.type = type;
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
    public FieldType getType() {
-      return this.b;
+      return this.type;
    }
 }

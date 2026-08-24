@@ -6,14 +6,14 @@ import org.dom4j.Element;
 
 public class TemplateActionParser extends ActionParser {
    @Override
-   public boolean support(String var1) {
-      return var1.equals("action-template");
+   public boolean support(String name) {
+      return name.equals("action-template");
    }
 
-   public Action parse(Element var1) {
-      TemplateAction var2 = new TemplateAction();
-      var2.setId(var1.attributeValue("id"));
-      var2.setName(var1.attributeValue("name"));
-      return var2;
+   public Action parse(Element element) {
+      TemplateAction templateAction = new TemplateAction();
+      templateAction.setId(element.attributeValue("id"));
+      templateAction.setName(element.attributeValue("name"));
+      return templateAction;
    }
 }

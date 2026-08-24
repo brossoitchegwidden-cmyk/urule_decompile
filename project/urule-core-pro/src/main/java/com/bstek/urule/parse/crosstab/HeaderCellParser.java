@@ -6,27 +6,27 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class HeaderCellParser implements Parser<HeaderCell> {
-   public HeaderCell parse(Element var1) {
-      HeaderCell var2 = new HeaderCell();
-      String var3 = var1.attributeValue("rowspan");
-      if (StringUtils.isNotBlank(var3)) {
-         int var4 = Integer.valueOf(var3);
-         var2.setRowspan(var4);
+   public HeaderCell parse(Element element) {
+      HeaderCell headerCell = new HeaderCell();
+      String text2 = element.attributeValue("rowspan");
+      if (StringUtils.isNotBlank(text2)) {
+         int number = Integer.valueOf(text2);
+         headerCell.setRowspan(number);
       }
 
-      String var6 = var1.attributeValue("colspan");
-      if (StringUtils.isNotBlank(var6)) {
-         int var5 = Integer.valueOf(var6);
-         var2.setColspan(var5);
+      String text3 = element.attributeValue("colspan");
+      if (StringUtils.isNotBlank(text3)) {
+         int number2 = Integer.valueOf(text3);
+         headerCell.setColspan(number2);
       }
 
-      String var7 = var1.getText();
-      var2.setText(var7);
-      return var2;
+      String text = element.getText();
+      headerCell.setText(text);
+      return headerCell;
    }
 
    @Override
-   public boolean support(String var1) {
-      return "header".equals(var1);
+   public boolean support(String name) {
+      return "header".equals(name);
    }
 }

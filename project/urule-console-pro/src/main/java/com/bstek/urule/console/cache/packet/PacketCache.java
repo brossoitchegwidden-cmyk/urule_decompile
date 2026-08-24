@@ -5,21 +5,24 @@ import java.util.List;
 public interface PacketCache {
    PacketCache ins = new PacketCacheImpl();
 
-   PacketData getPacket(long var1);
+   /**根据知识包ID加载知识包*/
+   PacketData getPacket(long id);
 
-   PacketData getPacket(String var1);
+   /**根据知识包code信息加载知识包*/
+   PacketData getPacket(String code);
 
-   byte[] getKnowledgeContent(long var1);
+   /**获取缓存中知识包的byte[]*/
+   byte[] getKnowledgeContent(long id);
 
-   List removeProject(long var1, String var3);
+   List removeProject(long projectId, String groupId);
 
-   List refreshPacket(long var1);
+   List refreshPacket(long id);
 
-   void refreshPacketConfig(long var1);
+   void refreshPacketConfig(long id);
 
-   void cacheUploadPacketPackage(Long var1);
+   void cacheUploadPacketPackage(Long packetId);
 
-   List enableClientsPacket(String var1, long var2);
+   List enableClientsPacket(String groupId, long packetId);
 
-   List disableClientsPacket(String var1, long var2);
+   List disableClientsPacket(String groupId, long packetId);
 }

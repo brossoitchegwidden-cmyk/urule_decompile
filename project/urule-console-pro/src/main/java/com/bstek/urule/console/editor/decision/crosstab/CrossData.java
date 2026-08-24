@@ -6,69 +6,69 @@ import java.util.List;
 import java.util.Map;
 
 public class CrossData {
-   private Map a;
-   private CrossHeader b;
-   private List c;
-   private List d;
-   private List e;
-   private List f;
-   private Map g;
+   private Map properties;
+   private CrossHeader header;
+   private List rows;
+   private List columns;
+   private List cells;
+   private List predefineRows;
+   private Map predefineNameMap;
 
    public CrossHeader getHeader() {
-      return this.b;
+      return this.header;
    }
 
-   public void setHeader(CrossHeader var1) {
-      this.b = var1;
+   public void setHeader(CrossHeader header) {
+      this.header = header;
    }
 
    public List getRows() {
-      return this.c;
+      return this.rows;
    }
 
-   public void setRows(List var1) {
-      this.c = var1;
+   public void setRows(List rows) {
+      this.rows = rows;
    }
 
    public List getColumns() {
-      return this.d;
+      return this.columns;
    }
 
-   public void setColumns(List var1) {
-      this.d = var1;
+   public void setColumns(List columns) {
+      this.columns = columns;
    }
 
    public List getCells() {
-      return this.e;
+      return this.cells;
    }
 
-   public void setCells(List var1) {
-      this.e = var1;
+   public void setCells(List cells) {
+      this.cells = cells;
    }
 
    public List getPredefineRows() {
-      return this.f;
+      return this.predefineRows;
    }
 
-   public void setPredefineRows(List var1) {
-      this.f = var1;
-      this.g = new HashMap();
+   public void setPredefineRows(List predefineRows) {
+      this.predefineRows = predefineRows;
+      this.predefineNameMap = new HashMap();
 
-      for(PredefineRow var3 : (Iterable<PredefineRow>)(Iterable<?>)(var1)) {
-         this.g.put(var3.getName(), var3);
+      for(PredefineRow predefineRow : (Iterable<PredefineRow>)(Iterable<?>)(predefineRows)) {
+         this.predefineNameMap.put(predefineRow.getName(), predefineRow);
       }
 
    }
 
    public Map getPredefineNameMap() {
-      return this.g;
+      return this.predefineNameMap;
    }
 
    public Map getProperties() {
-      return this.a;
+      return this.properties;
    }
 
-   public void setProperties(Map var1) {
-      this.a = var1;
+   public void setProperties(Map properties) {
+      this.properties = properties;
    }
 }

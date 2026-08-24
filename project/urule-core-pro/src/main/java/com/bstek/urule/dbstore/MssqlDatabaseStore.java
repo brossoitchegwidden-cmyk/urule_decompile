@@ -8,37 +8,37 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 public class MssqlDatabaseStore implements DatabaseStore {
-   private static final String a = "CREATE TABLE URULE_KP_STORE(ID_ varchar(60) primary key,UPDATE_DATE_ bigint not null,CREATE_USER_ varchar(60),DATA_ varbinary(max))";
-   private DataSource b;
+   private static final String CREATE_TABLE_SQL = "CREATE TABLE URULE_KP_STORE(ID_ varchar(60) primary key,UPDATE_DATE_ bigint not null,CREATE_USER_ varchar(60),DATA_ varbinary(max))";
+   private DataSource dataSource;
 
    @Override
-   public void init(DataSource var1) throws Exception {
-      this.b = var1;
-      Connection var2 = var1.getConnection();
-      String var3 = "SELECT count(*) FROM sysobjects WHERE name='URULE_KP_STORE'";
-      Statement var4 = var1.getConnection().createStatement();
-      ResultSet var5 = var4.executeQuery(var3);
-      int var6 = 0;
-      if (var5.next()) {
-         var6 = var5.getInt(1);
+   public void init(DataSource ds) throws Exception {
+      this.dataSource = ds;
+      Connection connection = ds.getConnection();
+      String text = "SELECT count(*) FROM sysobjects WHERE name='URULE_KP_STORE'";
+      Statement statement = ds.getConnection().createStatement();
+      ResultSet resultSet = statement.executeQuery(text);
+      int number = 0;
+      if (resultSet.next()) {
+         number = resultSet.getInt(1);
       }
 
-      var5.close();
-      if (var6 == 0) {
-         var4.execute("CREATE TABLE URULE_KP_STORE(ID_ varchar(60) primary key,UPDATE_DATE_ bigint not null,CREATE_USER_ varchar(60),DATA_ varbinary(max))");
+      resultSet.close();
+      if (number == 0) {
+         statement.execute("CREATE TABLE URULE_KP_STORE(ID_ varchar(60) primary key,UPDATE_DATE_ bigint not null,CREATE_USER_ varchar(60),DATA_ varbinary(max))");
       }
 
-      var4.close();
-      var2.close();
+      statement.close();
+      connection.close();
    }
 
    @Override
    public DbService getDbService() {
-      return new MssqlDbService(this.b);
+      return new MssqlDbService(this.dataSource);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.toLowerCase().indexOf("sql server") > -1;
+   public boolean support(String dbname) {
+      return dbname.toLowerCase().indexOf("sql server") > -1;
    }
 }

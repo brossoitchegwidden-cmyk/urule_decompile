@@ -8,68 +8,67 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class BatchSessionImpl implements BatchSession {
-   private ExecutorService a;
-   private int b;
-   private List<Business> c = new ArrayList<>();
-   private KnowledgePackage d;
-   private KnowledgePackage[] e;
+   private ExecutorService executorService;
+   private int batchSize;
+   private List<Business> business = new ArrayList<>();
+   private KnowledgePackage knowledgePackage;
+   private KnowledgePackage[] knowledgePackages;
 
-   public BatchSessionImpl(KnowledgePackage var1, int var2, int var3) {
-      this.a = Executors.newFixedThreadPool(var2);
-      this.d = var1;
-      this.b = var3;
+   public BatchSessionImpl(KnowledgePackage knowledgePackage, int threadSize, int batchSize) {
+      this.executorService = Executors.newFixedThreadPool(threadSize);
+      this.knowledgePackage = knowledgePackage;
+      this.batchSize = batchSize;
    }
 
-   public BatchSessionImpl(KnowledgePackage[] var1, int var2, int var3) {
-      this.a = Executors.newFixedThreadPool(var2);
-      this.e = var1;
-      this.b = var3;
+   public BatchSessionImpl(KnowledgePackage[] knowledgePackages, int threadSize, int batchSize) {
+      this.executorService = Executors.newFixedThreadPool(threadSize);
+      this.knowledgePackages = knowledgePackages;
+      this.batchSize = batchSize;
    }
-
    @Override
-   public void addBusiness(Business var1) {
-      if (this.c != null) {
-         if (this.c.size() >= this.b) {
-            this.a();
-            this.c = new ArrayList<>();
+   public void addBusiness(Business business) {
+      if (this.business != null) {
+         if (this.business.size() >= this.batchSize) {
+            this.initializeState();
+            this.business = new ArrayList<>();
          }
       } else {
-         this.c = new ArrayList<>();
+         this.business = new ArrayList<>();
       }
 
-      this.c.add(var1);
+      this.business.add(business);
    }
 
-   private void a() {
-      Runnable var1 = null;
-      if (this.d != null) {
-         var1 = new BatchThread(this.d, this.c);
+   private void initializeState() {
+      Runnable runnable = null;
+      if (this.knowledgePackage != null) {
+         runnable = new BatchThread(this.knowledgePackage, this.business);
       } else {
-         if (this.e == null) {
+         if (this.knowledgePackages == null) {
             throw new RuleException("KnowledgePackage can not be null.");
          }
 
-         var1 = new BatchThread(this.e, this.c);
+         runnable = new BatchThread(this.knowledgePackages, this.business);
       }
 
-      this.a.execute(var1);
-      this.c = null;
+      this.executorService.execute(runnable);
+      this.business = null;
    }
-
    @Override
    public void waitForCompletion() {
-      if (this.c != null && this.c.size() > 0) {
-         this.a();
+      if (this.business != null && this.business.size() > 0) {
+         this.initializeState();
       }
 
-      this.a.shutdown();
+      this.executorService.shutdown();
 
       try {
-         while (!this.a.awaitTermination(300L, TimeUnit.MILLISECONDS)) {
+         while (!this.executorService.awaitTermination(300L, TimeUnit.MILLISECONDS)) {
          }
-      } catch (InterruptedException var2) {
-         var2.printStackTrace();
-         throw new RuleException(var2);
+      } catch (InterruptedException interruptedException) {
+         Thread.currentThread().interrupt();
+         java.util.logging.Logger.getLogger(BatchSessionImpl.class.getName()).log(java.util.logging.Level.SEVERE, interruptedException.getMessage(), interruptedException);
+         throw new RuleException(interruptedException);
       }
    }
 }

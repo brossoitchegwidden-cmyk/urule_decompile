@@ -10,48 +10,48 @@ public class ScorecardImpl implements Scorecard {
    private boolean debug;
    private List<RowItem> rowItems;
 
-   public ScorecardImpl(String var1, List<RowItem> var2, boolean var3) {
-      this.name = var1;
-      this.rowItems = var2;
-      this.debug = var3;
+   public ScorecardImpl(String name, List<RowItem> rowItems, boolean debug) {
+      this.name = name;
+      this.rowItems = rowItems;
+      this.debug = debug;
    }
 
-   public BigDecimal executeSum(Context var1) {
-      BigDecimal var2 = null;
+   public BigDecimal executeSum(Context context) {
+      BigDecimal decimalValue = null;
 
-      for (RowItem var4 : this.rowItems) {
-         BigDecimal var5 = Utils.toBigDecimal(var4.getScore());
-         var4.setActualScore(var5);
-         if (var2 == null) {
-            var2 = var5;
+      for (RowItem rowItem : this.rowItems) {
+         BigDecimal decimalValue2 = Utils.toBigDecimal(rowItem.getScore());
+         rowItem.setActualScore(decimalValue2);
+         if (decimalValue == null) {
+            decimalValue = decimalValue2;
          } else {
-            var2 = var2.add(var5);
+            decimalValue = decimalValue.add(decimalValue2);
          }
       }
 
       if (this.debug) {
-         var1.getLogger().logScoreCardSum(this.name, var2);
+         context.getLogger().logScoreCardSum(this.name, decimalValue);
       }
 
-      return var2 == null ? new BigDecimal(0) : var2;
+      return decimalValue == null ? new BigDecimal(0) : decimalValue;
    }
 
-   public BigDecimal executeWeightSum(Context var1) {
-      BigDecimal var2 = new BigDecimal(0);
+   public BigDecimal executeWeightSum(Context context) {
+      BigDecimal bigDecimal = new BigDecimal(0);
 
-      for (RowItem var4 : this.rowItems) {
-         BigDecimal var5 = Utils.toBigDecimal(var4.getScore());
-         BigDecimal var6 = Utils.toBigDecimal(var4.getWeight());
-         BigDecimal var7 = var5.multiply(var6);
-         var4.setActualScore(var7);
-         var2 = var2.add(var7);
+      for (RowItem rowItem : this.rowItems) {
+         BigDecimal decimalValue = Utils.toBigDecimal(rowItem.getScore());
+         BigDecimal decimalValue2 = Utils.toBigDecimal(rowItem.getWeight());
+         BigDecimal decimalValue3 = decimalValue.multiply(decimalValue2);
+         rowItem.setActualScore(decimalValue3);
+         bigDecimal = bigDecimal.add(decimalValue3);
       }
 
       if (this.debug) {
-         var1.getLogger().logScoreCardSum(this.name, var2);
+         context.getLogger().logScoreCardSum(this.name, bigDecimal);
       }
 
-      return var2;
+      return bigDecimal;
    }
 
    @Override

@@ -20,50 +20,50 @@ public class PacketBuilder {
    private PacketBuilder() {
    }
 
-   public KnowledgePackage buildKnowledgePackage(long var1) {
-      return this.buildKnowledgeBase(var1).getKnowledgePackage();
+   public KnowledgePackage buildKnowledgePackage(long packetId) {
+      return this.buildKnowledgeBase(packetId).getKnowledgePackage();
    }
 
-   public KnowledgeBase buildKnowledgeBase(long var1) {
-      Packet var3 = PacketManager.ins.load(var1);
-      if (var3 == null) {
-         throw new RuleException("知识包【" + var1 + "】不存在！");
-      } else if (!var3.isEnable()) {
-         throw new RuleException("知识包【" + var1 + "】未启用");
+   public KnowledgeBase buildKnowledgeBase(long packetId) {
+      Packet packet = PacketManager.ins.load(packetId);
+      if (packet == null) {
+         throw new RuleException("知识包【" + packetId + "】不存在！");
+      } else if (!packet.isEnable()) {
+         throw new RuleException("知识包【" + packetId + "】未启用");
       } else {
-         List var4 = var3.getFiles();
-         if (var4 != null && var4.size() != 0) {
-            KnowledgeBuilder var5 = ServiceUtils.getKnowledgeBuilder();
-            ResourceBase var6 = var5.newResourceBase();
+         List files = packet.getFiles();
+         if (files != null && files.size() != 0) {
+            KnowledgeBuilder knowledgeBuilder = ServiceUtils.getKnowledgeBuilder();
+            ResourceBase resourceBase = knowledgeBuilder.newResourceBase();
 
-            for(PacketFile var8 : (Iterable<PacketFile>)(Iterable<?>)(var4)) {
-               var6.addResource(var8.getFileId(), var8.getVersion());
+            for(PacketFile packetFile : (Iterable<PacketFile>)(Iterable<?>)(files)) {
+               resourceBase.addResource(packetFile.getFileId(), packetFile.getVersion());
             }
 
             try {
-               return var5.buildKnowledgeBase(var6);
-            } catch (IOException var9) {
-               throw new RuleException(var9);
+               return knowledgeBuilder.buildKnowledgeBase(resourceBase);
+            } catch (IOException iOException) {
+               throw new RuleException(iOException);
             }
          } else {
-            throw new RuleException("知识包【" + var1 + "】下未定义规则文件！");
+            throw new RuleException("知识包【" + packetId + "】下未定义规则文件！");
          }
       }
    }
 
-   public KnowledgePackage buildKnowledgePackage(long var1, String var3) {
-      PacketDeploy var4 = this.a(var1, var3);
-      String var5 = var4.getContent();
-      return Utils.stringToKnowledgePackage(var5);
+   public KnowledgePackage buildKnowledgePackage(long packetId, String version) {
+      PacketDeploy packetDeploy = this.resolvePacketDeploy(packetId, version);
+      String content = packetDeploy.getContent();
+      return Utils.stringToKnowledgePackage(content);
    }
 
-   private PacketDeploy a(long var1, String var3) {
-      List var4 = PacketDeployManager.ins.newQuery().packetId(var1).version(var3).listWithContent();
-      if (var4.size() == 0) {
-         throw new RuleException("知识包【" + var1 + "】中发布的版本为【" + var3 + "】的知识包不存在！");
+   private PacketDeploy resolvePacketDeploy(long longValue, String text) {
+      List items = PacketDeployManager.ins.newQuery().packetId(longValue).version(text).listWithContent();
+      if (items.size() == 0) {
+         throw new RuleException("知识包【" + longValue + "】中发布的版本为【" + text + "】的知识包不存在！");
       } else {
-         PacketDeploy var5 = (PacketDeploy)var4.get(0);
-         return var5;
+         PacketDeploy packetDeploy = (PacketDeploy)items.get(0);
+         return packetDeploy;
       }
    }
 }

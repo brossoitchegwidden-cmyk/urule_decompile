@@ -20,82 +20,82 @@ public class MethodLeftPart implements LeftPart {
       return this.beanId;
    }
 
-   public void setBeanId(String var1) {
-      this.beanId = var1;
+   public void setBeanId(String beanId) {
+      this.beanId = beanId;
    }
 
    public String getBeanLabel() {
       return this.beanLabel;
    }
 
-   public void setBeanLabel(String var1) {
-      this.beanLabel = var1;
+   public void setBeanLabel(String beanLabel) {
+      this.beanLabel = beanLabel;
    }
 
    public String getMethodName() {
       return this.methodName;
    }
 
-   public void setMethodName(String var1) {
-      this.methodName = var1;
+   public void setMethodName(String methodName) {
+      this.methodName = methodName;
    }
 
    public String getMethodLabel() {
       return this.methodLabel;
    }
 
-   public void setMethodLabel(String var1) {
-      this.methodLabel = var1;
+   public void setMethodLabel(String methodLabel) {
+      this.methodLabel = methodLabel;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
-   public void setId(String var1) {
-      this.id = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public List<Parameter> getParameters() {
       return this.parameters;
    }
 
-   public void setParameters(List<Parameter> var1) {
-      this.parameters = var1;
+   public void setParameters(List<Parameter> parameters) {
+      this.parameters = parameters;
    }
 
    @Override
    public String getId() {
       if (this.id == null) {
-         String var1 = LocaleHolder.isEnglish() ? "Method" : "方法";
+         String text = LocaleHolder.isEnglish() ? "Method" : "方法";
          if (this.parameters != null) {
-            String var2 = "";
-            int var3 = 0;
+            String text2 = "";
+            int number = 0;
 
-            for (Parameter var5 : this.parameters) {
-               if (var3 > 0) {
-                  var2 = var2 + ",";
+            for (Parameter parameter : this.parameters) {
+               if (number > 0) {
+                  text2 = text2 + ",";
                }
 
-               var2 = var2 + var5.getId();
-               var3++;
+               text2 = text2 + parameter.getId();
+               number++;
             }
 
-            this.id = "[" + var1 + "]" + this.beanLabel + "." + this.methodLabel + "(" + var2 + ")";
+            this.id = "[" + text + "]" + this.beanLabel + "." + this.methodLabel + "(" + text2 + ")";
          } else {
-            this.id = "[" + var1 + "]" + this.beanLabel + "." + this.methodLabel;
+            this.id = "[" + text + "]" + this.beanLabel + "." + this.methodLabel;
          }
       }
 

@@ -9,7 +9,7 @@ public class ConstantLibrary {
       return this.categories;
    }
 
-   public void setCategories(List<ConstantCategory> var1) {
-      this.categories = var1;
+   public void setCategories(List<ConstantCategory> categories) {
+      this.categories = categories;
    }
 }

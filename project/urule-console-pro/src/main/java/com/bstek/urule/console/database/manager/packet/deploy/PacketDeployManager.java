@@ -6,23 +6,23 @@ import com.bstek.urule.console.database.model.PacketDeploy;
 public interface PacketDeployManager {
    PacketDeployManager ins = new PacketDeployManagerImpl();
 
-   void add(PacketDeploy var1);
+   void add(PacketDeploy deploy);
 
-   void delete(long var1);
+   void delete(long id);
 
-   void deleteByApplyId(long var1);
+   void deleteByApplyId(long id);
 
-   void deleteByPacketId(long var1);
+   void deleteByPacketId(long id);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   void disableAll(long var1);
+   void disableAll(long packetId);
 
-   void updateEnable(long var1, boolean var3);
+   void updateEnable(long id, boolean enable);
 
-   void updateStatus(long var1, ApplyStatus var3);
+   void updateStatus(long id, ApplyStatus status);
 
-   PacketDeploy load(long var1);
+   PacketDeploy load(long id);
 
    PacketDeployQuery newQuery();
 }

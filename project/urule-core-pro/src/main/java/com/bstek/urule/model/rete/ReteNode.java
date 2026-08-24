@@ -7,19 +7,19 @@ import java.util.Map;
 public abstract class ReteNode implements Node {
    private int id;
 
-   public ReteNode(int var1) {
-      this.id = var1;
+   public ReteNode(int id) {
+      this.id = id;
    }
 
    public abstract NodeType getNodeType();
 
-   public abstract Activity newActivity(Map<Object, Object> var1);
+   public abstract Activity newActivity(Map<Object, Object> context);
 
    public int getId() {
       return this.id;
    }
 
-   public void setId(int var1) {
-      this.id = var1;
+   public void setId(int id) {
+      this.id = id;
    }
 }

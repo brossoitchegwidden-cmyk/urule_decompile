@@ -7,130 +7,130 @@ import java.util.Date;
    ignoreUnknown = true
 )
 public class BatchDataProviderField {
-   private Long a;
-   private Long b;
-   private Long c;
-   private Long d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private Long i;
-   private String j;
-   private String k;
-   private Date l;
-   private Date m;
-   private BatchDataProvider n;
+   private Long id;
+   private Long batchId;
+   private Long projectId;
+   private Long providerId;
+   private String srcProperty;
+   private String dataType;
+   private String destProperty;
+   private String classPath;
+   private Long dataProviderId;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private BatchDataProvider dataProvider;
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public Long getBatchId() {
-      return this.b;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.b = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public Long getProjectId() {
-      return this.c;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.c = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public Long getProviderId() {
-      return this.d;
+      return this.providerId;
    }
 
-   public void setProviderId(Long var1) {
-      this.d = var1;
+   public void setProviderId(Long providerId) {
+      this.providerId = providerId;
    }
 
    public String getSrcProperty() {
-      return this.e;
+      return this.srcProperty;
    }
 
-   public void setSrcProperty(String var1) {
-      this.e = var1;
+   public void setSrcProperty(String srcProperty) {
+      this.srcProperty = srcProperty;
    }
 
    public String getDataType() {
-      return this.f;
+      return this.dataType;
    }
 
-   public void setDataType(String var1) {
-      this.f = var1;
+   public void setDataType(String dataType) {
+      this.dataType = dataType;
    }
 
    public String getDestProperty() {
-      return this.g;
+      return this.destProperty;
    }
 
-   public void setDestProperty(String var1) {
-      this.g = var1;
+   public void setDestProperty(String destProperty) {
+      this.destProperty = destProperty;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.k;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.k = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.l;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.l = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.m;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.m = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public Long getDataProviderId() {
-      return this.i;
+      return this.dataProviderId;
    }
 
-   public void setDataProviderId(Long var1) {
-      this.i = var1;
+   public void setDataProviderId(Long dataProviderId) {
+      this.dataProviderId = dataProviderId;
    }
 
    public BatchDataProvider getDataProvider() {
-      return this.n;
+      return this.dataProvider;
    }
 
-   public void setDataProvider(BatchDataProvider var1) {
-      this.n = var1;
+   public void setDataProvider(BatchDataProvider dataProvider) {
+      this.dataProvider = dataProvider;
    }
 
    public String getClassPath() {
-      return this.h;
+      return this.classPath;
    }
 
-   public void setClassPath(String var1) {
-      this.h = var1;
+   public void setClassPath(String classPath) {
+      this.classPath = classPath;
    }
 }

@@ -1,21 +1,21 @@
 package com.bstek.urule.action;
 
 public class ActionValueImpl implements ActionValue {
-   private String a;
-   private Object b;
+   private String actionId;
+   private Object value;
 
-   public ActionValueImpl(String var1, Object var2) {
-      this.a = var1;
-      this.b = var2;
+   public ActionValueImpl(String actionId, Object value) {
+      this.actionId = actionId;
+      this.value = value;
    }
 
    @Override
    public String getActionId() {
-      return this.a;
+      return this.actionId;
    }
 
    @Override
    public Object getValue() {
-      return this.b;
+      return this.value;
    }
 }

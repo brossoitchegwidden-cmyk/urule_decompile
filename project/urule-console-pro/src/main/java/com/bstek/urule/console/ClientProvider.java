@@ -3,5 +3,5 @@ package com.bstek.urule.console;
 import java.util.List;
 
 public interface ClientProvider {
-   List loadClients(String var1);
+   List loadClients(String groupId);
 }

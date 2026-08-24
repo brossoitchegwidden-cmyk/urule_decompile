@@ -31,144 +31,144 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.log.NullLogChute;
 
 public abstract class BaseServletHandler implements ServletHandler {
-   protected static final String b = "utf-8";
-   protected VelocityEngine c;
-   protected final String d = "parameters";
+   protected static final String DEFAULT_ENCODING = "utf-8";
+   protected VelocityEngine velocityEngine;
+   protected static final String PARAMETERS_ATTRIBUTE = "parameters";
 
    public void init() {
-      this.c = new VelocityEngine();
-      this.c.setProperty("resource.loader", "class");
-      this.c.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-      this.c.setProperty("runtime.log.logsystem", new NullLogChute());
-      this.c.init();
+      this.velocityEngine = new VelocityEngine();
+      this.velocityEngine.setProperty("resource.loader", "class");
+      this.velocityEngine.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+      this.velocityEngine.setProperty("runtime.log.logsystem", new NullLogChute());
+      this.velocityEngine.init();
    }
 
-   protected ObjectMapper a() {
-      ObjectMapper var1 = ((JsonMapper.Builder)JsonMapper.builder().enable(new StreamWriteFeature[]{StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN})).build();
-      var1.setDateFormat(new SimpleDateFormat("yyy-MM-dd HH:mm:ss"));
-      SimpleModule var2 = new SimpleModule();
-      var2.addSerializer(new BigDecimalJsonSerializer());
-      var1.registerModule(var2);
-      return var1;
+   protected ObjectMapper createObjectMapper() {
+      ObjectMapper objectMapper = ((JsonMapper.Builder)JsonMapper.builder().enable(new StreamWriteFeature[]{StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN})).build();
+      objectMapper.setDateFormat(new SimpleDateFormat("yyy-MM-dd HH:mm:ss"));
+      SimpleModule simpleModule = new SimpleModule();
+      simpleModule.addSerializer(new BigDecimalJsonSerializer());
+      objectMapper.registerModule(simpleModule);
+      return objectMapper;
    }
 
-   protected void b(String var1, HttpServletRequest var2, HttpServletResponse var3) throws Exception {
-      var3.setHeader("Access-Control-Allow-Origin", "*");
-      String var4 = this.a(var2);
-      if (var4 != null) {
-         this.c(var4, var2, var3);
+   protected void renderPage(String templatePath, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+      httpServletResponse.setHeader("Access-Control-Allow-Origin", "*");
+      String text = this.resolveRequestedMethod(httpServletRequest);
+      if (text != null) {
+         this.invokeHandlerMethod(text, httpServletRequest, httpServletResponse);
       } else {
-         VelocityContext var5 = new VelocityContext();
-         var5.put("contextPath", var2.getContextPath());
-         var3.setContentType("text/html");
-         var3.setCharacterEncoding("utf-8");
-         Template var6 = this.c.getTemplate("asserts/urule/html/" + var1, "utf-8");
-         PrintWriter var7 = var3.getWriter();
-         var6.merge(var5, var7);
-         var7.close();
+         VelocityContext velocityContext = new VelocityContext();
+         velocityContext.put("contextPath", httpServletRequest.getContextPath());
+         httpServletResponse.setContentType("text/html");
+         httpServletResponse.setCharacterEncoding("utf-8");
+         Template template = this.velocityEngine.getTemplate("asserts/urule/html/" + templatePath, "utf-8");
+         PrintWriter writer = httpServletResponse.getWriter();
+         template.merge(velocityContext, writer);
+         writer.close();
       }
 
    }
 
-   protected void c(String var1, HttpServletRequest var2, HttpServletResponse var3) throws Exception {
-      Method var4 = this.getClass().getMethod(var1, HttpServletRequest.class, HttpServletResponse.class);
-      var4.invoke(this, var2, var3);
+   protected void invokeHandlerMethod(String methodName, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+      Method method = this.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
+      method.invoke(this, httpServletRequest, httpServletResponse);
    }
 
-   protected void a(HttpServletResponse var1, Object var2) throws ServletException, IOException {
-      var1.setContentType("text/json");
-      var1.setCharacterEncoding("utf-8");
-      JsonMapper.Builder var3 = JsonMapper.builder();
-      var3.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-      ObjectMapper var4 = var3.build();
-      SimpleModule var5 = new SimpleModule();
-      var5.addSerializer(new BigDecimalJsonSerializer());
-      var4.registerModule(var5);
-      var4.setSerializationInclusion(Include.NON_NULL);
-      var4.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-      ServletOutputStream var6 = var1.getOutputStream();
+   protected void writeObjectToJson(HttpServletResponse resp, Object obj) throws ServletException, IOException {
+      resp.setContentType("text/json");
+      resp.setCharacterEncoding("utf-8");
+      JsonMapper.Builder builder = JsonMapper.builder();
+      builder.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+      ObjectMapper objectMapper = builder.build();
+      SimpleModule simpleModule = new SimpleModule();
+      simpleModule.addSerializer(new BigDecimalJsonSerializer());
+      objectMapper.registerModule(simpleModule);
+      objectMapper.setSerializationInclusion(Include.NON_NULL);
+      objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+      ServletOutputStream outputStream = resp.getOutputStream();
 
       try {
-         var4.writeValue(var6, var2);
+         objectMapper.writeValue(outputStream, obj);
       } finally {
-         ((OutputStream)var6).flush();
-         ((OutputStream)var6).close();
+         ((OutputStream)outputStream).flush();
+         ((OutputStream)outputStream).close();
       }
 
    }
 
-   protected String a(Throwable var1) {
-      StringBuilder var2 = new StringBuilder();
-      ByteArrayOutputStream var3 = new ByteArrayOutputStream();
-      PrintStream var4 = new PrintStream(var3);
-      var1.printStackTrace(var4);
-      String var5 = new String(var3.toByteArray());
-      IOUtils.closeQuietly(var4);
-      IOUtils.closeQuietly(var3);
-      var5 = var5.replaceAll("\n", "<br>");
-      if (var2.length() > 0) {
-         var2.append("<br>");
+   protected String buildExceptionStack(Throwable throwable) {
+      StringBuilder stringBuilder = new StringBuilder();
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      PrintStream printStream = new PrintStream(byteArrayOutputStream);
+      throwable.printStackTrace(printStream);
+      String string = new String(byteArrayOutputStream.toByteArray());
+      IOUtils.closeQuietly(printStream);
+      IOUtils.closeQuietly(byteArrayOutputStream);
+      string = string.replaceAll("\n", "<br>");
+      if (stringBuilder.length() > 0) {
+         stringBuilder.append("<br>");
       }
 
-      var2.append(var5);
-      return var2.toString();
+      stringBuilder.append(string);
+      return stringBuilder.toString();
    }
 
-   protected String a(HttpServletRequest var1) throws ServletException {
-      String var2 = var1.getContextPath() + "/urule";
-      String var3 = var1.getRequestURI();
-      String var4 = var3.substring(var2.length());
-      int var5 = var4.indexOf("/", 0);
-      if (var5 > -1) {
-         String var6 = var4.substring(var5 + 1).trim();
-         return var6.length() > 0 ? var6 : null;
+   protected String resolveRequestedMethod(HttpServletRequest httpServletRequest) throws ServletException {
+      String text = httpServletRequest.getContextPath() + "/urule";
+      String requestURI = httpServletRequest.getRequestURI();
+      String substring = requestURI.substring(text.length());
+      int number = substring.indexOf("/", 0);
+      if (number > -1) {
+         String trimmedText = substring.substring(number + 1).trim();
+         return trimmedText.length() > 0 ? trimmedText : null;
       } else {
          return null;
       }
    }
 
-   protected void b(HttpServletRequest var1) {
-      String var2 = var1.getParameter("groupId");
-      String var3 = var1.getParameter("projectId");
-      String var4 = var1.getContextPath();
-      String var5 = var1.getRequestURI();
-      if (var5.startsWith(var4)) {
-         var5 = var5.substring(var4.length());
+   protected void initializeRequestContext(HttpServletRequest httpServletRequest) {
+      String parameter = httpServletRequest.getParameter("groupId");
+      String parameter2 = httpServletRequest.getParameter("projectId");
+      String contextPath = httpServletRequest.getContextPath();
+      String requestURI = httpServletRequest.getRequestURI();
+      if (requestURI.startsWith(contextPath)) {
+         requestURI = requestURI.substring(contextPath.length());
       }
 
-      boolean var6 = !var5.startsWith("/urule/api/group/add") && !var5.startsWith("/urule/api/project/add");
+      boolean flag = !requestURI.startsWith("/urule/api/group/add") && !requestURI.startsWith("/urule/api/project/add");
       ContextHolder.clear();
-      if (StringUtils.isNotBlank(var3)) {
-         if (var6) {
-            if (StringUtils.isBlank(var2)) {
-               Project var7 = ProjectManager.ins.get(Long.parseLong(var3));
-               if (var7 == null) {
+      if (StringUtils.isNotBlank(parameter2)) {
+         if (flag) {
+            if (StringUtils.isBlank(parameter)) {
+               Project project = ProjectManager.ins.get(Long.parseLong(parameter2));
+               if (project == null) {
                   throw new InfoException("ProjectId invalid!");
                }
 
-               var2 = var7.getGroupId();
+               parameter = project.getGroupId();
             }
 
-            String var9 = SecurityUtils.getLoginUsername(var1);
-            User var8 = UserManager.ins.getProjectUser(Long.parseLong(var3), var9);
-            if (var8 == null) {
-               throw new PermissionDeniedException("Permission denied for project [" + var3 + "]");
+            String loginUsername = SecurityUtils.getLoginUsername(httpServletRequest);
+            User projectUser = UserManager.ins.getProjectUser(Long.parseLong(parameter2), loginUsername);
+            if (projectUser == null) {
+               throw new PermissionDeniedException("Permission denied for project [" + parameter2 + "]");
             }
          }
 
-         ContextHolder.setProjectId(Long.parseLong(var3));
+         ContextHolder.setProjectId(Long.parseLong(parameter2));
       }
 
-      if (StringUtils.isNotBlank(var2)) {
-         if (var6) {
-            String var10 = SecurityUtils.getLoginUsername(var1);
-            User var11 = UserManager.ins.getGroupUser(var2, var10);
-            if (var11 == null) {
-               throw new PermissionDeniedException("Permission denied for team [" + var2 + "]");
+      if (StringUtils.isNotBlank(parameter)) {
+         if (flag) {
+            String loginUsername2 = SecurityUtils.getLoginUsername(httpServletRequest);
+            User groupUser = UserManager.ins.getGroupUser(parameter, loginUsername2);
+            if (groupUser == null) {
+               throw new PermissionDeniedException("Permission denied for team [" + parameter + "]");
             }
          }
 
-         ContextHolder.setGroupId(var2);
+         ContextHolder.setGroupId(parameter);
       }
 
    }

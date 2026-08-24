@@ -22,131 +22,131 @@ import java.util.List;
 import java.util.Map;
 
 public class DecisionTableRulesBuilder {
-   private CellContentBuilder a;
+   private CellContentBuilder cellContentBuilder;
 
-   public List<Rule> buildRules(DecisionTable var1, String var2) {
-      ArrayList var3 = new ArrayList();
-      List var4 = var1.getRows();
-      Integer var5 = var1.getSalience();
-      int var6 = var4.size();
-      List var7 = var1.getColumns();
+   public List<Rule> buildRules(DecisionTable table, String path) {
+      ArrayList rules = new ArrayList();
+      List rows = table.getRows();
+      Integer salience = table.getSalience();
+      int number = rows.size();
+      List columns = table.getColumns();
 
-      for (int var8 = 0; var8 < var4.size(); var8++) {
-         Row var9 = (Row)var4.get(var8);
-         Rule var10 = new Rule();
-         var10.setFile(var2);
-         if (var5 != null) {
-            int var11 = var5 + (var6 - var8);
-            var10.setSalience(var11);
+      for (int index = 0; index < rows.size(); index++) {
+         Row row = (Row)rows.get(index);
+         Rule rule = new Rule();
+         rule.setFile(path);
+         if (salience != null) {
+            int number2 = salience + (number - index);
+            rule.setSalience(number2);
          }
 
-         var10.setMutexGroup(var1.getMutexGroup());
-         var10.setDebug(var1.getDebug());
-         var10.setSalience(var1.getSalience());
-         var10.setExpiresDate(var1.getExpiresDate());
-         var10.setEffectiveDate(var1.getEffectiveDate());
-         var10.setEnabled(var1.getEnabled());
-         var10.setName("r" + var9.getNum());
-         Lhs var22 = new Lhs();
-         And var12 = new And();
-         var10.setLhs(var22);
-         Rhs var13 = new Rhs();
-         var10.setRhs(var13);
-         var3.add(var10);
-         Value var14 = null;
+         rule.setMutexGroup(table.getMutexGroup());
+         rule.setDebug(table.getDebug());
+         rule.setSalience(table.getSalience());
+         rule.setExpiresDate(table.getExpiresDate());
+         rule.setEffectiveDate(table.getEffectiveDate());
+         rule.setEnabled(table.getEnabled());
+         rule.setName("r" + row.getNum());
+         Lhs lhs = new Lhs();
+         And and = new And();
+         rule.setLhs(lhs);
+         Rhs rhs = new Rhs();
+         rule.setRhs(rhs);
+         rules.add(rule);
+         Value localValue = null;
 
-         for (Column var16 : (Iterable<Column>)(Iterable<?>)(var7)) {
-            Cell var17 = this.a(var1, var9.getNum(), var16.getNum());
-            ColumnType var18 = var16.getType();
-            switch (var18) {
+         for (Column column : (Iterable<Column>)(Iterable<?>)(columns)) {
+            Cell cell = this.resolveCell(table, row.getNum(), column.getNum());
+            ColumnType type = column.getType();
+            switch (type) {
                case Criteria:
-                  Criterion var19 = this.a.buildCriterion(var17, var16);
-                  if (var19 != null) {
-                     var12.addCriterion(var19);
+                  Criterion criterion = this.cellContentBuilder.buildCriterion(cell, column);
+                  if (criterion != null) {
+                     and.addCriterion(criterion);
                   }
                   break;
                case ConsolePrint:
-                  var14 = var17.getValue();
-                  if (var14 != null) {
-                     ConsolePrintAction var27 = new ConsolePrintAction();
-                     var27.setPriority(1000 - var16.getNum());
-                     var27.setValue(var14);
-                     var13.addAction(var27);
+                  localValue = cell.getValue();
+                  if (localValue != null) {
+                     ConsolePrintAction consolePrintAction = new ConsolePrintAction();
+                     consolePrintAction.setPriority(1000 - column.getNum());
+                     consolePrintAction.setValue(localValue);
+                     rhs.addAction(consolePrintAction);
                   }
                   break;
                case Assignment:
-                  var14 = var17.getValue();
-                  if (var14 != null) {
-                     if (var16.isPredefine()) {
-                        PredefineAssignAction var25 = new PredefineAssignAction();
-                        var25.setPriority(1000 - var16.getNum());
-                        var25.setValue(var14);
-                        var25.setDatatype(var16.getPredefineDatatype());
-                        var25.setUuid(var16.getUuid());
-                        var25.setName(var16.getPredefineName());
-                        var25.setVariableCategoryUuid(var16.getPredefineVariableCategoryUuid());
-                        var25.setVariableCategory(var16.getPredefineVariableCategory());
-                        var25.setPropertyUuid(var16.getPredefinePropertyUuid());
-                        var25.setPropertyName(var16.getPredefinePropertyName());
-                        var25.setPropertyDatatype(var16.getPredefinePropertyDatatype());
-                        var25.setPropertyLabel(var16.getPredefinePropertyLabel());
-                        var13.addAction(var25);
+                  localValue = cell.getValue();
+                  if (localValue != null) {
+                     if (column.isPredefine()) {
+                        PredefineAssignAction predefineAssignAction = new PredefineAssignAction();
+                        predefineAssignAction.setPriority(1000 - column.getNum());
+                        predefineAssignAction.setValue(localValue);
+                        predefineAssignAction.setDatatype(column.getPredefineDatatype());
+                        predefineAssignAction.setUuid(column.getUuid());
+                        predefineAssignAction.setName(column.getPredefineName());
+                        predefineAssignAction.setVariableCategoryUuid(column.getPredefineVariableCategoryUuid());
+                        predefineAssignAction.setVariableCategory(column.getPredefineVariableCategory());
+                        predefineAssignAction.setPropertyUuid(column.getPredefinePropertyUuid());
+                        predefineAssignAction.setPropertyName(column.getPredefinePropertyName());
+                        predefineAssignAction.setPropertyDatatype(column.getPredefinePropertyDatatype());
+                        predefineAssignAction.setPropertyLabel(column.getPredefinePropertyLabel());
+                        rhs.addAction(predefineAssignAction);
                      } else {
-                        VariableAssignAction var26 = new VariableAssignAction();
-                        var26.setPriority(1000 - var16.getNum());
-                        var26.setValue(var14);
-                        var26.setDatatype(var16.getDatatype());
-                        var26.setVariableName(var16.getVariableName());
-                        var26.setCategoryUuid(var16.getCategoryUuid());
-                        var26.setUuid(var16.getUuid());
-                        var26.setVariableLabel(var16.getVariableLabel());
-                        var26.setVariableCategory(var16.getVariableCategory());
-                        var26.setKeyLabel(var16.getKeyLabel());
-                        var26.setKeyName(var16.getKeyName());
-                        var26.setKeyCategoryUuid(var16.getKeyCategoryUuid());
-                        var26.setKeyUuid(var16.getKeyUuid());
-                        var13.addAction(var26);
+                        VariableAssignAction variableAssignAction = new VariableAssignAction();
+                        variableAssignAction.setPriority(1000 - column.getNum());
+                        variableAssignAction.setValue(localValue);
+                        variableAssignAction.setDatatype(column.getDatatype());
+                        variableAssignAction.setVariableName(column.getVariableName());
+                        variableAssignAction.setCategoryUuid(column.getCategoryUuid());
+                        variableAssignAction.setUuid(column.getUuid());
+                        variableAssignAction.setVariableLabel(column.getVariableLabel());
+                        variableAssignAction.setVariableCategory(column.getVariableCategory());
+                        variableAssignAction.setKeyLabel(column.getKeyLabel());
+                        variableAssignAction.setKeyName(column.getKeyName());
+                        variableAssignAction.setKeyCategoryUuid(column.getKeyCategoryUuid());
+                        variableAssignAction.setKeyUuid(column.getKeyUuid());
+                        rhs.addAction(variableAssignAction);
                      }
                   }
                   break;
                case ExecuteMethod:
-                  Action var20 = var17.getAction();
-                  if (var20 != null) {
-                     AbstractAction var21 = (AbstractAction)var20;
-                     var21.setPriority(1000 - var16.getNum());
-                     var13.addAction(var21);
+                  Action action = cell.getAction();
+                  if (action != null) {
+                     AbstractAction abstractAction = (AbstractAction)action;
+                     abstractAction.setPriority(1000 - column.getNum());
+                     rhs.addAction(abstractAction);
                   }
             }
          }
 
-         if (var12.getCriterions() != null) {
-            var22.setCriterion(var12);
+         if (and.getCriterions() != null) {
+            lhs.setCriterion(and);
          }
       }
 
-      return var3;
+      return rules;
    }
 
-   private Cell a(DecisionTable var1, int var2, int var3) {
-      Map var4 = var1.getCellMap();
-      Cell var5 = null;
+   private Cell resolveCell(DecisionTable decisionTable, int number, int number2) {
+      Map cellMap = decisionTable.getCellMap();
+      Cell cell = null;
 
-      for (int var6 = var2; var6 > -1; var6--) {
-         String var7 = var1.buildCellKey(var6, var3);
-         if (var4.containsKey(var7)) {
-            var5 = (Cell)var4.get(var7);
+      for (int index = number; index > -1; index--) {
+         String cellKey = decisionTable.buildCellKey(index, number2);
+         if (cellMap.containsKey(cellKey)) {
+            cell = (Cell)cellMap.get(cellKey);
             break;
          }
       }
 
-      if (var5 == null) {
-         throw new RuleException("Decision table cell[" + var2 + "," + var3 + "] not exist.");
+      if (cell == null) {
+         throw new RuleException("Decision table cell[" + number + "," + number2 + "] not exist.");
       } else {
-         return var5;
+         return cell;
       }
    }
 
-   public void setCellContentBuilder(CellContentBuilder var1) {
-      this.a = var1;
+   public void setCellContentBuilder(CellContentBuilder cellContentBuilder) {
+      this.cellContentBuilder = cellContentBuilder;
    }
 }

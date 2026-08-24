@@ -9,119 +9,119 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class ResolverFieldManagerImpl implements ResolverFieldManager {
-   public BatchDataResolverItemField get(Long var1) {
-      List var2 = this.createQuery().id(var1).list();
-      return var2.size() > 0 ? (BatchDataResolverItemField)var2.get(0) : null;
+   public BatchDataResolverItemField get(Long id) {
+      List items = this.createQuery().id(id).list();
+      return items.size() > 0 ? (BatchDataResolverItemField)items.get(0) : null;
    }
 
-   public void add(BatchDataResolverItemField var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(BatchDataResolverItemField field) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_BATCH_RESOLVER_FIELD (SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CREATE_USER_, CREATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, RESOLVER_ID_, ITEM_ID_, KEY_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-         var3.setString(1, var1.getSrcProperty());
-         var3.setString(2, var1.getDataType());
-         var3.setString(3, var1.getDestProperty());
-         var3.setString(4, var1.getCreateUser());
-         var3.setTimestamp(5, new Timestamp(var1.getCreateDate().getTime()));
-         var3.setLong(6, var1.getId());
-         var3.setLong(7, var1.getProjectId());
-         var3.setLong(8, var1.getBatchId());
-         var3.setLong(9, var1.getResolverId());
-         var3.setLong(10, var1.getResolverItemId());
-         var3.setBoolean(11, var1.isKey());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_BATCH_RESOLVER_FIELD (SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CREATE_USER_, CREATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, RESOLVER_ID_, ITEM_ID_, KEY_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+         preparedStatement.setString(1, field.getSrcProperty());
+         preparedStatement.setString(2, field.getDataType());
+         preparedStatement.setString(3, field.getDestProperty());
+         preparedStatement.setString(4, field.getCreateUser());
+         preparedStatement.setTimestamp(5, new Timestamp(field.getCreateDate().getTime()));
+         preparedStatement.setLong(6, field.getId());
+         preparedStatement.setLong(7, field.getProjectId());
+         preparedStatement.setLong(8, field.getBatchId());
+         preparedStatement.setLong(9, field.getResolverId());
+         preparedStatement.setLong(10, field.getResolverItemId());
+         preparedStatement.setBoolean(11, field.isKey());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void update(BatchDataResolverItemField var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(BatchDataResolverItemField field) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("update URULE_BATCH_RESOLVER_FIELD set SRC_PROPERTY_=?, DATA_TYPE_=?, DEST_PROPERTY_=?, UPDATE_DATE_=? , UPDATE_USER_=?, KEY_=? where ID_=?");
-         var3.setString(1, var1.getSrcProperty());
-         var3.setString(2, var1.getDataType());
-         var3.setString(3, var1.getDestProperty());
-         var3.setTimestamp(4, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setString(5, var1.getUpdateUser());
-         var3.setBoolean(6, var1.isKey());
-         var3.setLong(7, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_BATCH_RESOLVER_FIELD set SRC_PROPERTY_=?, DATA_TYPE_=?, DEST_PROPERTY_=?, UPDATE_DATE_=? , UPDATE_USER_=?, KEY_=? where ID_=?");
+         preparedStatement.setString(1, field.getSrcProperty());
+         preparedStatement.setString(2, field.getDataType());
+         preparedStatement.setString(3, field.getDestProperty());
+         preparedStatement.setTimestamp(4, new Timestamp(field.getUpdateDate().getTime()));
+         preparedStatement.setString(5, field.getUpdateUser());
+         preparedStatement.setBoolean(6, field.isKey());
+         preparedStatement.setLong(7, field.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void remove(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void remove(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByItemId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByItemId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where ITEM_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where ITEM_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByResolverId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByResolverId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where RESOLVER_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where RESOLVER_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByBatchId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByBatchId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where BATCH_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where BATCH_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -130,34 +130,34 @@ public class ResolverFieldManagerImpl implements ResolverFieldManager {
       return new ResolverFieldQueryImpl();
    }
 
-   public void removeByProjectId(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByProjectId(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where PROJECT_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where PROJECT_ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void removeByGroupId(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByGroupId(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_BATCH_RESOLVER_FIELD where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

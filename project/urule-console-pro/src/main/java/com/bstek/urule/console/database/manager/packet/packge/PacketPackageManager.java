@@ -5,15 +5,15 @@ import com.bstek.urule.console.database.model.PacketPackage;
 public interface PacketPackageManager {
    PacketPackageManager ins = new PacketPackageManagerImpl();
 
-   void add(PacketPackage var1);
+   void add(PacketPackage pk);
 
-   void update(PacketPackage var1);
+   void update(PacketPackage pk);
 
-   void deleteByPacketId(long var1);
+   void deleteByPacketId(long packetId);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   PacketPackage loadByPacketId(long var1);
+   PacketPackage loadByPacketId(long packetId);
 
-   String loadContent(long var1);
+   String loadContent(long id);
 }

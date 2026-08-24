@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class TriangleFunctionMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      TriangleFunctionMath var2 = new TriangleFunctionMath();
-      var2.setName(JsonUtils.getJsonValue(var1, "name"));
-      var2.setValue(JsonUtils.parseValueNode(var1.get("value")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      TriangleFunctionMath triangleFunctionMath = new TriangleFunctionMath();
+      triangleFunctionMath.setName(JsonUtils.getJsonValue(jsonNode, "name"));
+      triangleFunctionMath.setValue(JsonUtils.parseValueNode(jsonNode.get("value")));
+      return triangleFunctionMath;
    }
 
    @Override

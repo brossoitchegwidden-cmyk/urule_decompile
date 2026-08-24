@@ -12,42 +12,41 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class JNDIConfigManager extends DBConfigManager {
-   private static final Log b = LogFactory.getLog(JdbcConfigManager.class);
-   private DataSource c;
+   private static final Log logger = LogFactory.getLog(JdbcConfigManager.class);
+   private DataSource dataSource;
 
-   public JNDIConfigManager(ApplicationConfig var1) {
-      super(var1);
+   public JNDIConfigManager(ApplicationConfig applicationConfig) {
+      super(applicationConfig);
    }
-
    public void load() {
-      this.a();
+      this.initializeProperties();
       super.load();
    }
 
-   protected void d() {
-      String var1 = this.getProperty("urule.store.database.jndiname");
-      b.debug("初始化报表JNDI数据源...");
+   protected void initializeConnectionSource() {
+      String property = this.getProperty("urule.store.database.jndiname");
+      JNDIConfigManager.logger.debug("初始化报表JNDI数据源...");
 
       try {
-         InitialContext var2 = new InitialContext();
-         if (StringUtils.isNotEmpty(var1) && !var1.startsWith("java:comp/env/")) {
-            var1 = "java:comp/env/" + var1;
+         InitialContext initialContext = new InitialContext();
+         if (StringUtils.isNotEmpty(property) && !property.startsWith("java:comp/env/")) {
+            property = "java:comp/env/" + property;
          }
 
-         DataSource var3 = (DataSource)var2.lookup(var1);
-         this.c = var3;
-      } catch (NamingException var4) {
-         var4.printStackTrace();
+         DataSource dataSource = (DataSource)initialContext.lookup(property);
+         this.dataSource = dataSource;
+      } catch (NamingException namingException) {
+         JNDIConfigManager.logger.error("Unable to initialize JNDI data source", namingException);
       }
 
    }
 
    public Connection getConnection() throws Exception {
-      return this.c.getConnection();
+      return this.dataSource.getConnection();
    }
 
-   protected void initConfig(SetupInfo var1) {
-      Properties var2 = this.b();
-      var2.put("urule.store.database.jndiname", var1.getDataSourceInfo().getJndi());
+   protected void initConfig(SetupInfo setupInfo) {
+      Properties properties = this.getApplicationProperties();
+      properties.put("urule.store.database.jndiname", setupInfo.getDataSourceInfo().getJndi());
    }
 }

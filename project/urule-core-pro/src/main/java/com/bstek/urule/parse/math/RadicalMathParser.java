@@ -6,18 +6,18 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class RadicalMathParser extends MathParser {
-   public RadicalMathParser(ValueParser var1) {
-      super(var1);
+   public RadicalMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
-   public MathSign parse(Element var1) {
-      RadicalMath var2 = new RadicalMath();
-      var2.setValue(this.a(var1));
-      return var2;
+   public MathSign parse(Element element) {
+      RadicalMath radicalMath = new RadicalMath();
+      radicalMath.setValue(this.parseValue(element));
+      return radicalMath;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("radical-sign");
+   public boolean support(String name) {
+      return name.equals("radical-sign");
    }
 }

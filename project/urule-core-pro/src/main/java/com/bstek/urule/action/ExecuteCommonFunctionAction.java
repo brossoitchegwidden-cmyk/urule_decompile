@@ -10,42 +10,42 @@ import com.bstek.urule.runtime.rete.Context;
 import java.util.Map;
 
 public class ExecuteCommonFunctionAction extends AbstractAction {
-   private String b;
-   private String c;
-   private CommonFunctionParameter d;
+   private String name;
+   private String label;
+   private CommonFunctionParameter parameter;
 
    @Override
-   public ActionValue execute(Context var1, Map<String, Object> var2) {
-      FunctionDescriptor var3 = null;
-      if (Utils.getFunctionDescriptorMap().containsKey(this.b)) {
-         var3 = Utils.findFunctionDescriptor(this.b);
-      } else if (Utils.getFunctionDescriptorLabelMap().containsKey(this.c)) {
-         var3 = Utils.getFunctionDescriptorLabelMap().get(this.c);
+   public ActionValue execute(Context context, Map<String, Object> factMap) {
+      FunctionDescriptor functionDescriptor = null;
+      if (Utils.getFunctionDescriptorMap().containsKey(this.name)) {
+         functionDescriptor = Utils.findFunctionDescriptor(this.name);
+      } else if (Utils.getFunctionDescriptorLabelMap().containsKey(this.label)) {
+         functionDescriptor = Utils.getFunctionDescriptorLabelMap().get(this.label);
       }
 
-      if (var3 == null) {
-         throw new RuleException("Function[" + this.b + "] not exist.");
+      if (functionDescriptor == null) {
+         throw new RuleException("Function[" + this.name + "] not exist.");
       }
 
-      String var4 = LocaleHolder.isEnglish() ? this.b : (this.c == null ? this.b : this.c);
-      Value var5 = null;
-      Object var6 = null;
-      if (this.d != null) {
-         var5 = this.d.getObjectParameter();
-         var6 = var1.getValueCompute().complexValueCompute(var5, var1, var2);
+      String text = LocaleHolder.isEnglish() ? this.name : (this.label == null ? this.name : this.label);
+      Value objectParameter = null;
+      Object objectValue = null;
+      if (this.parameter != null) {
+         objectParameter = this.parameter.getObjectParameter();
+         objectValue = context.getValueCompute().complexValueCompute(objectParameter, context, factMap);
       }
 
-      String var7 = null;
-      if (var3.getArgument() != null && var3.getArgument().isNeedProperty()) {
-         var7 = this.d.getProperty();
+      String property = null;
+      if (functionDescriptor.getArgument() != null && functionDescriptor.getArgument().isNeedProperty()) {
+         property = this.parameter.getProperty();
       }
 
-      if (this.a) {
-         var1.getLogger().logExecuteFunction(var4, var6);
+      if (this.debug) {
+         context.getLogger().logExecuteFunction(text, objectValue);
       }
 
-      Object var8 = var3.doFunction(var6, var7, var1.getWorkingMemory());
-      return var8 == null ? null : new ActionValueImpl(this.b, var8);
+      Object objectValue2 = functionDescriptor.doFunction(objectValue, property, context.getWorkingMemory());
+      return objectValue2 == null ? null : new ActionValueImpl(this.name, objectValue2);
    }
 
    @Override
@@ -54,26 +54,26 @@ public class ExecuteCommonFunctionAction extends AbstractAction {
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
-      return this.c;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.c = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public CommonFunctionParameter getParameter() {
-      return this.d;
+      return this.parameter;
    }
 
-   public void setParameter(CommonFunctionParameter var1) {
-      this.d = var1;
+   public void setParameter(CommonFunctionParameter parameter) {
+      this.parameter = parameter;
    }
 }

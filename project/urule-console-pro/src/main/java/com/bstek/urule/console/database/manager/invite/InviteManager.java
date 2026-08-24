@@ -5,13 +5,13 @@ import com.bstek.urule.console.database.model.Invite;
 public interface InviteManager {
    InviteManagerImpl ins = new InviteManagerImpl();
 
-   Invite get(String var1);
+   Invite get(String secretKey);
 
-   void add(Invite var1);
+   void add(Invite invite);
 
-   void update(Invite var1);
+   void update(Invite invite);
 
-   void remove(String var1);
+   void remove(String secretKey);
 
-   void removeByGroupId(String var1);
+   void removeByGroupId(String groupId);
 }

@@ -17,88 +17,89 @@ public class VersionFileManagerImpl implements VersionFileManager {
    protected VersionFileManagerImpl() {
    }
 
-   public VersionFile loadFile(long var1) {
-      List var3 = this.newQuery().id(var1).list();
-      return var3.size() > 0 ? (VersionFile)var3.get(0) : null;
+   public VersionFile loadFile(long id) {
+      List items = this.newQuery().id(id).list();
+      return items.size() > 0 ? (VersionFile)items.get(0) : null;
    }
 
-   public String loadFileContent(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
-      String var4 = null;
+   public String loadFileContent(long id) {
+      Connection connection = JdbcUtils.getConnection();
+      String string = null;
 
-      String var7;
+      String fileContent;
       try {
-         PreparedStatement var5 = var3.prepareStatement("select CONTENT_ from URULE_VERSION_FILE where ID_=?");
-         var5.setLong(1, var1);
+         PreparedStatement preparedStatement = connection.prepareStatement("select CONTENT_ from URULE_VERSION_FILE where ID_=?");
+         preparedStatement.setLong(1, id);
 
-         ResultSet var6;
-         for(var6 = var5.executeQuery(); var6.next(); var4 = var6.getString(1)) {
+         ResultSet resultSet;
+         for(resultSet = preparedStatement.executeQuery(); resultSet.next(); string = resultSet.getString(1)) {
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-         var7 = var4;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         fileContent = string;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return fileContent;
    }
 
-   public void updateContent(long var1, String var3) {
-      Connection var4 = JdbcUtils.getConnection();
-      String var5 = "update URULE_VERSION_FILE set CONTENT_=?,DIGEST_=? where ID_=?";
+   /**专门用于项目导入提供的方法，不在接口中声明*/
+   public void updateContent(long id, String content) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "update URULE_VERSION_FILE set CONTENT_=?,DIGEST_=? where ID_=?";
 
       try {
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setString(1, var3);
-         var6.setString(2, MD5Utils.stringToMD5(var3));
-         var6.setLong(3, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, content);
+         preparedStatement.setString(2, MD5Utils.stringToMD5(content));
+         preparedStatement.setLong(3, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public VersionFile loadFile(long var1, String var3) {
-      List var4 = this.newQuery().fileId(var1).version(var3).list();
-      return var4.size() > 0 ? (VersionFile)var4.get(0) : null;
+   public VersionFile loadFile(long fileId, String version) {
+      List items = this.newQuery().fileId(fileId).version(version).list();
+      return items.size() > 0 ? (VersionFile)items.get(0) : null;
    }
 
-   public List loadFiles(long var1) {
-      return this.newQuery().fileId(var1).list();
+   public List loadFiles(long fileId) {
+      return this.newQuery().fileId(fileId).list();
    }
 
-   public void saveFile(VersionFile var1) {
-      Connection var2 = JdbcUtils.getConnection();
-      String var3 = "insert into URULE_VERSION_FILE(ID_, FILE_ID_, PROJECT_ID_, NAME_, VERSION_, NOTE_, CONTENT_, DIGEST_, CREATE_USER_, CREATE_DATE_) values(?,?,?,?,?,?,?,?,?, ?)";
-      long var4 = IDGenerator.getInstance().nextId(IDType.FILE);
-      var1.setId(var4);
+   public void saveFile(VersionFile file) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "insert into URULE_VERSION_FILE(ID_, FILE_ID_, PROJECT_ID_, NAME_, VERSION_, NOTE_, CONTENT_, DIGEST_, CREATE_USER_, CREATE_DATE_) values(?,?,?,?,?,?,?,?,?, ?)";
+      long longValue = IDGenerator.getInstance().nextId(IDType.FILE);
+      file.setId(longValue);
 
       try {
-         PreparedStatement var6 = var2.prepareStatement(var3);
-         var6.setLong(1, var4);
-         var6.setLong(2, var1.getFileId());
-         var6.setLong(3, var1.getProjectId());
-         var6.setString(4, var1.getName());
-         var6.setString(5, var1.getVersion());
-         var6.setString(6, var1.getNote());
-         var6.setString(7, var1.getContent());
-         var6.setString(8, MD5Utils.stringToMD5(var1.getContent()));
-         var6.setString(9, var1.getCreateUser());
-         var6.setTimestamp(10, new Timestamp((new Date()).getTime()));
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, longValue);
+         preparedStatement.setLong(2, file.getFileId());
+         preparedStatement.setLong(3, file.getProjectId());
+         preparedStatement.setString(4, file.getName());
+         preparedStatement.setString(5, file.getVersion());
+         preparedStatement.setString(6, file.getNote());
+         preparedStatement.setString(7, file.getContent());
+         preparedStatement.setString(8, MD5Utils.stringToMD5(file.getContent()));
+         preparedStatement.setString(9, file.getCreateUser());
+         preparedStatement.setTimestamp(10, new Timestamp((new Date()).getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -107,34 +108,34 @@ public class VersionFileManagerImpl implements VersionFileManager {
       return new VersionFileQueryImpl();
    }
 
-   public void deleteByProjectId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByProjectId(long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete from URULE_VERSION_FILE where PROJECT_ID_=?");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_VERSION_FILE where PROJECT_ID_=?");
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void deleteByFileId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByFileId(long fileId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete from URULE_VERSION_FILE where FILE_ID_=?");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_VERSION_FILE where FILE_ID_=?");
+         preparedStatement.setLong(1, fileId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

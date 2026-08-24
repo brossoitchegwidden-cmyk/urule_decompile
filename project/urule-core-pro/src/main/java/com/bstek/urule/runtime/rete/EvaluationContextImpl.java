@@ -7,77 +7,77 @@ import java.util.Map;
 import java.util.Set;
 
 public class EvaluationContextImpl extends ContextImpl implements EvaluationContext {
-   private int a = 0;
-   private Set<OrActivity> b = new HashSet<>();
-   private Set<MetActivity> c = new HashSet<>();
-   private Set<String> d = new HashSet<>();
-   private Map<String, ActivityState> e = new HashMap<>();
+   private int nextToken;
+   private Set<OrActivity> orActivities = new HashSet<>();
+   private Set<MetActivity> metActivities = new HashSet<>();
+   private Set<String> pathPassedSet = new HashSet<>();
+   private Map<String, ActivityState> activityStatesById = new HashMap<>();
 
-   public EvaluationContextImpl(WorkingMemory var1, Map<String, String> var2) {
-      super(var1, var2);
+   public EvaluationContextImpl(WorkingMemory workingMemory, Map<String, String> variableCategoryMap) {
+      super(workingMemory, variableCategoryMap);
    }
 
    @Override
    public void resetActivitiesState() {
-      this.d.clear();
-      this.e.clear();
-      this.b.clear();
+      this.pathPassedSet.clear();
+      this.activityStatesById.clear();
+      this.orActivities.clear();
    }
 
    @Override
-   public boolean orActivityIsPassed(OrActivity var1) {
-      return this.b.contains(var1);
+   public boolean orActivityIsPassed(OrActivity or) {
+      return this.orActivities.contains(or);
    }
 
    @Override
-   public boolean metActivityIsPassed(MetActivity var1) {
-      return this.c.contains(var1);
+   public boolean metActivityIsPassed(MetActivity met) {
+      return this.metActivities.contains(met);
    }
 
    @Override
-   public void addPassedMetActivity(MetActivity var1) {
-      this.c.add(var1);
+   public void addPassedMetActivity(MetActivity met) {
+      this.metActivities.add(met);
    }
 
    @Override
-   public void addPassedOrActivity(OrActivity var1) {
-      this.b.add(var1);
+   public void addPassedOrActivity(OrActivity or) {
+      this.orActivities.add(or);
    }
 
    @Override
-   public CriteriaActivityState getActivityState(String var1) {
-      CriteriaActivityState var2 = (CriteriaActivityState)this.e.get(var1);
-      if (var2 == null) {
-         var2 = new CriteriaActivityState(var1);
-         this.e.put(var1, var2);
+   public CriteriaActivityState getActivityState(String id) {
+      CriteriaActivityState criteriaActivityState = (CriteriaActivityState)this.activityStatesById.get(id);
+      if (criteriaActivityState == null) {
+         criteriaActivityState = new CriteriaActivityState(id);
+         this.activityStatesById.put(id, criteriaActivityState);
       }
 
-      return var2;
+      return criteriaActivityState;
    }
 
    @Override
-   public AndActivityState getAndActivityState(String var1) {
-      AndActivityState var2 = (AndActivityState)this.e.get(var1);
-      if (var2 == null) {
-         var2 = new AndActivityState(var1);
-         this.e.put(var1, var2);
+   public AndActivityState getAndActivityState(String id) {
+      AndActivityState andActivityState = (AndActivityState)this.activityStatesById.get(id);
+      if (andActivityState == null) {
+         andActivityState = new AndActivityState(id);
+         this.activityStatesById.put(id, andActivityState);
       }
 
-      return var2;
+      return andActivityState;
    }
 
    @Override
    public Set<String> getPathPassedSet() {
-      return this.d;
+      return this.pathPassedSet;
    }
 
    @Override
    public Integer nextToken() {
-      return this.a++;
+      return this.nextToken++;
    }
 
    @Override
    public void reset() {
-      this.a = 0;
+      this.nextToken = 0;
    }
 }

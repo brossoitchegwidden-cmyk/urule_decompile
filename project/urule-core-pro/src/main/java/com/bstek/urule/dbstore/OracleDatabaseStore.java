@@ -8,37 +8,37 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 public class OracleDatabaseStore implements DatabaseStore {
-   private static final String a = "CREATE TABLE URULE_KP_STORE(ID_ VARCHAR2(60) PRIMARY KEY,UPDATE_DATE_ NUMBER NOT NULL,CREATE_USER_ VARCHAR2(60),DATA_ BLOB)";
-   private DataSource b;
+   private static final String CREATE_TABLE_SQL = "CREATE TABLE URULE_KP_STORE(ID_ VARCHAR2(60) PRIMARY KEY,UPDATE_DATE_ NUMBER NOT NULL,CREATE_USER_ VARCHAR2(60),DATA_ BLOB)";
+   private DataSource dataSource;
 
    @Override
-   public void init(DataSource var1) throws Exception {
-      this.b = var1;
-      Connection var2 = var1.getConnection();
-      String var3 = "SELECT COUNT(*) FROM User_Tables WHERE table_name = 'URULE_KP_STORE'";
-      Statement var4 = var2.createStatement();
-      ResultSet var5 = var4.executeQuery(var3);
-      int var6 = 0;
-      if (var5.next()) {
-         var6 = var5.getInt(1);
+   public void init(DataSource ds) throws Exception {
+      this.dataSource = ds;
+      Connection connection = ds.getConnection();
+      String text = "SELECT COUNT(*) FROM User_Tables WHERE table_name = 'URULE_KP_STORE'";
+      Statement statement = connection.createStatement();
+      ResultSet resultSet = statement.executeQuery(text);
+      int number = 0;
+      if (resultSet.next()) {
+         number = resultSet.getInt(1);
       }
 
-      var5.close();
-      if (var6 == 0) {
-         var4.execute("CREATE TABLE URULE_KP_STORE(ID_ VARCHAR2(60) PRIMARY KEY,UPDATE_DATE_ NUMBER NOT NULL,CREATE_USER_ VARCHAR2(60),DATA_ BLOB)");
+      resultSet.close();
+      if (number == 0) {
+         statement.execute("CREATE TABLE URULE_KP_STORE(ID_ VARCHAR2(60) PRIMARY KEY,UPDATE_DATE_ NUMBER NOT NULL,CREATE_USER_ VARCHAR2(60),DATA_ BLOB)");
       }
 
-      var4.close();
-      var2.close();
+      statement.close();
+      connection.close();
    }
 
    @Override
    public DbService getDbService() {
-      return new OracleDbService(this.b);
+      return new OracleDbService(this.dataSource);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.toLowerCase().indexOf("oracle") > -1;
+   public boolean support(String dbname) {
+      return dbname.toLowerCase().indexOf("oracle") > -1;
    }
 }

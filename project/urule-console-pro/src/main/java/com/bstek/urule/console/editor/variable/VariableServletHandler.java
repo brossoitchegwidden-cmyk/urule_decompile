@@ -26,64 +26,64 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 
 public class VariableServletHandler extends ApiServletHandler {
-   public void excel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      InputStream var3 = FileUtils.uploadFile(var1).getInputStream();
-      List var4 = ExcelImportUtils.parseSheets(var3);
-      Map var5 = ExcelImportUtils.parseVariables(var4);
-      var3.close();
-      this.a(var2, var5);
+   public void excel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      InputStream inputStream = FileUtils.uploadFile(req).getInputStream();
+      List sheets = ExcelImportUtils.parseSheets(inputStream);
+      Map variables = ExcelImportUtils.parseVariables(sheets);
+      inputStream.close();
+      this.writeObjectToJson(resp, variables);
    }
 
-   public void importXml(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      DiskFileItemFactory var3 = new DiskFileItemFactory();
-      ServletFileUpload var4 = new ServletFileUpload(var3);
-      InputStream var5 = null;
+   public void importXml(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory();
+      ServletFileUpload servletFileUpload = new ServletFileUpload(diskFileItemFactory);
+      InputStream inputStream = null;
 
       try {
-         List var6 = var4.parseRequest(var1);
-         if (var6.size() != 1) {
+         List request = servletFileUpload.parseRequest(req);
+         if (request.size() != 1) {
             throw new ServletException("Upload xml file is invalid.");
          }
 
-         FileItem var7 = (FileItem)var6.get(0);
-         var5 = var7.getInputStream();
-         String var8 = IOUtils.toString(var5, "utf-8");
-         ArrayList var9 = new ArrayList();
-         Document var10 = DocumentHelper.parseText(var8);
-         Element var11 = var10.getRootElement();
-         String var12 = var11.attributeValue("clazz");
+         FileItem fileItem = (FileItem)request.get(0);
+         inputStream = fileItem.getInputStream();
+         String text2 = IOUtils.toString(inputStream, "utf-8");
+         ArrayList items = new ArrayList();
+         Document text = DocumentHelper.parseText(text2);
+         Element rootElement = text.getRootElement();
+         String text3 = rootElement.attributeValue("clazz");
 
-         for(Object var14 : var11.elements()) {
-            if (var14 != null && var14 instanceof Element) {
-               Element var15 = (Element)var14;
-               Variable var16 = new Variable();
-               var16.setAct(Act.InOut);
-               var16.setUuid(UUID.randomUUID().toString());
-               var16.setDefaultValue(var15.attributeValue("defaultValue"));
-               var16.setLabel(var15.attributeValue("label"));
-               var16.setName(var15.attributeValue("name"));
-               var16.setType(Datatype.valueOf(var15.attributeValue("type")));
-               var9.add(var16);
+         for(Object objectValue : rootElement.elements()) {
+            if (objectValue != null && objectValue instanceof Element) {
+               Element element = (Element)objectValue;
+               Variable variable = new Variable();
+               variable.setAct(Act.InOut);
+               variable.setUuid(UUID.randomUUID().toString());
+               variable.setDefaultValue(element.attributeValue("defaultValue"));
+               variable.setLabel(element.attributeValue("label"));
+               variable.setName(element.attributeValue("name"));
+               variable.setType(Datatype.valueOf(element.attributeValue("type")));
+               items.add(variable);
             }
          }
 
-         HashMap var22 = new HashMap();
-         var22.put("clazz", var12);
-         var22.put("variables", var9);
-         this.a(var2, var22);
-      } catch (Exception var20) {
-         throw new ServletException(var20);
+         HashMap valuesByKey = new HashMap();
+         valuesByKey.put("clazz", text3);
+         valuesByKey.put("variables", items);
+         this.writeObjectToJson(resp, valuesByKey);
+      } catch (Exception exception) {
+         throw new ServletException(exception);
       } finally {
-         IOUtils.closeQuietly(var5);
+         IOUtils.closeQuietly(inputStream);
       }
 
    }
 
-   public void generateFields(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("clazz");
-      Class var4 = ClassUtils.getTargetClass(var3);
-      List var5 = ClassUtils.classToVariables(var4);
-      this.a(var2, var5);
+   public void generateFields(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("clazz");
+      Class targetClass = ClassUtils.getTargetClass(parameter);
+      List items = ClassUtils.classToVariables(targetClass);
+      this.writeObjectToJson(resp, items);
    }
 
    public String url() {

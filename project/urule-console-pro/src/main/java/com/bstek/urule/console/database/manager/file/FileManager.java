@@ -7,35 +7,50 @@ public interface FileManager {
    long ROOT_FILE_ID = 0L;
    FileManager ins = new FileManagerImpl();
 
-   RuleFile get(long var1);
+   /**获取规则文件*/
+   RuleFile get(long id);
 
-   void add(RuleFile var1);
+   /**新增规则文件*/
+   void add(RuleFile file);
 
-   void update(RuleFile var1);
+   /**更新规则文件(文件同步使用)*/
+   void update(RuleFile file);
 
-   void remove(long var1);
+   /**删除规则文件*/
+   void remove(long id);
 
-   void rename(long var1, String var3, String var4);
+   /**重命名规则文件*/
+   void rename(long id, String account, String newName);
 
-   void updateDeleteFlag(long var1, boolean var3, String var4);
+   /**设置文件删除标记*/
+   void updateDeleteFlag(long id, boolean deleted, String account);
 
-   boolean checkExist(long var1, long var3, String var5, String var6);
+   /**检测规则文件是否存在*/
+   boolean checkExist(long projectId, long parentId, String type, String name);
 
-   void changeParent(long var1, long var3);
+   /**移动规则文件*/
+   void changeParent(long id, long newDirId);
 
-   List list(long var1, long var3);
+   /**查询指定父节点指定项目下的文件列表*/
+   List list(long projectId, long parentId);
 
-   List list(long var1, long var3, String var5);
+   /**查询指定父节点指定项目指定类型下的文件列表*/
+   List list(long projectId, long parentId, String type);
 
-   String loadContent(long var1);
+   /**加载规则文件xml信息*/
+   String loadContent(long id);
 
-   void updateContent(long var1, String var3, String var4);
+   /**更新规则文件xml配置*/
+   void updateContent(long id, String account, String content);
 
-   void lock(long var1, String var3);
+   /**锁定文件*/
+   void lock(long id, String userId);
 
-   void unlock(long var1, String var3, String var4);
+   /**解锁文件*/
+   void unlock(long id, String version, String account);
 
-   void deleteByProjectId(long var1);
+   /**删除指定项目下的所有规则文件*/
+   void deleteByProjectId(long projectId);
 
    FileQuery newQuery();
 

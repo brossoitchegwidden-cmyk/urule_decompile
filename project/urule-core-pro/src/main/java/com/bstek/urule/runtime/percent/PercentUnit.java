@@ -7,59 +7,59 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PercentUnit {
-   private long a;
-   private int b;
-   private String c;
-   private String d;
-   private Map<String, Branch> e = new ConcurrentHashMap<>();
+   private long total;
+   private int unitId;
+   private String flowId;
+   private String decisionNodeName;
+   private Map<String, Branch> branchesByPath = new ConcurrentHashMap<>();
 
-   public Branch getBranch(DecisionItem var1) {
-      String var2 = this.c + "." + this.d + "." + var1.getTo();
-      if (this.e.containsKey(var2)) {
-         return this.e.get(var2);
+   public Branch getBranch(DecisionItem item) {
+      String text = this.flowId + "." + this.decisionNodeName + "." + item.getTo();
+      if (this.branchesByPath.containsKey(text)) {
+         return this.branchesByPath.get(text);
       }
 
-      Branch var3 = new Branch();
-      var3.setName(var1.getTo());
-      var3.setPercent(var1.getPercent());
-      var3.setTotal(0L);
-      this.e.put(var2, var3);
-      return var3;
+      Branch branch = new Branch();
+      branch.setName(item.getTo());
+      branch.setPercent(item.getPercent());
+      branch.setTotal(0L);
+      this.branchesByPath.put(text, branch);
+      return branch;
    }
 
    public int getUnitId() {
-      return this.b;
+      return this.unitId;
    }
 
-   public void setUnitId(int var1) {
-      this.b = var1;
+   public void setUnitId(int unitId) {
+      this.unitId = unitId;
    }
 
    public long getTotal() {
-      return this.a;
+      return this.total;
    }
 
-   public void setTotal(long var1) {
-      this.a = var1;
+   public void setTotal(long total) {
+      this.total = total;
    }
 
    public String getFlowId() {
-      return this.c;
+      return this.flowId;
    }
 
-   public void setFlowId(String var1) {
-      this.c = var1;
+   public void setFlowId(String flowId) {
+      this.flowId = flowId;
    }
 
    public String getDecisionNodeName() {
-      return this.d;
+      return this.decisionNodeName;
    }
 
-   public void setDecisionNodeName(String var1) {
-      this.d = var1;
+   public void setDecisionNodeName(String decisionNodeName) {
+      this.decisionNodeName = decisionNodeName;
    }
 
    public Collection<Branch> getBranchs() {
-      return this.e.values();
+      return this.branchesByPath.values();
    }
 }

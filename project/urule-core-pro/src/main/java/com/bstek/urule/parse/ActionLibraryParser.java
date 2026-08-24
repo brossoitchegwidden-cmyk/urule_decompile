@@ -9,57 +9,57 @@ import java.util.UUID;
 import org.dom4j.Element;
 
 public class ActionLibraryParser implements Parser<ActionLibrary> {
-   public ActionLibrary parse(Element var1) {
-      ActionLibrary var2 = new ActionLibrary();
+   public ActionLibrary parse(Element element) {
+      ActionLibrary actionLibrary = new ActionLibrary();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("spring-bean")) {
-               var2.addSpringBean(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("spring-bean")) {
+               actionLibrary.addSpringBean(this.resolveSpringBean(element2));
             }
          }
       }
 
-      return var2;
+      return actionLibrary;
    }
 
-   private SpringBean a(Element var1) {
-      SpringBean var2 = new SpringBean();
-      var2.setId(var1.attributeValue("id"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setName(var1.attributeValue("name"));
+   private SpringBean resolveSpringBean(Element element) {
+      SpringBean springBean = new SpringBean();
+      springBean.setId(element.attributeValue("id"));
+      springBean.setUuid(element.attributeValue("uuid"));
+      springBean.setName(element.attributeValue("name"));
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            Method var6 = new Method();
-            var6.setMethodName(var5.attributeValue("method-name"));
-            var6.setUuid(var5.attributeValue("uuid"));
-            var6.setName(var5.attributeValue("name"));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            Method method = new Method();
+            method.setMethodName(element2.attributeValue("method-name"));
+            method.setUuid(element2.attributeValue("uuid"));
+            method.setName(element2.attributeValue("name"));
 
-            for (Object var8 : var5.elements()) {
-               if (var8 != null && var8 instanceof Element) {
-                  Element var9 = (Element)var8;
-                  if (var9.getName().equals("parameter")) {
-                     Parameter var10 = new Parameter();
-                     var10.setUuid(UUID.randomUUID().toString());
-                     var10.setName(var9.attributeValue("name"));
-                     var10.setType(Datatype.valueOf(var9.attributeValue("type")));
-                     var6.addParameter(var10);
+            for (Object objectValue2 : element2.elements()) {
+               if (objectValue2 != null && objectValue2 instanceof Element) {
+                  Element element3 = (Element)objectValue2;
+                  if (element3.getName().equals("parameter")) {
+                     Parameter parameter = new Parameter();
+                     parameter.setUuid(UUID.randomUUID().toString());
+                     parameter.setName(element3.attributeValue("name"));
+                     parameter.setType(Datatype.valueOf(element3.attributeValue("type")));
+                     method.addParameter(parameter);
                   }
                }
             }
 
-            var2.addMethod(var6);
+            springBean.addMethod(method);
          }
       }
 
-      return var2;
+      return springBean;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("action-library");
+   public boolean support(String name) {
+      return name.equals("action-library");
    }
 }

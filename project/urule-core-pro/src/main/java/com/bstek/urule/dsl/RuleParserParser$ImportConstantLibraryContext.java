@@ -9,15 +9,15 @@ public class RuleParserParser$ImportConstantLibraryContext extends ParserRuleCon
       return this.getToken(97, 0);
    }
 
-   public RuleParserParser$ImportConstantLibraryContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$ImportConstantLibraryContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 9;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitImportConstantLibrary(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitImportConstantLibrary(this) : parseTreeVisitor.visitChildren(this));
    }
 }

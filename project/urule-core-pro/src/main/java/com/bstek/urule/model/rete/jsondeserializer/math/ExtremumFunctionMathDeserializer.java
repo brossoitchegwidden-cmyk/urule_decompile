@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class ExtremumFunctionMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      ExtremumMath var2 = new ExtremumMath();
-      var2.setName(JsonUtils.getJsonValue(var1, "name"));
-      var2.setValue1(JsonUtils.parseValueNode(var1.get("value1")));
-      var2.setValue2(JsonUtils.parseValueNode(var1.get("value2")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      ExtremumMath extremumMath = new ExtremumMath();
+      extremumMath.setName(JsonUtils.getJsonValue(jsonNode, "name"));
+      extremumMath.setValue1(JsonUtils.parseValueNode(jsonNode.get("value1")));
+      extremumMath.setValue2(JsonUtils.parseValueNode(jsonNode.get("value2")));
+      return extremumMath;
    }
 
    @Override

@@ -8,15 +8,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class InputValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      SimpleValue var2 = new SimpleValue();
-      var2.setContent(JsonUtils.getJsonValue(var1, "content"));
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      return var2;
+   public Value deserialize(JsonNode jsonNode) {
+      SimpleValue simpleValue = new SimpleValue();
+      simpleValue.setContent(JsonUtils.getJsonValue(jsonNode, "content"));
+      simpleValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      return simpleValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.Input);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.Input);
    }
 }

@@ -8,15 +8,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class ParenValueDeserializer implements ValueDeserializer {
    @Override
-   public Value deserialize(JsonNode var1) {
-      ParenValue var2 = new ParenValue();
-      var2.setArithmetic(JsonUtils.parseComplexArithmetic(var1));
-      var2.setValue(JsonUtils.parseValue(var1));
-      return var2;
+   public Value deserialize(JsonNode jsonNode) {
+      ParenValue parenValue = new ParenValue();
+      parenValue.setArithmetic(JsonUtils.parseComplexArithmetic(jsonNode));
+      parenValue.setValue(JsonUtils.parseValue(jsonNode));
+      return parenValue;
    }
 
    @Override
-   public boolean support(ValueType var1) {
-      return var1.equals(ValueType.Paren);
+   public boolean support(ValueType type) {
+      return type.equals(ValueType.Paren);
    }
 }

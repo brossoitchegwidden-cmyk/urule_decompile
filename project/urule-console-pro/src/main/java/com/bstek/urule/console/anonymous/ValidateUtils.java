@@ -7,26 +7,26 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 public class ValidateUtils {
-   private static Logger a = Logger.getGlobal();
+   private static Logger logger = Logger.getGlobal();
 
-   public static boolean validateUserPwd(HttpServletRequest var0, String var1, String var2) {
-      String var3 = var0.getParameter("_u");
-      String var4 = var0.getParameter("_p");
-      if (var3 != null && var4 != null) {
+   public static boolean validateUserPwd(HttpServletRequest req, String defineUser, String definePwd) {
+      String parameter = req.getParameter("_u");
+      String parameter2 = req.getParameter("_p");
+      if (parameter != null && parameter2 != null) {
          try {
-            var3 = URLDecoder.decode(var3, "utf-8");
-            var4 = URLDecoder.decode(var4, "utf-8");
-            if (var3.equals(var1) && var4.equals(var2)) {
+            parameter = URLDecoder.decode(parameter, "utf-8");
+            parameter2 = URLDecoder.decode(parameter2, "utf-8");
+            if (parameter.equals(defineUser) && parameter2.equals(definePwd)) {
                return true;
             } else {
-               a.warning("User or password is invalid.");
+               ValidateUtils.logger.warning("User or password is invalid.");
                return false;
             }
-         } catch (UnsupportedEncodingException var6) {
-            throw new RuleException(var6);
+         } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            throw new RuleException(unsupportedEncodingException);
          }
       } else {
-         a.warning("User and password can not be null.");
+         ValidateUtils.logger.warning("User and password can not be null.");
          return false;
       }
    }

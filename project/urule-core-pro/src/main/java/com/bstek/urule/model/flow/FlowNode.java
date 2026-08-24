@@ -12,8 +12,8 @@ import org.springframework.context.ApplicationContext;
 public abstract class FlowNode implements Node {
    protected String name;
    protected String eventBean;
-   protected String x;
-   protected String y;
+   protected String xCoordinate;
+   protected String yCoordinate;
    protected String width;
    protected String height;
    protected static final String EXCEPTION_DATA = "_node_business_exception_";
@@ -22,79 +22,79 @@ public abstract class FlowNode implements Node {
    public FlowNode() {
    }
 
-   public FlowNode(String var1) {
-      this.name = var1;
+   public FlowNode(String name) {
+      this.name = name;
    }
 
-   public final void enter(Exception var1, FlowContext var2, FlowInstance var3) {
-      if (var1 == null || this instanceof ExceptionNode) {
-         if (var3.isDebug()) {
-            var2.getLogger().logFlowNode(this, var3.getProcessDefinition().getFile(), true);
+   public final void enter(Exception ex, FlowContext context, FlowInstance instance) {
+      if (ex == null || this instanceof ExceptionNode) {
+         if (instance.isDebug()) {
+            context.getLogger().logFlowNode(this, instance.getProcessDefinition().getFile(), true);
          }
 
-         this.enterNode(var1, var2, var3);
+         this.enterNode(ex, context, instance);
       }
    }
 
-   public abstract void enterNode(Exception var1, FlowContext var2, FlowInstance var3);
+   public abstract void enterNode(Exception ex, FlowContext context, FlowInstance instance);
 
-   protected void leave(String var1, FlowContext var2, FlowInstance var3, Exception var4) {
-      this.handleExeption(var4);
-      if (var3.isDebug()) {
-         var2.getLogger().logFlowNode(this, var3.getProcessDefinition().getFile(), false);
+   protected void leave(String connectionName, FlowContext context, FlowInstance instance, Exception ex) {
+      this.handleExeption(ex);
+      if (instance.isDebug()) {
+         context.getLogger().logFlowNode(this, instance.getProcessDefinition().getFile(), false);
       }
 
-      for (Connection var6 : this.connections) {
-         if (var1 != null) {
-            String var7 = var6.getName();
-            var7 = var7 == null ? var7 : var7.trim();
-            if (var1.trim().equals(var7)) {
-               var6.execute(var4, var2, var3);
+      for (Connection connection : this.connections) {
+         if (connectionName != null) {
+            String name = connection.getName();
+            name = name == null ? name : name.trim();
+            if (connectionName.trim().equals(name)) {
+               connection.execute(ex, context, instance);
                break;
             }
          } else if (this instanceof DecisionNode) {
-            if (var4 == null) {
+            if (ex == null) {
                break;
             }
 
-            var6.execute(var4, var2, var3);
+            connection.execute(ex, context, instance);
          } else {
-            var6.execute(var4, var2, var3);
-            if (var4 == null) {
+            connection.execute(ex, context, instance);
+            if (ex == null) {
                break;
             }
          }
       }
    }
 
-   private void handleExeption(Exception var1) {
-      if (var1 != null) {
-         boolean var2 = false;
+   private void handleExeption(Exception exception) {
+      if (exception != null) {
+         boolean flag = false;
 
-         for (Connection var4 : this.connections) {
-            FlowNode var5 = var4.getTo();
-            if (var5 instanceof ExceptionNode) {
-               var2 = true;
+         for (Connection connection : this.connections) {
+            FlowNode to = connection.getTo();
+            if (to instanceof ExceptionNode) {
+               flag = true;
                break;
             }
          }
 
-         if (!var2) {
-            StringBuilder var6 = new StringBuilder();
-            Utils.buildCause(var1, var6);
-            throw new RuntimeException(var6.toString(), var1);
+         if (!flag) {
+            StringBuilder stringBuilder = new StringBuilder();
+            Utils.buildCause(exception, stringBuilder);
+            throw new RuntimeException(stringBuilder.toString(), exception);
          }
       }
    }
 
-   protected void executeNodeEvent(EventType var1, FlowContext var2, ProcessInstance var3) {
+   protected void executeNodeEvent(EventType type, FlowContext context, ProcessInstance instance) {
       if (!StringUtils.isEmpty(this.eventBean)) {
-         ApplicationContext var4 = var2.getApplicationContext();
-         NodeEvent var5 = (NodeEvent)var4.getBean(this.eventBean);
-         if (var1.equals(EventType.enter)) {
-            var5.enter(this, var3, var2);
+         ApplicationContext applicationContext = context.getApplicationContext();
+         NodeEvent nodeEvent = (NodeEvent)applicationContext.getBean(this.eventBean);
+         if (type.equals(EventType.enter)) {
+            nodeEvent.enter(this, instance, context);
          } else {
-            var5.leave(this, var3, var2);
+            nodeEvent.leave(this, instance, context);
          }
       }
    }
@@ -105,55 +105,55 @@ public abstract class FlowNode implements Node {
       return this.connections;
    }
 
-   public void setConnections(List<Connection> var1) {
-      this.connections = var1;
+   public void setConnections(List<Connection> connections) {
+      this.connections = connections;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getEventBean() {
       return this.eventBean;
    }
 
-   public void setEventBean(String var1) {
-      this.eventBean = var1;
+   public void setEventBean(String eventBean) {
+      this.eventBean = eventBean;
    }
 
    public String getX() {
-      return this.x;
+      return this.xCoordinate;
    }
 
-   public void setX(String var1) {
-      this.x = var1;
+   public void setX(String text) {
+      this.xCoordinate = text;
    }
 
    public String getY() {
-      return this.y;
+      return this.yCoordinate;
    }
 
-   public void setY(String var1) {
-      this.y = var1;
+   public void setY(String text) {
+      this.yCoordinate = text;
    }
 
    public String getWidth() {
       return this.width;
    }
 
-   public void setWidth(String var1) {
-      this.width = var1;
+   public void setWidth(String width) {
+      this.width = width;
    }
 
    public String getHeight() {
       return this.height;
    }
 
-   public void setHeight(String var1) {
-      this.height = var1;
+   public void setHeight(String height) {
+      this.height = height;
    }
 }

@@ -21,106 +21,106 @@ public class MethodValue extends AbstractValue {
    @JsonIgnore
    @Override
    public String getId() {
-      StringBuilder var1 = new StringBuilder();
-      var1.append("[BEAN][" + this.beanId + "." + this.methodName + "]");
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("[BEAN][" + this.beanId + "." + this.methodName + "]");
       if (this.parameters != null) {
-         var1.append("(");
+         stringBuilder.append("(");
 
-         for (int var2 = 0; var2 < this.parameters.size(); var2++) {
-            if (var2 > 0) {
-               var1.append(",");
+         for (int index = 0; index < this.parameters.size(); index++) {
+            if (index > 0) {
+               stringBuilder.append(",");
             }
 
-            Parameter var3 = this.parameters.get(var2);
-            var1.append(var3.getId());
+            Parameter parameter = this.parameters.get(index);
+            stringBuilder.append(parameter.getId());
          }
 
-         var1.append(")");
+         stringBuilder.append(")");
       }
 
       if (this.arithmetic != null) {
-         var1.append(this.arithmetic.getId());
+         stringBuilder.append(this.arithmetic.getId());
       }
 
-      return var1.toString();
+      return stringBuilder.toString();
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      StringBuilder var1 = new StringBuilder();
-      var1.append("[BEAN][" + this.beanId + "." + this.methodName + "]");
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("[BEAN][" + this.beanId + "." + this.methodName + "]");
       if (this.parameters != null) {
-         var1.append("(");
+         stringBuilder.append("(");
 
-         for (int var2 = 0; var2 < this.parameters.size(); var2++) {
-            if (var2 > 0) {
-               var1.append(",");
+         for (int index = 0; index < this.parameters.size(); index++) {
+            if (index > 0) {
+               stringBuilder.append(",");
             }
 
-            Parameter var3 = this.parameters.get(var2);
-            var1.append(var3.getId());
+            Parameter parameter = this.parameters.get(index);
+            stringBuilder.append(parameter.getId());
          }
 
-         var1.append(")");
+         stringBuilder.append(")");
       }
 
-      return var1.toString();
+      return stringBuilder.toString();
    }
 
    public String getBeanId() {
       return this.beanId;
    }
 
-   public void setBeanId(String var1) {
-      this.beanId = var1;
+   public void setBeanId(String beanId) {
+      this.beanId = beanId;
    }
 
    public String getBeanLabel() {
       return this.beanLabel;
    }
 
-   public void setBeanLabel(String var1) {
-      this.beanLabel = var1;
+   public void setBeanLabel(String beanLabel) {
+      this.beanLabel = beanLabel;
    }
 
    public String getMethodLabel() {
       return this.methodLabel;
    }
 
-   public void setMethodLabel(String var1) {
-      this.methodLabel = var1;
+   public void setMethodLabel(String methodLabel) {
+      this.methodLabel = methodLabel;
    }
 
    public String getMethodName() {
       return this.methodName;
    }
 
-   public void setMethodName(String var1) {
-      this.methodName = var1;
+   public void setMethodName(String methodName) {
+      this.methodName = methodName;
    }
 
    public List<Parameter> getParameters() {
       return this.parameters;
    }
 
-   public void setParameters(List<Parameter> var1) {
-      this.parameters = var1;
+   public void setParameters(List<Parameter> parameters) {
+      this.parameters = parameters;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 }

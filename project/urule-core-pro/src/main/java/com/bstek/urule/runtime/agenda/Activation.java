@@ -8,5 +8,5 @@ public interface Activation extends Comparable<Activation> {
 
    Rule convertToElseRule();
 
-   void execute(Context var1);
+   void execute(Context context);
 }

@@ -9,27 +9,27 @@ public class RuleParserParser$RuleSetHeaderContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$ResourceContext.class);
    }
 
-   public RuleParserParser$ResourceContext resource(int var1) {
-      return (RuleParserParser$ResourceContext)this.getRuleContext(RuleParserParser$ResourceContext.class, var1);
+   public RuleParserParser$ResourceContext resource(int number) {
+      return (RuleParserParser$ResourceContext)this.getRuleContext(RuleParserParser$ResourceContext.class, number);
    }
 
    public List<RuleParserParser$FunctionImportContext> functionImport() {
       return this.getRuleContexts(RuleParserParser$FunctionImportContext.class);
    }
 
-   public RuleParserParser$FunctionImportContext functionImport(int var1) {
-      return (RuleParserParser$FunctionImportContext)this.getRuleContext(RuleParserParser$FunctionImportContext.class, var1);
+   public RuleParserParser$FunctionImportContext functionImport(int number) {
+      return (RuleParserParser$FunctionImportContext)this.getRuleContext(RuleParserParser$FunctionImportContext.class, number);
    }
 
-   public RuleParserParser$RuleSetHeaderContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$RuleSetHeaderContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 1;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitRuleSetHeader(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitRuleSetHeader(this) : parseTreeVisitor.visitChildren(this));
    }
 }

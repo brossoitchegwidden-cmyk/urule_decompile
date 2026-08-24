@@ -4,9 +4,9 @@ public class InstanceData {
    private BranchCounter branchCounter;
    private int parallelInstanceCount;
 
-   public InstanceData(BranchCounter var1, int var2) {
-      this.branchCounter = var1;
-      this.parallelInstanceCount = var2;
+   public InstanceData(BranchCounter branchCounter, int parallelInstanceCount) {
+      this.branchCounter = branchCounter;
+      this.parallelInstanceCount = parallelInstanceCount;
    }
 
    public int getParallelInstanceCount() {

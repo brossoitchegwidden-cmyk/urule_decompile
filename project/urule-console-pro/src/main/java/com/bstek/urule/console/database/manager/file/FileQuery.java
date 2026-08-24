@@ -3,33 +3,33 @@ package com.bstek.urule.console.database.manager.file;
 import java.util.List;
 
 public interface FileQuery {
-   FileQuery id(long var1);
+   FileQuery id(long id);
 
-   FileQuery ids(List var1);
+   FileQuery ids(List ids);
 
-   FileQuery name(String var1);
+   FileQuery name(String name);
 
-   FileQuery nameLike(String var1);
+   FileQuery nameLike(String name);
 
-   FileQuery type(String var1);
+   FileQuery type(String type);
 
-   FileQuery types(String[] var1);
+   FileQuery types(String[] types);
 
-   FileQuery lockedUser(String var1);
+   FileQuery lockedUser(String lockedUser);
 
-   FileQuery updateUser(String var1);
+   FileQuery updateUser(String updateUser);
 
-   FileQuery deleted(boolean var1);
+   FileQuery deleted(boolean deleted);
 
-   FileQuery removeEmpty(boolean var1);
+   FileQuery removeEmpty(boolean removeEmpty);
 
-   FileQuery containCommonProject(boolean var1);
+   FileQuery containCommonProject(boolean containCommonProject);
 
-   FileQuery desc(String var1);
+   FileQuery desc(String property);
 
-   FileQuery asc(String var1);
+   FileQuery asc(String property);
 
-   List tree(Long var1);
+   List tree(Long projectId);
 
-   List list(Long var1);
+   List list(Long projectId);
 }

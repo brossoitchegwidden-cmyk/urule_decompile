@@ -1,27 +1,27 @@
 package com.bstek.urule.console.editor.diagram;
 
 public class Edge {
-   private int a;
-   private int b;
+   private int from;
+   private int to;
 
-   public Edge(int var1, int var2) {
-      this.a = var1;
-      this.b = var2;
+   public Edge(int from, int to) {
+      this.from = from;
+      this.to = to;
    }
 
    public int getFrom() {
-      return this.a;
+      return this.from;
    }
 
-   public void setFrom(int var1) {
-      this.a = var1;
+   public void setFrom(int from) {
+      this.from = from;
    }
 
    public int getTo() {
-      return this.b;
+      return this.to;
    }
 
-   public void setTo(int var1) {
-      this.b = var1;
+   public void setTo(int to) {
+      this.to = to;
    }
 }

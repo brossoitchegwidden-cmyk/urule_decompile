@@ -3,49 +3,49 @@ package com.bstek.urule.console.editor.packet.scenario;
 import java.util.List;
 
 public class ResultWrapper {
-   private String a;
-   private String b;
-   private long c;
-   private long d;
-   private List e;
+   private String scenarioName;
+   private String packageName;
+   private long totalTime;
+   private long prepareTime;
+   private List resultList;
 
    public String getScenarioName() {
-      return this.a;
+      return this.scenarioName;
    }
 
-   public void setScenarioName(String var1) {
-      this.a = var1;
+   public void setScenarioName(String scenarioName) {
+      this.scenarioName = scenarioName;
    }
 
    public String getPackageName() {
-      return this.b;
+      return this.packageName;
    }
 
-   public void setPackageName(String var1) {
-      this.b = var1;
+   public void setPackageName(String packageName) {
+      this.packageName = packageName;
    }
 
    public long getTotalTime() {
-      return this.c;
+      return this.totalTime;
    }
 
-   public void setTotalTime(long var1) {
-      this.c = var1;
+   public void setTotalTime(long totalTime) {
+      this.totalTime = totalTime;
    }
 
    public long getPrepareTime() {
-      return this.d;
+      return this.prepareTime;
    }
 
-   public void setPrepareTime(long var1) {
-      this.d = var1;
+   public void setPrepareTime(long prepareTime) {
+      this.prepareTime = prepareTime;
    }
 
    public List getResultList() {
-      return this.e;
+      return this.resultList;
    }
 
-   public void setResultList(List var1) {
-      this.e = var1;
+   public void setResultList(List resultList) {
+      this.resultList = resultList;
    }
 }

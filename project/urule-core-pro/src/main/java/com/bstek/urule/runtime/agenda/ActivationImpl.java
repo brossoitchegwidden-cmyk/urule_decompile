@@ -18,127 +18,127 @@ import java.util.Map;
 import java.util.Set;
 
 public class ActivationImpl implements Activation {
-   private Rule a;
-   private Set<Criteria> b;
-   private Map<String, Object> c;
+   private Rule rule;
+   private Set<Criteria> criterias;
+   private Map<String, Object> factMap;
 
-   public ActivationImpl(Rule var1) {
-      this.a = var1;
+   public ActivationImpl(Rule rule) {
+      this.rule = rule;
    }
 
    @Override
-   public void execute(Context var1) {
+   public void execute(Context context) {
       try {
-         if (this.a.getDebug() != null && this.a.getDebug()) {
-            var1.getLogger().logExecuteRule(this.a);
+         if (this.rule.getDebug() != null && this.rule.getDebug()) {
+            context.getLogger().logExecuteRule(this.rule);
          }
 
-         var1.cleanTipMsg();
-         var1.addTipMsg("执行规则[" + this.a.getName() + "(" + this.a.getFile() + ")]动作");
-         ((ExecutionContextImpl)var1).setCurrentRule(this.a);
-         Date var2 = new Date();
-         Date var7 = this.a.getEffectiveDate();
-         if (var7 == null || var7.compareTo(var2) <= 0) {
-            Date var4 = this.a.getExpiresDate();
-            if (var4 == null || var4.compareTo(var2) >= 0) {
-               ((ExecutionContextImpl)var1).setCurrentRuleFactMap(this.c);
-               ((ExecutionContextImpl)var1).setCurrentRuleCriterias(this.b);
-               if (this.a instanceof LoopRule) {
-                  LoopRule var5 = (LoopRule)this.a;
-                  var5.execute(var1, this.c);
-               } else if (this.a instanceof ScoreRule) {
-                  ScoreRule var8 = (ScoreRule)this.a;
-                  var8.execute(var1, this.c);
+         context.cleanTipMsg();
+         context.addTipMsg("执行规则[" + this.rule.getName() + "(" + this.rule.getFile() + ")]动作");
+         ((ExecutionContextImpl)context).setCurrentRule(this.rule);
+         Date date = new Date();
+         Date effectiveDate = this.rule.getEffectiveDate();
+         if (effectiveDate == null || effectiveDate.compareTo(date) <= 0) {
+            Date expiresDate = this.rule.getExpiresDate();
+            if (expiresDate == null || expiresDate.compareTo(date) >= 0) {
+               ((ExecutionContextImpl)context).setCurrentRuleFactMap(this.factMap);
+               ((ExecutionContextImpl)context).setCurrentRuleCriterias(this.criterias);
+               if (this.rule instanceof LoopRule) {
+                  LoopRule loopRule = (LoopRule)this.rule;
+                  loopRule.execute(context, this.factMap);
+               } else if (this.rule instanceof ScoreRule) {
+                  ScoreRule scoreRule = (ScoreRule)this.rule;
+                  scoreRule.execute(context, this.factMap);
                } else {
-                  this.a(var1, this.c);
+                  this.executeActions(context, this.factMap);
                }
 
-               var1.cleanTipMsg();
+               context.cleanTipMsg();
             }
          }
-      } catch (Exception var6) {
-         String var3 = var1.getTipMsg();
-         throw new RuleAssertException(var3, var6);
+      } catch (Exception exception) {
+         String tipMsg = context.getTipMsg();
+         throw new RuleAssertException(tipMsg, exception);
       }
    }
 
-   private void a(Context var1, Map<String, Object> var2) {
-      Rhs var3 = this.a.getRhs();
-      if (var3 != null) {
-         List var4 = var3.getActions();
-         if (var4 != null) {
-            int var5 = 1;
+   private void executeActions(Context context, Map<String, Object> valuesByKey) {
+      Rhs rhs = this.rule.getRhs();
+      if (rhs != null) {
+         List actions = rhs.getActions();
+         if (actions != null) {
+            int number = 1;
 
-            for (Action var7 : (Iterable<Action>)(Iterable<?>)(var4)) {
-               if (this.a.getDebug() != null) {
-                  var7.setDebug(this.a.getDebug());
+            for (Action action : (Iterable<Action>)(Iterable<?>)(actions)) {
+               if (this.rule.getDebug() != null) {
+                  action.setDebug(this.rule.getDebug());
                }
 
-               var1.addTipMsg("动作" + var5 + "." + this.a(var7.getActionType()) + "");
-               var7.execute(var1, var2);
-               var5++;
+               context.addTipMsg("动作" + number + "." + this.getActionDescription(action.getActionType()) + "");
+               action.execute(context, valuesByKey);
+               number++;
             }
          }
       }
    }
 
-   private String a(ActionType var1) {
-      String var2 = "未知";
-      switch (var1) {
+   private String getActionDescription(ActionType actionType) {
+      String text = "未知";
+      switch (actionType) {
          case ConsolePrint:
-            var2 = "控制台输出";
+            text = "控制台输出";
             break;
          case ExecuteCommonFunction:
-            var2 = "执行函数";
+            text = "执行函数";
             break;
          case ExecuteMethod:
-            var2 = "执行方法";
+            text = "执行方法";
             break;
          case Scoring:
-            var2 = "评分卡得分计算";
+            text = "评分卡得分计算";
             break;
          case VariableAssign:
-            var2 = "变量赋值";
+            text = "变量赋值";
             break;
          case TemplateAction:
             throw new RuleException("Unsupport action type:" + ActionType.TemplateAction);
       }
 
-      return var2;
+      return text;
    }
 
    @Override
    public Rule convertToElseRule() {
-      this.a = Utils.buildElseRule(this.a);
-      return this.a;
+      this.rule = Utils.buildElseRule(this.rule);
+      return this.rule;
    }
 
-   public void setCriterias(Set<Criteria> var1) {
-      this.b = var1;
+   public void setCriterias(Set<Criteria> criterias) {
+      this.criterias = criterias;
    }
 
-   public void setFactMap(Map<String, Object> var1) {
-      this.c = var1;
+   public void setFactMap(Map<String, Object> factMap) {
+      this.factMap = factMap;
    }
 
    @Override
    public Rule getRule() {
-      return this.a;
+      return this.rule;
    }
 
-   public void setRule(Rule var1) {
-      this.a = var1;
+   public void setRule(Rule rule) {
+      this.rule = rule;
    }
 
-   public int compareTo(Activation var1) {
-      Integer var2 = var1.getRule().getSalience();
-      Integer var3 = this.a.getSalience();
-      if (var2 != null && var3 != null) {
-         return var2 - var3;
-      } else if (var2 != null) {
+   public int compareTo(Activation activation) {
+      Integer salience = activation.getRule().getSalience();
+      Integer salience2 = this.rule.getSalience();
+      if (salience != null && salience2 != null) {
+         return salience - salience2;
+      } else if (salience != null) {
          return 1;
       } else {
-         return var3 != null ? -1 : 0;
+         return salience2 != null ? -1 : 0;
       }
    }
 }

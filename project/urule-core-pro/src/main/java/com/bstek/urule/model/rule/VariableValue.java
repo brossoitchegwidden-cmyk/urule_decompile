@@ -17,48 +17,48 @@ public class VariableValue extends AbstractValue {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getVariableName() {
       return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.variableName = var1;
+   public void setVariableName(String variableName) {
+      this.variableName = variableName;
    }
 
    public String getVariableLabel() {
       return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.variableLabel = var1;
+   public void setVariableLabel(String variableLabel) {
+      this.variableLabel = variableLabel;
    }
 
    public String getVariableCategory() {
       return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.variableCategory = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    public Datatype getDatatype() {
       return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.datatype = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    @Override
@@ -69,19 +69,19 @@ public class VariableValue extends AbstractValue {
    @JsonIgnore
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Variable" : "变量";
-      String var2 = "[" + var1 + "]" + this.variableCategory + "." + this.variableLabel;
+      String text = LocaleHolder.isEnglish() ? "Variable" : "变量";
+      String id = "[" + text + "]" + this.variableCategory + "." + this.variableLabel;
       if (this.arithmetic != null) {
-         var2 = var2 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var2;
+      return id;
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Variable" : "变量";
-      return "[" + var1 + "]" + this.variableCategory + "." + this.variableLabel;
+      String text = LocaleHolder.isEnglish() ? "Variable" : "变量";
+      return "[" + text + "]" + this.variableCategory + "." + this.variableLabel;
    }
 }

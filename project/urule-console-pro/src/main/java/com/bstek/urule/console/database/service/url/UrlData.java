@@ -3,19 +3,19 @@ package com.bstek.urule.console.database.service.url;
 import java.util.List;
 
 public class UrlData {
-   private List a;
-   private boolean b;
+   private List entries;
+   private boolean provider;
 
-   public UrlData(List var1, boolean var2) {
-      this.a = var1;
-      this.b = var2;
+   public UrlData(List list, boolean provider) {
+      this.entries = list;
+      this.provider = provider;
    }
 
    public List getList() {
-      return this.a;
+      return this.entries;
    }
 
    public boolean isProvider() {
-      return this.b;
+      return this.provider;
    }
 }

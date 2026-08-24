@@ -6,19 +6,27 @@ import java.util.List;
 public interface ProjectRoleService {
    ProjectRoleServiceImpl ins = new ProjectRoleServiceImpl();
 
-   List loadRoles(long var1);
+   /**获取项目下的角色列表*/
+   List loadRoles(long projectId);
 
-   List users(long var1, long var3);
+   /**获取角色的用户列表*/
+   List users(long projectId, long roleId);
 
-   void add(ProjectRole var1);
+   /**插入角色对象*/
+   void add(ProjectRole role);
 
-   void update(ProjectRole var1);
+   /**更新角色对象*/
+   void update(ProjectRole role);
 
-   void remove(Long var1);
+   /**删除角色对象*/
+   void remove(Long id);
 
-   void addUserRole(long var1, String var3, long var4);
+   /**添加用户角色关系*/
+   void addUserRole(long projectId, String userId, long roleId);
 
-   void removeUserRole(String var1, long var2);
+   /**删除用户角色关系*/
+   void removeUserRole(String userId, long roleId);
 
-   List loadUserRoles(long var1, String var3);
+   /**获取用户的角色列表*/
+   List loadUserRoles(long projectId, String account);
 }

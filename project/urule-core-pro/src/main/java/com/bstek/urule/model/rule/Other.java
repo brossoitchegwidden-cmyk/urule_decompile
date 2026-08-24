@@ -11,15 +11,15 @@ public class Other {
       return this.actions;
    }
 
-   public void setActions(List<Action> var1) {
-      this.actions = var1;
+   public void setActions(List<Action> actions) {
+      this.actions = actions;
    }
 
-   public void addAction(Action var1) {
+   public void addAction(Action action) {
       if (this.actions == null) {
          this.actions = new ArrayList<>();
       }
 
-      this.actions.add(var1);
+      this.actions.add(action);
    }
 }

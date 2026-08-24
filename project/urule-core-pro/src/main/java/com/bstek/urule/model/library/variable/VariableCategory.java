@@ -26,48 +26,48 @@ public class VariableCategory {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public CategoryType getType() {
       return this.type;
    }
 
-   public void setType(CategoryType var1) {
-      this.type = var1;
+   public void setType(CategoryType type) {
+      this.type = type;
    }
 
    public Act getAct() {
       return this.act;
    }
 
-   public void setAct(Act var1) {
-      this.act = var1;
+   public void setAct(Act act) {
+      this.act = act;
    }
 
    public String getClazz() {
       return this.clazz;
    }
 
-   public void setClazz(String var1) {
-      this.clazz = var1;
+   public void setClazz(String clazz) {
+      this.clazz = clazz;
    }
 
    public String getFile() {
       return this.file;
    }
 
-   public void setFile(String var1) {
-      this.file = var1;
+   public void setFile(String file) {
+      this.file = file;
    }
 
    public List<Variable> getVariables() {
@@ -75,41 +75,41 @@ public class VariableCategory {
    }
 
    public VariableCategory newVariableCategoryWithDefaultValue() {
-      VariableCategory var1 = new VariableCategory();
-      var1.setName(this.name);
-      var1.setAct(this.act);
-      var1.setClazz(this.clazz);
-      var1.setFile(this.file);
-      var1.setType(this.type);
+      VariableCategory variableCategory = new VariableCategory();
+      variableCategory.setName(this.name);
+      variableCategory.setAct(this.act);
+      variableCategory.setClazz(this.clazz);
+      variableCategory.setFile(this.file);
+      variableCategory.setType(this.type);
 
-      for (Variable var3 : this.variables) {
-         if (var3.getDefaultValue() != null) {
-            var1.addVariable(var3);
+      for (Variable variable : this.variables) {
+         if (variable.getDefaultValue() != null) {
+            variableCategory.addVariable(variable);
          }
       }
 
-      return var1;
+      return variableCategory;
    }
 
-   public void setVariables(List<Variable> var1) {
-      this.variables = var1;
+   public void setVariables(List<Variable> variables) {
+      this.variables = variables;
       this.variableNames.clear();
       this.variableLabels.clear();
 
-      for (Variable var3 : var1) {
-         this.variableNames.put(var3.getName(), var3);
-         this.variableLabels.put(var3.getLabel(), var3);
+      for (Variable variable : variables) {
+         this.variableNames.put(variable.getName(), variable);
+         this.variableLabels.put(variable.getLabel(), variable);
       }
    }
 
-   public void addVariable(Variable var1) {
-      this.variables.add(var1);
-      if (StringUtils.isNotBlank(var1.getName())) {
-         this.variableNames.put(var1.getName(), var1);
+   public void addVariable(Variable variable) {
+      this.variables.add(variable);
+      if (StringUtils.isNotBlank(variable.getName())) {
+         this.variableNames.put(variable.getName(), variable);
       }
 
-      if (StringUtils.isNotBlank(var1.getLabel())) {
-         this.variableLabels.put(var1.getLabel(), var1);
+      if (StringUtils.isNotBlank(variable.getLabel())) {
+         this.variableLabels.put(variable.getLabel(), variable);
       }
    }
 
@@ -117,15 +117,15 @@ public class VariableCategory {
       return this.variableNames;
    }
 
-   public void setVariableNames(Map<String, Variable> var1) {
-      this.variableNames = var1;
+   public void setVariableNames(Map<String, Variable> variableNames) {
+      this.variableNames = variableNames;
    }
 
    public Map<String, Variable> getVariableLabels() {
       return this.variableLabels;
    }
 
-   public void setVariableLabels(Map<String, Variable> var1) {
-      this.variableLabels = var1;
+   public void setVariableLabels(Map<String, Variable> variableLabels) {
+      this.variableLabels = variableLabels;
    }
 }

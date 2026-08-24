@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class LogMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      LogMath var2 = new LogMath();
-      var2.setBaseValue(JsonUtils.parseValueNode(var1.get("baseValue")));
-      var2.setValue(JsonUtils.parseValueNode(var1.get("value")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      LogMath logMath = new LogMath();
+      logMath.setBaseValue(JsonUtils.parseValueNode(jsonNode.get("baseValue")));
+      logMath.setValue(JsonUtils.parseValueNode(jsonNode.get("value")));
+      return logMath;
    }
 
    @Override

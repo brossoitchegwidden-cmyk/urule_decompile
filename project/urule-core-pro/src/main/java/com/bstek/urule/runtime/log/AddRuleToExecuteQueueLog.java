@@ -4,81 +4,77 @@ import com.bstek.urule.model.rule.Rule;
 import java.util.Date;
 
 public class AddRuleToExecuteQueueLog extends DataLog {
-   private static final String b = "规则 【%s】(%s)，已被添加到执行队列";
-   private static final String c = "The rule 【%s】(%s) has been added to the execution queue";
-   private static final String d = "规则 【%s】(%s)，未被添加到执行队列,因当前匹配操作在工作区更新情况下发生，且当前规则在执行队列中已存在！";
-   private static final String e = "Rule 【%s】(%s)，which was not added to the execution queue because the current match operation occurred with a workspace update, and the current rule already exists in the execution queue!";
-   private Integer f;
-   private String g;
-   private String h;
-   private Date i;
-   private Date j;
-   private Boolean k;
-   private Boolean l;
-   private String m;
-   private String n;
-   private boolean o;
+   private Integer salience;
+   private String ruleName;
+   private String ruleFile;
+   private Date effectiveDate;
+   private Date expiresDate;
+   private Boolean enabled;
+   private Boolean debug;
+   private String activationGroup;
+   private String agendaGroup;
+   private boolean add;
 
-   public AddRuleToExecuteQueueLog(Rule var1, boolean var2) {
-      this.g = var1.getName();
-      this.h = var1.getFile();
-      this.f = var1.getSalience();
-      this.i = var1.getEffectiveDate();
-      this.j = var1.getExpiresDate();
-      this.k = var1.getEnabled();
-      this.l = var1.getDebug();
-      this.m = var1.getMutexGroup();
-      this.n = var1.getPendedGroup();
-      this.o = var2;
-      String var3 = "";
-      if (var2) {
-         var3 = this.a() ? "The rule 【%s】(%s) has been added to the execution queue" : "规则 【%s】(%s)，已被添加到执行队列";
+   public AddRuleToExecuteQueueLog(Rule rule, boolean add) {
+      this.ruleName = rule.getName();
+      this.ruleFile = rule.getFile();
+      this.salience = rule.getSalience();
+      this.effectiveDate = rule.getEffectiveDate();
+      this.expiresDate = rule.getExpiresDate();
+      this.enabled = rule.getEnabled();
+      this.debug = rule.getDebug();
+      this.activationGroup = rule.getMutexGroup();
+      this.agendaGroup = rule.getPendedGroup();
+      this.add = add;
+      String text = "";
+      if (add) {
+         text = this.isEnglishLanguage() ? "The rule 【%s】(%s) has been added to the execution queue" : "规则 【%s】(%s)，已被添加到执行队列";
       } else {
-         var3 = this.a()
+         text = this.isEnglishLanguage()
             ? "Rule 【%s】(%s)，which was not added to the execution queue because the current match operation occurred with a workspace update, and the current rule already exists in the execution queue!"
             : "规则 【%s】(%s)，未被添加到执行队列,因当前匹配操作在工作区更新情况下发生，且当前规则在执行队列中已存在！";
       }
 
-      this.a = "》》》" + String.format(var3, var1.getName(), this.h);
+      this.msg = "》》》" + String.format(text, rule.getName(), this.ruleFile);
    }
 
    public String getRuleFile() {
-      return this.h;
+      return this.ruleFile;
    }
 
    public String getRuleName() {
-      return this.g;
+      return this.ruleName;
    }
 
    public Integer getSalience() {
-      return this.f;
+      return this.salience;
    }
 
    public String getActivationGroup() {
-      return this.m;
+      return this.activationGroup;
    }
 
    public String getAgendaGroup() {
-      return this.n;
+      return this.agendaGroup;
    }
 
    public Boolean getDebug() {
-      return this.l;
+      return this.debug;
    }
 
    public Date getEffectiveDate() {
-      return this.i;
+      return this.effectiveDate;
    }
 
    public Boolean getEnabled() {
-      return this.k;
+      return this.enabled;
    }
 
    public Date getExpiresDate() {
-      return this.j;
+      return this.expiresDate;
    }
 
    public boolean isAdd() {
-      return this.o;
+      return this.add;
    }
 }

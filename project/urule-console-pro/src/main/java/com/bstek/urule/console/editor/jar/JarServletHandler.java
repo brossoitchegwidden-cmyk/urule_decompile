@@ -23,19 +23,19 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class JarServletHandler extends ApiServletHandler {
-   private DynamicSpringConfigLoader e = ServiceUtils.getDynamicSpringConfigLoader();
-   private JarCacheAdapter f = null;
+   private DynamicSpringConfigLoader dynamicSpringConfigLoader = ServiceUtils.getDynamicSpringConfigLoader();
+   private JarCacheAdapter hostJarCacheAdapter = null;
 
    public JarCacheAdapter getJarCacheAdapter() {
-      if (this.f == null) {
+      if (this.hostJarCacheAdapter == null) {
          try {
-            this.f = (JarCacheAdapter)Utils.getApplicationContext().getBean(JarCacheAdapter.BEAN_ID);
-         } catch (NoSuchBeanDefinitionException var2) {
-            this.f = new HostJarCacheAdapter();
+            this.hostJarCacheAdapter = (JarCacheAdapter)Utils.getApplicationContext().getBean(JarCacheAdapter.BEAN_ID);
+         } catch (NoSuchBeanDefinitionException noSuchBeanDefinitionException) {
+            this.hostJarCacheAdapter = new HostJarCacheAdapter();
          }
       }
 
-      return this.f;
+      return this.hostJarCacheAdapter;
    }
 
    @URuleAuthorization(
@@ -43,20 +43,20 @@ public class JarServletHandler extends ApiServletHandler {
       model = "dynamicJar",
       code = "manager"
    )
-   public void deploy(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = this.e.buildDynamicJarsStoreDirectPath();
-      int var4 = DynamicJarManager.ins.createJarFiles(var3);
-      HashMap var5 = new HashMap();
-      String var6 = var1.getParameter("groupId");
-      if (var4 > 0) {
-         this.e.loadDynamicJars(var3);
-         List var7 = this.getJarCacheAdapter().loadDynamicJars(var6, UrlType.cluster);
-         List var8 = UrlService.ins.load(UrlType.client, var6).getList();
-         var5.put("clients", var8);
-         var5.put("result", var7);
+   public void deploy(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String dynamicJarsStoreDirectPath = this.dynamicSpringConfigLoader.buildDynamicJarsStoreDirectPath();
+      int jarFiles = DynamicJarManager.ins.createJarFiles(dynamicJarsStoreDirectPath);
+      HashMap valuesByKey = new HashMap();
+      String parameter = req.getParameter("groupId");
+      if (jarFiles > 0) {
+         this.dynamicSpringConfigLoader.loadDynamicJars(dynamicJarsStoreDirectPath);
+         List dynamicJars = this.getJarCacheAdapter().loadDynamicJars(parameter, UrlType.cluster);
+         List list = UrlService.ins.load(UrlType.client, parameter).getList();
+         valuesByKey.put("clients", list);
+         valuesByKey.put("result", dynamicJars);
       }
 
-      this.a(var2, var5);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    @URuleAuthorization(
@@ -64,29 +64,15 @@ public class JarServletHandler extends ApiServletHandler {
       model = "dynamicJar",
       code = "manager"
    )
-   public void sendToClients(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      List var4 = this.getJarCacheAdapter().loadDynamicJars(var3, UrlType.client);
-      this.a(var2, var4);
+   public void sendToClients(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      List dynamicJars = this.getJarCacheAdapter().loadDynamicJars(parameter, UrlType.client);
+      this.writeObjectToJson(resp, dynamicJars);
    }
 
-   public void load(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupId");
-      this.a(var2, DynamicJarManager.ins.newQuery().groupId(var3).list());
-   }
-
-   @URuleAuthorization(
-      authType = "group",
-      model = "dynamicJar",
-      code = "manager"
-   )
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      DynamicJar var3 = new DynamicJar();
-      var3.setGroupId(var1.getParameter("groupId"));
-      var3.setDesc(var1.getParameter("desc"));
-      var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      DynamicJarManager.ins.add(var3);
-      this.a(var2, var3);
+   public void load(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupId");
+      this.writeObjectToJson(resp, DynamicJarManager.ins.newQuery().groupId(parameter).list());
    }
 
    @URuleAuthorization(
@@ -94,12 +80,13 @@ public class JarServletHandler extends ApiServletHandler {
       model = "dynamicJar",
       code = "manager"
    )
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      DynamicJar var3 = new DynamicJar();
-      var3.setDesc(var1.getParameter("desc"));
-      var3.setId(Long.valueOf(var1.getParameter("id")));
-      var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      DynamicJarManager.ins.update(var3);
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      DynamicJar dynamicJar = new DynamicJar();
+      dynamicJar.setGroupId(req.getParameter("groupId"));
+      dynamicJar.setDesc(req.getParameter("desc"));
+      dynamicJar.setCreateUser(SecurityUtils.getLoginUsername(req));
+      DynamicJarManager.ins.add(dynamicJar);
+      this.writeObjectToJson(resp, dynamicJar);
    }
 
    @URuleAuthorization(
@@ -107,13 +94,12 @@ public class JarServletHandler extends ApiServletHandler {
       model = "dynamicJar",
       code = "manager"
    )
-   public void download(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      byte[] var5 = DynamicJarManager.ins.loadJar(var3);
-      DynamicJar var6 = DynamicJarManager.ins.load(var3);
-      ByteArrayInputStream var7 = new ByteArrayInputStream(var5);
-      FileUtils.downloadFile(var6.getName(), var7, var2);
-      IOUtils.closeQuietly(var7);
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      DynamicJar dynamicJar = new DynamicJar();
+      dynamicJar.setDesc(req.getParameter("desc"));
+      dynamicJar.setId(Long.valueOf(req.getParameter("id")));
+      dynamicJar.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      DynamicJarManager.ins.update(dynamicJar);
    }
 
    @URuleAuthorization(
@@ -121,18 +107,32 @@ public class JarServletHandler extends ApiServletHandler {
       model = "dynamicJar",
       code = "manager"
    )
-   public void upload(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      String var5 = SecurityUtils.getLoginUsername(var1);
-      UploadFile var6 = FileUtils.uploadFile(var1);
-      if (!var6.getName().toLowerCase().endsWith(".jar")) {
+   public void download(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      byte[] jar = DynamicJarManager.ins.loadJar(longValue);
+      DynamicJar dynamicJar = DynamicJarManager.ins.load(longValue);
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(jar);
+      FileUtils.downloadFile(dynamicJar.getName(), byteArrayInputStream, resp);
+      IOUtils.closeQuietly(byteArrayInputStream);
+   }
+
+   @URuleAuthorization(
+      authType = "group",
+      model = "dynamicJar",
+      code = "manager"
+   )
+   public void upload(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      UploadFile uploadFile = FileUtils.uploadFile(req);
+      if (!uploadFile.getName().toLowerCase().endsWith(".jar")) {
          throw new RuleException("请上传后缀名为.jar的文件");
       } else {
-         InputStream var7 = var6.getInputStream();
-         byte[] var8 = IOUtils.toByteArray(var7);
-         IOUtils.closeQuietly(var7);
-         DynamicJarManager.ins.updateJar(var3, var6.getName(), var5, var8);
-         this.a(var2, var6.getName());
+         InputStream inputStream = uploadFile.getInputStream();
+         byte[] bytes = IOUtils.toByteArray(inputStream);
+         IOUtils.closeQuietly(inputStream);
+         DynamicJarManager.ins.updateJar(longValue, uploadFile.getName(), loginUsername, bytes);
+         this.writeObjectToJson(resp, uploadFile.getName());
       }
    }
 
@@ -141,9 +141,9 @@ public class JarServletHandler extends ApiServletHandler {
       model = "dynamicJar",
       code = "manager"
    )
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      DynamicJarManager.ins.delete(var3);
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      DynamicJarManager.ins.delete(longValue);
    }
 
    public String url() {

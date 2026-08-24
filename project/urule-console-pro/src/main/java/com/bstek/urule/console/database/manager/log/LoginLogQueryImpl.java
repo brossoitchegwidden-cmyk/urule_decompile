@@ -13,166 +13,166 @@ import java.util.Date;
 import java.util.List;
 
 public class LoginLogQueryImpl implements LoginLogQuery {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private Date e;
-   private Date f;
-   private List g = new ArrayList();
+   private String userId;
+   private String userIdLike;
+   private String ip;
+   private String username;
+   private Date date;
+   private Date loginDateEnd;
+   private List queryParameters = new ArrayList();
 
    protected LoginLogQueryImpl() {
    }
 
-   public Page paging(int var1, int var2) {
-      String var3 = "select ID_,USER_ID_,USER_NAME_,IP_,USER_AGENT_,CREATE_DATE_ from URULE_LOG_USERLOGIN";
-      StringBuilder var4 = this.a();
-      if (var4.length() > 0) {
-         var3 = var3 + " where" + var4.toString();
+   public Page paging(int pageIndex, int pageSize) {
+      String pageSql = "select ID_,USER_ID_,USER_NAME_,IP_,USER_AGENT_,CREATE_DATE_ from URULE_LOG_USERLOGIN";
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         pageSql = pageSql + " where" + stringBuilder.toString();
       }
 
-      var3 = var3 + " order by CREATE_DATE_ desc";
-      Connection var5 = JdbcUtils.getConnection();
+      pageSql = pageSql + " order by CREATE_DATE_ desc";
+      Connection connection = JdbcUtils.getConnection();
 
-      Page var10;
+      Page page;
       try {
-         Page var6 = new Page(var1, var2);
-         var3 = JdbcUtils.getPageSql(var3, var6.getStartRow(), var2);
-         PreparedStatement var7 = var5.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.g, var7);
-         ResultSet var8 = var7.executeQuery();
-         List var9 = this.a(var8);
-         var6.setData(var9);
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var3 = "select count(*) from URULE_LOG_USERLOGIN";
-         if (var4.length() > 0) {
-            var3 = var3 + " where" + var4.toString();
+         Page page2 = new Page(pageIndex, pageSize);
+         pageSql = JdbcUtils.getPageSql(pageSql, page2.getStartRow(), pageSize);
+         PreparedStatement preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readLoginLogs(resultSet);
+         page2.setData(items);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         pageSql = "select count(*) from URULE_LOG_USERLOGIN";
+         if (stringBuilder.length() > 0) {
+            pageSql = pageSql + " where" + stringBuilder.toString();
          }
 
-         var7 = var5.prepareStatement(var3);
-         JdbcUtils.fillPreparedStatementParameters(this.g, var7);
-         var8 = var7.executeQuery();
-         if (var8.next()) {
-            var6.setTotalRows(var8.getLong(1));
+         preparedStatement = connection.prepareStatement(pageSql);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            page2.setTotalRows(resultSet.getLong(1));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var10 = var6;
-      } catch (Exception var14) {
-         throw new RuleException(var14);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         page = page2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var10;
+      return page;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readLoginLogs(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         LoginLog var3 = new LoginLog();
-         var3.setId(var1.getLong(1));
-         var3.setUserId(var1.getString(2));
-         var3.setUsername(var1.getString(3));
-         var3.setIp(var1.getString(4));
-         var3.setUserAgent(var1.getString(5));
-         var3.setCreateDate(var1.getTimestamp(6));
-         var2.add(var3);
+      while(resultSet.next()) {
+         LoginLog loginLog = new LoginLog();
+         loginLog.setId(resultSet.getLong(1));
+         loginLog.setUserId(resultSet.getString(2));
+         loginLog.setUsername(resultSet.getString(3));
+         loginLog.setIp(resultSet.getString(4));
+         loginLog.setUserAgent(resultSet.getString(5));
+         loginLog.setCreateDate(resultSet.getTimestamp(6));
+         items.add(loginLog);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a() {
-      this.g.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (StringUtils.isNotBlank(this.a)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (StringUtils.isNotBlank(this.userId)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" USER_ID_ = ?");
-         this.g.add(this.a);
+         stringBuilder.append(" USER_ID_ = ?");
+         this.queryParameters.add(this.userId);
       }
 
-      if (StringUtils.isNotBlank(this.b)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.userIdLike)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" USER_ID_ like ?");
-         this.g.add("%" + this.b + "%");
+         stringBuilder.append(" USER_ID_ like ?");
+         this.queryParameters.add("%" + this.userIdLike + "%");
       }
 
-      if (StringUtils.isNotBlank(this.c)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.ip)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" IP_ = ?");
-         this.g.add(this.c);
+         stringBuilder.append(" IP_ = ?");
+         this.queryParameters.add(this.ip);
       }
 
-      if (StringUtils.isNotBlank(this.d)) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (StringUtils.isNotBlank(this.username)) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" USER_NAME_ like ?");
-         this.g.add("%" + this.d + "%");
+         stringBuilder.append(" USER_NAME_ like ?");
+         this.queryParameters.add("%" + this.username + "%");
       }
 
-      if (this.e != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.date != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" CREATE_DATE_ > ?");
-         this.g.add(this.e);
+         stringBuilder.append(" CREATE_DATE_ > ?");
+         this.queryParameters.add(this.date);
       }
 
-      if (this.f != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.loginDateEnd != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" CREATE_DATE_ < ?");
-         this.g.add(this.f);
+         stringBuilder.append(" CREATE_DATE_ < ?");
+         this.queryParameters.add(this.loginDateEnd);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public LoginLogQuery userId(String var1) {
-      this.a = var1;
+   public LoginLogQuery userId(String userId) {
+      this.userId = userId;
       return this;
    }
 
-   public LoginLogQuery ip(String var1) {
-      this.c = var1;
+   public LoginLogQuery ip(String ip) {
+      this.ip = ip;
       return this;
    }
 
-   public LoginLogQuery username(String var1) {
-      this.d = var1;
+   public LoginLogQuery username(String username) {
+      this.username = username;
       return this;
    }
 
-   public LoginLogQuery loginDateBegin(Date var1) {
-      this.e = var1;
+   public LoginLogQuery loginDateBegin(Date date) {
+      this.date = date;
       return this;
    }
 
-   public LoginLogQuery loginDateEnd(Date var1) {
-      this.f = var1;
+   public LoginLogQuery loginDateEnd(Date date) {
+      this.loginDateEnd = date;
       return this;
    }
 
-   public LoginLogQuery userIdLike(String var1) {
-      this.b = var1;
+   public LoginLogQuery userIdLike(String userId) {
+      this.userIdLike = userId;
       return this;
    }
 }

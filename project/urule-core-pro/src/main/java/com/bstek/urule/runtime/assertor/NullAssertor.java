@@ -6,8 +6,8 @@ import org.apache.commons.lang.StringUtils;
 
 public class NullAssertor implements Assertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      return var1 == null ? true : StringUtils.isBlank(var1.toString());
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      return left == null ? true : StringUtils.isBlank(left.toString());
    }
 
    @Override

@@ -26,210 +26,210 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class ScorecardParser extends LibrariesParser<ScorecardDefinition> {
-   private CardCellParser a;
-   private AttributeRowParser b = new AttributeRowParser();
-   private CustomColParser c = new CustomColParser();
-   private RulesRebuilder d;
+   private CardCellParser cardCellParser;
+   private AttributeRowParser attributeRowParser = new AttributeRowParser();
+   private CustomColParser customColParser = new CustomColParser();
+   private RulesRebuilder rulesRebuilder;
 
-   public ScorecardDefinition parse(Element var1) {
-      ScorecardDefinition var2 = new ScorecardDefinition();
-      var2.setName(var1.attributeValue("name"));
-      var2.setScoringType(ScoringType.valueOf(var1.attributeValue("scoring-type")));
-      var2.setAssignTargetType(AssignTargetType.valueOf(var1.attributeValue("assign-target-type")));
-      var2.setVariableCategory(var1.attributeValue("var-category"));
-      var2.setVariableName(var1.attributeValue("var"));
-      var2.setVariableLabel(var1.attributeValue("var-label"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setCategoryUuid(var1.attributeValue("category-uuid"));
-      var2.setKeyUuid(var1.attributeValue("key-uuid"));
-      var2.setKeyCategoryUuid(var1.attributeValue("key-category-uuid"));
-      String var3 = var1.attributeValue("datatype");
-      if (StringUtils.isNotBlank(var3)) {
-         var2.setDatatype(Datatype.valueOf(var3));
+   public ScorecardDefinition parse(Element element) {
+      ScorecardDefinition scorecardDefinition = new ScorecardDefinition();
+      scorecardDefinition.setName(element.attributeValue("name"));
+      scorecardDefinition.setScoringType(ScoringType.valueOf(element.attributeValue("scoring-type")));
+      scorecardDefinition.setAssignTargetType(AssignTargetType.valueOf(element.attributeValue("assign-target-type")));
+      scorecardDefinition.setVariableCategory(element.attributeValue("var-category"));
+      scorecardDefinition.setVariableName(element.attributeValue("var"));
+      scorecardDefinition.setVariableLabel(element.attributeValue("var-label"));
+      scorecardDefinition.setUuid(element.attributeValue("uuid"));
+      scorecardDefinition.setCategoryUuid(element.attributeValue("category-uuid"));
+      scorecardDefinition.setKeyUuid(element.attributeValue("key-uuid"));
+      scorecardDefinition.setKeyCategoryUuid(element.attributeValue("key-category-uuid"));
+      String text = element.attributeValue("datatype");
+      if (StringUtils.isNotBlank(text)) {
+         scorecardDefinition.setDatatype(Datatype.valueOf(text));
       }
 
-      var2.setKeyLabel(var1.attributeValue("key-label"));
-      var2.setKeyName(var1.attributeValue("key-name"));
-      var2.setScoringBean(var1.attributeValue("custom-scoring-bean"));
-      String var4 = var1.attributeValue("salience");
-      if (StringUtils.isNotEmpty(var4)) {
-         var2.setSalience(Integer.valueOf(var4));
+      scorecardDefinition.setKeyLabel(element.attributeValue("key-label"));
+      scorecardDefinition.setKeyName(element.attributeValue("key-name"));
+      scorecardDefinition.setScoringBean(element.attributeValue("custom-scoring-bean"));
+      String text2 = element.attributeValue("salience");
+      if (StringUtils.isNotEmpty(text2)) {
+         scorecardDefinition.setSalience(Integer.valueOf(text2));
       }
 
-      String var5 = var1.attributeValue("effective-date");
-      SimpleDateFormat var6 = new SimpleDateFormat(Configure.getDateFormat());
-      if (StringUtils.isNotEmpty(var5)) {
+      String text3 = element.attributeValue("effective-date");
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      if (StringUtils.isNotEmpty(text3)) {
          try {
-            var2.setEffectiveDate(var6.parse(var5));
-         } catch (ParseException var20) {
-            throw new RuleException(var20);
+            scorecardDefinition.setEffectiveDate(simpleDateFormat.parse(text3));
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       }
 
-      String var7 = var1.attributeValue("expires-date");
-      if (StringUtils.isNotEmpty(var7)) {
+      String text4 = element.attributeValue("expires-date");
+      if (StringUtils.isNotEmpty(text4)) {
          try {
-            var2.setExpiresDate(var6.parse(var7));
-         } catch (ParseException var19) {
-            throw new RuleException(var19);
+            scorecardDefinition.setExpiresDate(simpleDateFormat.parse(text4));
+         } catch (ParseException parseException2) {
+            throw new RuleException(parseException2);
          }
       }
 
-      String var8 = var1.attributeValue("enabled");
-      if (StringUtils.isNotEmpty(var8)) {
-         var2.setEnabled(Boolean.valueOf(var8));
+      String text5 = element.attributeValue("enabled");
+      if (StringUtils.isNotEmpty(text5)) {
+         scorecardDefinition.setEnabled(Boolean.valueOf(text5));
       }
 
-      String var9 = var1.attributeValue("debug");
-      if (StringUtils.isNotEmpty(var9)) {
-         var2.setDebug(Boolean.valueOf(var9));
+      String text6 = element.attributeValue("debug");
+      if (StringUtils.isNotEmpty(text6)) {
+         scorecardDefinition.setDebug(Boolean.valueOf(text6));
       }
 
-      var2.setAttributeColWidth(var1.attributeValue("attr-col-width"));
-      var2.setAttributeColName(var1.attributeValue("attr-col-name"));
-      var2.setAttributeColVariableCategory(var1.attributeValue("attr-col-category"));
-      var2.setAttributeColVariableCategoryUuid(var1.attributeValue("attr-col-category-uuid"));
-      var2.setConditionColName(var1.attributeValue("condition-col-name"));
-      var2.setConditionColWidth(var1.attributeValue("condition-col-width"));
-      var2.setScoreColName(var1.attributeValue("score-col-name"));
-      var2.setScoreColWidth(var1.attributeValue("score-col-width"));
-      String var10 = var1.attributeValue("weight-support");
-      if (StringUtils.isNotBlank(var10)) {
-         var2.setWeightSupport(Boolean.valueOf(var10));
+      scorecardDefinition.setAttributeColWidth(element.attributeValue("attr-col-width"));
+      scorecardDefinition.setAttributeColName(element.attributeValue("attr-col-name"));
+      scorecardDefinition.setAttributeColVariableCategory(element.attributeValue("attr-col-category"));
+      scorecardDefinition.setAttributeColVariableCategoryUuid(element.attributeValue("attr-col-category-uuid"));
+      scorecardDefinition.setConditionColName(element.attributeValue("condition-col-name"));
+      scorecardDefinition.setConditionColWidth(element.attributeValue("condition-col-width"));
+      scorecardDefinition.setScoreColName(element.attributeValue("score-col-name"));
+      scorecardDefinition.setScoreColWidth(element.attributeValue("score-col-width"));
+      String text7 = element.attributeValue("weight-support");
+      if (StringUtils.isNotBlank(text7)) {
+         scorecardDefinition.setWeightSupport(Boolean.valueOf(text7));
       }
 
-      ArrayList var11 = new ArrayList();
-      ArrayList var12 = new ArrayList();
-      ArrayList var13 = new ArrayList();
-      var2.setCells(var11);
-      var2.setRows(var12);
-      var2.setCustomCols(var13);
+      ArrayList items = new ArrayList();
+      ArrayList items2 = new ArrayList();
+      ArrayList items3 = new ArrayList();
+      scorecardDefinition.setCells(items);
+      scorecardDefinition.setRows(items2);
+      scorecardDefinition.setCustomCols(items3);
 
-      for (Object var15 : var1.elements()) {
-         if (var15 != null && var15 instanceof Element) {
-            Element var16 = (Element)var15;
-            String var17 = var16.getName();
-            if (this.a.support(var17)) {
-               var11.add(this.a.parse(var16));
-            } else if (this.b.support(var17)) {
-               var12.add(this.b.parse(var16));
-            } else if (this.c.support(var17)) {
-               var13.add(this.c.parse(var16));
-            } else if (var17.equals("quick-test-data")) {
-               String var18 = var16.getTextTrim();
-               var2.setQuickTestData(var18);
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.cardCellParser.support(name)) {
+               items.add(this.cardCellParser.parse(element2));
+            } else if (this.attributeRowParser.support(name)) {
+               items2.add(this.attributeRowParser.parse(element2));
+            } else if (this.customColParser.support(name)) {
+               items3.add(this.customColParser.parse(element2));
+            } else if (name.equals("quick-test-data")) {
+               String textTrim = element2.getTextTrim();
+               scorecardDefinition.setQuickTestData(textTrim);
             }
 
-            Library var21 = this.a(var16);
-            if (var21 != null) {
-               var2.addLibrary(var21);
-            } else if (var17.equals("remark")) {
-               var2.setRemark(var16.getText());
+            Library library = this.parseLibrary(element2);
+            if (library != null) {
+               scorecardDefinition.addLibrary(library);
+            } else if (name.equals("remark")) {
+               scorecardDefinition.setRemark(element2.getText());
             }
          }
       }
 
-      this.a(var2);
-      return var2;
+      this.processScorecardDefinition(scorecardDefinition);
+      return scorecardDefinition;
    }
 
-   private void a(ScorecardDefinition var1) {
-      List var2 = var1.getLibraries();
-      if (var2 != null) {
-         ResourceLibrary var3 = this.d.getResourceLibraryBuilder().buildResourceLibrary(var2, var1.getPredefines());
-         VariableCategory var4 = var3.getVariableCategoryByUuid(var1.getAttributeColVariableCategoryUuid());
-         if (var4 == null) {
-            var4 = var3.getVariableCategoryByCategoryName(var1.getAttributeColVariableCategory());
+   private void processScorecardDefinition(ScorecardDefinition scorecardDefinition) {
+      List libraries = scorecardDefinition.getLibraries();
+      if (libraries != null) {
+         ResourceLibrary resourceLibrary = this.rulesRebuilder.getResourceLibraryBuilder().buildResourceLibrary(libraries, scorecardDefinition.getPredefines());
+         VariableCategory variableCategoryByUuid = resourceLibrary.getVariableCategoryByUuid(scorecardDefinition.getAttributeColVariableCategoryUuid());
+         if (variableCategoryByUuid == null) {
+            variableCategoryByUuid = resourceLibrary.getVariableCategoryByCategoryName(scorecardDefinition.getAttributeColVariableCategory());
          }
 
-         var1.setAttributeColVariableCategory(var4.getName());
-         if (var1.getAssignTargetType() == AssignTargetType.parameter && StringUtils.isBlank(var1.getKeyUuid())) {
-            Variable var5 = var3.getParameterByUuid(var1.getKeyUuid(), var1.getKeyName(), var1.getKeyLabel());
-            if (var5 != null && var5.getType() == Datatype.Object) {
-               var1.setKeyUuid(var5.getUuid());
+         scorecardDefinition.setAttributeColVariableCategory(variableCategoryByUuid.getName());
+         if (scorecardDefinition.getAssignTargetType() == AssignTargetType.parameter && StringUtils.isBlank(scorecardDefinition.getKeyUuid())) {
+            Variable parameterByUuid = resourceLibrary.getParameterByUuid(scorecardDefinition.getKeyUuid(), scorecardDefinition.getKeyName(), scorecardDefinition.getKeyLabel());
+            if (parameterByUuid != null && parameterByUuid.getType() == Datatype.Object) {
+               scorecardDefinition.setKeyUuid(parameterByUuid.getUuid());
             }
          }
 
-         if (!var1.getAssignTargetType().equals(AssignTargetType.none)) {
-            if (var1.getKeyCategoryUuid() != null) {
-               VariableData var12 = var3.getVariableByUuid(var1.getKeyCategoryUuid(), var1.getKeyUuid());
-               var1.setVariableLabel(var12.getVariable().getLabel());
-               var1.setDatatype(var12.getVariable().getType());
-               var1.setVariableName(var12.getVariable().getName());
-               var12 = var3.getVariableByUuid(var1.getCategoryUuid(), var1.getUuid());
-               var1.setKeyName(var12.getVariable().getName());
-               var1.setKeyLabel(var12.getVariable().getLabel());
+         if (!scorecardDefinition.getAssignTargetType().equals(AssignTargetType.none)) {
+            if (scorecardDefinition.getKeyCategoryUuid() != null) {
+               VariableData variableByUuid = resourceLibrary.getVariableByUuid(scorecardDefinition.getKeyCategoryUuid(), scorecardDefinition.getKeyUuid());
+               scorecardDefinition.setVariableLabel(variableByUuid.getVariable().getLabel());
+               scorecardDefinition.setDatatype(variableByUuid.getVariable().getType());
+               scorecardDefinition.setVariableName(variableByUuid.getVariable().getName());
+               variableByUuid = resourceLibrary.getVariableByUuid(scorecardDefinition.getCategoryUuid(), scorecardDefinition.getUuid());
+               scorecardDefinition.setKeyName(variableByUuid.getVariable().getName());
+               scorecardDefinition.setKeyLabel(variableByUuid.getVariable().getLabel());
             } else {
-               VariableData var14 = null;
-               if ("参数".equals(var1.getCategoryUuid())) {
-                  Variable var6 = var3.getParameterByUuid(var1.getKeyUuid(), var1.getKeyName(), var1.getKeyLabel());
-                  if (var6 == null) {
-                     var6 = var3.getParameterByUuid(var1.getKeyUuid(), var1.getVariableName(), var1.getVariableLabel());
+               VariableData variableData = null;
+               if ("参数".equals(scorecardDefinition.getCategoryUuid())) {
+                  Variable parameterByUuid2 = resourceLibrary.getParameterByUuid(scorecardDefinition.getKeyUuid(), scorecardDefinition.getKeyName(), scorecardDefinition.getKeyLabel());
+                  if (parameterByUuid2 == null) {
+                     parameterByUuid2 = resourceLibrary.getParameterByUuid(scorecardDefinition.getKeyUuid(), scorecardDefinition.getVariableName(), scorecardDefinition.getVariableLabel());
                   }
 
-                  if (var6 != null && var6.getType() == Datatype.Object) {
-                     var14 = var3.getVariableByUuid(var6.getDataType(), var1.getUuid());
-                     if (StringUtils.isBlank(var1.getKeyUuid())) {
-                        var1.setKeyUuid(var6.getUuid());
+                  if (parameterByUuid2 != null && parameterByUuid2.getType() == Datatype.Object) {
+                     variableData = resourceLibrary.getVariableByUuid(parameterByUuid2.getDataType(), scorecardDefinition.getUuid());
+                     if (StringUtils.isBlank(scorecardDefinition.getKeyUuid())) {
+                        scorecardDefinition.setKeyUuid(parameterByUuid2.getUuid());
                      }
                   }
 
-                  if (var14 == null) {
-                     var14 = var3.getVariableByName(var1.getCategoryUuid(), var1.getVariableName());
+                  if (variableData == null) {
+                     variableData = resourceLibrary.getVariableByName(scorecardDefinition.getCategoryUuid(), scorecardDefinition.getVariableName());
                   }
                } else {
-                  var14 = var3.getVariableByUuid(var1.getCategoryUuid(), var1.getUuid());
+                  variableData = resourceLibrary.getVariableByUuid(scorecardDefinition.getCategoryUuid(), scorecardDefinition.getUuid());
                }
 
-               var1.setVariableLabel(var14.getVariable().getLabel());
-               var1.setDatatype(var14.getVariable().getType());
-               var1.setVariableCategory(var14.getCategory().getName());
-               var1.setVariableName(var14.getVariable().getName());
+               scorecardDefinition.setVariableLabel(variableData.getVariable().getLabel());
+               scorecardDefinition.setDatatype(variableData.getVariable().getType());
+               scorecardDefinition.setVariableCategory(variableData.getCategory().getName());
+               scorecardDefinition.setVariableName(variableData.getVariable().getName());
             }
          }
 
-         List var15 = var1.getCells();
-         if (var15 != null) {
-            for (CardCell var7 : (Iterable<CardCell>)(Iterable<?>)(var15)) {
-               Joint var8 = var7.getJoint();
-               if (var8 != null && var8.getConditions() != null) {
-                  for (Condition var10 : var8.getConditions()) {
-                     if (var10 != null) {
-                        Value var11 = var10.getValue();
-                        if (var11 != null) {
-                           this.d.rebuildValue(var11, var3, false);
+         List cells = scorecardDefinition.getCells();
+         if (cells != null) {
+            for (CardCell cardCell : (Iterable<CardCell>)(Iterable<?>)(cells)) {
+               Joint joint = cardCell.getJoint();
+               if (joint != null && joint.getConditions() != null) {
+                  for (Condition condition : joint.getConditions()) {
+                     if (condition != null) {
+                        Value localValue = condition.getValue();
+                        if (localValue != null) {
+                           this.rulesRebuilder.rebuildValue(localValue, resourceLibrary, false);
                         }
                      }
                   }
                }
 
-               Value var17 = var7.getValue();
-               if (var17 != null) {
-                  this.d.rebuildValue(var17, var3, false);
+               Value localValue2 = cardCell.getValue();
+               if (localValue2 != null) {
+                  this.rulesRebuilder.rebuildValue(localValue2, resourceLibrary, false);
                }
 
-               if (var7.getType().equals(CellType.attribute)) {
-                  VariableData var18 = null;
-                  if ("参数".equals(var4.getUuid())) {
-                     Variable var19 = var3.getParameterByUuid(var7.getKeyUuid(), var7.getKeyName(), var7.getKeyLabel());
-                     if (var19 != null && var19.getType() == Datatype.Object) {
-                        var18 = var3.getVariableByUuid(var19.getDataType(), var7.getUuid());
-                        if (StringUtils.isBlank(var7.getKeyUuid())) {
-                           var7.setKeyUuid(var19.getUuid());
+               if (cardCell.getType().equals(CellType.attribute)) {
+                  VariableData variableData2 = null;
+                  if ("参数".equals(variableCategoryByUuid.getUuid())) {
+                     Variable parameterByUuid3 = resourceLibrary.getParameterByUuid(cardCell.getKeyUuid(), cardCell.getKeyName(), cardCell.getKeyLabel());
+                     if (parameterByUuid3 != null && parameterByUuid3.getType() == Datatype.Object) {
+                        variableData2 = resourceLibrary.getVariableByUuid(parameterByUuid3.getDataType(), cardCell.getUuid());
+                        if (StringUtils.isBlank(cardCell.getKeyUuid())) {
+                           cardCell.setKeyUuid(parameterByUuid3.getUuid());
                         }
                      }
 
-                     if (var18 == null) {
-                        var18 = var3.getVariableByName(var4.getUuid(), var7.getVariableName());
+                     if (variableData2 == null) {
+                        variableData2 = resourceLibrary.getVariableByName(variableCategoryByUuid.getUuid(), cardCell.getVariableName());
                      }
                   } else {
-                     var18 = var3.getVariableByUuid(var4.getUuid(), var7.getUuid());
+                     variableData2 = resourceLibrary.getVariableByUuid(variableCategoryByUuid.getUuid(), cardCell.getUuid());
                   }
 
-                  if (var18 != null) {
-                     var7.setDatatype(var18.getVariable().getType());
-                     var7.setVariableLabel(var18.getVariable().getLabel());
-                     var7.setVariableName(var18.getVariable().getName());
+                  if (variableData2 != null) {
+                     cardCell.setDatatype(variableData2.getVariable().getType());
+                     cardCell.setVariableLabel(variableData2.getVariable().getLabel());
+                     cardCell.setVariableName(variableData2.getVariable().getName());
                   }
                }
             }
@@ -237,16 +237,16 @@ public class ScorecardParser extends LibrariesParser<ScorecardDefinition> {
       }
    }
 
-   public void setCardCellParser(CardCellParser var1) {
-      this.a = var1;
+   public void setCardCellParser(CardCellParser cardCellParser) {
+      this.cardCellParser = cardCellParser;
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.d = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("scorecard");
+   public boolean support(String name) {
+      return name.equals("scorecard");
    }
 }

@@ -6,40 +6,40 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class SetupInfo {
-   private String a;
-   private boolean b = true;
-   private DataSourceInfo c = new DataSourceInfo();
-   private PropertiesInfo d = new PropertiesInfo();
+   private String configType;
+   private boolean initializationDb = true;
+   private DataSourceInfo dataSourceInfo = new DataSourceInfo();
+   private PropertiesInfo propertiesInfo = new PropertiesInfo();
 
    public String getConfigType() {
-      return this.a;
+      return this.configType;
    }
 
-   public void setConfigType(String var1) {
-      this.a = var1;
+   public void setConfigType(String configType) {
+      this.configType = configType;
    }
 
    public DataSourceInfo getDataSourceInfo() {
-      return this.c;
+      return this.dataSourceInfo;
    }
 
-   public void setDataSourceInfo(DataSourceInfo var1) {
-      this.c = var1;
+   public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+      this.dataSourceInfo = dataSourceInfo;
    }
 
    public PropertiesInfo getPropertiesInfo() {
-      return this.d;
+      return this.propertiesInfo;
    }
 
-   public void setPropertiesInfo(PropertiesInfo var1) {
-      this.d = var1;
+   public void setPropertiesInfo(PropertiesInfo propertiesInfo) {
+      this.propertiesInfo = propertiesInfo;
    }
 
    public boolean isInitializationDb() {
-      return this.b;
+      return this.initializationDb;
    }
 
-   public void setInitializationDb(boolean var1) {
-      this.b = var1;
+   public void setInitializationDb(boolean initializationDb) {
+      this.initializationDb = initializationDb;
    }
 }

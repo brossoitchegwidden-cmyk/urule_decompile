@@ -11,156 +11,154 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class KnowledgeServiceImpl implements KnowledgeService, ApplicationContextAware {
-   private boolean a = true;
-   private long b;
-   private RemoteService c;
-   private KnowledgePackageService d;
-   private KnowledgePackageFileService e;
-   private Logger f = Logger.getLogger(KnowledgeServiceImpl.class.getName());
-
+   private boolean knowledgeSyncCheck = true;
+   private long knowledgeUpdateCycle;
+   private RemoteService remoteService;
+   private KnowledgePackageService knowledgePackageService;
+   private KnowledgePackageFileService knowledgePackageFileService;
+   private Logger logger = Logger.getLogger(KnowledgeServiceImpl.class.getName());
    @Override
-   public KnowledgePackage[] getKnowledges(String[] var1) throws IOException {
-      KnowledgePackage[] var2 = new KnowledgePackage[var1.length];
+   public KnowledgePackage[] getKnowledges(String[] packageIds) throws IOException {
+      KnowledgePackage[] knowledgePackage = new KnowledgePackage[packageIds.length];
 
-      for (int var3 = 0; var3 < var1.length; var3++) {
-         String var4 = var1[var3];
-         var2[var3] = this.getKnowledge(var4);
+      for (int index = 0; index < packageIds.length; index++) {
+         String text = packageIds[index];
+         knowledgePackage[index] = this.getKnowledge(text);
       }
 
-      return var2;
+      return knowledgePackage;
    }
-
    @Override
-   public void reloadKnowledge(String var1) throws IOException {
-      KnowledgePackage var2 = this.a(var1);
-      CacheUtils.getKnowledgeCache().putKnowledge(var1, var2);
+   public void reloadKnowledge(String packageId) throws IOException {
+      KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(packageId);
+      CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledgePackage);
    }
-
    @Override
-   public KnowledgePackage getKnowledge(String var1) throws IOException {
-      if (this.d != null) {
-         return this.d.buildKnowledgePackage(var1);
+   public KnowledgePackage getKnowledge(String packageId) throws IOException {
+      if (this.knowledgePackageService != null) {
+         return this.knowledgePackageService.buildKnowledgePackage(packageId);
       }
 
-      if (this.b == 0L) {
-         return this.a(var1);
+      if (this.knowledgeUpdateCycle == 0L) {
+         return this.resolveKnowledgePackage(packageId);
       }
 
-      KnowledgePackage var2 = CacheUtils.getKnowledgeCache().getKnowledge(var1);
-      if (this.b != 1L) {
-         if (var2 == null) {
-            var2 = this.a(var1);
-            CacheUtils.getKnowledgeCache().putKnowledge(var1, var2);
+      KnowledgePackage knowledge = CacheUtils.getKnowledgeCache().getKnowledge(packageId);
+      if (this.knowledgeUpdateCycle != 1L) {
+         if (knowledge == null) {
+            knowledge = this.resolveKnowledgePackage(packageId);
+            CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledge);
          } else {
-            long var11 = var2.getTimestamp();
-            if (this.e.isEnable()) {
-               KnowledgePackage var13 = this.e.verifyKnowledgePackage(var1, var11);
-               if (var13 != null) {
-                  var2 = var13;
-                  CacheUtils.getKnowledgeCache().putKnowledge(var1, var2);
-                  return var2;
+            long timestamp = knowledge.getTimestamp();
+            if (this.knowledgePackageFileService.isEnable()) {
+               KnowledgePackage knowledgePackage = this.knowledgePackageFileService.verifyKnowledgePackage(packageId, timestamp);
+               if (knowledgePackage != null) {
+                  knowledge = knowledgePackage;
+                  CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledge);
+                  return knowledge;
                }
-            } else if (this.d != null) {
-               KnowledgePackage var14 = this.d.verifyKnowledgePackage(var1, var11);
-               if (var14 != null) {
-                  return var14;
+            } else if (this.knowledgePackageService != null) {
+               KnowledgePackage knowledge2 = this.knowledgePackageService.verifyKnowledgePackage(packageId, timestamp);
+               if (knowledge2 != null) {
+                  return knowledge2;
                }
             }
 
-            long var15 = System.currentTimeMillis();
-            long var7 = var15 - var11;
-            if (var7 >= this.b) {
-               KnowledgePackage var9 = this.c.getKnowledge(var1, String.valueOf(var2.getTimestamp()));
-               if (var9 == null) {
-                  var2.resetTimestamp();
-                  CacheUtils.getKnowledgeCache().putKnowledge(var1, var2);
+            long longValue = System.currentTimeMillis();
+            long longValue2 = longValue - timestamp;
+            if (longValue2 >= this.knowledgeUpdateCycle) {
+               KnowledgePackage knowledge3 = this.remoteService.getKnowledge(packageId, String.valueOf(knowledge.getTimestamp()));
+               if (knowledge3 == null) {
+                  knowledge.resetTimestamp();
+                  CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledge);
                } else {
-                  this.f.info("Update remote knowledgepackage.");
-                  var9.resetTimestamp();
-                  var2 = var9;
-                  CacheUtils.getKnowledgeCache().putKnowledge(var1, var9);
+                  this.logger.info("Update remote knowledgepackage.");
+                  knowledge3.resetTimestamp();
+                  knowledge = knowledge3;
+                  CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledge3);
                }
             }
          }
 
-         return var2;
+         return knowledge;
       } else {
-         if (var2 == null) {
-            var2 = this.a(var1);
-            CacheUtils.getKnowledgeCache().putKnowledge(var1, var2);
+         if (knowledge == null) {
+            knowledge = this.resolveKnowledgePackage(packageId);
+            CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledge);
          } else {
-            long var3 = var2.getTimestamp();
-            if (this.e.isEnable() && this.a) {
-               KnowledgePackage var12 = this.e.verifyKnowledgePackage(var1, var3);
-               if (var12 != null) {
-                  var2 = var12;
-                  CacheUtils.getKnowledgeCache().putKnowledge(var1, var2);
+            long timestamp2 = knowledge.getTimestamp();
+            if (this.knowledgePackageFileService.isEnable() && this.knowledgeSyncCheck) {
+               KnowledgePackage knowledgePackage2 = this.knowledgePackageFileService.verifyKnowledgePackage(packageId, timestamp2);
+               if (knowledgePackage2 != null) {
+                  knowledge = knowledgePackage2;
+                  CacheUtils.getKnowledgeCache().putKnowledge(packageId, knowledge);
                }
-            } else if (this.d != null && this.a) {
-               KnowledgePackage var5 = this.d.verifyKnowledgePackage(var1, var3);
-               if (var5 != null) {
-                  return var5;
+            } else if (this.knowledgePackageService != null && this.knowledgeSyncCheck) {
+               KnowledgePackage knowledge4 = this.knowledgePackageService.verifyKnowledgePackage(packageId, timestamp2);
+               if (knowledge4 != null) {
+                  return knowledge4;
                }
             }
          }
 
-         return var2;
+         return knowledge;
       }
    }
 
-   private KnowledgePackage a(String var1) throws IOException {
-      KnowledgePackage var2 = this.e.loadKnowledgePackage(var1);
-      if (var2 != null) {
-         return var2;
+   private KnowledgePackage resolveKnowledgePackage(String text) throws IOException {
+      KnowledgePackage knowledgePackage = this.knowledgePackageFileService.loadKnowledgePackage(text);
+      if (knowledgePackage != null) {
+         return knowledgePackage;
       } else {
-         var2 = this.c.getKnowledge(var1, null);
-         if (var2 != null) {
-            return var2;
-         } else if (this.d != null) {
-            return this.d.buildKnowledgePackage(var1);
+         knowledgePackage = this.remoteService.getKnowledge(text, null);
+         if (knowledgePackage != null) {
+            return knowledgePackage;
+         } else if (this.knowledgePackageService != null) {
+            return this.knowledgePackageService.buildKnowledgePackage(text);
          } else {
-            throw new RuleException("Remote server/local repository/local data file all unavailable,can't load knowledgepackage[" + var1 + "]!");
+            throw new RuleException("Remote server/local repository/local data file all unavailable,can't load knowledgepackage[" + text + "]!");
          }
       }
    }
 
-   public void setRemoteService(RemoteService var1) {
-      this.c = var1;
+   public void setRemoteService(RemoteService remoteService) {
+      this.remoteService = remoteService;
    }
 
-   public void setKnowledgeUpdateCycle(long var1) {
-      System.out.println("urule.knowledgeUpdateCycle:" + var1);
-      this.b = var1;
+   public void setKnowledgeUpdateCycle(long knowledgeUpdateCycle) {
+      System.out.println("urule.knowledgeUpdateCycle:" + knowledgeUpdateCycle);
+      this.knowledgeUpdateCycle = knowledgeUpdateCycle;
    }
 
-   public void setKnowledgePackageFileService(KnowledgePackageFileService var1) {
-      this.e = var1;
+   /**供外部设置基于数据库存储知识包文件方式实现*/
+   public void setKnowledgePackageFileService(KnowledgePackageFileService knowledgePackageFileService) {
+      this.knowledgePackageFileService = knowledgePackageFileService;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      boolean var2 = var1.containsBean("urule.knowledgePackageService");
-      if (var2) {
-         this.d = (KnowledgePackageService)var1.getBean("urule.knowledgePackageService");
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      boolean flag = applicationContext.containsBean("urule.knowledgePackageService");
+      if (flag) {
+         this.knowledgePackageService = (KnowledgePackageService)applicationContext.getBean("urule.knowledgePackageService");
       }
 
-      Collection var3 = var1.getBeansOfType(KnowledgePackageFileService.class).values();
-      if (var3.size() == 1) {
-         this.e = (KnowledgePackageFileService)var3.iterator().next();
+      Collection knowledgePackageFileServices = applicationContext.getBeansOfType(KnowledgePackageFileService.class).values();
+      if (knowledgePackageFileServices.size() == 1) {
+         this.knowledgePackageFileService = (KnowledgePackageFileService)knowledgePackageFileServices.iterator().next();
       } else {
-         for (KnowledgePackageFileService var5 : (Iterable<KnowledgePackageFileService>)(Iterable<?>)(var3)) {
-            if (var5.isEnable()) {
-               this.e = var5;
+         for (KnowledgePackageFileService knowledgePackageFileService : (Iterable<KnowledgePackageFileService>)(Iterable<?>)(knowledgePackageFileServices)) {
+            if (knowledgePackageFileService.isEnable()) {
+               this.knowledgePackageFileService = knowledgePackageFileService;
                break;
             }
          }
 
-         if (this.e == null) {
-            this.e = (KnowledgePackageFileService)var3.iterator().next();
+         if (this.knowledgePackageFileService == null) {
+            this.knowledgePackageFileService = (KnowledgePackageFileService)knowledgePackageFileServices.iterator().next();
          }
       }
    }
 
-   public void setKnowledgeSyncCheck(boolean var1) {
-      this.a = var1;
+   public void setKnowledgeSyncCheck(boolean knowledgeSyncCheckValue) {
+      this.knowledgeSyncCheck = knowledgeSyncCheckValue;
    }
 }

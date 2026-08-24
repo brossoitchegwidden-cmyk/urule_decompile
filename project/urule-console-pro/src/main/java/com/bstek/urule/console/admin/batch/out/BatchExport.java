@@ -28,136 +28,136 @@ public class BatchExport {
    private BatchExport() {
    }
 
-   public void doExport(OutputStream var1, List var2) throws Exception {
-      Document var3 = this.a(var2);
-      StringWriter var4 = new StringWriter();
-      XMLWriter var5 = new XMLWriter(var4, new OutputFormat());
-      var5.write(var3);
-      String var6 = var4.toString();
-      byte[] var7 = Utils.compress(var6);
-      IOUtils.write(var7, var1);
+   public void doExport(OutputStream outputStream, List items) throws Exception {
+      Document document = this.buildBatchDocument(items);
+      StringWriter stringWriter = new StringWriter();
+      XMLWriter xMLWriter = new XMLWriter(stringWriter, new OutputFormat());
+      xMLWriter.write(document);
+      String text = stringWriter.toString();
+      byte[] bytes = Utils.compress(text);
+      IOUtils.write(bytes, outputStream);
    }
 
-   public void doExport(Element var1, List var2) throws Exception {
-      this.a(var1, var2);
+   public void doExport(Element element, List items) throws Exception {
+      this.appendBatches(element, items);
    }
 
-   private Document a(List var1) {
-      Document var2 = DocumentHelper.createDocument();
-      Element var3 = var2.addElement("batchs");
-      this.a(var3, var1);
-      return var2;
+   private Document buildBatchDocument(List items) {
+      Document document = DocumentHelper.createDocument();
+      Element element = document.addElement("batchs");
+      this.appendBatches(element, items);
+      return document;
    }
 
-   private void a(Element var1, List var2) {
-      for(Batch var4 : (Iterable<Batch>)(Iterable<?>)(var2)) {
-         Element var5 = var1.addElement("batch");
-         var5.addAttribute("name", var4.getName());
-         var5.addAttribute("skip-limit", String.valueOf(var4.getSkipLimit()));
-         var5.addAttribute("async", String.valueOf(var4.isAsync()));
-         var5.addAttribute("callback-url", var4.getCallbackUrl());
-         var5.addAttribute("listener", var4.getListener());
-         var5.addAttribute("thread-multi", String.valueOf(var4.isThreadMulti()));
-         var5.addAttribute("thread-size", String.valueOf(var4.getThreadSize()));
-         var5.addAttribute("thread-data-size", String.valueOf(var4.getThreadDataSize()));
-         var5.addAttribute("packet-id", String.valueOf(var4.getPacketId()));
-         var5.addAttribute("provider-id", String.valueOf(var4.getProviderId()));
-         var5.addAttribute("resolver-id", String.valueOf(var4.getResolverId()));
-         this.a(var5, var4.getPacketInputData(), "packet-input-data");
-         var5.addAttribute("rest-enable", String.valueOf(var4.isRestEnable()));
-         var5.addAttribute("rest-security-enable", String.valueOf(var4.isRestSecurityEnable()));
-         var5.addAttribute("rest-security-user", String.valueOf(var4.getRestSecurityUser()));
-         var5.addAttribute("rest-security-password", String.valueOf(var4.getRestSecurityPassword()));
-         this.a(var5, var4.getInputData(), "input-data");
-         this.a(var5, var4.getDesc(), "desc");
-         this.a(var4.getDataProvider(), var5);
-         this.a(var4.getDataResolver(), var5);
+   private void appendBatches(Element element, List items) {
+      for(Batch batch : (Iterable<Batch>)(Iterable<?>)(items)) {
+         Element element2 = element.addElement("batch");
+         element2.addAttribute("name", batch.getName());
+         element2.addAttribute("skip-limit", String.valueOf(batch.getSkipLimit()));
+         element2.addAttribute("async", String.valueOf(batch.isAsync()));
+         element2.addAttribute("callback-url", batch.getCallbackUrl());
+         element2.addAttribute("listener", batch.getListener());
+         element2.addAttribute("thread-multi", String.valueOf(batch.isThreadMulti()));
+         element2.addAttribute("thread-size", String.valueOf(batch.getThreadSize()));
+         element2.addAttribute("thread-data-size", String.valueOf(batch.getThreadDataSize()));
+         element2.addAttribute("packet-id", String.valueOf(batch.getPacketId()));
+         element2.addAttribute("provider-id", String.valueOf(batch.getProviderId()));
+         element2.addAttribute("resolver-id", String.valueOf(batch.getResolverId()));
+         this.appendEncodedChild(element2, batch.getPacketInputData(), "packet-input-data");
+         element2.addAttribute("rest-enable", String.valueOf(batch.isRestEnable()));
+         element2.addAttribute("rest-security-enable", String.valueOf(batch.isRestSecurityEnable()));
+         element2.addAttribute("rest-security-user", String.valueOf(batch.getRestSecurityUser()));
+         element2.addAttribute("rest-security-password", String.valueOf(batch.getRestSecurityPassword()));
+         this.appendEncodedChild(element2, batch.getInputData(), "input-data");
+         this.appendEncodedChild(element2, batch.getDesc(), "desc");
+         this.appendProvider(batch.getDataProvider(), element2);
+         this.appendResolver(batch.getDataResolver(), element2);
       }
 
    }
 
-   private void a(BatchDataProvider var1, Element var2) {
-      Element var3 = var2.addElement("provider");
-      var3.addAttribute("name", var1.getName());
-      var3.addAttribute("datasource-id", String.valueOf(var1.getDatasourceId()));
-      var3.addAttribute("listener", var1.getListener());
-      this.a(var3, var1.getDesc(), "desc");
-      this.a(var3, var1.getInputData(), "input-data");
-      var3.addAttribute("packet-var-name", var1.getPacketVarName());
-      var3.addAttribute("support-paging", String.valueOf(var1.isSupportsPaging()));
-      var3.addAttribute("page-size", String.valueOf(var1.getPageSize()));
-      this.a(var3, var1.getPageSql(), "page-sql");
-      var3.addAttribute("order-field", String.valueOf(var1.getOrderField()));
-      var3.addAttribute("order-field-param-name", String.valueOf(var1.getOrderFieldParamName()));
-      var3.addAttribute("page-limit-type", String.valueOf(var1.getPageLimitType()));
-      this.a(var3, var1.getCountSql(), "count-sql");
-      this.a(var3, var1.getFilterData(), "filter-data");
-      this.a(var1.getFields(), var3);
+   private void appendProvider(BatchDataProvider batchDataProvider, Element element) {
+      Element element2 = element.addElement("provider");
+      element2.addAttribute("name", batchDataProvider.getName());
+      element2.addAttribute("datasource-id", String.valueOf(batchDataProvider.getDatasourceId()));
+      element2.addAttribute("listener", batchDataProvider.getListener());
+      this.appendEncodedChild(element2, batchDataProvider.getDesc(), "desc");
+      this.appendEncodedChild(element2, batchDataProvider.getInputData(), "input-data");
+      element2.addAttribute("packet-var-name", batchDataProvider.getPacketVarName());
+      element2.addAttribute("support-paging", String.valueOf(batchDataProvider.isSupportsPaging()));
+      element2.addAttribute("page-size", String.valueOf(batchDataProvider.getPageSize()));
+      this.appendEncodedChild(element2, batchDataProvider.getPageSql(), "page-sql");
+      element2.addAttribute("order-field", String.valueOf(batchDataProvider.getOrderField()));
+      element2.addAttribute("order-field-param-name", String.valueOf(batchDataProvider.getOrderFieldParamName()));
+      element2.addAttribute("page-limit-type", String.valueOf(batchDataProvider.getPageLimitType()));
+      this.appendEncodedChild(element2, batchDataProvider.getCountSql(), "count-sql");
+      this.appendEncodedChild(element2, batchDataProvider.getFilterData(), "filter-data");
+      this.appendProviderFields(batchDataProvider.getFields(), element2);
    }
 
-   private void a(List var1, Element var2) {
-      for(BatchDataProviderField var4 : (Iterable<BatchDataProviderField>)(Iterable<?>)(var1)) {
-         Element var5 = var2.addElement("field");
-         var5.addAttribute("src-property", var4.getSrcProperty());
-         var5.addAttribute("data-type", var4.getDataType());
-         var5.addAttribute("classpath", var4.getClassPath());
-         var5.addAttribute("dest-property", var4.getDestProperty());
-         var5.addAttribute("provider-id", Long.toString(var4.getDataProviderId()));
-         if (var4.getDataProvider() != null) {
-            this.a(var4.getDataProvider(), var5);
+   private void appendProviderFields(List items, Element element) {
+      for(BatchDataProviderField batchDataProviderField : (Iterable<BatchDataProviderField>)(Iterable<?>)(items)) {
+         Element element2 = element.addElement("field");
+         element2.addAttribute("src-property", batchDataProviderField.getSrcProperty());
+         element2.addAttribute("data-type", batchDataProviderField.getDataType());
+         element2.addAttribute("classpath", batchDataProviderField.getClassPath());
+         element2.addAttribute("dest-property", batchDataProviderField.getDestProperty());
+         element2.addAttribute("provider-id", Long.toString(batchDataProviderField.getDataProviderId()));
+         if (batchDataProviderField.getDataProvider() != null) {
+            this.appendProvider(batchDataProviderField.getDataProvider(), element2);
          }
       }
 
    }
 
-   private void a(BatchDataResolver var1, Element var2) {
-      Element var3 = var2.addElement("resolver");
-      var3.addAttribute("name", var1.getName());
-      var3.addAttribute("listener", String.valueOf(var1.getListener()));
-      var3.addAttribute("tran-scope", String.valueOf(var1.getTranScope().name()));
-      var3.addAttribute("datasource-id", String.valueOf(var1.getDatasourceId()));
-      this.a(var3, var1.getFilterData(), "filter-data");
-      this.a(var3, var1.getDesc(), "desc");
-      this.b(var1.getItems(), var3);
+   private void appendResolver(BatchDataResolver batchDataResolver, Element element) {
+      Element element2 = element.addElement("resolver");
+      element2.addAttribute("name", batchDataResolver.getName());
+      element2.addAttribute("listener", String.valueOf(batchDataResolver.getListener()));
+      element2.addAttribute("tran-scope", String.valueOf(batchDataResolver.getTranScope().name()));
+      element2.addAttribute("datasource-id", String.valueOf(batchDataResolver.getDatasourceId()));
+      this.appendEncodedChild(element2, batchDataResolver.getFilterData(), "filter-data");
+      this.appendEncodedChild(element2, batchDataResolver.getDesc(), "desc");
+      this.appendResolverItems(batchDataResolver.getItems(), element2);
    }
 
-   private void b(List var1, Element var2) {
-      for(BatchDataResolverItem var4 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var1)) {
-         Element var5 = var2.addElement("item");
-         var5.addAttribute("name", var4.getName());
-         var5.addAttribute("update-mode", var4.getUpdateMode().name());
-         var5.addAttribute("table-name", var4.getTableName());
-         this.a(var5, var4.getFilterData(), "filter-data");
-         var5.addAttribute("partition-name", var4.getPartitionName());
-         var5.addAttribute("partition-value", var4.getPartitionValue());
-         var5.addAttribute("commit-limit", String.valueOf(var4.getCommitLimit()));
-         this.a(var5, var4.getDesc(), "desc");
-         this.c(var4.getFields(), var5);
+   private void appendResolverItems(List items, Element element) {
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(items)) {
+         Element element2 = element.addElement("item");
+         element2.addAttribute("name", batchDataResolverItem.getName());
+         element2.addAttribute("update-mode", batchDataResolverItem.getUpdateMode().name());
+         element2.addAttribute("table-name", batchDataResolverItem.getTableName());
+         this.appendEncodedChild(element2, batchDataResolverItem.getFilterData(), "filter-data");
+         element2.addAttribute("partition-name", batchDataResolverItem.getPartitionName());
+         element2.addAttribute("partition-value", batchDataResolverItem.getPartitionValue());
+         element2.addAttribute("commit-limit", String.valueOf(batchDataResolverItem.getCommitLimit()));
+         this.appendEncodedChild(element2, batchDataResolverItem.getDesc(), "desc");
+         this.appendResolverItemFields(batchDataResolverItem.getFields(), element2);
       }
 
    }
 
-   private void c(List var1, Element var2) {
-      for(BatchDataResolverItemField var4 : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(var1)) {
-         Element var5 = var2.addElement("field");
-         var5.addAttribute("src-property", var4.getSrcProperty());
-         var5.addAttribute("key", String.valueOf(var4.isKey()));
-         var5.addAttribute("data-type", var4.getDataType());
-         var5.addAttribute("dest-property", var4.getDestProperty());
+   private void appendResolverItemFields(List items, Element element) {
+      for(BatchDataResolverItemField batchDataResolverItemField : (Iterable<BatchDataResolverItemField>)(Iterable<?>)(items)) {
+         Element element2 = element.addElement("field");
+         element2.addAttribute("src-property", batchDataResolverItemField.getSrcProperty());
+         element2.addAttribute("key", String.valueOf(batchDataResolverItemField.isKey()));
+         element2.addAttribute("data-type", batchDataResolverItemField.getDataType());
+         element2.addAttribute("dest-property", batchDataResolverItemField.getDestProperty());
       }
 
    }
 
-   private void a(Element var1, String var2, String var3) {
-      if (!StringUtils.isBlank(var2)) {
+   private void appendEncodedChild(Element element, String text, String text2) {
+      if (!StringUtils.isBlank(text)) {
          try {
-            var2 = Base64.getEncoder().encodeToString(var2.getBytes("utf-8"));
-         } catch (UnsupportedEncodingException var5) {
-            throw new RuleException(var5);
+            text = Base64.getEncoder().encodeToString(text.getBytes("utf-8"));
+         } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            throw new RuleException(unsupportedEncodingException);
          }
 
-         Element var4 = var1.addElement(var3);
-         var4.add(new DefaultCDATA(var2));
+         Element element2 = element.addElement(text2);
+         element2.add(new DefaultCDATA(text));
       }
    }
 }

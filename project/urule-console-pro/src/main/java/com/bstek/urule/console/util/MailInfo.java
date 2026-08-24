@@ -1,76 +1,76 @@
 package com.bstek.urule.console.util;
 
 public class MailInfo {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private boolean h;
+   private String host;
+   private String formName;
+   private String formPassword;
+   private String replayAddress;
+   private String toAddress;
+   private String subject;
+   private String content;
+   private boolean auth;
 
    public String getHost() {
-      return this.a;
+      return this.host;
    }
 
-   public void setHost(String var1) {
-      this.a = var1;
+   public void setHost(String host) {
+      this.host = host;
    }
 
    public String getFormName() {
-      return this.b;
+      return this.formName;
    }
 
-   public void setFormName(String var1) {
-      this.b = var1;
+   public void setFormName(String formName) {
+      this.formName = formName;
    }
 
    public String getFormPassword() {
-      return this.c;
+      return this.formPassword;
    }
 
-   public void setFormPassword(String var1) {
-      this.c = var1;
+   public void setFormPassword(String formPassword) {
+      this.formPassword = formPassword;
    }
 
    public String getReplayAddress() {
-      return this.d;
+      return this.replayAddress;
    }
 
-   public void setReplayAddress(String var1) {
-      this.d = var1;
+   public void setReplayAddress(String replayAddress) {
+      this.replayAddress = replayAddress;
    }
 
    public String getToAddress() {
-      return this.e;
+      return this.toAddress;
    }
 
-   public void setToAddress(String var1) {
-      this.e = var1;
+   public void setToAddress(String toAddress) {
+      this.toAddress = toAddress;
    }
 
    public String getSubject() {
-      return this.f;
+      return this.subject;
    }
 
-   public void setSubject(String var1) {
-      this.f = var1;
+   public void setSubject(String subject) {
+      this.subject = subject;
    }
 
    public String getContent() {
-      return this.g;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.g = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public boolean isAuth() {
-      return this.h;
+      return this.auth;
    }
 
-   public void setAuth(boolean var1) {
-      this.h = var1;
+   public void setAuth(boolean auth) {
+      this.auth = auth;
    }
 }

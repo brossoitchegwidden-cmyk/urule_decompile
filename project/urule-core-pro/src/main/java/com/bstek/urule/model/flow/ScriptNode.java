@@ -26,18 +26,18 @@ public class ScriptNode extends BindingNode {
    private FlowNodeType type = FlowNodeType.Script;
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      Exception var4 = null;
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      Exception exception2 = null;
 
       try {
-         var3.setCurrentNode(this);
-         this.executeNodeEvent(EventType.enter, var2, var3);
-         this.executeKnowledgePackage(var2, var3);
-         this.executeNodeEvent(EventType.leave, var2, var3);
-      } catch (Exception var9) {
-         var4 = var9;
+         instance.setCurrentNode(this);
+         this.executeNodeEvent(EventType.enter, context, instance);
+         this.executeKnowledgePackage(context, instance);
+         this.executeNodeEvent(EventType.leave, context, instance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         this.leave(null, var2, var3, var4);
+         this.leave(null, context, instance, exception2);
       }
    }
 
@@ -46,44 +46,44 @@ public class ScriptNode extends BindingNode {
       return this.type;
    }
 
-   public RuleSet buildRuleSet(List<Library> var1, FlowDefinition var2) {
-      RuleSet var3 = new RuleSet();
-      Rule var4 = new Rule();
-      var4.setDebug(var2.isDebug());
-      var4.setFile(var2.getFile());
-      var4.setName("脚本节点[" + this.name + "]规则");
-      Rhs var5 = new Rhs();
-      var4.setRhs(var5);
+   public RuleSet buildRuleSet(List<Library> libraries, FlowDefinition fd) {
+      RuleSet ruleSet = new RuleSet();
+      Rule rule = new Rule();
+      rule.setDebug(fd.isDebug());
+      rule.setFile(fd.getFile());
+      rule.setName("脚本节点[" + this.name + "]规则");
+      Rhs rhs = new Rhs();
+      rule.setRhs(rhs);
       this.buildActions();
-      var5.setActions(this.actionsData);
-      if (var1 != null) {
-         for (Library var7 : var1) {
-            var3.addLibrary(var7);
+      rhs.setActions(this.actionsData);
+      if (libraries != null) {
+         for (Library library : libraries) {
+            ruleSet.addLibrary(library);
          }
       }
 
-      ArrayList var8 = new ArrayList();
-      var8.add(var4);
-      var3.setRules(var8);
-      return var3;
+      ArrayList items = new ArrayList();
+      items.add(rule);
+      ruleSet.setRules(items);
+      return ruleSet;
    }
 
    private void buildActions() {
-      for (Action var2 : this.actionsData) {
-         if (var2 instanceof ExecuteMethodAction) {
-            ExecuteMethodAction var3 = (ExecuteMethodAction)var2;
-            InvokeFile var4 = var3.getInvokeFile();
-            if (var4 != null) {
-               KnowledgeBuilder var5 = (KnowledgeBuilder)Utils.getApplicationContext().getBean("urule.knowledgeBuilder");
-               ResourceBase var6 = var5.newResourceBase();
-               var6.addResource(var4.getId(), var4.getVersion());
+      for (Action action : this.actionsData) {
+         if (action instanceof ExecuteMethodAction) {
+            ExecuteMethodAction executeMethodAction = (ExecuteMethodAction)action;
+            InvokeFile invokeFile = executeMethodAction.getInvokeFile();
+            if (invokeFile != null) {
+               KnowledgeBuilder knowledgeBuilder = (KnowledgeBuilder)Utils.getApplicationContext().getBean("urule.knowledgeBuilder");
+               ResourceBase resourceBase = knowledgeBuilder.newResourceBase();
+               resourceBase.addResource(invokeFile.getId(), invokeFile.getVersion());
 
                try {
-                  KnowledgeBase var7 = var5.buildKnowledgeBase(var6);
-                  KnowledgePackage var8 = var7.getKnowledgePackage();
-                  var4.setKnowledgePackageWrapper(new KnowledgePackageWrapper(var8));
-               } catch (IOException var9) {
-                  throw new RuleException(var9);
+                  KnowledgeBase knowledgeBase = knowledgeBuilder.buildKnowledgeBase(resourceBase);
+                  KnowledgePackage knowledgePackage = knowledgeBase.getKnowledgePackage();
+                  invokeFile.setKnowledgePackageWrapper(new KnowledgePackageWrapper(knowledgePackage));
+               } catch (IOException iOException) {
+                  throw new RuleException(iOException);
                }
             }
          }
@@ -94,15 +94,15 @@ public class ScriptNode extends BindingNode {
       return this.actionXml;
    }
 
-   public void setActionXml(String var1) {
-      this.actionXml = var1;
+   public void setActionXml(String actionXml) {
+      this.actionXml = actionXml;
    }
 
    public List<Action> getActionsData() {
       return this.actionsData;
    }
 
-   public void setActionsData(List<Action> var1) {
-      this.actionsData = var1;
+   public void setActionsData(List<Action> actions) {
+      this.actionsData = actions;
    }
 }

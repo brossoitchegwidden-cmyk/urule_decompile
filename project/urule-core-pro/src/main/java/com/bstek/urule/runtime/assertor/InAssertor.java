@@ -6,82 +6,82 @@ import java.util.Collection;
 
 public class InAssertor implements Assertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      if (var1 != null && var2 != null) {
-         if (var2 instanceof Collection) {
-            Collection var16 = (Collection)var2;
-            if (var1 instanceof Collection) {
-               Collection var18 = (Collection)var1;
-               boolean var21 = false;
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      if (left != null && right != null) {
+         if (right instanceof Collection) {
+            Collection right2 = (Collection)right;
+            if (left instanceof Collection) {
+               Collection left2 = (Collection)left;
+               boolean evalResult = false;
 
-               for (Object var27 : var18) {
-                  for (Object var33 : var16) {
-                     if (var33.toString().equals(var27.toString())) {
-                        var21 = true;
+               for (Object objectValue : left2) {
+                  for (Object objectValue2 : right2) {
+                     if (objectValue2.toString().equals(objectValue.toString())) {
+                        evalResult = true;
                         break;
                      }
 
-                     var21 = false;
+                     evalResult = false;
                   }
                }
 
-               return var21;
+               return evalResult;
             } else {
-               String[] var17 = var1.toString().split(",");
-               boolean var20 = false;
+               String[] parts = left.toString().split(",");
+               boolean evalResult2 = false;
 
-               for (String var32 : var17) {
-                  for (Object var37 : var16) {
-                     if (var37.toString().equals(var32)) {
-                        var20 = true;
+               for (String text : parts) {
+                  for (Object objectValue3 : right2) {
+                     if (objectValue3.toString().equals(text)) {
+                        evalResult2 = true;
                         break;
                      }
 
-                     var20 = false;
+                     evalResult2 = false;
                   }
                }
 
-               return var20;
+               return evalResult2;
             }
          } else {
-            if (!(var2 instanceof String)) {
+            if (!(right instanceof String)) {
                return false;
             }
 
-            String var4 = (String)var2;
-            String[] var5 = var4.split(",");
-            if (var1 instanceof Collection) {
-               Collection var19 = (Collection)var1;
-               boolean var22 = false;
+            String right3 = (String)right;
+            String[] parts2 = right3.split(",");
+            if (left instanceof Collection) {
+               Collection left3 = (Collection)left;
+               boolean evalResult3 = false;
 
-               for (Object var28 : var19) {
-                  for (String var38 : var5) {
-                     if (var28.toString().equals(var38)) {
-                        var22 = true;
+               for (Object objectValue4 : left3) {
+                  for (String text2 : parts2) {
+                     if (objectValue4.toString().equals(text2)) {
+                        evalResult3 = true;
                         break;
                      }
 
-                     var22 = false;
+                     evalResult3 = false;
                   }
                }
 
-               return var22;
+               return evalResult3;
             } else {
-               String[] var6 = var1.toString().split(",");
-               boolean var7 = false;
+               String[] parts3 = left.toString().split(",");
+               boolean evalResult4 = false;
 
-               for (String var11 : var6) {
-                  for (String var15 : var5) {
-                     if (var15.equals(var11)) {
-                        var7 = true;
+               for (String text3 : parts3) {
+                  for (String text4 : parts2) {
+                     if (text4.equals(text3)) {
+                        evalResult4 = true;
                         break;
                      }
 
-                     var7 = false;
+                     evalResult4 = false;
                   }
                }
 
-               return var7;
+               return evalResult4;
             }
          }
       } else {

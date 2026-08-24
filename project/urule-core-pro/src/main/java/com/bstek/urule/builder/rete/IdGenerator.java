@@ -1,22 +1,22 @@
 package com.bstek.urule.builder.rete;
 
 public class IdGenerator {
-   private int a = 1;
-   private static final ThreadLocal<Integer> b = new ThreadLocal<>();
+   private int currentId = 1;
+   private static final ThreadLocal<Integer> LAST_GENERATED_ID = new ThreadLocal<>();
 
    public IdGenerator() {
-      Integer var1 = b.get();
-      if (var1 != null) {
-         this.a = var1;
+      Integer lastGeneratedId = LAST_GENERATED_ID.get();
+      if (lastGeneratedId != null) {
+         this.currentId = lastGeneratedId;
       }
    }
 
    public static final void clean() {
-      b.remove();
+      LAST_GENERATED_ID.remove();
    }
 
    public int nextId() {
-      b.set(++this.a);
-      return this.a;
+      LAST_GENERATED_ID.set(++this.currentId);
+      return this.currentId;
    }
 }

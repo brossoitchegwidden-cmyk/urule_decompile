@@ -5,5 +5,5 @@ import com.bstek.urule.model.GeneralEntity;
 import java.util.Map;
 
 public interface RuleProcessor {
-   Map fireRules(BatchContext var1, GeneralEntity var2) throws ProcessorException;
+   Map fireRules(BatchContext batchContext, GeneralEntity data) throws ProcessorException;
 }

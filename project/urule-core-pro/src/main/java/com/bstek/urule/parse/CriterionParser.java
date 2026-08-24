@@ -10,30 +10,30 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public abstract class CriterionParser extends AbstractParser<Criterion> implements ApplicationContextAware {
-   private Collection<CriterionParser> a;
-   private ApplicationContext b;
+   private Collection<CriterionParser> criterionParsers;
+   private ApplicationContext applicationContext;
 
-   public List<Criterion> parseCriterion(Element var1) {
-      if (this.a == null) {
-         this.a();
+   public List<Criterion> parseCriterion(Element element) {
+      if (this.criterionParsers == null) {
+         this.initializeState();
       }
 
-      ArrayList var2 = null;
+      ArrayList criterion2 = null;
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            String var6 = var5.getName();
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for (CriterionParser var8 : this.a) {
-               if (var8.support(var6)) {
-                  if (var2 == null) {
-                     var2 = new ArrayList();
+            for (CriterionParser criterionParser : this.criterionParsers) {
+               if (criterionParser.support(name)) {
+                  if (criterion2 == null) {
+                     criterion2 = new ArrayList();
                   }
 
-                  Criterion var9 = var8.parse(var5);
-                  if (var9 != null) {
-                     var2.add(var9);
+                  Criterion criterion = criterionParser.parse(element2);
+                  if (criterion != null) {
+                     criterion2.add(criterion);
                   }
                   break;
                }
@@ -41,14 +41,14 @@ public abstract class CriterionParser extends AbstractParser<Criterion> implemen
          }
       }
 
-      return var2;
+      return criterion2;
    }
 
-   private void a() {
-      this.a = this.b.getBeansOfType(CriterionParser.class).values();
+   private void initializeState() {
+      this.criterionParsers = this.applicationContext.getBeansOfType(CriterionParser.class).values();
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.b = var1;
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.applicationContext = applicationContext;
    }
 }

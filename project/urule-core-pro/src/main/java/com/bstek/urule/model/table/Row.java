@@ -8,19 +8,19 @@ public class Row implements Comparable<Row> {
       return this.num;
    }
 
-   public void setNum(int var1) {
-      this.num = var1;
+   public void setNum(int num) {
+      this.num = num;
    }
 
    public int getHeight() {
       return this.height;
    }
 
-   public void setHeight(int var1) {
-      this.height = var1;
+   public void setHeight(int height) {
+      this.height = height;
    }
 
-   public int compareTo(Row var1) {
-      return var1.getNum() - this.num;
+   public int compareTo(Row row) {
+      return row.getNum() - this.num;
    }
 }

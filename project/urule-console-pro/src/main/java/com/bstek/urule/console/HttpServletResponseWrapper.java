@@ -5,17 +5,17 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 public class HttpServletResponseWrapper extends javax.servlet.http.HttpServletResponseWrapper {
-   private ServletOutputStream a;
+   private ServletOutputStream outputStream;
 
-   public HttpServletResponseWrapper(HttpServletResponse var1) {
-      super(var1);
+   public HttpServletResponseWrapper(HttpServletResponse response) {
+      super(response);
    }
 
    public ServletOutputStream getOutputStream() throws IOException {
-      if (this.a == null) {
-         this.a = super.getOutputStream();
+      if (this.outputStream == null) {
+         this.outputStream = super.getOutputStream();
       }
 
-      return this.a;
+      return this.outputStream;
    }
 }

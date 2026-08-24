@@ -3,85 +3,85 @@ package com.bstek.urule.console.database.model;
 import java.util.Date;
 
 public class PacketPackage {
-   private long a;
-   private long b;
-   private long c;
-   private String d;
-   private String e;
-   private Date f;
-   private Date g;
-   private String h;
-   private String i;
+   private long id;
+   private long packetId;
+   private long projectId;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private String desc;
+   private String content;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getPacketId() {
-      return this.b;
+      return this.packetId;
    }
 
-   public void setPacketId(long var1) {
-      this.b = var1;
+   public void setPacketId(long packetId) {
+      this.packetId = packetId;
    }
 
    public long getProjectId() {
-      return this.c;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.c = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getCreateUser() {
-      return this.d;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.d = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.e;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.e = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.f;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.f = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.g;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.g = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getDesc() {
-      return this.h;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.h = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getContent() {
-      return this.i;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.i = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 }

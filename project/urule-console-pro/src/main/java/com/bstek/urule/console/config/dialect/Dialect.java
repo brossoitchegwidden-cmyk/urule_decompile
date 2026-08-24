@@ -1,15 +1,15 @@
 package com.bstek.urule.console.config.dialect;
 
 public abstract class Dialect {
-   public abstract String getLimitString(String var1, int var2, int var3);
+   public abstract String getLimitString(String query, int offset, int limit);
 
-   public String getCountSql(String var1) {
-      return "select count(*) TOTAL_ROWS_ from (" + var1 + ") as countTable";
+   public String getCountSql(String sql) {
+      return "select count(*) TOTAL_ROWS_ from (" + sql + ") as countTable";
    }
 
-   public String getOriginSql(String var1) {
-      String var2 = var1.replaceAll(":\\w+", "?");
-      return var2;
+   public String getOriginSql(String sql) {
+      String originSql = sql.replaceAll(":\\w+", "?");
+      return originSql;
    }
 
    public boolean supportTransaction() {

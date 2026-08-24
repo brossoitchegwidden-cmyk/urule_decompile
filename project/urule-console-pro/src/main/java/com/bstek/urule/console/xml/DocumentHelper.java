@@ -8,39 +8,39 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
 public class DocumentHelper {
-   public static Document parseText(String var0) throws DocumentException {
-      Document var1 = null;
-      XXESAXReader var2 = new XXESAXReader();
-      String var3 = a(var0);
-      InputSource var4 = new InputSource(new StringReader(var0));
-      var4.setEncoding(var3);
-      var1 = ((SAXReader)var2).read(var4);
-      if (var1.getXMLEncoding() == null) {
-         var1.setXMLEncoding(var3);
+   public static Document parseText(String text) throws DocumentException {
+      Document document = null;
+      XXESAXReader xXESAXReader = new XXESAXReader();
+      String text2 = detectXmlEncoding(text);
+      InputSource inputSource = new InputSource(new StringReader(text));
+      inputSource.setEncoding(text2);
+      document = ((SAXReader)xXESAXReader).read(inputSource);
+      if (document.getXMLEncoding() == null) {
+         document.setXMLEncoding(text2);
       }
 
-      return var1;
+      return document;
    }
 
-   private static String a(String var0) {
-      String var1 = null;
-      String var2 = var0.trim();
-      if (var2.startsWith("<?xml")) {
-         int var3 = var2.indexOf("?>");
-         String var4 = var2.substring(0, var3);
-         StringTokenizer var5 = new StringTokenizer(var4, " =\"'");
+   private static String detectXmlEncoding(String text) {
+      String text2 = null;
+      String trimmedText = text.trim();
+      if (trimmedText.startsWith("<?xml")) {
+         int number = trimmedText.indexOf("?>");
+         String substring = trimmedText.substring(0, number);
+         StringTokenizer stringTokenizer = new StringTokenizer(substring, " =\"'");
 
-         while(var5.hasMoreTokens()) {
-            String var6 = var5.nextToken();
-            if ("encoding".equals(var6)) {
-               if (var5.hasMoreTokens()) {
-                  var1 = var5.nextToken();
+         while(stringTokenizer.hasMoreTokens()) {
+            String text3 = stringTokenizer.nextToken();
+            if ("encoding".equals(text3)) {
+               if (stringTokenizer.hasMoreTokens()) {
+                  text2 = stringTokenizer.nextToken();
                }
                break;
             }
          }
       }
 
-      return var1;
+      return text2;
    }
 }

@@ -1,9 +1,9 @@
 package com.bstek.urule.runtime.cache;
 
 public class CacheUtils$CacheInstance {
-   private static KnowledgeCache a = new MemoryKnowledgeCache();
+   private static KnowledgeCache memoryKnowledgeCache = new MemoryKnowledgeCache();
 
-   static KnowledgeCache a() {
-      return a;
+   static KnowledgeCache getMemoryKnowledgeCache() {
+      return CacheUtils$CacheInstance.memoryKnowledgeCache;
    }
 }

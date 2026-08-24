@@ -18,209 +18,209 @@ import java.util.List;
 import java.util.Map;
 
 public class TestResultBuilder {
-   public static Map build(ResultWrapper var0) throws Exception {
-      SimpleDateFormat var1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      String var2 = "基于场景的批量测试报告-" + var1.format(new Date());
-      String var3 = a(var0);
-      HashMap var4 = new HashMap();
-      var4.put("title", var2);
-      var4.put("content", var3);
-      return var4;
+   public static Map build(ResultWrapper result) throws Exception {
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      String text = "基于场景的批量测试报告-" + simpleDateFormat.format(new Date());
+      String text2 = buildReportContent(result);
+      HashMap buildResult = new HashMap();
+      buildResult.put("title", text);
+      buildResult.put("content", text2);
+      return buildResult;
    }
 
-   private static String a(ResultWrapper var0) {
-      StringBuilder var1 = new StringBuilder();
-      if (var0 == null) {
-         var1.append("<h1>方案测试报告不存在，或已过期，请重新测试具体方案!</h1>");
-         return var1.toString();
+   private static String buildReportContent(ResultWrapper resultWrapper) {
+      StringBuilder stringBuilder = new StringBuilder();
+      if (resultWrapper == null) {
+         stringBuilder.append("<h1>方案测试报告不存在，或已过期，请重新测试具体方案!</h1>");
+         return stringBuilder.toString();
       } else {
-         SimpleDateFormat var2 = new SimpleDateFormat("yyyy年MM月dd日  HH时mm分ss秒");
-         var1.append("<h5 style=\"margin:5px;\">报告生成时间：" + var2.format(new Date()) + "</h5>");
-         var1.append("<h5 style=\"margin:5px;\">准备数据(解析方案中的Excel文件等)耗时：" + var0.getPrepareTime() + "ms，运行规则耗时：" + var0.getTotalTime() + "ms</h5>");
-         StringBuilder var3 = new StringBuilder();
-         var3.append("<table style='margin:5px;border-collapse: collapse;border:solid 1px #cacaca;font-size:12px;width:100%' border='1'>");
-         int var4 = 0;
-         int var5 = 0;
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日  HH时mm分ss秒");
+         stringBuilder.append("<h5 style=\"margin:5px;\">报告生成时间：" + simpleDateFormat.format(new Date()) + "</h5>");
+         stringBuilder.append("<h5 style=\"margin:5px;\">准备数据(解析方案中的Excel文件等)耗时：" + resultWrapper.getPrepareTime() + "ms，运行规则耗时：" + resultWrapper.getTotalTime() + "ms</h5>");
+         StringBuilder stringBuilder2 = new StringBuilder();
+         stringBuilder2.append("<table style='margin:5px;border-collapse: collapse;border:solid 1px #cacaca;font-size:12px;width:100%' border='1'>");
+         int number = 0;
+         int number2 = 0;
 
-         for(TestResult var7 : (Iterable<TestResult>)(Iterable<?>)(var0.getResultList())) {
-            int var8 = 0;
-            int var9 = 0;
+         for(TestResult testResult : (Iterable<TestResult>)(Iterable<?>)(resultWrapper.getResultList())) {
+            int number3 = 0;
+            int number4 = 0;
 
-            for(ValueCompare var11 : (Iterable<ValueCompare>)(Iterable<?>)(var7.getValueCompares())) {
-               if (var11.isMatched()) {
-                  ++var8;
+            for(ValueCompare valueCompare : (Iterable<ValueCompare>)(Iterable<?>)(testResult.getValueCompares())) {
+               if (valueCompare.isMatched()) {
+                  ++number3;
                } else {
-                  ++var9;
+                  ++number4;
                }
             }
 
-            if (var9 > 0) {
-               var3.append("<tr name='fail_row'>");
+            if (number4 > 0) {
+               stringBuilder2.append("<tr name='fail_row'>");
             } else {
-               var3.append("<tr name='success_row'>");
+               stringBuilder2.append("<tr name='success_row'>");
             }
 
-            var3.append("<td>");
-            var3.append("<div style=\"margin:5px\">场景" + var7.getScenarioId() + "，" + var7.getScenarioDesc() + "</div>");
-            var3.append("<div style=\"margin:5px\">耗时：" + var7.getConsumeTime() + "ms，预期结果匹配数量为：" + var8 + "条，不匹配为：" + var9 + "条，");
-            if (var9 > 0) {
-               var3.append("<span style=\"color:red\"><label>失败&nbsp;X</label></span>");
-               ++var5;
+            stringBuilder2.append("<td>");
+            stringBuilder2.append("<div style=\"margin:5px\">场景" + testResult.getScenarioId() + "，" + testResult.getScenarioDesc() + "</div>");
+            stringBuilder2.append("<div style=\"margin:5px\">耗时：" + testResult.getConsumeTime() + "ms，预期结果匹配数量为：" + number3 + "条，不匹配为：" + number4 + "条，");
+            if (number4 > 0) {
+               stringBuilder2.append("<span style=\"color:red\"><label>失败&nbsp;X</label></span>");
+               ++number2;
             } else {
-               var3.append("<span style=\"color:green\">成功&radic;</span>");
-               ++var4;
+               stringBuilder2.append("<span style=\"color:green\">成功&radic;</span>");
+               ++number;
             }
 
-            var3.append("<span  name='detail' style='margin-left:10px;cursor:pointer;color:blue' c-data='" + var7.getScenarioId() + "'>明细</span>");
-            var3.append("</div>");
-            String var13 = a(var0, var7);
-            var3.append(var13);
-            var3.append("</td>");
-            var3.append("</tr>");
+            stringBuilder2.append("<span  name='detail' style='margin-left:10px;cursor:pointer;color:blue' c-data='" + testResult.getScenarioId() + "'>明细</span>");
+            stringBuilder2.append("</div>");
+            String text = buildScenarioDetails(resultWrapper, testResult);
+            stringBuilder2.append(text);
+            stringBuilder2.append("</td>");
+            stringBuilder2.append("</tr>");
          }
 
-         BigDecimal var12 = Utils.toBigDecimal(var4).divide(Utils.toBigDecimal(var5 + var4), 2, 4).multiply(Utils.toBigDecimal(100));
-         var1.append("<h5 style=\"margin:5px;\">成功：" + var4 + "条，失败：" + var5 + "条；成功率：" + var12.toPlainString() + "%；<span style='cursor:pointer;text-decoration:underline' id='see_success'>只看成功的</span>，<span style='cursor:pointer;text-decoration:underline' id='see_fail'>只看失败的</span>，<span style='cursor:pointer;text-decoration:underline' id='see_all'>查看全部</span></h5>");
-         var3.append("</td>");
-         var3.append("</tr>");
-         var3.append("</table>");
-         var1.append(var3);
-         return var1.toString();
+         BigDecimal decimalValue = Utils.toBigDecimal(number).divide(Utils.toBigDecimal(number2 + number), 2, 4).multiply(Utils.toBigDecimal(100));
+         stringBuilder.append("<h5 style=\"margin:5px;\">成功：" + number + "条，失败：" + number2 + "条；成功率：" + decimalValue.toPlainString() + "%；<span style='cursor:pointer;text-decoration:underline' id='see_success'>只看成功的</span>，<span style='cursor:pointer;text-decoration:underline' id='see_fail'>只看失败的</span>，<span style='cursor:pointer;text-decoration:underline' id='see_all'>查看全部</span></h5>");
+         stringBuilder2.append("</td>");
+         stringBuilder2.append("</tr>");
+         stringBuilder2.append("</table>");
+         stringBuilder.append(stringBuilder2);
+         return stringBuilder.toString();
       }
    }
 
-   private static String a(ResultWrapper var0, TestResult var1) {
-      StringBuilder var2 = new StringBuilder();
-      var2.append("<div id='detailContent-" + var1.getScenarioId() + "' style='margin:5px;background:#f7f7f7;display:none'>");
-      var2.append("<div style='margin-top:20px'><h3>详细内容</h3></div>");
-      var2.append("<fieldset style='border:solid 1px #ddd;border-radius:5px;margin:5px'>");
-      var2.append("<legend>");
-      var2.append("输入数据");
-      var2.append("</legend>");
-      var2.append("<pre style='color:#9c27b0;white-space:pre-wrap'>");
-      var2.append(var1.getInputData());
-      var2.append("</pre>");
-      var2.append("</fieldset>");
-      var2.append("<fieldset style='border:solid 1px #ddd;border-radius:5px;margin:5px'>");
-      var2.append("<legend>");
-      var2.append("预期输出数据");
-      var2.append("</legend>");
-      var2.append("<pre style='color:#2196F3;white-space:pre-wrap'>");
-      var2.append(var1.getOutputData());
-      var2.append("</pre>");
-      var2.append("</fieldset>");
-      int var3 = 1;
-      var2.append("<fieldset style='border:solid 1px #ddd;border-radius:5px;margin:5px'>");
-      var2.append("<legend>");
-      var2.append("预期结果匹配情况");
-      var2.append("</legend>");
+   private static String buildScenarioDetails(ResultWrapper resultWrapper, TestResult testResult) {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("<div id='detailContent-" + testResult.getScenarioId() + "' style='margin:5px;background:#f7f7f7;display:none'>");
+      stringBuilder.append("<div style='margin-top:20px'><h3>详细内容</h3></div>");
+      stringBuilder.append("<fieldset style='border:solid 1px #ddd;border-radius:5px;margin:5px'>");
+      stringBuilder.append("<legend>");
+      stringBuilder.append("输入数据");
+      stringBuilder.append("</legend>");
+      stringBuilder.append("<pre style='color:#9c27b0;white-space:pre-wrap'>");
+      stringBuilder.append(testResult.getInputData());
+      stringBuilder.append("</pre>");
+      stringBuilder.append("</fieldset>");
+      stringBuilder.append("<fieldset style='border:solid 1px #ddd;border-radius:5px;margin:5px'>");
+      stringBuilder.append("<legend>");
+      stringBuilder.append("预期输出数据");
+      stringBuilder.append("</legend>");
+      stringBuilder.append("<pre style='color:#2196F3;white-space:pre-wrap'>");
+      stringBuilder.append(testResult.getOutputData());
+      stringBuilder.append("</pre>");
+      stringBuilder.append("</fieldset>");
+      int number = 1;
+      stringBuilder.append("<fieldset style='border:solid 1px #ddd;border-radius:5px;margin:5px'>");
+      stringBuilder.append("<legend>");
+      stringBuilder.append("预期结果匹配情况");
+      stringBuilder.append("</legend>");
 
-      for(ValueCompare var5 : (Iterable<ValueCompare>)(Iterable<?>)(var1.getValueCompares())) {
-         var2.append("<div style=\"margin-top:5px\">");
-         var2.append(var3 + ".");
-         var2.append("对象\"" + var5.getCategory() + "\"的");
-         var2.append("\"" + var5.getFieldName() + "\"" + var5.getOp().toString() + "预期值");
-         if (var5.getExpectedData() == null) {
-            var2.append("null");
+      for(ValueCompare valueCompare : (Iterable<ValueCompare>)(Iterable<?>)(testResult.getValueCompares())) {
+         stringBuilder.append("<div style=\"margin-top:5px\">");
+         stringBuilder.append(number + ".");
+         stringBuilder.append("对象\"" + valueCompare.getCategory() + "\"的");
+         stringBuilder.append("\"" + valueCompare.getFieldName() + "\"" + valueCompare.getOp().toString() + "预期值");
+         if (valueCompare.getExpectedData() == null) {
+            stringBuilder.append("null");
          } else {
-            var2.append("\"" + var5.getExpectedData() + "\"");
+            stringBuilder.append("\"" + valueCompare.getExpectedData() + "\"");
          }
 
-         var2.append(",实际值为");
-         if (var5.getData() == null) {
-            var2.append("null");
+         stringBuilder.append(",实际值为");
+         if (valueCompare.getData() == null) {
+            stringBuilder.append("null");
          } else {
-            var2.append("\"" + var5.getData() + "\"");
+            stringBuilder.append("\"" + valueCompare.getData() + "\"");
          }
 
-         var2.append(",");
-         if (var5.isMatched()) {
-            var2.append("<span style=\"color:green\">成功&nbsp;&radic;</span>");
+         stringBuilder.append(",");
+         if (valueCompare.isMatched()) {
+            stringBuilder.append("<span style=\"color:green\">成功&nbsp;&radic;</span>");
          } else {
-            var2.append("<span style=\"color:red\"><label>失败&nbsp;X</label></span>");
+            stringBuilder.append("<span style=\"color:red\"><label>失败&nbsp;X</label></span>");
          }
 
-         var2.append("</div>");
-         ++var3;
+         stringBuilder.append("</div>");
+         ++number;
       }
 
-      var2.append("</fieldset>");
-      var2.append("<div style=\"margin-top:5px\"><span style='color:#545454'>触发的规则数量：</span>" + var1.getMatchedRuleList().size() + "<div>");
-      var2.append("<div style=\"margin-top:5px\"><span style='color:#545454'>未触发的规则数量：</span>" + var1.getNotMatchedRuleList().size() + "<div>");
-      var2.append("<div style='margin-top:5px'><span style=\"color:#545454;\">经过的规则流节点数量：</span>" + var1.getFlowNodeList().size() + "<div>");
-      var2.append("<div style=\"margin-top:5px\"><span style='color:#545454'>触发的规则列表：</span>");
-      var2.append("<span style='margin:5px;color:#9c27b0'>");
-      boolean var7 = false;
+      stringBuilder.append("</fieldset>");
+      stringBuilder.append("<div style=\"margin-top:5px\"><span style='color:#545454'>触发的规则数量：</span>" + testResult.getMatchedRuleList().size() + "<div>");
+      stringBuilder.append("<div style=\"margin-top:5px\"><span style='color:#545454'>未触发的规则数量：</span>" + testResult.getNotMatchedRuleList().size() + "<div>");
+      stringBuilder.append("<div style='margin-top:5px'><span style=\"color:#545454;\">经过的规则流节点数量：</span>" + testResult.getFlowNodeList().size() + "<div>");
+      stringBuilder.append("<div style=\"margin-top:5px\"><span style='color:#545454'>触发的规则列表：</span>");
+      stringBuilder.append("<span style='margin:5px;color:#9c27b0'>");
+      boolean flag = false;
 
-      for(MatchedRuleLog var6 : (Iterable<MatchedRuleLog>)(Iterable<?>)(var1.getMatchedRuleList())) {
-         if (var7) {
-            var2.append("、");
+      for(MatchedRuleLog matchedRuleLog : (Iterable<MatchedRuleLog>)(Iterable<?>)(testResult.getMatchedRuleList())) {
+         if (flag) {
+            stringBuilder.append("、");
          }
 
-         var2.append(var6.getRuleName() + "<span style='color:#795548'>(" + a(var6.getRuleFile()) + ")</span>");
-         var7 = true;
+         stringBuilder.append(matchedRuleLog.getRuleName() + "<span style='color:#795548'>(" + valueOrNone(matchedRuleLog.getRuleFile()) + ")</span>");
+         flag = true;
       }
 
-      var2.append("</span>");
-      var2.append("<div>");
-      var2.append("<div style=\"margin-top:5px\"><span style='color:#545454'>未触发的规则列表：</span>");
-      var2.append("<span style='margin:5px;color:#9c27b0'>");
+      stringBuilder.append("</span>");
+      stringBuilder.append("<div>");
+      stringBuilder.append("<div style=\"margin-top:5px\"><span style='color:#545454'>未触发的规则列表：</span>");
+      stringBuilder.append("<span style='margin:5px;color:#9c27b0'>");
 
-      for(RuleData var12 : (Iterable<RuleData>)(Iterable<?>)(var1.getNotMatchedRuleList())) {
-         if (var7) {
-            var2.append("、");
+      for(RuleData ruleData : (Iterable<RuleData>)(Iterable<?>)(testResult.getNotMatchedRuleList())) {
+         if (flag) {
+            stringBuilder.append("、");
          }
 
-         var2.append(var12.getName() + "<span style='color:#795548'>(" + a(var12.getFile()) + ")</span>");
-         var7 = true;
+         stringBuilder.append(ruleData.getName() + "<span style='color:#795548'>(" + valueOrNone(ruleData.getFile()) + ")</span>");
+         flag = true;
       }
 
-      var2.append("</span>");
-      var2.append("<div>");
-      var2.append("<div style='margin-top:5px'><span style=\"color:#545454;\">经过的规则流节点列表：</span>");
-      var2.append("<span style='margin:5px;color:#9c27b0'>");
+      stringBuilder.append("</span>");
+      stringBuilder.append("<div>");
+      stringBuilder.append("<div style='margin-top:5px'><span style=\"color:#545454;\">经过的规则流节点列表：</span>");
+      stringBuilder.append("<span style='margin:5px;color:#9c27b0'>");
 
-      for(FlowNodeLog var13 : (Iterable<FlowNodeLog>)(Iterable<?>)(var1.getFlowNodeList())) {
-         if (var7) {
-            var2.append("、");
+      for(FlowNodeLog flowNodeLog : (Iterable<FlowNodeLog>)(Iterable<?>)(testResult.getFlowNodeList())) {
+         if (flag) {
+            stringBuilder.append("、");
          }
 
-         var2.append(var13.getNodeName() + "<span style='color:#795548'>(" + a(var13.getFile()) + ")</span>");
-         var7 = true;
+         stringBuilder.append(flowNodeLog.getNodeName() + "<span style='color:#795548'>(" + valueOrNone(flowNodeLog.getFile()) + ")</span>");
+         flag = true;
       }
 
-      var2.append("</span>");
-      var2.append("<div>");
-      var2.append("<div style=\"color:#545454;margin-top:5px\">运行日志：</div>");
-      List var11 = var1.getLogs();
-      if (var11 != null && var11.size() != 0) {
-         var2.append("<div style=\"font-size:11px;border:dotted 1px #a5a5a5;margin:5px;padding:5px;border-radius:5px\">");
-         a(var2, var11);
-         var2.append("</div>");
+      stringBuilder.append("</span>");
+      stringBuilder.append("<div>");
+      stringBuilder.append("<div style=\"color:#545454;margin-top:5px\">运行日志：</div>");
+      List logs = testResult.getLogs();
+      if (logs != null && logs.size() != 0) {
+         stringBuilder.append("<div style=\"font-size:11px;border:dotted 1px #a5a5a5;margin:5px;padding:5px;border-radius:5px\">");
+         appendLogHtml(stringBuilder, logs);
+         stringBuilder.append("</div>");
       } else {
-         var2.append("<div style='color:#df3600'>当前未开启日志输出功能</div>");
+         stringBuilder.append("<div style='color:#df3600'>当前未开启日志输出功能</div>");
       }
 
-      var2.append("</div>");
-      return var2.toString();
+      stringBuilder.append("</div>");
+      return stringBuilder.toString();
    }
 
-   private static String a(String var0) {
-      return var0 == null ? "无" : var0;
+   private static String valueOrNone(String text) {
+      return text == null ? "无" : text;
    }
 
-   private static void a(StringBuilder var0, List var1) {
-      for(Log var3 : (Iterable<Log>)(Iterable<?>)(var1)) {
-         if (var3 instanceof UnitLog) {
-            var0.append("<div style=\"margin:8px;border:dashed 1px #cccccc\">");
-            UnitLog var4 = (UnitLog)var3;
-            List var5 = var4.getLogs();
-            a(var0, var5);
-            var0.append("</div>");
-         } else if (var3 instanceof DataLog) {
-            DataLog var6 = (DataLog)var3;
-            String var7 = var6.getHtmlMsg();
-            var0.append(var7);
+   private static void appendLogHtml(StringBuilder stringBuilder, List items) {
+      for(Log log : (Iterable<Log>)(Iterable<?>)(items)) {
+         if (log instanceof UnitLog) {
+            stringBuilder.append("<div style=\"margin:8px;border:dashed 1px #cccccc\">");
+            UnitLog unitLog = (UnitLog)log;
+            List logs = unitLog.getLogs();
+            appendLogHtml(stringBuilder, logs);
+            stringBuilder.append("</div>");
+         } else if (log instanceof DataLog) {
+            DataLog dataLog = (DataLog)log;
+            String htmlMsg = dataLog.getHtmlMsg();
+            stringBuilder.append(htmlMsg);
          }
       }
 

@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class ProjectRole extends Role {
-   private long a;
+   private long projectId;
 
    public long getProjectId() {
-      return this.a;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.a = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 }

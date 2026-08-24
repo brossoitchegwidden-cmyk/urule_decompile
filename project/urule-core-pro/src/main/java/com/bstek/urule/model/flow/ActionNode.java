@@ -10,24 +10,24 @@ public class ActionNode extends FlowNode {
    public ActionNode() {
    }
 
-   public ActionNode(String var1) {
-      super(var1);
+   public ActionNode(String name) {
+      super(name);
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      Exception var4 = null;
-      var3.setCurrentNode(this);
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      Exception exception2 = null;
+      instance.setCurrentNode(this);
 
       try {
-         this.executeNodeEvent(EventType.enter, var2, var3);
-         FlowAction var5 = (FlowAction)var2.getApplicationContext().getBean(this.actionBean);
-         var5.execute(this, var2, var3);
-         this.executeNodeEvent(EventType.leave, var2, var3);
-      } catch (Exception var9) {
-         var4 = var9;
+         this.executeNodeEvent(EventType.enter, context, instance);
+         FlowAction flowAction = (FlowAction)context.getApplicationContext().getBean(this.actionBean);
+         flowAction.execute(this, context, instance);
+         this.executeNodeEvent(EventType.leave, context, instance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         this.leave(null, var2, var3, var4);
+         this.leave(null, context, instance, exception2);
       }
    }
 
@@ -40,7 +40,7 @@ public class ActionNode extends FlowNode {
       return this.actionBean;
    }
 
-   public void setActionBean(String var1) {
-      this.actionBean = var1;
+   public void setActionBean(String actionBean) {
+      this.actionBean = actionBean;
    }
 }

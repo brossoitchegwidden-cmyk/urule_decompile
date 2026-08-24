@@ -35,140 +35,145 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 
 public class DataSourceServletHandler extends ApiServletHandler {
+   /**新增数据仓库*/
    @Transactional
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "datasource"
    )
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("data");
-      DataSource var4 = (DataSource)this.a().readValue(var3, DataSource.class);
-      var4.setId(IDGenerator.getInstance().nextId(IDType.DATASOURCE));
-      var4.setGroupId(ContextHolder.getGroupId());
-      var4.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      var4.setCreateDate(new Date());
-      DataSourceService.ins.add(var4);
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("data");
+      DataSource dataSource = (DataSource)this.createObjectMapper().readValue(parameter, DataSource.class);
+      dataSource.setId(IDGenerator.getInstance().nextId(IDType.DATASOURCE));
+      dataSource.setGroupId(ContextHolder.getGroupId());
+      dataSource.setCreateUser(SecurityUtils.getLoginUsername(req));
+      dataSource.setCreateDate(new Date());
+      DataSourceService.ins.add(dataSource);
    }
 
+   /**更新数据仓库*/
    @Transactional
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "datasource"
    )
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("data");
-      DataSource var4 = (DataSource)this.a().readValue(var3, DataSource.class);
-      var4.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      var4.setUpdateDate(new Date());
-      DataSourceService.ins.update(var4);
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("data");
+      DataSource dataSource = (DataSource)this.createObjectMapper().readValue(parameter, DataSource.class);
+      dataSource.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      dataSource.setUpdateDate(new Date());
+      DataSourceService.ins.update(dataSource);
    }
 
+   /**删除数据仓库*/
    @Transactional
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "datasource"
    )
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      DataSourceService.ins.remove(var3);
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      DataSourceService.ins.remove(longValue);
    }
 
-   public void page(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = ContextHolder.getGroupId();
-      int var4 = Integer.parseInt(var1.getParameter("pageIndex"));
-      int var5 = Integer.parseInt(var1.getParameter("pageSize"));
-      Page var6 = new Page(var4, var5);
-      DataSourceQuery var7 = DataSourceManager.ins.createQuery();
-      String var8 = var1.getParameter("id");
-      if (StringUtils.isNotBlank(var8)) {
-         var7.id(Long.parseLong(var8));
+   /**查询所有数据仓库*/
+   public void page(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String groupId = ContextHolder.getGroupId();
+      int number = Integer.parseInt(req.getParameter("pageIndex"));
+      int number2 = Integer.parseInt(req.getParameter("pageSize"));
+      Page page = new Page(number, number2);
+      DataSourceQuery query = DataSourceManager.ins.createQuery();
+      String parameter = req.getParameter("id");
+      if (StringUtils.isNotBlank(parameter)) {
+         query.id(Long.parseLong(parameter));
       }
 
-      String var9 = var1.getParameter("name");
-      if (StringUtils.isNotBlank(var9)) {
-         var7.nameLike(var9);
+      String parameter2 = req.getParameter("name");
+      if (StringUtils.isNotBlank(parameter2)) {
+         query.nameLike(parameter2);
       }
 
-      String var10 = var1.getParameter("type");
-      if (StringUtils.isNotBlank(var10)) {
-         var7.type(var10);
+      String parameter3 = req.getParameter("type");
+      if (StringUtils.isNotBlank(parameter3)) {
+         query.type(parameter3);
       }
 
-      String var11 = var1.getParameter("createUser");
-      if (StringUtils.isNotBlank(var11)) {
-         var7.createUserLike(var11);
+      String parameter4 = req.getParameter("createUser");
+      if (StringUtils.isNotBlank(parameter4)) {
+         query.createUserLike(parameter4);
       }
 
-      var7.groupId(var3).page(var6);
-      this.a(var2, var6);
+      query.groupId(groupId).page(page);
+      this.writeObjectToJson(resp, page);
    }
 
+   /**查询数据仓库字段*/
    @URuleAuthorization(
       authType = "group",
       code = "manager",
       model = "datasource"
    )
-   public void buildFields(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.parseLong(var1.getParameter("id"));
-      String var5 = var1.getParameter("tableName");
-      String var6 = "select * from " + var5;
-      DataSource var7 = DataSourceManager.ins.get(var3);
-      javax.sql.DataSource var8 = DataSourceHandlerManager.getDataSource(var7);
-      Connection var9 = var8.getConnection();
-      ArrayList var10 = new ArrayList();
+   public void buildFields(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.parseLong(req.getParameter("id"));
+      String parameter = req.getParameter("tableName");
+      String text = "select * from " + parameter;
+      DataSource dataSource = DataSourceManager.ins.get(longValue);
+      javax.sql.DataSource dataSource2 = DataSourceHandlerManager.getDataSource(dataSource);
+      Connection connection = dataSource2.getConnection();
+      ArrayList items = new ArrayList();
 
       try {
-         Dialect var11 = DialectResolver.resolveDialect(var9);
-         String var12 = var11.getLimitString(var6, 0, 1);
-         if (var11 instanceof OrderLimitDialect) {
-            var12 = var6 + " limit 1";
+         Dialect dialect = DialectResolver.resolveDialect(connection);
+         String limitString = dialect.getLimitString(text, 0, 1);
+         if (dialect instanceof OrderLimitDialect) {
+            limitString = text + " limit 1";
          }
 
-         ParsedSql var13 = NamedSQLUtils.parseSql(var12);
-         String var14 = JdbcUtils.getOriginSql(var13.getOriginalSql());
-         PreparedStatement var15 = var9.prepareStatement(var14);
-         ResultSet var16 = var15.executeQuery();
-         ResultSetMetaData var17 = var16.getMetaData();
-         int var18 = var17.getColumnCount();
+         ParsedSql sql = NamedSQLUtils.parseSql(limitString);
+         String originSql = JdbcUtils.getOriginSql(sql.getOriginalSql());
+         PreparedStatement preparedStatement = connection.prepareStatement(originSql);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ResultSetMetaData metaData = resultSet.getMetaData();
+         int columnCount = metaData.getColumnCount();
 
-         for(int var19 = 0; var19 < var18; ++var19) {
-            String var20 = var17.getColumnLabel(var19 + 1);
-            if (StringUtils.isBlank(var20)) {
-               var20 = var17.getColumnName(var19 + 1);
+         for(int index = 0; index < columnCount; ++index) {
+            String columnLabel = metaData.getColumnLabel(index + 1);
+            if (StringUtils.isBlank(columnLabel)) {
+               columnLabel = metaData.getColumnName(index + 1);
             }
 
-            int var21 = var20.lastIndexOf(".");
-            if (var21 > -1) {
-               var20 = var20.substring(var21 + 1);
+            int number = columnLabel.lastIndexOf(".");
+            if (number > -1) {
+               columnLabel = columnLabel.substring(number + 1);
             }
 
-            int var22 = var17.getColumnType(var19 + 1);
-            FieldType var23 = JdbcUtils.buildJdbcFieldType(var22);
-            var10.add(new Field(var20, var23));
+            int columnType = metaData.getColumnType(index + 1);
+            FieldType jdbcFieldType = JdbcUtils.buildJdbcFieldType(columnType);
+            items.add(new Field(columnLabel, jdbcFieldType));
          }
 
-         JdbcUtils.closeResultSet(var16);
-         JdbcUtils.closeStatement(var15);
-      } catch (Exception var27) {
-         var27.printStackTrace();
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         java.util.logging.Logger.getLogger(DataSourceServletHandler.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
       } finally {
-         this.a(var9);
+         this.closeConnection(connection);
       }
 
-      this.a(var2, var10);
+      this.writeObjectToJson(resp, items);
    }
 
-   private void a(Connection var1) {
+   private void closeConnection(Connection connection) {
       try {
-         if (var1 != null) {
-            var1.close();
+         if (connection != null) {
+            connection.close();
          }
 
-      } catch (SQLException var3) {
-         throw new RuleException(var3);
+      } catch (SQLException sQLException) {
+         throw new RuleException(sQLException);
       }
    }
 
@@ -177,27 +182,27 @@ public class DataSourceServletHandler extends ApiServletHandler {
       code = "manager",
       model = "datasource"
    )
-   public void testConnection(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      HashMap var3 = new HashMap();
-      var3.put("result", true);
-      Connection var4 = null;
-      javax.sql.DataSource var5 = null;
-      DataSource var6 = null;
+   public void testConnection(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("result", true);
+      Connection connection = null;
+      javax.sql.DataSource dataSource = null;
+      DataSource dataSource2 = null;
 
       try {
-         String var7 = var1.getParameter("data");
-         var6 = (DataSource)this.a().readValue(var7, DataSource.class);
-         var5 = DataSourceHandlerManager.newDataSource(var6);
-         var4 = var5.getConnection();
-      } catch (Exception var11) {
-         var3.put("error", var11.toString());
-         var3.put("stack", this.a(var11));
-         var3.put("result", false);
+         String parameter = req.getParameter("data");
+         dataSource2 = (DataSource)this.createObjectMapper().readValue(parameter, DataSource.class);
+         dataSource = DataSourceHandlerManager.newDataSource(dataSource2);
+         connection = dataSource.getConnection();
+      } catch (Exception exception) {
+         valuesByKey.put("error", exception.toString());
+         valuesByKey.put("stack", this.buildExceptionStack(exception));
+         valuesByKey.put("result", false);
       } finally {
-         this.a(var4);
+         this.closeConnection(connection);
       }
 
-      this.a(var2, var3);
+      this.writeObjectToJson(resp, valuesByKey);
    }
 
    public String url() {

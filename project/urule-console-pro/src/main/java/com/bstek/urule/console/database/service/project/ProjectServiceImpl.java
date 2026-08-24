@@ -48,222 +48,214 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ProjectServiceImpl implements ProjectService {
-   public void add(Project var1) {
+   public void add(Project project) {
       try {
-         String var2 = var1.getName();
-         if (StringUtils.isBlank(var2)) {
+         String name = project.getName();
+         if (StringUtils.isBlank(name)) {
             throw new InfoException("项目名称不能为空.<br/>The project name can not empty.");
-         } else if (StringUtils.hasSpecialChar(var2)) {
+         } else if (StringUtils.hasSpecialChar(name)) {
             throw new InfoException("项目名称不能包含特殊字符.<br/>Project name cannot contain special characters.");
          } else {
-            List var3 = ProjectManager.ins.newQuery().groupId(var1.getGroupId()).name(var1.getName()).list();
-            if (var3.size() > 0) {
+            List items = ProjectManager.ins.newQuery().groupId(project.getGroupId()).name(project.getName()).list();
+            if (items.size() > 0) {
                throw new InfoException("项目名称重复.<br/>Duplicate project name.");
             } else {
-               ProjectManager.ins.add(var1);
-               User var4 = UserServiceManager.getUserService().get(var1.getCreateUser());
-               ProjectManager.ins.addProjectUser(var1.getId(), var1.getCreateUser(), var4.getName());
+               ProjectManager.ins.add(project);
+               User user = UserServiceManager.getUserService().get(project.getCreateUser());
+               ProjectManager.ins.addProjectUser(project.getId(), project.getCreateUser(), user.getName());
 
-               for(ProjectRoleEnum var8 : ProjectRoleEnum.values()) {
-                  ProjectRole var9 = new ProjectRole();
-                  var9.setProjectId(var1.getId());
-                  var9.setType("system");
-                  var9.setName(var8.name());
-                  var9.setCreateUser(var1.getCreateUser());
-                  ProjectRoleManager.ins.add(var9);
-                  this.a(var9);
-                  if (var8 == ProjectRoleEnum.Manager) {
-                     ProjectRoleService.ins.addUserRole(var1.getId(), var1.getCreateUser(), var9.getId());
+               for(ProjectRoleEnum projectRoleEnum : ProjectRoleEnum.values()) {
+                  ProjectRole projectRole = new ProjectRole();
+                  projectRole.setProjectId(project.getId());
+                  projectRole.setType("system");
+                  projectRole.setName(projectRoleEnum.name());
+                  projectRole.setCreateUser(project.getCreateUser());
+                  ProjectRoleManager.ins.add(projectRole);
+                  this.processProjectRole(projectRole);
+                  if (projectRoleEnum == ProjectRoleEnum.Manager) {
+                     ProjectRoleService.ins.addUserRole(project.getId(), project.getCreateUser(), projectRole.getId());
                   }
                }
 
             }
          }
-      } catch (Exception var10) {
-         throw new InfoException(var10);
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
 
-   private void a(ProjectRole var1) {
-      long var2 = var1.getId();
-      List var4 = PermissionProvider.getProjectModules();
+   private void processProjectRole(ProjectRole projectRole) {
+      long id = projectRole.getId();
+      List projectModules = PermissionProvider.getProjectModules();
 
-      for(Module var6 : (Iterable<Module>)(Iterable<?>)(var4)) {
-         for(Permission var8 : (Iterable<Permission>)(Iterable<?>)(var6.getItems())) {
-            boolean var9 = false;
+      for(Module module : (Iterable<Module>)(Iterable<?>)(projectModules)) {
+         for(Permission permission : (Iterable<Permission>)(Iterable<?>)(module.getItems())) {
+            boolean flag = false;
 
-            for(String var11 : (Iterable<String>)(Iterable<?>)(var8.getRoles())) {
-               if (var11.equals(var1.getName())) {
-                  var9 = true;
+            for(String text : (Iterable<String>)(Iterable<?>)(permission.getRoles())) {
+               if (text.equals(projectRole.getName())) {
+                  flag = true;
                }
             }
 
-            var8.setChecked(var9);
-            var8.setDisabled(false);
+            permission.setChecked(flag);
+            permission.setDisabled(false);
          }
       }
 
-      AuthorityService.ins.initPermissions(var2, var4);
+      AuthorityService.ins.initPermissions(id, projectModules);
    }
-
-   public void update(Project var1) {
-      String var2 = var1.getName();
-      if (StringUtils.isBlank(var2)) {
+   public void update(Project project) {
+      String name = project.getName();
+      if (StringUtils.isBlank(name)) {
          throw new InfoException("项目名称不能为空.<br/>The project name can not empty.");
-      } else if (StringUtils.hasSpecialChar(var2)) {
+      } else if (StringUtils.hasSpecialChar(name)) {
          throw new InfoException("项目名称不能包含特殊字符.<br/>Project name cannot contain special characters.");
       } else {
-         ProjectManager.ins.update(var1);
+         ProjectManager.ins.update(project);
       }
    }
-
-   public List remove(long var1) {
+   public List remove(long projectId) {
       try {
-         Project var3 = ProjectManager.ins.get(var1);
-         List var4 = PacketCache.ins.removeProject(var1, var3.getGroupId());
-         OperationLogManager.ins.removeByProjectId(var1);
-         KnowledgeLogManager.ins.removeByProject(var1);
-         ScenarioManager.ins.deleteByProjectId(var1);
-         PacketApplyManager.ins.deleteByProjectId(var1);
-         PacketDeployManager.ins.deleteByProjectId(var1);
-         PacketManager.ins.deleteByProjectId(var1);
-         BatchManagerHelper.removeByProjectId(var1);
-         VersionFileManager.ins.deleteByProjectId(var1);
-         DirectoryManager.ins.deleteByProjectId(var1);
-         FileManager.ins.deleteByProjectId(var1);
+         Project project = ProjectManager.ins.get(projectId);
+         List removeResult = PacketCache.ins.removeProject(projectId, project.getGroupId());
+         OperationLogManager.ins.removeByProjectId(projectId);
+         KnowledgeLogManager.ins.removeByProject(projectId);
+         ScenarioManager.ins.deleteByProjectId(projectId);
+         PacketApplyManager.ins.deleteByProjectId(projectId);
+         PacketDeployManager.ins.deleteByProjectId(projectId);
+         PacketManager.ins.deleteByProjectId(projectId);
+         BatchManagerHelper.removeByProjectId(projectId);
+         VersionFileManager.ins.deleteByProjectId(projectId);
+         DirectoryManager.ins.deleteByProjectId(projectId);
+         FileManager.ins.deleteByProjectId(projectId);
 
-         for(Role var7 : (Iterable<Role>)(Iterable<?>)(ProjectRoleManager.ins.loadRoles(var1))) {
-            AuthorityManager.ins.removeByRole(RoleCategory.project.name(), var7.getId());
+         for(Role role : (Iterable<Role>)(Iterable<?>)(ProjectRoleManager.ins.loadRoles(projectId))) {
+            AuthorityManager.ins.removeByRole(RoleCategory.project.name(), role.getId());
          }
 
-         ProjectRoleManager.ins.removeByProjectId(var1);
-         ProjectManager.ins.removeProjectUsers(var1);
-         ProjectManager.ins.remove(var1);
-         return var4;
-      } catch (Exception var8) {
-         throw new InfoException(var8);
+         ProjectRoleManager.ins.removeByProjectId(projectId);
+         ProjectManager.ins.removeProjectUsers(projectId);
+         ProjectManager.ins.remove(projectId);
+         return removeResult;
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
-
-   public void addProjectuser(long var1, String var3) {
-      User var4 = UserManager.ins.getProjectUser(var1, var3);
-      if (var4 == null) {
-         User var5 = UserServiceManager.getUserService().get(var3);
-         ProjectManager.ins.addProjectUser(var1, var3, var5.getName());
-         ProjectRole var6 = ProjectRoleManager.ins.get(var1, ProjectRoleEnum.User.name());
-         if (var6 != null) {
-            ProjectRoleService.ins.addUserRole(var1, var3, ((Role)var6).getId());
+   public void addProjectuser(long projectId, String account) {
+      User projectUser = UserManager.ins.getProjectUser(projectId, account);
+      if (projectUser == null) {
+         User user = UserServiceManager.getUserService().get(account);
+         ProjectManager.ins.addProjectUser(projectId, account, user.getName());
+         ProjectRole projectRole = ProjectRoleManager.ins.get(projectId, ProjectRoleEnum.User.name());
+         if (projectRole != null) {
+            ProjectRoleService.ins.addUserRole(projectId, account, ((Role)projectRole).getId());
          }
       }
 
    }
+   public List getUserCommits(Long projectId, Date startDate, Date endDate) {
+      FileCountQuery fileCountQuery = FileManager.ins.newCountQuery();
+      List userCommits = fileCountQuery.projectId(projectId).updateDateBegin(startDate).updateDateEnd(endDate).getUserCommits();
+      HashMap valuesByKey = new HashMap();
 
-   public List getUserCommits(Long var1, Date var2, Date var3) {
-      FileCountQuery var4 = FileManager.ins.newCountQuery();
-      List var5 = var4.projectId(var1).updateDateBegin(var2).updateDateEnd(var3).getUserCommits();
-      HashMap var6 = new HashMap();
-
-      for(RuleFile var8 : (Iterable<RuleFile>)(Iterable<?>)(var5)) {
-         UserCommitVO var9 = new UserCommitVO();
-         if (!var6.containsKey(var8.getUpdateUser())) {
-            var9.setUserId(var8.getUpdateUser());
-            User var10 = UserServiceManager.getUserService().get(var8.getUpdateUser());
-            var9.setUserName(var10 != null ? var10.getName() : var8.getUpdateUser());
-            var6.put(var8.getUpdateUser(), var9);
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(userCommits)) {
+         UserCommitVO userCommitVO = new UserCommitVO();
+         if (!valuesByKey.containsKey(ruleFile.getUpdateUser())) {
+            userCommitVO.setUserId(ruleFile.getUpdateUser());
+            User user = UserServiceManager.getUserService().get(ruleFile.getUpdateUser());
+            userCommitVO.setUserName(user != null ? user.getName() : ruleFile.getUpdateUser());
+            valuesByKey.put(ruleFile.getUpdateUser(), userCommitVO);
          } else {
-            var9 = (UserCommitVO)var6.get(var8.getUpdateUser());
+            userCommitVO = (UserCommitVO)valuesByKey.get(ruleFile.getUpdateUser());
          }
 
-         var9.setCount(var9.getCount() + 1);
+         userCommitVO.setCount(userCommitVO.getCount() + 1);
       }
 
-      ArrayList var11 = new ArrayList(var6.values());
-      Collections.sort(var11, new Comparator<UserCommitVO>() {
-         public int compare(UserCommitVO var1, UserCommitVO var2) {
-            return var2.getCount() - var1.getCount();
+      ArrayList items = new ArrayList(valuesByKey.values());
+      Collections.sort(items, new Comparator<UserCommitVO>() {
+         public int compare(UserCommitVO userCommitVO, UserCommitVO userCommitVO2) {
+            return userCommitVO2.getCount() - userCommitVO.getCount();
          }
       });
-      return (List)(var11.size() > 5 ? var11.subList(0, 4) : var11);
+      return (List)(items.size() > 5 ? items.subList(0, 4) : items);
    }
+   public List getRuleCommits(Long projectId, Date startDate, Date endDate) {
+      FileCountQuery fileCountQuery = FileManager.ins.newCountQuery();
+      List ruleCommits = fileCountQuery.projectId(projectId).updateDateBegin(startDate).updateDateEnd(endDate).getRuleCommits();
+      HashMap valuesByKey = new HashMap();
 
-   public List getRuleCommits(Long var1, Date var2, Date var3) {
-      FileCountQuery var4 = FileManager.ins.newCountQuery();
-      List var5 = var4.projectId(var1).updateDateBegin(var2).updateDateEnd(var3).getRuleCommits();
-      HashMap var6 = new HashMap();
-
-      for(RuleFile var8 : (Iterable<RuleFile>)(Iterable<?>)(var5)) {
-         RuleCommitVO var9 = new RuleCommitVO();
-         Calendar var10 = Calendar.getInstance();
-         var10.setTime(var8.getModifyDate());
-         var10.set(11, 0);
-         var10.set(12, 0);
-         var10.set(13, 0);
-         var10.set(14, 0);
-         if (!var6.containsKey(var10.getTime())) {
-            var9.setCreateDate(var10.getTime());
-            var6.put(var10.getTime(), var9);
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(ruleCommits)) {
+         RuleCommitVO ruleCommitVO = new RuleCommitVO();
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(ruleFile.getModifyDate());
+         calendar.set(11, 0);
+         calendar.set(12, 0);
+         calendar.set(13, 0);
+         calendar.set(14, 0);
+         if (!valuesByKey.containsKey(calendar.getTime())) {
+            ruleCommitVO.setCreateDate(calendar.getTime());
+            valuesByKey.put(calendar.getTime(), ruleCommitVO);
          } else {
-            var9 = (RuleCommitVO)var6.get(var10.getTime());
+            ruleCommitVO = (RuleCommitVO)valuesByKey.get(calendar.getTime());
          }
 
-         var9.setCount(var9.getCount() + 1);
+         ruleCommitVO.setCount(ruleCommitVO.getCount() + 1);
       }
 
-      ArrayList var11 = new ArrayList(var6.values());
-      Collections.sort(var11, new Comparator<RuleCommitVO>() {
-         public int compare(RuleCommitVO var1, RuleCommitVO var2) {
-            return (int)(var1.getCreateDate().getTime() - var2.getCreateDate().getTime());
+      ArrayList ruleCommits2 = new ArrayList(valuesByKey.values());
+      Collections.sort(ruleCommits2, new Comparator<RuleCommitVO>() {
+         public int compare(RuleCommitVO ruleCommitVO, RuleCommitVO ruleCommitVO2) {
+            return (int)(ruleCommitVO.getCreateDate().getTime() - ruleCommitVO2.getCreateDate().getTime());
          }
       });
-      return var11;
+      return ruleCommits2;
    }
+   public List getRuleDeploys(Long projectId, Date startDate, Date endDate) {
+      PacketApplyQuery packetApplyQuery = PacketApplyManager.ins.newQuery();
+      List items = packetApplyQuery.projectId(projectId).startDate(startDate).endDate(endDate).type(ApplyType.deploy).status(ApplyStatus.pass).list();
+      HashMap valuesByKey = new HashMap();
 
-   public List getRuleDeploys(Long var1, Date var2, Date var3) {
-      PacketApplyQuery var4 = PacketApplyManager.ins.newQuery();
-      List var5 = var4.projectId(var1).startDate(var2).endDate(var3).type(ApplyType.deploy).status(ApplyStatus.pass).list();
-      HashMap var6 = new HashMap();
-
-      for(PacketApply var8 : (Iterable<PacketApply>)(Iterable<?>)(var5)) {
-         RuleDeployVO var9 = new RuleDeployVO();
-         Calendar var10 = Calendar.getInstance();
-         var10.setTime(var8.getCreateDate());
-         var10.set(11, 0);
-         var10.set(12, 0);
-         var10.set(13, 0);
-         var10.set(14, 0);
-         if (!var6.containsKey(var10.getTime())) {
-            var6.put(var10.getTime(), var9);
+      for(PacketApply packetApply : (Iterable<PacketApply>)(Iterable<?>)(items)) {
+         RuleDeployVO ruleDeployVO = new RuleDeployVO();
+         Calendar calendar = Calendar.getInstance();
+         calendar.setTime(packetApply.getCreateDate());
+         calendar.set(11, 0);
+         calendar.set(12, 0);
+         calendar.set(13, 0);
+         calendar.set(14, 0);
+         if (!valuesByKey.containsKey(calendar.getTime())) {
+            valuesByKey.put(calendar.getTime(), ruleDeployVO);
          } else {
-            var9 = (RuleDeployVO)var6.get(var10.getTime());
+            ruleDeployVO = (RuleDeployVO)valuesByKey.get(calendar.getTime());
          }
 
-         var9.setCreateDate(var10.getTime());
-         var9.setCount(var9.getCount() + 1);
+         ruleDeployVO.setCreateDate(calendar.getTime());
+         ruleDeployVO.setCount(ruleDeployVO.getCount() + 1);
       }
 
-      ArrayList var11 = new ArrayList(var6.values());
-      Collections.sort(var11, new Comparator<RuleDeployVO>() {
-         public int compare(RuleDeployVO var1, RuleDeployVO var2) {
-            return (int)(var1.getCreateDate().getTime() - var2.getCreateDate().getTime());
+      ArrayList ruleDeploys = new ArrayList(valuesByKey.values());
+      Collections.sort(ruleDeploys, new Comparator<RuleDeployVO>() {
+         public int compare(RuleDeployVO ruleDeployVO, RuleDeployVO ruleDeployVO2) {
+            return (int)(ruleDeployVO.getCreateDate().getTime() - ruleDeployVO2.getCreateDate().getTime());
          }
       });
-      return var11;
+      return ruleDeploys;
    }
-
-   public List getRuleExecCount(Long var1, Date var2, Date var3) {
-      KnowledgeLogCountQuery var4 = KnowledgeLogManager.ins.newCountQuery();
-      var4.projectId(var1);
-      var4.dateBegin(var2);
-      var4.dateEnd(var3);
-      return var4.listExec();
+   public List getRuleExecCount(Long projectId, Date startDate, Date endDate) {
+      KnowledgeLogCountQuery knowledgeLogCountQuery = KnowledgeLogManager.ins.newCountQuery();
+      knowledgeLogCountQuery.projectId(projectId);
+      knowledgeLogCountQuery.dateBegin(startDate);
+      knowledgeLogCountQuery.dateEnd(endDate);
+      return knowledgeLogCountQuery.listExec();
    }
-
-   public List getRuleExecTime(Long var1, Date var2, Date var3) {
-      KnowledgeLogCountQuery var4 = KnowledgeLogManager.ins.newCountQuery();
-      var4.projectId(var1);
-      var4.dateBegin(var2);
-      var4.dateEnd(var3);
-      List var5 = var4.listTime();
-      return var5.size() > 10 ? var5.subList(0, 9) : var5;
+   public List getRuleExecTime(Long projectId, Date startDate, Date endDate) {
+      KnowledgeLogCountQuery knowledgeLogCountQuery = KnowledgeLogManager.ins.newCountQuery();
+      knowledgeLogCountQuery.projectId(projectId);
+      knowledgeLogCountQuery.dateBegin(startDate);
+      knowledgeLogCountQuery.dateEnd(endDate);
+      List items = knowledgeLogCountQuery.listTime();
+      return items.size() > 10 ? items.subList(0, 9) : items;
    }
 }

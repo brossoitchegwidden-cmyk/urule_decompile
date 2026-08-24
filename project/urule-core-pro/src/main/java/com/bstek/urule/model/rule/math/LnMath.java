@@ -11,24 +11,24 @@ public class LnMath implements MathSign {
    private Value value;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
-      double var4 = Utils.toBigDecimal(var3).doubleValue();
-      return new BigDecimal(Math.log(var4)).stripTrailingZeros();
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.value, context, factMap);
+      double doubleValue = Utils.toBigDecimal(objectValue).doubleValue();
+      return new BigDecimal(Math.log(doubleValue)).stripTrailingZeros();
    }
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Ln" : "自然对数";
-      return "[" + var1 + "]" + this.value + "";
+      String text = LocaleHolder.isEnglish() ? "Ln" : "自然对数";
+      return "[" + text + "]" + this.value + "";
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    @Override

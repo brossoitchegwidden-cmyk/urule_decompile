@@ -11,8 +11,8 @@ public class SimpleArithmetic extends Arithmetic {
       return this.value;
    }
 
-   public void setValue(SimpleArithmeticValue var1) {
-      this.value = var1;
+   public void setValue(SimpleArithmeticValue value) {
+      this.value = value;
    }
 
    @Override

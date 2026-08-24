@@ -14,9 +14,9 @@ public class TerminalNode extends ReteNode {
       super(0);
    }
 
-   public TerminalNode(Rule var1, int var2) {
-      super(var2);
-      this.rule = var1;
+   public TerminalNode(Rule rule, int id) {
+      super(id);
+      this.rule = rule;
    }
 
    @Override
@@ -24,7 +24,7 @@ public class TerminalNode extends ReteNode {
       return this.nodeType;
    }
 
-   public Rule[] enter(Context var1, Object var2) {
+   public Rule[] enter(Context context, Object object) {
       return new Rule[]{this.rule};
    }
 
@@ -32,18 +32,18 @@ public class TerminalNode extends ReteNode {
       return this.rule;
    }
 
-   public void setRule(Rule var1) {
-      this.rule = var1;
+   public void setRule(Rule rule) {
+      this.rule = rule;
    }
 
    @Override
-   public Activity newActivity(Map<Object, Object> var1) {
-      if (var1.containsKey(this)) {
-         return (TerminalActivity)var1.get(this);
+   public Activity newActivity(Map<Object, Object> context) {
+      if (context.containsKey(this)) {
+         return (TerminalActivity)context.get(this);
       }
 
-      TerminalActivity var2 = new TerminalActivity(this.rule);
-      var1.put(this, var2);
-      return var2;
+      TerminalActivity terminalActivity = new TerminalActivity(this.rule);
+      context.put(this, terminalActivity);
+      return terminalActivity;
    }
 }

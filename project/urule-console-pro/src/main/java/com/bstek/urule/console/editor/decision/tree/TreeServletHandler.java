@@ -16,36 +16,36 @@ import org.dom4j.Element;
 
 public class TreeServletHandler extends ApiServletHandler {
    public static final String DECISION_TREE_DATA = "_decision_tree_data";
-   private VariableTreeNodeParser e;
-   private ConditionTreeNodeParser f;
-   private ActionTreeNodeParser g;
+   private VariableTreeNodeParser variableTreeNodeParser;
+   private ConditionTreeNodeParser conditionTreeNodeParser;
+   private ActionTreeNodeParser actionTreeNodeParser;
 
    public void init() {
       super.init();
-      this.e = (VariableTreeNodeParser)Utils.getApplicationContext().getBean("urule.variableTreeNodeParser");
-      this.f = (ConditionTreeNodeParser)Utils.getApplicationContext().getBean("urule.conditionTreeNodeParser");
-      this.g = (ActionTreeNodeParser)Utils.getApplicationContext().getBean("urule.actionTreeNodeParser");
+      this.variableTreeNodeParser = (VariableTreeNodeParser)Utils.getApplicationContext().getBean("urule.variableTreeNodeParser");
+      this.conditionTreeNodeParser = (ConditionTreeNodeParser)Utils.getApplicationContext().getBean("urule.conditionTreeNodeParser");
+      this.actionTreeNodeParser = (ActionTreeNodeParser)Utils.getApplicationContext().getBean("urule.actionTreeNodeParser");
    }
 
-   public void parseTreeNode(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("xml");
-      var3 = URLDecoder.decode(var3, "utf-8");
-      Document var4 = DocumentHelper.parseText(var3);
-      Element var5 = var4.getRootElement();
-      if (this.e.support(var5.getName())) {
-         VariableTreeNode var6 = this.e.parse(var5);
-         StoreTools.setAttribute("_decision_tree_data", var6);
-      } else if (this.f.support(var5.getName())) {
-         StoreTools.setAttribute("_decision_tree_data", this.f.parse(var5));
-      } else if (this.g.support(var5.getName())) {
-         StoreTools.setAttribute("_decision_tree_data", this.g.parse(var5));
+   public void parseTreeNode(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("xml");
+      parameter = URLDecoder.decode(parameter, "utf-8");
+      Document text = DocumentHelper.parseText(parameter);
+      Element rootElement = text.getRootElement();
+      if (this.variableTreeNodeParser.support(rootElement.getName())) {
+         VariableTreeNode variableTreeNode = this.variableTreeNodeParser.parse(rootElement);
+         StoreTools.setAttribute("_decision_tree_data", variableTreeNode);
+      } else if (this.conditionTreeNodeParser.support(rootElement.getName())) {
+         StoreTools.setAttribute("_decision_tree_data", this.conditionTreeNodeParser.parse(rootElement));
+      } else if (this.actionTreeNodeParser.support(rootElement.getName())) {
+         StoreTools.setAttribute("_decision_tree_data", this.actionTreeNodeParser.parse(rootElement));
       }
 
    }
 
-   public void loadTreeNode(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Object var3 = StoreTools.getAttribute("_decision_tree_data");
-      this.a(var2, var3);
+   public void loadTreeNode(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Object attribute = StoreTools.getAttribute("_decision_tree_data");
+      this.writeObjectToJson(resp, attribute);
    }
 
    public String url() {

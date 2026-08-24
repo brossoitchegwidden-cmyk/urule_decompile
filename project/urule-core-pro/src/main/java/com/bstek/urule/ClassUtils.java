@@ -9,7 +9,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,215 +19,206 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-public class ClassUtils {
-   private static ConcurrentHashMap<String, Class<?>> a = new ConcurrentHashMap<>();
-   private static ConcurrentHashMap<String, String> b = new ConcurrentHashMap<>();
+/** Utilities for exposing JavaBean properties as URule variables. */
+public final class ClassUtils {
+   private static final Map<String, Class<?>> CLASS_CACHE = new ConcurrentHashMap<>();
+   private static final Set<String> MISSING_CLASS_CACHE = ConcurrentHashMap.newKeySet();
 
-   public static void classToXml(Class<?> var0, File var1) {
-      if (!var1.exists()) {
-         try {
-            var1.createNewFile();
-         } catch (IOException var12) {
-            throw new RuntimeException(var12);
-         }
+   private ClassUtils() {
+   }
+
+   /** Writes the variable model for {@code type} as UTF-8 XML. */
+   public static void classToXml(Class<?> type, File file) {
+      Document document = DocumentHelper.createDocument();
+      Element root = document.addElement("variables");
+      root.addAttribute("clazz", type.getName());
+
+      for (Variable variable : classToVariables(type)) {
+         Element element = root.addElement("variable");
+         addAttributeIfPresent(element, "name", variable.getName());
+         addAttributeIfPresent(element, "label", variable.getLabel());
+         addAttributeIfPresent(element, "defaultValue", variable.getDefaultValue());
+         addAttributeIfPresent(element, "type", variable.getType());
+         addAttributeIfPresent(element, "act", variable.getAct());
       }
 
-      FileOutputStream var2 = null;
+      OutputFormat format = OutputFormat.createPrettyPrint();
+      format.setEncoding("utf-8");
+      try (FileOutputStream output = new FileOutputStream(file)) {
+         XMLWriter writer = new XMLWriter(output, format);
+         writer.write(document);
+         writer.close();
+      } catch (Exception exception) {
+         throw new RuntimeException("Could not write variables for " + type.getName() + " to " + file, exception);
+      }
+   }
+
+   private static void addAttributeIfPresent(Element element, String name, Object value) {
+      if (value != null) {
+         element.addAttribute(name, String.valueOf(value));
+      }
+   }
+
+   public static List<Variable> classToVariables(Class<?> type) {
+      try {
+         return parseClass("", "", type, new ArrayList<>());
+      } catch (Exception exception) {
+         throw new RuntimeException("Could not inspect JavaBean " + type.getName(), exception);
+      }
+   }
+
+   public static Class<?> doGetTargetClass(String className, boolean failIfMissing) throws ClassNotFoundException {
+      Class<?> cachedClass = CLASS_CACHE.get(className);
+      if (cachedClass != null) {
+         return cachedClass;
+      }
+      if (MISSING_CLASS_CACHE.contains(className)) {
+         if (failIfMissing) {
+            throw new ClassNotFoundException(className);
+         }
+         return null;
+      }
 
       try {
-         var2 = new FileOutputStream(var1);
-         List var3 = classToVariables(var0);
-         StringBuffer var4 = new StringBuffer();
-         var4.append("<variables clazz=\"" + var0.getName() + "\">");
-
-         for (Variable var6 : (Iterable<Variable>)(Iterable<?>)(var3)) {
-            var4.append("<variable ");
-            var4.append("name=\"" + var6.getName() + "\" ");
-            if (var6.getLabel() != null) {
-               var4.append("label=\"" + var6.getLabel() + "\" ");
-            }
-
-            if (var6.getDefaultValue() != null) {
-               var4.append("defaultValue=\"" + var6.getDefaultValue() + "\" ");
-            }
-
-            if (var6.getType() != null) {
-               var4.append("type=\"" + var6.getType() + "\" ");
-            }
-
-            if (var6.getAct() != null) {
-               var4.append("act=\"" + var6.getAct() + "\" ");
-            }
-
-            var4.append(">");
-            var4.append("</variable>");
+         Class<?> targetClass = Class.forName(className);
+         CLASS_CACHE.put(className, targetClass);
+         return targetClass;
+      } catch (ClassNotFoundException defaultLoaderException) {
+         Class<?> targetClass = loadFromApplicationContext(className, defaultLoaderException, failIfMissing);
+         if (targetClass != null) {
+            CLASS_CACHE.put(className, targetClass);
          }
-
-         var4.append("</variables>");
-         Document var15 = DocumentHelper.parseText(var4.toString());
-         OutputFormat var16 = OutputFormat.createPrettyPrint();
-         var16.setEncoding("utf-8");
-         XMLWriter var7 = new XMLWriter(var2, var16);
-         var7.write(var15);
-         var7.close();
-         var2.close();
-      } catch (Exception var13) {
-         throw new RuntimeException(var13);
-      } finally {
-         IOUtils.closeQuietly(var2);
+         return targetClass;
       }
    }
 
-   public static List<Variable> classToVariables(Class<?> var0) {
+   private static Class<?> loadFromApplicationContext(
+         String className, ClassNotFoundException defaultLoaderException, boolean failIfMissing)
+         throws ClassNotFoundException {
       try {
-         return a("", "", var0, new ArrayList<>());
-      } catch (Exception var2) {
-         throw new RuntimeException(var2);
+         if (Utils.getApplicationContext() == null) {
+            throw defaultLoaderException;
+         }
+         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory)
+               Utils.getApplicationContext().getAutowireCapableBeanFactory();
+         return beanFactory.getBeanClassLoader().loadClass(className);
+      } catch (ClassNotFoundException applicationLoaderException) {
+         MISSING_CLASS_CACHE.add(className);
+         if (failIfMissing) {
+            throw applicationLoaderException;
+         }
+         return null;
       }
    }
 
-   public static Class<?> doGetTargetClass(String var0, boolean var1) throws ClassNotFoundException {
-      if (a.containsKey(var0)) {
-         return a.get(var0);
+   public static Class<?> getTargetClass(String className) throws ClassNotFoundException {
+      return doGetTargetClass(className, true);
+   }
+
+   public static Class<?> getTargetClassDefaultNull(String className) throws ClassNotFoundException {
+      return doGetTargetClass(className, false);
+   }
+
+   private static List<Variable> parseClass(
+         String propertyPath, String labelPath, Class<?> type, Collection<Class<?>> ancestors) throws Exception {
+      List<Variable> variables = new ArrayList<>();
+      BeanInfo beanInfo = Introspector.getBeanInfo(type, Object.class);
+      PropertyDescriptor[] properties = beanInfo.getPropertyDescriptors();
+      if (properties == null || ancestors.contains(type)) {
+         return variables;
       }
 
-      Class var2 = null;
-      if (b.contains(var0)) {
-         if (var1) {
-            throw new ClassNotFoundException(var0);
-         } else {
-            return null;
-         }
-      } else {
-         if (a.contains(var0)) {
-            return a.get(var0);
+      for (PropertyDescriptor property : properties) {
+         Class<?> propertyType = property.getPropertyType();
+         if (propertyType == null) {
+            continue;
          }
 
+         String propertyName = property.getName();
+         String variableName = propertyPath + propertyName;
+         String declaredLabel = getPropertyAnnotationLabel(type, propertyName);
+         String localLabel = declaredLabel == null ? variableName : declaredLabel;
+         String variableLabel = StringUtils.isBlank(labelPath) ? localLabel : labelPath + localLabel;
+
+         Variable variable = new Variable();
+         variable.setName(variableName);
+         variable.setUuid(UUID.randomUUID().toString());
+         variable.setLabel(variableLabel);
+         variable.setType(getDatatype(propertyType));
+         variable.setAct(Act.InOut);
+
+         if (!Datatype.Object.equals(variable.getType()) || Object.class.equals(propertyType)) {
+            variables.add(variable);
+         } else if (!ancestors.contains(propertyType)) {
+            ancestors.add(type);
+            variables.add(variable);
+            variables.addAll(parseClass(
+                  variableName + ".", variableLabel + ".", propertyType, ancestors));
+            ancestors.remove(type);
+         }
+      }
+      return variables;
+   }
+
+   /**
+    * A valid JavaBean property does not have to be backed by a field. In that
+    * case there simply is no field-level {@link Label} annotation.
+    */
+   private static String getPropertyAnnotationLabel(Class<?> type, String fieldName) {
+      Class<?> currentType = type;
+      while (currentType != null && currentType != Object.class) {
          try {
-            var2 = Class.forName(var0);
-            a.put(var0, var2);
-         } catch (ClassNotFoundException var6) {
-            try {
-               DefaultListableBeanFactory var4 = (DefaultListableBeanFactory)Utils.getApplicationContext().getAutowireCapableBeanFactory();
-               var2 = var4.getBeanClassLoader().loadClass(var0);
-               a.put(var0, var2);
-            } catch (ClassNotFoundException var5) {
-               b.put(var0, var0);
-               if (var1) {
-                  throw var5;
-               }
-
-               return null;
-            }
-         }
-
-         a.put(var0, var2);
-         return var2;
-      }
-   }
-
-   public static Class<?> getTargetClass(String var0) throws ClassNotFoundException {
-      return doGetTargetClass(var0, true);
-   }
-
-   public static Class<?> getTargetClassDefaultNull(String var0) throws ClassNotFoundException {
-      return doGetTargetClass(var0, false);
-   }
-
-   private static List<Variable> a(String var0, String var1, Class<?> var2, Collection<Class<?>> var3) throws Exception {
-      ArrayList var4 = new ArrayList();
-      BeanInfo var5 = Introspector.getBeanInfo(var2, Object.class);
-      PropertyDescriptor[] var6 = var5.getPropertyDescriptors();
-      if (var6 != null && !var3.contains(var2)) {
-         for (PropertyDescriptor var10 : var6) {
-            Variable var11 = new Variable();
-            Class var12 = var10.getPropertyType();
-            Datatype var13 = a(var12);
-            String var14 = var10.getName();
-            String var15 = a(var2, var14);
-            String var16 = var0 + var10.getName();
-            var15 = var15 == null ? var16 : var15;
-            String var17 = StringUtils.isBlank(var1) ? var15 : var1 + var15;
-            var11.setName(var16);
-            var11.setUuid(UUID.randomUUID().toString());
-            var11.setLabel(var17);
-            var11.setType(var13);
-            var11.setAct(Act.InOut);
-            if (!Datatype.Object.equals(var13) || var12.equals(Object.class)) {
-               var4.add(var11);
-            } else if (!var3.contains(var2) && !var3.contains(var12)) {
-               var3.add(var2);
-               var4.add(var11);
-               var4.addAll(a(var0 + var10.getName() + ".", var17 + ".", var12, var3));
-               var3.remove(var2);
-            }
+            Field field = currentType.getDeclaredField(fieldName);
+            Label label = field.getAnnotation(Label.class);
+            return label == null ? null : label.value();
+         } catch (NoSuchFieldException exception) {
+            currentType = currentType.getSuperclass();
          }
       }
-
-      return var4;
+      return null;
    }
 
-   private static String a(Class<?> var0, String var1) throws Exception {
-      Field var2 = null;
-
-      while (var2 == null) {
-         try {
-            var2 = var0.getDeclaredField(var1);
-         } catch (NoSuchFieldException var4) {
-            if (var0 == Object.class) {
-               throw var4;
-            }
-
-            var0 = var0.getSuperclass();
-         }
-      }
-
-      Label var3 = var2.getAnnotation(Label.class);
-      return var3 != null ? var3.value() : null;
-   }
-
-   private static Datatype a(Class<?> var0) {
-      if (String.class.isAssignableFrom(var0)) {
+   private static Datatype getDatatype(Class<?> type) {
+      if (String.class.isAssignableFrom(type)) {
          return Datatype.String;
-      } else if (Boolean.class.isAssignableFrom(var0) || boolean.class.isAssignableFrom(var0)) {
+      } else if (Boolean.class.isAssignableFrom(type) || boolean.class.equals(type)) {
          return Datatype.Boolean;
-      } else if (Integer.class.isAssignableFrom(var0) || int.class.isAssignableFrom(var0)) {
+      } else if (Integer.class.isAssignableFrom(type) || int.class.equals(type)) {
          return Datatype.Integer;
-      } else if (Float.class.isAssignableFrom(var0) || float.class.isAssignableFrom(var0)) {
+      } else if (Float.class.isAssignableFrom(type) || float.class.equals(type)) {
          return Datatype.Float;
-      } else if (Long.class.isAssignableFrom(var0) || long.class.isAssignableFrom(var0)) {
+      } else if (Long.class.isAssignableFrom(type) || long.class.equals(type)) {
          return Datatype.Long;
-      } else if (BigDecimal.class.isAssignableFrom(var0)) {
+      } else if (BigDecimal.class.isAssignableFrom(type)) {
          return Datatype.BigDecimal;
-      } else if (Double.class.isAssignableFrom(var0) || double.class.isAssignableFrom(var0)) {
+      } else if (Double.class.isAssignableFrom(type) || double.class.equals(type)) {
          return Datatype.Double;
-      } else if (Date.class.isAssignableFrom(var0)) {
+      } else if (Date.class.isAssignableFrom(type)) {
          return Datatype.Date;
-      } else if (Date.class.isAssignableFrom(var0)) {
-         return Datatype.Date;
-      } else if (List.class.isAssignableFrom(var0)) {
+      } else if (List.class.isAssignableFrom(type)) {
          return Datatype.List;
-      } else if (Map.class.isAssignableFrom(var0)) {
+      } else if (Map.class.isAssignableFrom(type)) {
          return Datatype.Map;
-      } else if (Set.class.isAssignableFrom(var0)) {
+      } else if (Set.class.isAssignableFrom(type)) {
          return Datatype.Set;
-      } else if (Enum.class.isAssignableFrom(var0)) {
+      } else if (Enum.class.isAssignableFrom(type)) {
          return Datatype.Enum;
-      } else {
-         return !Character.class.isAssignableFrom(var0) && !char.class.isAssignableFrom(var0) ? Datatype.Object : Datatype.Char;
+      } else if (Character.class.isAssignableFrom(type) || char.class.equals(type)) {
+         return Datatype.Char;
       }
+      return Datatype.Object;
    }
 
    public static void cleanClassesCache() {
-      a.clear();
-      b.clear();
+      CLASS_CACHE.clear();
+      MISSING_CLASS_CACHE.clear();
    }
 }

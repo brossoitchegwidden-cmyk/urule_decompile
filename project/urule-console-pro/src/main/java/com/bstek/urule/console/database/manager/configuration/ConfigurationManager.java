@@ -6,13 +6,18 @@ import com.bstek.urule.console.database.model.Page;
 public interface ConfigurationManager {
    ConfigurationManager ins = new ConfigurationManagerImpl();
 
-   void getConfigurations(Configuration var1, Page var2);
+   /**获取配置项列表*/
+   void getConfigurations(Configuration condition, Page page);
 
-   Configuration getConfiguration(String var1);
+   /**查询配置项*/
+   Configuration getConfiguration(String key);
 
-   void deleteConfiguration(long var1);
+   /**删除配置项*/
+   void deleteConfiguration(long id);
 
-   void updateConfiguration(Configuration var1);
+   /**更新配置项*/
+   void updateConfiguration(Configuration configuration);
 
-   void insertConfiguration(Configuration var1);
+   /**新增配置项*/
+   void insertConfiguration(Configuration configuration);
 }

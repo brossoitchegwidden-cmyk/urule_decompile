@@ -8,12 +8,12 @@ public class SignIValue extends AbstractValue {
 
    @Override
    public String getId() {
-      String var1 = "[i]";
+      String id = "[i]";
       if (this.arithmetic != null) {
-         var1 = var1 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var1;
+      return id;
    }
 
    @Override

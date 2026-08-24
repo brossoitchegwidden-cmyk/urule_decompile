@@ -6,20 +6,20 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class ExtremumFunctionMathParser extends MathParser {
-   public ExtremumFunctionMathParser(ValueParser var1) {
-      super(var1);
+   public ExtremumFunctionMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("extremum");
+   public boolean support(String name) {
+      return name.equals("extremum");
    }
 
-   public MathSign parse(Element var1) {
-      ExtremumMath var2 = new ExtremumMath();
-      var2.setName(var1.attributeValue("name"));
-      var2.setValue1(this.a(var1.element("value1")));
-      var2.setValue2(this.a(var1.element("value2")));
-      return var2;
+   public MathSign parse(Element element) {
+      ExtremumMath extremumMath = new ExtremumMath();
+      extremumMath.setName(element.attributeValue("name"));
+      extremumMath.setValue1(this.parseValue(element.element("value1")));
+      extremumMath.setValue2(this.parseValue(element.element("value2")));
+      return extremumMath;
    }
 }

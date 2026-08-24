@@ -4,33 +4,33 @@ import com.bstek.urule.console.database.model.Page;
 import java.util.List;
 
 public interface PacketQuery {
-   PacketQuery id(long var1);
+   PacketQuery id(long id);
 
-   PacketQuery code(String var1);
+   PacketQuery code(String code);
 
-   PacketQuery name(String var1);
+   PacketQuery name(String name);
 
-   PacketQuery codeLike(String var1);
+   PacketQuery codeLike(String code);
 
-   PacketQuery projectId(long var1);
+   PacketQuery projectId(long projectId);
 
-   PacketQuery idLike(String var1);
+   PacketQuery idLike(String id);
 
-   PacketQuery nameLike(String var1);
+   PacketQuery nameLike(String name);
 
-   PacketQuery typeLike(String var1);
+   PacketQuery typeLike(String type);
 
-   PacketQuery descLike(String var1);
+   PacketQuery descLike(String desc);
 
-   PacketQuery createUserLike(String var1);
+   PacketQuery createUserLike(String createUser);
 
-   PacketQuery enable(boolean var1);
+   PacketQuery enable(boolean enable);
 
-   PacketQuery restEnable(boolean var1);
+   PacketQuery restEnable(boolean restEnable);
 
-   PacketQuery auditEnable(boolean var1);
+   PacketQuery auditEnable(boolean auditEnable);
 
    List list();
 
-   Page paging(int var1, int var2);
+   Page paging(int pageIndex, int pageSize);
 }

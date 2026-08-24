@@ -3,31 +3,31 @@ package com.bstek.urule.console.editor.lib;
 import java.util.List;
 
 public class VariableInfo {
-   private long a;
-   private String b;
-   private String c;
-   private List d;
+   private long id;
+   private String path;
+   private String type;
+   private List variableCategories;
 
-   public VariableInfo(long var1, String var3, String var4, List var5) {
-      this.a = var1;
-      this.b = var3;
-      this.c = var4;
-      this.d = var5;
+   public VariableInfo(long id, String path, String type, List variableCategories) {
+      this.id = id;
+      this.path = path;
+      this.type = type;
+      this.variableCategories = variableCategories;
    }
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
    public String getPath() {
-      return this.b;
+      return this.path;
    }
 
    public String getType() {
-      return this.c;
+      return this.type;
    }
 
    public List getVariableCategories() {
-      return this.d;
+      return this.variableCategories;
    }
 }

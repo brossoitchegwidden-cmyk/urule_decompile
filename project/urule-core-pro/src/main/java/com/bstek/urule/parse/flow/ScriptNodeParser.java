@@ -9,49 +9,49 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
 public class ScriptNodeParser extends FlowNodeParser<ScriptNode> {
-   private Collection<ActionParser> b;
+   private Collection<ActionParser> actionParsers;
 
-   public ScriptNode parse(Element var1) {
-      ScriptNode var2 = new ScriptNode();
-      var2.setName(var1.attributeValue("name"));
-      var2.setEventBean(var1.attributeValue("event-bean"));
-      var2.setX(var1.attributeValue("x"));
-      var2.setY(var1.attributeValue("y"));
-      var2.setWidth(var1.attributeValue("width"));
-      var2.setHeight(var1.attributeValue("height"));
-      var2.setConnections(this.a(var1));
-      ArrayList var3 = new ArrayList();
-      var2.setActionsData(var3);
-      StringBuilder var4 = new StringBuilder();
+   public ScriptNode parse(Element element) {
+      ScriptNode scriptNode = new ScriptNode();
+      scriptNode.setName(element.attributeValue("name"));
+      scriptNode.setEventBean(element.attributeValue("event-bean"));
+      scriptNode.setX(element.attributeValue("x"));
+      scriptNode.setY(element.attributeValue("y"));
+      scriptNode.setWidth(element.attributeValue("width"));
+      scriptNode.setHeight(element.attributeValue("height"));
+      scriptNode.setConnections(this.parseConnections(element));
+      ArrayList items = new ArrayList();
+      scriptNode.setActionsData(items);
+      StringBuilder stringBuilder = new StringBuilder();
 
-      for (Object var6 : var1.elements()) {
-         if (var6 != null && var6 instanceof Element) {
-            Element var7 = (Element)var6;
-            String var8 = var7.getName();
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for (ActionParser var10 : this.b) {
-               if (var10.support(var8)) {
-                  var4.append(var7.asXML());
-                  var3.add(var10.parse(var7));
+            for (ActionParser actionParser : this.actionParsers) {
+               if (actionParser.support(name)) {
+                  stringBuilder.append(element2.asXML());
+                  items.add(actionParser.parse(element2));
                   break;
                }
             }
 
-            var2.setActionXml(var4.toString());
+            scriptNode.setActionXml(stringBuilder.toString());
          }
       }
 
-      return var2;
+      return scriptNode;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("script");
+   public boolean support(String name) {
+      return name.equals("script");
    }
 
    @Override
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      super.setApplicationContext(var1);
-      this.b = var1.getBeansOfType(ActionParser.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      super.setApplicationContext(applicationContext);
+      this.actionParsers = applicationContext.getBeansOfType(ActionParser.class).values();
    }
 }

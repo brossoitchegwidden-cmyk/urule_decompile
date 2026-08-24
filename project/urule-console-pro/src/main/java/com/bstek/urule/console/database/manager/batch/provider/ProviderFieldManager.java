@@ -5,21 +5,21 @@ import com.bstek.urule.console.database.model.batch.BatchDataProviderField;
 public interface ProviderFieldManager {
    ProviderFieldManager ins = new ProviderFieldManagerImpl();
 
-   BatchDataProviderField get(Long var1);
+   BatchDataProviderField get(Long id);
 
-   void add(BatchDataProviderField var1);
+   void add(BatchDataProviderField field);
 
-   void update(BatchDataProviderField var1);
+   void update(BatchDataProviderField field);
 
-   void remove(Long var1);
+   void remove(Long id);
 
-   void removeByProviderId(Long var1);
+   void removeByProviderId(Long id);
 
-   void removeByBatchId(Long var1);
+   void removeByBatchId(Long id);
 
-   void removeByProjectId(Long var1);
+   void removeByProjectId(Long id);
 
-   void removeByGroupId(String var1);
+   void removeByGroupId(String groupId);
 
    ProviderFieldQuery createQuery();
 }

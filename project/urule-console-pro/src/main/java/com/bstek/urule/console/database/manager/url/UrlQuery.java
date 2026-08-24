@@ -4,15 +4,15 @@ import com.bstek.urule.console.database.model.UrlType;
 import java.util.List;
 
 public interface UrlQuery {
-   UrlQuery nameLike(String var1);
+   UrlQuery nameLike(String name);
 
-   UrlQuery urlLike(String var1);
+   UrlQuery urlLike(String url);
 
-   UrlQuery type(UrlType var1);
+   UrlQuery type(UrlType type);
 
-   UrlQuery groupId(String var1);
+   UrlQuery groupId(String groupId);
 
-   UrlQuery id(long var1);
+   UrlQuery id(long id);
 
    List list();
 }

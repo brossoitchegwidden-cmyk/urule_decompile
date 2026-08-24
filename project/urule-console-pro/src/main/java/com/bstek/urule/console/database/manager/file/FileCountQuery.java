@@ -4,11 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 public interface FileCountQuery {
-   FileCountQuery projectId(Long var1);
+   FileCountQuery projectId(Long projectId);
 
-   FileCountQuery updateDateBegin(Date var1);
+   FileCountQuery updateDateBegin(Date date);
 
-   FileCountQuery updateDateEnd(Date var1);
+   FileCountQuery updateDateEnd(Date date);
 
    Integer getRuleCount();
 

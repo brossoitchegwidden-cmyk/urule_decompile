@@ -1,7 +1,7 @@
 /**
  * Created by jacky on 2016/6/17.
  */
-import {formatDate} from '../Utils.js';
+import {escapeXmlAttribute,formatDate} from '../Utils.js';
 
 export const LOAD_MASTER_COMPLETED='load_master_completed';
 export const LOAD_SLAVE_COMPLETE='load_slave_completed';
@@ -58,18 +58,14 @@ export function refreshKnowledgeCache(project,packageId,files) {
 };
 
 export function saveData(data,newVersion,project) {
-    let xml='<?xml version="1.0" encoding="utf-8"?>';
-    xml+='<res-packages>';
-    let errorInfo='';
-    data.forEach((p,index)=>{
-        xml+="<res-package id='"+p.id+"' name='"+p.name+"' create_date='"+formatDate(p.createDate,'yyyy-MM-dd HH:mm:ss')+"'>";
-        var resourceItems=p.resourceItems;
-        resourceItems.forEach((item,i)=>{
-            xml+="<res-package-item  name='"+item.name+"' path='"+item.path+"' version='"+item.version+"'/>";
-        });
-        xml+='</res-package>';
-    });
-    xml+='</res-packages>';
+    const packageElements=data.map(resourcePackage=>{
+        const itemElements=resourcePackage.resourceItems.map(item=>
+            `<res-package-item name="${escapeXmlAttribute(item.name)}" path="${escapeXmlAttribute(item.path)}" version="${escapeXmlAttribute(item.version)}"/>`
+        ).join('');
+        const createDate=formatDate(resourcePackage.createDate,'yyyy-MM-dd HH:mm:ss');
+        return `<res-package id="${escapeXmlAttribute(resourcePackage.id)}" name="${escapeXmlAttribute(resourcePackage.name)}" create_date="${escapeXmlAttribute(createDate)}">${itemElements}</res-package>`;
+    }).join('');
+    const xml=`<?xml version="1.0" encoding="utf-8"?><res-packages>${packageElements}</res-packages>`;
     $.ajax({
         url:window._server+'/packageeditor/saveResourcePackages',
         type:'POST',

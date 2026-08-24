@@ -8,23 +8,23 @@ public class RuleParserParser$MultiCellConditionsContext extends RuleParserParse
       return this.getRuleContexts(RuleParserParser$DecisionTableCellConditionContext.class);
    }
 
-   public RuleParserParser$DecisionTableCellConditionContext decisionTableCellCondition(int var1) {
-      return (RuleParserParser$DecisionTableCellConditionContext)this.getRuleContext(RuleParserParser$DecisionTableCellConditionContext.class, var1);
+   public RuleParserParser$DecisionTableCellConditionContext decisionTableCellCondition(int number) {
+      return (RuleParserParser$DecisionTableCellConditionContext)this.getRuleContext(RuleParserParser$DecisionTableCellConditionContext.class, number);
    }
 
    public List<RuleParserParser$JoinContext> join() {
       return this.getRuleContexts(RuleParserParser$JoinContext.class);
    }
 
-   public RuleParserParser$JoinContext join(int var1) {
-      return (RuleParserParser$JoinContext)this.getRuleContext(RuleParserParser$JoinContext.class, var1);
+   public RuleParserParser$JoinContext join(int number) {
+      return (RuleParserParser$JoinContext)this.getRuleContext(RuleParserParser$JoinContext.class, number);
    }
 
-   public RuleParserParser$MultiCellConditionsContext(RuleParserParser$DecisionTableCellConditionContext var1) {
-      this.copyFrom(var1);
+   public RuleParserParser$MultiCellConditionsContext(RuleParserParser$DecisionTableCellConditionContext ruleParserParser$DecisionTableCellConditionContext) {
+      this.copyFrom(ruleParserParser$DecisionTableCellConditionContext);
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitMultiCellConditions(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitMultiCellConditions(this) : parseTreeVisitor.visitChildren(this));
    }
 }

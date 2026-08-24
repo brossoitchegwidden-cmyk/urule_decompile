@@ -20,61 +20,61 @@ public abstract class BindingNode extends FlowNode {
    public BindingNode() {
    }
 
-   public BindingNode(String var1) {
-      super(var1);
+   public BindingNode(String name) {
+      super(name);
    }
 
-   protected KnowledgeSession executeKnowledgePackage(FlowContext var1, ProcessInstance var2) {
-      KnowledgeSession var3 = (KnowledgeSession)var1.getWorkingMemory();
-      KnowledgePackage var4 = this.loadKnowledgePackage(var1);
-      KnowledgeSession var5 = null;
+   protected KnowledgeSession executeKnowledgePackage(FlowContext context, ProcessInstance instance) {
+      KnowledgeSession workingMemory = (KnowledgeSession)context.getWorkingMemory();
+      KnowledgePackage knowledgePackage = this.loadKnowledgePackage(context);
+      KnowledgeSession knowledgeSession = null;
       if (this instanceof RulePackageNode) {
-         var5 = KnowledgeSessionFactory.newKnowledgeSession(var4, var3);
+         knowledgeSession = KnowledgeSessionFactory.newKnowledgeSession(knowledgePackage, workingMemory);
       } else {
-         var5 = KnowledgeSessionFactory.newKnowledgeSession(this.knowledgePackageWrapper, var1, var3);
+         knowledgeSession = KnowledgeSessionFactory.newKnowledgeSession(this.knowledgePackageWrapper, context, workingMemory);
       }
 
-      if (var4.getFlowMap() != null && var4.getFlowMap().size() != 0) {
-         String var15 = var4.getFlowMap().values().iterator().next().getId();
-         FlowExecutionResponse var7 = var5.startProcess(var15, var1.getVariables());
-         ((ExecutionResponseImpl)var1.getResponse()).addFlowExecutionResponse(var7);
+      if (knowledgePackage.getFlowMap() != null && knowledgePackage.getFlowMap().size() != 0) {
+         String id = knowledgePackage.getFlowMap().values().iterator().next().getId();
+         FlowExecutionResponse flowExecutionResponse = knowledgeSession.startProcess(id, context.getVariables());
+         ((ExecutionResponseImpl)context.getResponse()).addFlowExecutionResponse(flowExecutionResponse);
       } else {
-         RuleExecutionResponse var6 = var5.fireRules(var1.getVariables());
-         ((ExecutionResponseImpl)var1.getResponse()).addRuleExecutionResponse(var6);
+         RuleExecutionResponse ruleExecutionResponse = knowledgeSession.fireRules(context.getVariables());
+         ((ExecutionResponseImpl)context.getResponse()).addRuleExecutionResponse(ruleExecutionResponse);
       }
 
-      var1.addRuleData(var5.getLogManager().getRuleData());
-      synchronized (var1) {
-         Map var16 = var5.getParameters();
-         Map var8 = var1.getVariables();
+      context.addRuleData(knowledgeSession.getLogManager().getRuleData());
+      synchronized (context) {
+         Map parameters = knowledgeSession.getParameters();
+         Map variables = context.getVariables();
 
-         for (String var10 : (Iterable<String>)(Iterable<?>)(var16.keySet())) {
-            if (!var10.equals("return_to__")) {
-               Object var11 = var16.get(var10);
-               var8.put(var10, var11);
+         for (String text : (Iterable<String>)(Iterable<?>)(parameters.keySet())) {
+            if (!text.equals("return_to__")) {
+               Object objectValue = parameters.get(text);
+               variables.put(text, objectValue);
             }
          }
 
-         return var5;
+         return knowledgeSession;
       }
    }
 
-   private KnowledgePackage loadKnowledgePackage(FlowContext var1) {
+   private KnowledgePackage loadKnowledgePackage(FlowContext flowContext) {
       if (this instanceof RulePackageNode) {
-         RulePackageNode var2 = (RulePackageNode)this;
-         KnowledgeService var3 = (KnowledgeService)var1.getApplicationContext().getBean("urule.knowledgeService");
-         String var4 = var2.getCode();
-         if (StringUtils.isNotBlank(var4)) {
+         RulePackageNode rulePackageNode = (RulePackageNode)this;
+         KnowledgeService knowledgeService = (KnowledgeService)flowContext.getApplicationContext().getBean("urule.knowledgeService");
+         String code = rulePackageNode.getCode();
+         if (StringUtils.isNotBlank(code)) {
             try {
-               return var3.getKnowledge(var4);
-            } catch (Exception var6) {
-               throw new RuleException(var6);
+               return knowledgeService.getKnowledge(code);
+            } catch (Exception exception) {
+               throw new RuleException(exception);
             }
          } else {
             try {
-               return var3.getKnowledge(var2.getPackageId());
-            } catch (Exception var7) {
-               throw new RuleException(var7);
+               return knowledgeService.getKnowledge(rulePackageNode.getPackageId());
+            } catch (Exception exception2) {
+               throw new RuleException(exception2);
             }
          }
       } else {
@@ -86,7 +86,7 @@ public abstract class BindingNode extends FlowNode {
       return this.knowledgePackageWrapper;
    }
 
-   public void setKnowledgePackageWrapper(KnowledgePackageWrapper var1) {
-      this.knowledgePackageWrapper = var1;
+   public void setKnowledgePackageWrapper(KnowledgePackageWrapper knowledgePackageWrapper) {
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
    }
 }

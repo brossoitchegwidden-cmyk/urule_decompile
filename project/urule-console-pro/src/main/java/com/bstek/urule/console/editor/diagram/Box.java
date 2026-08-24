@@ -1,22 +1,22 @@
 package com.bstek.urule.console.editor.diagram;
 
 public class Box {
-   private int a;
-   private int b;
+   private int width;
+   private int height;
 
    public int getWidth() {
-      return this.a;
+      return this.width;
    }
 
-   public void setWidth(int var1) {
-      this.a = var1;
+   public void setWidth(int width) {
+      this.width = width;
    }
 
    public int getHeight() {
-      return this.b;
+      return this.height;
    }
 
-   public void setHeight(int var1) {
-      this.b = var1;
+   public void setHeight(int height) {
+      this.height = height;
    }
 }

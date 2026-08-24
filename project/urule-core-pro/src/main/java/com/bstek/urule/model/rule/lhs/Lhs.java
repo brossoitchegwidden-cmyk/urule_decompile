@@ -7,7 +7,7 @@ public class Lhs {
       return this.criterion;
    }
 
-   public void setCriterion(Criterion var1) {
-      this.criterion = var1;
+   public void setCriterion(Criterion criterion) {
+      this.criterion = criterion;
    }
 }

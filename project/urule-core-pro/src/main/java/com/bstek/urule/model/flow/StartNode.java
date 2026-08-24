@@ -9,8 +9,8 @@ public class StartNode extends FlowNode {
    public StartNode() {
    }
 
-   public StartNode(String var1) {
-      super(var1);
+   public StartNode(String name) {
+      super(name);
    }
 
    @Override
@@ -19,16 +19,16 @@ public class StartNode extends FlowNode {
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      Exception var4 = null;
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      Exception exception2 = null;
 
       try {
-         this.executeNodeEvent(EventType.enter, var2, var3);
-         this.executeNodeEvent(EventType.leave, var2, var3);
-      } catch (Exception var9) {
-         var4 = var9;
+         this.executeNodeEvent(EventType.enter, context, instance);
+         this.executeNodeEvent(EventType.leave, context, instance);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         this.leave(null, var2, var3, var4);
+         this.leave(null, context, instance, exception2);
       }
    }
 }

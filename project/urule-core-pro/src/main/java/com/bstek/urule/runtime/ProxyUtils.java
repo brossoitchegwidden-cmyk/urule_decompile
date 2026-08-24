@@ -7,37 +7,37 @@ import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.support.AopUtils;
 
 public class ProxyUtils {
-   public static Object getTargetObject(Object var0) {
-      if (AopUtils.isAopProxy(var0)) {
-         return AopUtils.isJdkDynamicProxy(var0) ? b(var0) : a(var0);
+   public static Object getTargetObject(Object obj) {
+      if (AopUtils.isAopProxy(obj)) {
+         return AopUtils.isJdkDynamicProxy(obj) ? resolveJdkProxyTarget(obj) : resolveCglibTarget(obj);
       } else {
-         return var0;
+         return obj;
       }
    }
 
-   private static Object a(Object var0) {
+   private static Object resolveCglibTarget(Object objectValue) {
       try {
-         Field var1 = var0.getClass().getDeclaredField("CGLIB$CALLBACK_0");
-         var1.setAccessible(true);
-         Object var2 = var1.get(var0);
-         Field var3 = var2.getClass().getDeclaredField("advised");
-         var3.setAccessible(true);
-         return ((AdvisedSupport)var3.get(var2)).getTargetSource().getTarget();
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         Field declaredField = objectValue.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+         declaredField.setAccessible(true);
+         Object objectValue2 = declaredField.get(objectValue);
+         Field declaredField2 = objectValue2.getClass().getDeclaredField("advised");
+         declaredField2.setAccessible(true);
+         return ((AdvisedSupport)declaredField2.get(objectValue2)).getTargetSource().getTarget();
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   private static Object b(Object var0) {
+   private static Object resolveJdkProxyTarget(Object objectValue) {
       try {
-         Field var1 = var0.getClass().getSuperclass().getDeclaredField("h");
-         var1.setAccessible(true);
-         AopProxy var2 = (AopProxy)var1.get(var0);
-         Field var3 = var2.getClass().getDeclaredField("advised");
-         var3.setAccessible(true);
-         return ((AdvisedSupport)var3.get(var2)).getTargetSource().getTarget();
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         Field declaredField = objectValue.getClass().getSuperclass().getDeclaredField("h");
+         declaredField.setAccessible(true);
+         AopProxy aopProxy = (AopProxy)declaredField.get(objectValue);
+         Field declaredField2 = aopProxy.getClass().getDeclaredField("advised");
+         declaredField2.setAccessible(true);
+         return ((AdvisedSupport)declaredField2.get(aopProxy)).getTargetSource().getTarget();
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 }

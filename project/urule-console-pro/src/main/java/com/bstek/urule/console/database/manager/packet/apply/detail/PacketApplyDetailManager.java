@@ -6,15 +6,15 @@ import java.util.List;
 public interface PacketApplyDetailManager {
    PacketApplyDetailManager ins = new PacketApplyDetailManagerImpl();
 
-   void add(PacketApplyDetail var1);
+   void add(PacketApplyDetail detail);
 
-   void deleteByApplyId(long var1);
+   void deleteByApplyId(long projectId);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   PacketApplyDetail load(long var1);
+   PacketApplyDetail load(long id);
 
-   List loadByApplyId(long var1);
+   List loadByApplyId(long applyId);
 
    PacketApplyDetailQuery newQuery();
 }

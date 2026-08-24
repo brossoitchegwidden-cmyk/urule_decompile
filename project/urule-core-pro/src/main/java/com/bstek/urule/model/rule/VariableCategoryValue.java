@@ -15,12 +15,12 @@ public class VariableCategoryValue extends AbstractValue {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
-   public VariableCategoryValue(String var1) {
-      this.variableCategory = var1;
+   public VariableCategoryValue(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    @Override
@@ -28,27 +28,27 @@ public class VariableCategoryValue extends AbstractValue {
       return this.valueType;
    }
 
-   public void setVariableCategory(String var1) {
-      this.variableCategory = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    @JsonIgnore
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Variable Category" : "变量对象";
-      String var2 = "[" + var1 + "]" + this.variableCategory;
+      String text = LocaleHolder.isEnglish() ? "Variable Category" : "变量对象";
+      String id = "[" + text + "]" + this.variableCategory;
       if (this.arithmetic != null) {
-         var2 = var2 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var2;
+      return id;
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Variable Category" : "变量对象";
-      return "[" + var1 + "]" + this.variableCategory;
+      String text = LocaleHolder.isEnglish() ? "Variable Category" : "变量对象";
+      return "[" + text + "]" + this.variableCategory;
    }
 
    public String getVariableCategory() {

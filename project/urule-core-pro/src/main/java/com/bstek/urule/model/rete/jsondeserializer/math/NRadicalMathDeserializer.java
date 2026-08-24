@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class NRadicalMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      NRadicalMath var2 = new NRadicalMath();
-      JsonNode var3 = var1.get("power");
-      var2.setPower(JsonUtils.parseValueNode(var3));
-      var2.setValue(JsonUtils.parseValueNode(var1.get("value")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      NRadicalMath nRadicalMath = new NRadicalMath();
+      JsonNode power = jsonNode.get("power");
+      nRadicalMath.setPower(JsonUtils.parseValueNode(power));
+      nRadicalMath.setValue(JsonUtils.parseValueNode(jsonNode.get("value")));
+      return nRadicalMath;
    }
 
    @Override

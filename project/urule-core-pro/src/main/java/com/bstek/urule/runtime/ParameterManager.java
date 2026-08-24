@@ -9,65 +9,65 @@ import java.util.Map;
 import java.util.Set;
 
 public class ParameterManager {
-   private static ParameterManager a = new ParameterManager();
+   private static ParameterManager instance = new ParameterManager();
 
    private ParameterManager() {
    }
 
    public static ParameterManager getInstance() {
-      return a;
+      return ParameterManager.instance;
    }
 
-   public void initKnowledgePackageParameters(KnowledgePackage var1, Map<String, Object> var2) {
-      Map var3 = var1.getParameters();
-      if (var3 != null) {
-         for (String var5 : (Iterable<String>)(Iterable<?>)(var3.keySet())) {
-            Datatype var6 = Datatype.valueOf((String)var3.get(var5));
-            if (var6.equals(Datatype.Integer)) {
-               var2.put(var5, 0);
-            } else if (var6.equals(Datatype.Long)) {
-               var2.put(var5, 0);
-            } else if (var6.equals(Datatype.Double)) {
-               var2.put(var5, 0);
-            } else if (var6.equals(Datatype.Float)) {
-               var2.put(var5, 0);
-            } else if (var6.equals(Datatype.Boolean)) {
-               var2.put(var5, false);
-            } else if (var6.equals(Datatype.List)) {
-               var2.put(var5, new ArrayList());
-            } else if (var6.equals(Datatype.Set)) {
-               var2.put(var5, new HashSet());
-            } else if (var6.equals(Datatype.Map)) {
-               var2.put(var5, new HashMap());
+   public void initKnowledgePackageParameters(KnowledgePackage knowledgePackage, Map<String, Object> initParameters) {
+      Map parameters = knowledgePackage.getParameters();
+      if (parameters != null) {
+         for (String text : (Iterable<String>)(Iterable<?>)(parameters.keySet())) {
+            Datatype datatype = Datatype.valueOf((String)parameters.get(text));
+            if (datatype.equals(Datatype.Integer)) {
+               initParameters.put(text, 0);
+            } else if (datatype.equals(Datatype.Long)) {
+               initParameters.put(text, 0);
+            } else if (datatype.equals(Datatype.Double)) {
+               initParameters.put(text, 0);
+            } else if (datatype.equals(Datatype.Float)) {
+               initParameters.put(text, 0);
+            } else if (datatype.equals(Datatype.Boolean)) {
+               initParameters.put(text, false);
+            } else if (datatype.equals(Datatype.List)) {
+               initParameters.put(text, new ArrayList());
+            } else if (datatype.equals(Datatype.Set)) {
+               initParameters.put(text, new HashSet());
+            } else if (datatype.equals(Datatype.Map)) {
+               initParameters.put(text, new HashMap());
             }
          }
       }
    }
 
-   public void clearInitParameters(Map<String, Object> var1) {
-      ArrayList var2 = new ArrayList();
+   public void clearInitParameters(Map<String, Object> initParameters) {
+      ArrayList items = new ArrayList();
 
-      for (String var4 : var1.keySet()) {
-         Object var5 = var1.get(var4);
-         if (var5 != null) {
-            if (var5 instanceof List) {
-               ((List)var5).clear();
-            } else if (var5 instanceof Set) {
-               ((Set)var5).clear();
-            } else if (var5 instanceof Map) {
-               ((Map)var5).clear();
-            } else if (var5 instanceof Number) {
-               var1.put(var4, 0);
-            } else if (var5 instanceof Boolean) {
-               var1.put(var4, false);
-            } else if (var5 instanceof String) {
-               var2.add(var4);
+      for (String text : initParameters.keySet()) {
+         Object objectValue = initParameters.get(text);
+         if (objectValue != null) {
+            if (objectValue instanceof List) {
+               ((List)objectValue).clear();
+            } else if (objectValue instanceof Set) {
+               ((Set)objectValue).clear();
+            } else if (objectValue instanceof Map) {
+               ((Map)objectValue).clear();
+            } else if (objectValue instanceof Number) {
+               initParameters.put(text, 0);
+            } else if (objectValue instanceof Boolean) {
+               initParameters.put(text, false);
+            } else if (objectValue instanceof String) {
+               items.add(text);
             }
          }
       }
 
-      for (String var7 : (Iterable<String>)(Iterable<?>)(var2)) {
-         var1.remove(var7);
+      for (String text2 : (Iterable<String>)(Iterable<?>)(items)) {
+         initParameters.remove(text2);
       }
    }
 }

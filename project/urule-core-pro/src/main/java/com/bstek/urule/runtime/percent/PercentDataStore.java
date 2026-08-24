@@ -7,5 +7,5 @@ import java.util.List;
 public interface PercentDataStore {
    String BEAN_ID = "urule.percentDataStore";
 
-   PercentUnit getDecisionNodePercent(ProcessDefinition var1, List<DecisionItem> var2, String var3);
+   PercentUnit getDecisionNodePercent(ProcessDefinition pd, List<DecisionItem> items, String decisionNodeName);
 }

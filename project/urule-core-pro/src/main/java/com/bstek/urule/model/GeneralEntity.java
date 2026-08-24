@@ -13,20 +13,20 @@ public class GeneralEntity extends HashMap<String, Object> {
    public GeneralEntity() {
    }
 
-   public GeneralEntity(String var1) {
-      if (StringUtils.isBlank(var1)) {
+   public GeneralEntity(String targetClass) {
+      if (StringUtils.isBlank(targetClass)) {
          throw new RuleException("Target class cannot be null.");
       }
 
-      this.targetClass = var1;
+      this.targetClass = targetClass;
    }
 
    public String getTargetClass() {
       return this.targetClass;
    }
 
-   public void setTargetClass(String var1) {
-      this.targetClass = var1;
+   public void setTargetClass(String targetClass) {
+      this.targetClass = targetClass;
    }
 
    public String getId() {
@@ -34,10 +34,10 @@ public class GeneralEntity extends HashMap<String, Object> {
    }
 
    @Override
-   public boolean equals(Object var1) {
-      if (var1 instanceof GeneralEntity) {
-         GeneralEntity var2 = (GeneralEntity)var1;
-         return var2.getId().contentEquals(this.id);
+   public boolean equals(Object objectValue) {
+      if (objectValue instanceof GeneralEntity) {
+         GeneralEntity generalEntity = (GeneralEntity)objectValue;
+         return generalEntity.getId().contentEquals(this.id);
       } else {
          return false;
       }

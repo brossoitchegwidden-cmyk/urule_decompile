@@ -10,15 +10,15 @@ public class VariableLibrary {
       return this.variableCategories;
    }
 
-   public void setVariableCategories(List<VariableCategory> var1) {
-      this.variableCategories = var1;
+   public void setVariableCategories(List<VariableCategory> variableCategories) {
+      this.variableCategories = variableCategories;
    }
 
-   public void addVariableCategory(VariableCategory var1) {
+   public void addVariableCategory(VariableCategory category) {
       if (this.variableCategories == null) {
          this.variableCategories = new ArrayList<>();
       }
 
-      this.variableCategories.add(var1);
+      this.variableCategories.add(category);
    }
 }

@@ -9,15 +9,15 @@ import com.bstek.urule.model.rule.lhs.Met;
 import java.util.List;
 
 public abstract class JunctionBuilder extends CriterionBuilder {
-   protected List<BaseReteNode> a(Criterion var1, BuildContext var2, List<BaseReteNode> var3) {
-      if (var1 instanceof Met) {
-         return MetBuilder.ins.buildCriterion((BaseCriterion)var1, var3, var2);
-      } else if (var1 instanceof Junction) {
-         Junction var5 = (Junction)var1;
-         return ReteBuilder.buildCriterion(var2, var5);
-      } else if (var1 instanceof Criteria) {
-         Criteria var4 = (Criteria)var1;
-         return this.a(var4, var3, var2);
+   protected List<BaseReteNode> buildCriterion(Criterion criterion, BuildContext context, List<BaseReteNode> prevCriteriaNodes) {
+      if (criterion instanceof Met) {
+         return MetBuilder.ins.buildCriterion((BaseCriterion)criterion, prevCriteriaNodes, context);
+      } else if (criterion instanceof Junction) {
+         Junction junction = (Junction)criterion;
+         return ReteBuilder.buildCriterion(context, junction);
+      } else if (criterion instanceof Criteria) {
+         Criteria criteria = (Criteria)criterion;
+         return this.buildCriteria(criteria, prevCriteriaNodes, context);
       } else {
          return null;
       }

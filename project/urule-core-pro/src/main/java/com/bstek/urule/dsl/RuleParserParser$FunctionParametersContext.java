@@ -9,19 +9,19 @@ public class RuleParserParser$FunctionParametersContext extends ParserRuleContex
       return this.getRuleContexts(RuleParserParser$FunctionParameterContext.class);
    }
 
-   public RuleParserParser$FunctionParameterContext functionParameter(int var1) {
-      return (RuleParserParser$FunctionParameterContext)this.getRuleContext(RuleParserParser$FunctionParameterContext.class, var1);
+   public RuleParserParser$FunctionParameterContext functionParameter(int number) {
+      return (RuleParserParser$FunctionParameterContext)this.getRuleContext(RuleParserParser$FunctionParameterContext.class, number);
    }
 
-   public RuleParserParser$FunctionParametersContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$FunctionParametersContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 12;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitFunctionParameters(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitFunctionParameters(this) : parseTreeVisitor.visitChildren(this));
    }
 }

@@ -13,39 +13,39 @@ public class ConstantCategory {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getLabel() {
       return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.label = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public List<Constant> getConstants() {
       return this.constants;
    }
 
-   public void setConstants(List<Constant> var1) {
-      this.constants = var1;
+   public void setConstants(List<Constant> constants) {
+      this.constants = constants;
    }
 
-   public void addConstant(Constant var1) {
+   public void addConstant(Constant constant) {
       if (this.constants == null) {
          this.constants = new ArrayList<>();
       }
 
-      this.constants.add(var1);
+      this.constants.add(constant);
    }
 }

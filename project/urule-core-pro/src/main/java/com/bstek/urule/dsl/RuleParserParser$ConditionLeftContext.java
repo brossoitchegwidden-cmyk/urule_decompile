@@ -30,27 +30,27 @@ public class RuleParserParser$ConditionLeftContext extends ParserRuleContext {
       return this.getTokens(93);
    }
 
-   public TerminalNode ARITH(int var1) {
-      return this.getToken(93, var1);
+   public TerminalNode ARITH(int number) {
+      return this.getToken(93, number);
    }
 
    public List<RuleParserParser$ValueContext> value() {
       return this.getRuleContexts(RuleParserParser$ValueContext.class);
    }
 
-   public RuleParserParser$ValueContext value(int var1) {
-      return (RuleParserParser$ValueContext)this.getRuleContext(RuleParserParser$ValueContext.class, var1);
+   public RuleParserParser$ValueContext value(int number) {
+      return (RuleParserParser$ValueContext)this.getRuleContext(RuleParserParser$ValueContext.class, number);
    }
 
-   public RuleParserParser$ConditionLeftContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$ConditionLeftContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 39;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitConditionLeft(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitConditionLeft(this) : parseTreeVisitor.visitChildren(this));
    }
 }

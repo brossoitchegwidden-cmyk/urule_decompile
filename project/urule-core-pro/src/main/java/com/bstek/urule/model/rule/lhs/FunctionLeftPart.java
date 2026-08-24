@@ -15,38 +15,38 @@ public class FunctionLeftPart implements LeftPart {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public List<Parameter> getParameters() {
       return this.parameters;
    }
 
-   public void setParameters(List<Parameter> var1) {
-      this.parameters = var1;
+   public void setParameters(List<Parameter> parameters) {
+      this.parameters = parameters;
    }
 
    @Override
    public String getId() {
       if (this.id == null) {
-         String var1 = LocaleHolder.isEnglish() ? "Function" : "函数";
+         String text = LocaleHolder.isEnglish() ? "Function" : "函数";
          if (this.parameters != null) {
-            String var2 = "";
-            int var3 = 0;
+            String text2 = "";
+            int number = 0;
 
-            for (Parameter var5 : this.parameters) {
-               if (var3 > 0) {
-                  var2 = var2 + ",";
+            for (Parameter parameter : this.parameters) {
+               if (number > 0) {
+                  text2 = text2 + ",";
                }
 
-               var2 = var2 + var5.getId();
-               var3++;
+               text2 = text2 + parameter.getId();
+               number++;
             }
 
-            this.id = "[" + var1 + "]." + this.name + "(" + var2 + ")";
+            this.id = "[" + text + "]." + this.name + "(" + text2 + ")";
          } else {
-            this.id = "[" + var1 + "]." + this.name;
+            this.id = "[" + text + "]." + this.name;
          }
       }
 

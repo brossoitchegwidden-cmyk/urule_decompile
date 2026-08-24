@@ -6,22 +6,22 @@ import com.bstek.urule.parse.deserializer.VariableLibraryDeserializer;
 import org.dom4j.Element;
 
 public class VariableLibraryResourceBuilder implements ResourceBuilder<VariableLibrary> {
-   private VariableLibraryDeserializer a;
+   private VariableLibraryDeserializer variableLibraryDeserializer;
 
-   public VariableLibrary build(Element var1, String var2) {
-      VariableLibrary var3 = new VariableLibrary();
-      var3.setVariableCategories(this.a.deserialize(var1));
+   public VariableLibrary build(Element root, String file) {
+      VariableLibrary variableLibrary = new VariableLibrary();
+      variableLibrary.setVariableCategories(this.variableLibraryDeserializer.deserialize(root));
 
-      for (VariableCategory var5 : var3.getVariableCategories()) {
-         var5.setFile(var2);
+      for (VariableCategory variableCategory : variableLibrary.getVariableCategories()) {
+         variableCategory.setFile(file);
       }
 
-      return var3;
+      return variableLibrary;
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1);
+   public boolean support(Element root) {
+      return this.variableLibraryDeserializer.support(root);
    }
 
    @Override
@@ -29,7 +29,7 @@ public class VariableLibraryResourceBuilder implements ResourceBuilder<VariableL
       return ResourceType.VariableLibrary;
    }
 
-   public void setVariableLibraryDeserializer(VariableLibraryDeserializer var1) {
-      this.a = var1;
+   public void setVariableLibraryDeserializer(VariableLibraryDeserializer variableLibraryDeserializer) {
+      this.variableLibraryDeserializer = variableLibraryDeserializer;
    }
 }

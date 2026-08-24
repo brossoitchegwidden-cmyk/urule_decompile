@@ -9,15 +9,15 @@ public class RuleParserParser$AutoFocusAttributeContext extends ParserRuleContex
       return this.getToken(95, 0);
    }
 
-   public RuleParserParser$AutoFocusAttributeContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$AutoFocusAttributeContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 29;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitAutoFocusAttribute(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitAutoFocusAttribute(this) : parseTreeVisitor.visitChildren(this));
    }
 }

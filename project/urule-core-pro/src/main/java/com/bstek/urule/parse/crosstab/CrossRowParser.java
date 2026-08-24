@@ -9,42 +9,42 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class CrossRowParser implements Parser<CrossRow> {
-   public CrossRow parse(Element var1) {
-      String var2 = var1.attributeValue("type");
-      if (var2.equals("left")) {
-         LeftRow var6 = new LeftRow();
-         var6.setRowNumber(Integer.valueOf(var1.attributeValue("number")));
-         return var6;
+   public CrossRow parse(Element element) {
+      String text = element.attributeValue("type");
+      if (text.equals("left")) {
+         LeftRow leftRow = new LeftRow();
+         leftRow.setRowNumber(Integer.valueOf(element.attributeValue("number")));
+         return leftRow;
       }
 
-      TopRow var3 = new TopRow();
-      var3.setRowNumber(Integer.valueOf(var1.attributeValue("number")));
-      String var4 = var1.attributeValue("bundle-data-type");
-      if (StringUtils.isNotBlank(var4)) {
-         var3.setBundleDataType(var4);
-         var3.setVariableCategory(var1.attributeValue("var-category"));
-         var3.setVariableName(var1.attributeValue("var"));
-         var3.setVariableLabel(var1.attributeValue("var-label"));
-         String var5 = var1.attributeValue("datatype");
-         if (var5 != null) {
-            var3.setDatatype(Datatype.valueOf(var5));
+      TopRow topRow = new TopRow();
+      topRow.setRowNumber(Integer.valueOf(element.attributeValue("number")));
+      String text2 = element.attributeValue("bundle-data-type");
+      if (StringUtils.isNotBlank(text2)) {
+         topRow.setBundleDataType(text2);
+         topRow.setVariableCategory(element.attributeValue("var-category"));
+         topRow.setVariableName(element.attributeValue("var"));
+         topRow.setVariableLabel(element.attributeValue("var-label"));
+         String text3 = element.attributeValue("datatype");
+         if (text3 != null) {
+            topRow.setDatatype(Datatype.valueOf(text3));
          }
 
-         var3.setKeyLabel(var1.attributeValue("key-label"));
-         var3.setKeyName(var1.attributeValue("key-name"));
-         var3.setKeyCategoryUuid(var1.attributeValue("key-category-uuid"));
-         var3.setKeyUuid(var1.attributeValue("key-uuid"));
-         var3.setCategoryUuid(var1.attributeValue("category-uuid"));
-         var3.setUuid(var1.attributeValue("uuid"));
-         var3.setPredefineUuid(var1.attributeValue("predefine-uuid"));
-         var3.setPredefinePropertyUuid(var1.attributeValue("predefine-property-uuid"));
+         topRow.setKeyLabel(element.attributeValue("key-label"));
+         topRow.setKeyName(element.attributeValue("key-name"));
+         topRow.setKeyCategoryUuid(element.attributeValue("key-category-uuid"));
+         topRow.setKeyUuid(element.attributeValue("key-uuid"));
+         topRow.setCategoryUuid(element.attributeValue("category-uuid"));
+         topRow.setUuid(element.attributeValue("uuid"));
+         topRow.setPredefineUuid(element.attributeValue("predefine-uuid"));
+         topRow.setPredefinePropertyUuid(element.attributeValue("predefine-property-uuid"));
       }
 
-      return var3;
+      return topRow;
    }
 
    @Override
-   public boolean support(String var1) {
-      return "row".equals(var1);
+   public boolean support(String name) {
+      return "row".equals(name);
    }
 }

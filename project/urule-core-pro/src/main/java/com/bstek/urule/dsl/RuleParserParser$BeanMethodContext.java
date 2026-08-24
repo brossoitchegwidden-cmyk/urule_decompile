@@ -10,19 +10,19 @@ public class RuleParserParser$BeanMethodContext extends ParserRuleContext {
       return this.getTokens(96);
    }
 
-   public TerminalNode Identifier(int var1) {
-      return this.getToken(96, var1);
+   public TerminalNode Identifier(int number) {
+      return this.getToken(96, number);
    }
 
-   public RuleParserParser$BeanMethodContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$BeanMethodContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 57;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitBeanMethod(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitBeanMethod(this) : parseTreeVisitor.visitChildren(this));
    }
 }

@@ -5,9 +5,12 @@ import java.util.List;
 public interface ClientPacketCacheAdapter {
    String BEAN_ID = "urule.clientPacketCacheAdapter";
 
-   List enableClientsPacket(String var1, long var2);
+   /**知识包启用时同步客户端的缓存*/
+   List enableClientsPacket(String groupId, long packetId);
 
-   List disableClientsPacket(String var1, long var2);
+   /**知识包停用时同步客户端的缓存*/
+   List disableClientsPacket(String groupId, long packetId);
 
-   List pushPacketToClients(String var1, PacketData var2);
+   /**发布到客户端*/
+   List pushPacketToClients(String groupId, PacketData packetData);
 }

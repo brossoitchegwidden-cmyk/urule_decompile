@@ -7,139 +7,139 @@ import java.util.List;
 import java.util.Set;
 
 public class NamedSQLUtils {
-   private static final char[] a = new char[]{'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
-   private static final String[] b = new String[]{"'", "\"", "--", "/*"};
-   private static final String[] c = new String[]{"'", "\"", "\n", "*/"};
+   private static final char[] PARAMETER_SEPARATORS = new char[]{'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
+   private static final String[] COMMENT_START_SEQUENCES = new String[]{"'", "\"", "--", "/*"};
+   private static final String[] COMMENT_END_SEQUENCES = new String[]{"'", "\"", "\n", "*/"};
 
-   public static ParsedSql parseSql(String var0) {
-      HashSet var1 = new HashSet();
-      String var2 = var0;
-      ArrayList var3 = new ArrayList();
-      char[] var4 = var0.toCharArray();
-      int var5 = 0;
-      int var6 = 0;
-      int var7 = 0;
-      int var8 = 0;
-      int var9 = 0;
+   public static ParsedSql parseSql(String sql) {
+      HashSet uniqueItems = new HashSet();
+      String sql2 = sql;
+      ArrayList items = new ArrayList();
+      char[] values = sql.toCharArray();
+      int number = 0;
+      int number2 = 0;
+      int number3 = 0;
+      int number4 = 0;
+      int number5 = 0;
 
       while(true) {
-         if (var9 < var4.length) {
-            while(var9 < var4.length) {
-               int var10 = a(var4, var9);
-               if (var9 == var10) {
+         if (number5 < values.length) {
+            while(number5 < values.length) {
+               int number6 = skipCommentsAndQuotedText(values, number5);
+               if (number5 == number6) {
                   break;
                }
 
-               var9 = var10;
+               number5 = number6;
             }
 
-            if (var9 < var4.length) {
-               char var15 = var4[var9];
-               if (var15 != ':' && var15 != '&') {
-                  if (var15 == '\\') {
-                     int var17 = var9 + 1;
-                     if (var17 < var4.length && var4[var17] == ':') {
-                        var2 = var2.substring(0, var9 - var8) + var2.substring(var9 - var8 + 1);
-                        ++var8;
-                        var9 += 2;
+            if (number5 < values.length) {
+               char text = values[number5];
+               if (text != ':' && text != '&') {
+                  if (text == '\\') {
+                     int number7 = number5 + 1;
+                     if (number7 < values.length && values[number7] == ':') {
+                        sql2 = sql2.substring(0, number5 - number4) + sql2.substring(number5 - number4 + 1);
+                        ++number4;
+                        number5 += 2;
                         continue;
                      }
                   }
 
-                  if (var15 == '?') {
-                     int var18 = var9 + 1;
-                     if (var18 < var4.length && (var4[var18] == '?' || var4[var18] == '|' || var4[var18] == '&')) {
-                        var9 += 2;
+                  if (text == '?') {
+                     int number8 = number5 + 1;
+                     if (number8 < values.length && (values[number8] == '?' || values[number8] == '|' || values[number8] == '&')) {
+                        number5 += 2;
                         continue;
                      }
 
-                     ++var6;
-                     ++var7;
+                     ++number2;
+                     ++number3;
                   }
                } else {
-                  int var16 = var9 + 1;
-                  if (var16 < var4.length && var4[var16] == ':' && var15 == ':') {
-                     var9 += 2;
+                  int number9 = number5 + 1;
+                  if (number9 < values.length && values[number9] == ':' && text == ':') {
+                     number5 += 2;
                      continue;
                   }
 
-                  Object var13 = null;
-                  if (var16 < var4.length && var15 == ':' && var4[var16] == '{') {
+                  Object objectValue = null;
+                  if (number9 < values.length && text == ':' && values[number9] == '{') {
                      while(true) {
-                        if (var16 >= var4.length || '}' == var4[var16]) {
-                           if (var16 >= var4.length) {
-                              throw new RuleException("Non-terminated named parameter declaration at position " + var9 + " in statement: " + var0);
+                        if (number9 >= values.length || '}' == values[number9]) {
+                           if (number9 >= values.length) {
+                              throw new RuleException("Non-terminated named parameter declaration at position " + number5 + " in statement: " + sql);
                            }
 
-                           if (var16 - var9 > 3) {
-                              String var20 = var0.substring(var9 + 2, var16);
-                              var5 = a(var1, var5, var20);
-                              var7 = a(var3, var7, var8, var9, var16 + 1, var20);
+                           if (number9 - number5 > 3) {
+                              String substring = sql.substring(number5 + 2, number9);
+                              number = countUniqueParameter(uniqueItems, number, substring);
+                              number3 = addNamedParameter(items, number3, number4, number5, number9 + 1, substring);
                            }
 
-                           ++var16;
+                           ++number9;
                            break;
                         }
 
-                        ++var16;
-                        if (':' == var4[var16] || '{' == var4[var16]) {
-                           throw new RuleException("Parameter name contains invalid character '" + var4[var16] + "' at position " + var9 + " in statement: " + var0);
+                        ++number9;
+                        if (':' == values[number9] || '{' == values[number9]) {
+                           throw new RuleException("Parameter name contains invalid character '" + values[number9] + "' at position " + number5 + " in statement: " + sql);
                         }
                      }
                   } else {
-                     while(var16 < var4.length && !a(var4[var16])) {
-                        ++var16;
+                     while(number9 < values.length && !isParameterSeparator(values[number9])) {
+                        ++number9;
                      }
 
-                     if (var16 - var9 > 1) {
-                        String var19 = var0.substring(var9 + 1, var16);
-                        var5 = a(var1, var5, var19);
-                        var7 = a(var3, var7, var8, var9, var16, var19);
+                     if (number9 - number5 > 1) {
+                        String substring2 = sql.substring(number5 + 1, number9);
+                        number = countUniqueParameter(uniqueItems, number, substring2);
+                        number3 = addNamedParameter(items, number3, number4, number5, number9, substring2);
                      }
                   }
 
-                  var9 = var16 - 1;
+                  number5 = number9 - 1;
                }
 
-               ++var9;
+               ++number5;
                continue;
             }
          }
 
-         ParsedSql var14 = new ParsedSql(var2);
+         ParsedSql parsedSql = new ParsedSql(sql2);
 
-         for(ParameterHolder var12 : (Iterable<ParameterHolder>)(Iterable<?>)(var3)) {
-            var14.a(var12.getParameterName(), var12.getStartIndex(), var12.getEndIndex());
+         for(ParameterHolder parameterHolder : (Iterable<ParameterHolder>)(Iterable<?>)(items)) {
+            parsedSql.addNamedParameter(parameterHolder.getParameterName(), parameterHolder.getStartIndex(), parameterHolder.getEndIndex());
          }
 
-         var14.a(var5);
-         var14.b(var6);
-         var14.c(var7);
-         return var14;
+         parsedSql.setNamedParameterCount(number);
+         parsedSql.setUnnamedParameterCount(number2);
+         parsedSql.setTotalParameterCount(number3);
+         return parsedSql;
       }
    }
 
-   private static int a(List var0, int var1, int var2, int var3, int var4, String var5) {
-      var0.add(new ParameterHolder(var5, var3 - var2, var4 - var2));
-      ++var1;
-      return var1;
+   private static int addNamedParameter(List items, int number, int number2, int number3, int number4, String text) {
+      items.add(new ParameterHolder(text, number3 - number2, number4 - number2));
+      ++number;
+      return number;
    }
 
-   private static int a(Set var0, int var1, String var2) {
-      if (!var0.contains(var2)) {
-         var0.add(var2);
-         ++var1;
+   private static int countUniqueParameter(Set uniqueItems, int number, String text) {
+      if (!uniqueItems.contains(text)) {
+         uniqueItems.add(text);
+         ++number;
       }
 
-      return var1;
+      return number;
    }
 
-   private static boolean a(char var0) {
-      if (Character.isWhitespace(var0)) {
+   private static boolean isParameterSeparator(char text) {
+      if (Character.isWhitespace(text)) {
          return true;
       } else {
-         for(char var4 : a) {
-            if (var0 == var4) {
+         for(char text2 : NamedSQLUtils.PARAMETER_SEPARATORS) {
+            if (text == text2) {
                return true;
             }
          }
@@ -148,74 +148,74 @@ public class NamedSQLUtils {
       }
    }
 
-   private static int a(char[] var0, int var1) {
-      for(int var2 = 0; var2 < b.length; ++var2) {
-         if (var0[var1] == b[var2].charAt(0)) {
-            boolean var3 = true;
+   private static int skipCommentsAndQuotedText(char[] values, int number) {
+      for(int index = 0; index < NamedSQLUtils.COMMENT_START_SEQUENCES.length; ++index) {
+         if (values[number] == NamedSQLUtils.COMMENT_START_SEQUENCES[index].charAt(0)) {
+            boolean flag = true;
 
-            for(int var4 = 1; var4 < b[var2].length(); ++var4) {
-               if (var0[var1 + var4] != b[var2].charAt(var4)) {
-                  var3 = false;
+            for(int index2 = 1; index2 < NamedSQLUtils.COMMENT_START_SEQUENCES[index].length(); ++index2) {
+               if (values[number + index2] != NamedSQLUtils.COMMENT_START_SEQUENCES[index].charAt(index2)) {
+                  flag = false;
                   break;
                }
             }
 
-            if (var3) {
-               int var9 = b[var2].length();
+            if (flag) {
+               int number2 = NamedSQLUtils.COMMENT_START_SEQUENCES[index].length();
 
-               for(int var5 = var1 + var9; var5 < var0.length; ++var5) {
-                  if (var0[var5] == c[var2].charAt(0)) {
-                     boolean var6 = true;
-                     int var7 = var5;
+               for(int index3 = number + number2; index3 < values.length; ++index3) {
+                  if (values[index3] == NamedSQLUtils.COMMENT_END_SEQUENCES[index].charAt(0)) {
+                     boolean flag2 = true;
+                     int index32 = index3;
 
-                     for(int var8 = 1; var8 < c[var2].length(); ++var8) {
-                        if (var5 + var8 >= var0.length) {
-                           return var0.length;
+                     for(int index4 = 1; index4 < NamedSQLUtils.COMMENT_END_SEQUENCES[index].length(); ++index4) {
+                        if (index3 + index4 >= values.length) {
+                           return values.length;
                         }
 
-                        if (var0[var5 + var8] != c[var2].charAt(var8)) {
-                           var6 = false;
+                        if (values[index3 + index4] != NamedSQLUtils.COMMENT_END_SEQUENCES[index].charAt(index4)) {
+                           flag2 = false;
                            break;
                         }
 
-                        var7 = var5 + var8;
+                        index32 = index3 + index4;
                      }
 
-                     if (var6) {
-                        return var7 + 1;
+                     if (flag2) {
+                        return index32 + 1;
                      }
                   }
                }
 
-               return var0.length;
+               return values.length;
             }
          }
       }
 
-      return var1;
+      return number;
    }
 
    private static class ParameterHolder {
-      private final String a;
-      private final int b;
-      private final int c;
+      private final String parameterName;
+      private final int startIndex;
+      private final int endIndex;
 
-      public ParameterHolder(String var1, int var2, int var3) {
-         this.a = var1;
-         this.b = var2;
-         this.c = var3;
+      public ParameterHolder(String text, int number, int number2) {
+         this.parameterName = text;
+         this.startIndex = number;
+         this.endIndex = number2;
       }
 
       public String getParameterName() {
-         return this.a;
+         return this.parameterName;
       }
 
       public int getStartIndex() {
-         return this.b;
+         return this.startIndex;
       }
 
       public int getEndIndex() {
-         return this.c;
+         return this.endIndex;
       }
    }
 }

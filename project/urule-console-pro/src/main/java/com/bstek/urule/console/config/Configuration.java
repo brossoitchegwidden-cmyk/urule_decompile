@@ -4,67 +4,67 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 public class Configuration {
-   private Long a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private Timestamp f;
-   private Timestamp g;
+   private Long id;
+   private String key;
+   private String value;
+   private String label;
+   private String type;
+   private Timestamp createDate;
+   private Timestamp updateDate;
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getKey() {
-      return this.b;
+      return this.key;
    }
 
-   public void setKey(String var1) {
-      this.b = var1;
+   public void setKey(String key) {
+      this.key = key;
    }
 
    public String getValue() {
-      return this.c;
+      return this.value;
    }
 
-   public void setValue(String var1) {
-      this.c = var1;
+   public void setValue(String value) {
+      this.value = value;
    }
 
    public String getType() {
-      return this.e;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.e = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String getLabel() {
-      return this.d;
+      return this.label;
    }
 
-   public void setLabel(String var1) {
-      this.d = var1;
+   public void setLabel(String label) {
+      this.label = label;
    }
 
    public Date getCreateDate() {
-      return this.f;
+      return this.createDate;
    }
 
-   public void setCreateDate(Timestamp var1) {
-      this.f = var1;
+   public void setCreateDate(Timestamp createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.g;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Timestamp var1) {
-      this.g = var1;
+   public void setUpdateDate(Timestamp updateDate) {
+      this.updateDate = updateDate;
    }
 }

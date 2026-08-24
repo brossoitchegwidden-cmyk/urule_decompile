@@ -6,29 +6,29 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class FractionMathParser extends MathParser {
-   public FractionMathParser(ValueParser var1) {
-      super(var1);
+   public FractionMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
-   public MathSign parse(Element var1) {
-      FractionMath var2 = new FractionMath();
+   public MathSign parse(Element element) {
+      FractionMath fractionMath = new FractionMath();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("numerator")) {
-               var2.setNumerator(this.a(var5));
-            } else if (var5.getName().equals("denominator")) {
-               var2.setDenominator(this.a(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("numerator")) {
+               fractionMath.setNumerator(this.parseValue(element2));
+            } else if (element2.getName().equals("denominator")) {
+               fractionMath.setDenominator(this.parseValue(element2));
             }
          }
       }
 
-      return var2;
+      return fractionMath;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("fraction-sign");
+   public boolean support(String name) {
+      return name.equals("fraction-sign");
    }
 }

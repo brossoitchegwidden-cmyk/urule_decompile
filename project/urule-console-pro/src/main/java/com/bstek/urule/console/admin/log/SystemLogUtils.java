@@ -10,96 +10,89 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SystemLogUtils {
-   private static final Log a = LogFactory.getLog(SystemLogUtils.class);
-   private static LogAppenderManager b;
+/** Creates audit records and forwards them to the configured appenders. */
+public final class SystemLogUtils {
+   private static final Log LOGGER = LogFactory.getLog(SystemLogUtils.class);
+   private static volatile LogAppenderManager appenderManager;
 
-   public static void addGroupOperationLog(String var0, String var1, Long var2, String var3) {
-      addGroupOperationLog(var0, var1, var2.toString(), var3);
+   private SystemLogUtils() {
    }
 
-   public static void addGroupOperationLog(String var0, String var1, String var2, String var3) {
-      OperationLog var4 = URuleLogService.ins.getOperationLog();
-      var4.setGroupId(ContextHolder.getGroupId());
-      var4.setCategory(var0);
-      var4.setAction(var1);
-      var4.setContent(var3);
-      var4.setItemId(var2);
+   public static void addGroupOperationLog(String category, String action, Long itemId, String content) {
+      addGroupOperationLog(category, action, itemId.toString(), content);
+   }
+
+   public static void addGroupOperationLog(String category, String action, String itemId, String content) {
+      OperationLog operationLog = URuleLogService.ins.getOperationLog();
+      operationLog.setGroupId(ContextHolder.getGroupId());
+      operationLog.setCategory(category);
+      operationLog.setAction(action);
+      operationLog.setContent(content);
+      operationLog.setItemId(itemId);
+      append(operationLog);
+   }
+
+   public static void addRuleFileOperationLog(String fileName, String action, Long itemId, String content) {
+      RuleFileType fileType = RuleFileType.getRuleFileType(fileName);
+      addProjectOperationLog(fileType.name(), action, itemId, content.replace("{type}", fileType.getLabel()));
+   }
+
+   public static void addProjectOperationLog(String category, String action, Long itemId, String content) {
+      addProjectOperationLog(category, action, itemId.toString(), content);
+   }
+
+   public static void addProjectOperationLog(String category, String action, String itemId, String content) {
+      OperationLog operationLog = URuleLogService.ins.getOperationLog();
+      operationLog.setGroupId(ContextHolder.getGroupId());
+      operationLog.setProjectId(ContextHolder.getProjectId());
+      operationLog.setCategory(category);
+      operationLog.setAction(action);
+      operationLog.setItemId(itemId);
+      operationLog.setContent(content);
+      append(operationLog);
+   }
+
+   public static void addKnowledgeLog(KnowledgeLog knowledgeLog) {
+      append(knowledgeLog);
+   }
+
+   public static void addLoginLog(HttpServletRequest request) {
+      LoginLog loginLog = URuleLogService.ins.getLoginLog();
+      append(loginLog);
+   }
+
+   private static void append(URuleLog log) {
+      if (LOGGER.isDebugEnabled()) {
+         LOGGER.debug(log.toString());
+      }
 
       try {
-         a(var4);
-      } catch (InterruptedException var6) {
-         var6.printStackTrace();
+         getAppenderManager().putLog(log);
+      } catch (InterruptedException exception) {
+         Thread.currentThread().interrupt();
+         LOGGER.warn("Interrupted while queuing a URule audit log", exception);
       }
-
    }
 
-   public static void addRuleFileOperationLog(String var0, String var1, Long var2, String var3) {
-      RuleFileType var4 = RuleFileType.getRuleFileType(var0);
-      addProjectOperationLog(var4.name(), var1, var2, var3.replace("{type}", var4.getLabel()));
-   }
-
-   public static void addProjectOperationLog(String var0, String var1, Long var2, String var3) {
-      addProjectOperationLog(var0, var1, var2.toString(), var3);
-   }
-
-   public static void addProjectOperationLog(String var0, String var1, String var2, String var3) {
-      OperationLog var4 = URuleLogService.ins.getOperationLog();
-      var4.setGroupId(ContextHolder.getGroupId());
-      var4.setProjectId(ContextHolder.getProjectId());
-      var4.setCategory(var0);
-      var4.setAction(var1);
-      if (var2 != null) {
-         var4.setItemId(var2.toString());
+   private static LogAppenderManager getAppenderManager() {
+      LogAppenderManager result = appenderManager;
+      if (result == null) {
+         synchronized (SystemLogUtils.class) {
+            result = appenderManager;
+            if (result == null) {
+               result = new LogAppenderManager();
+               appenderManager = result;
+            }
+         }
       }
-
-      var4.setContent(var3);
-
-      try {
-         a(var4);
-      } catch (InterruptedException var6) {
-         var6.printStackTrace();
-      }
-
-   }
-
-   public static void addKnowledgeLog(KnowledgeLog var0) {
-      try {
-         a(var0);
-      } catch (InterruptedException var2) {
-         var2.printStackTrace();
-      }
-
-   }
-
-   public static void addLoginLog(HttpServletRequest var0) {
-      LoginLog var1 = URuleLogService.ins.getLoginLog();
-
-      try {
-         a(var1);
-      } catch (InterruptedException var3) {
-         var3.printStackTrace();
-      }
-
-   }
-
-   private static void a(URuleLog var0) throws InterruptedException {
-      if (a.isDebugEnabled()) {
-         a.debug(var0.toString());
-      }
-
-      if (b == null) {
-         b = new LogAppenderManager();
-      }
-
-      b.putLog(var0);
+      return result;
    }
 
    static {
-      String var0 = "LogWorkerJob";
-      Thread var1 = new Thread(new LogWorkerJob(), var0);
-      var1.setDaemon(true);
-      var1.start();
-      System.out.println("Thread [" + var0 + "] is started...");
+      String threadName = "LogWorkerJob";
+      Thread worker = new Thread(new LogWorkerJob(), threadName);
+      worker.setDaemon(true);
+      worker.start();
+      LOGGER.info("Thread [" + threadName + "] started");
    }
 }

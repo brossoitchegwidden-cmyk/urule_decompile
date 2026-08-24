@@ -3,22 +3,22 @@ package com.bstek.urule.console.database.model.batch;
 import java.util.List;
 
 public class BatchInput {
-   private String a;
-   private List b;
+   private String clazz;
+   private List fields;
 
    public String getClazz() {
-      return this.a;
+      return this.clazz;
    }
 
-   public void setClazz(String var1) {
-      this.a = var1;
+   public void setClazz(String clazz) {
+      this.clazz = clazz;
    }
 
    public List getFields() {
-      return this.b;
+      return this.fields;
    }
 
-   public void setFields(List var1) {
-      this.b = var1;
+   public void setFields(List fields) {
+      this.fields = fields;
    }
 }

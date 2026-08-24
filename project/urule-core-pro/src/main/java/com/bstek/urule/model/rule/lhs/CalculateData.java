@@ -17,24 +17,24 @@ public class CalculateData {
    private boolean doAssignment;
    private List<Object> collectObjects = new ArrayList<>();
 
-   public CalculateData(CalculateItem var1) {
-      this.item = var1;
+   public CalculateData(CalculateItem item) {
+      this.item = item;
    }
 
    public Object getResultValue() {
       return this.resultValue;
    }
 
-   public void buildValue(EvaluationContext var1, Map<String, Object> var2) {
-      BigDecimal var3 = BigDecimal.valueOf(this.count);
+   public void buildValue(EvaluationContext context, Map<String, Object> factMap) {
+      BigDecimal decimalValue = BigDecimal.valueOf(this.count);
       switch (this.item.getType()) {
          case count:
-            this.resultValue = var3;
+            this.resultValue = decimalValue;
             break;
          case avg:
             if (this.value != null) {
-               BigDecimal var4 = this.value.divide(var3, 8, 4).stripTrailingZeros();
-               this.resultValue = var4;
+               BigDecimal decimalValue2 = this.value.divide(decimalValue, 8, 4).stripTrailingZeros();
+               this.resultValue = decimalValue2;
             } else {
                this.resultValue = null;
             }
@@ -53,41 +53,41 @@ public class CalculateData {
       }
 
       if (this.item.isEnableAssignment() && !this.doAssignment) {
-         ObjectValue var5 = new ObjectValue(this.resultValue);
-         this.doAssignment(var5, var1, var2);
+         ObjectValue objectValue = new ObjectValue(this.resultValue);
+         this.doAssignment(objectValue, context, factMap);
          this.doAssignment = true;
       }
    }
 
-   private void doAssignment(Value var1, EvaluationContext var2, Map<String, Object> var3) {
-      VariableAssignAction var4 = new VariableAssignAction();
-      var4.setValue(var1);
-      var4.setDatatype(this.item.getAssignDatatype());
-      var4.setVariableName(this.item.getAssignVariable());
-      var4.setVariableLabel(this.item.getAssignVariableLabel());
-      var4.setVariableCategory(this.item.getAssignVariableCategory());
-      var4.setKeyLabel(this.item.getKeyLabel());
-      var4.setKeyName(this.item.getKeyName());
-      var4.execute(var2, var3);
+   private void doAssignment(Value localValue, EvaluationContext evaluationContext, Map<String, Object> valuesByKey) {
+      VariableAssignAction variableAssignAction = new VariableAssignAction();
+      variableAssignAction.setValue(localValue);
+      variableAssignAction.setDatatype(this.item.getAssignDatatype());
+      variableAssignAction.setVariableName(this.item.getAssignVariable());
+      variableAssignAction.setVariableLabel(this.item.getAssignVariableLabel());
+      variableAssignAction.setVariableCategory(this.item.getAssignVariableCategory());
+      variableAssignAction.setKeyLabel(this.item.getKeyLabel());
+      variableAssignAction.setKeyName(this.item.getKeyName());
+      variableAssignAction.execute(evaluationContext, valuesByKey);
    }
 
-   public void addObject(Object var1) {
-      this.collectObjects.add(var1);
+   public void addObject(Object obj) {
+      this.collectObjects.add(obj);
    }
 
    public int getCount() {
       return this.count;
    }
 
-   public void setCount(int var1) {
-      this.count = var1;
+   public void setCount(int count) {
+      this.count = count;
    }
 
    public BigDecimal getValue() {
       return this.value;
    }
 
-   public void setValue(BigDecimal var1) {
-      this.value = var1;
+   public void setValue(BigDecimal value) {
+      this.value = value;
    }
 }

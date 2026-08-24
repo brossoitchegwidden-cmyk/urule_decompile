@@ -6,19 +6,19 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class TriangleFunctionMathParser extends MathParser {
-   public TriangleFunctionMathParser(ValueParser var1) {
-      super(var1);
+   public TriangleFunctionMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("triangle");
+   public boolean support(String name) {
+      return name.equals("triangle");
    }
 
-   public MathSign parse(Element var1) {
-      TriangleFunctionMath var2 = new TriangleFunctionMath();
-      var2.setName(var1.attributeValue("name"));
-      var2.setValue(this.a(var1));
-      return var2;
+   public MathSign parse(Element element) {
+      TriangleFunctionMath triangleFunctionMath = new TriangleFunctionMath();
+      triangleFunctionMath.setName(element.attributeValue("name"));
+      triangleFunctionMath.setValue(this.parseValue(element));
+      return triangleFunctionMath;
    }
 }

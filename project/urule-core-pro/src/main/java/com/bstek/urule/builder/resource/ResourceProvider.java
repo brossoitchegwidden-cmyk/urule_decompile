@@ -1,5 +1,5 @@
 package com.bstek.urule.builder.resource;
 
 public interface ResourceProvider {
-   Resource provide(long var1, String var3);
+   Resource provide(long fileId, String version);
 }

@@ -14,14 +14,14 @@ public class EndNode extends FlowNode {
       return this.type;
    }
 
-   public EndNode(String var1) {
-      super(var1);
+   public EndNode(String name) {
+      super(name);
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      this.executeNodeEvent(EventType.enter, var2, var3);
-      var3.setCurrentNode(this);
-      this.executeNodeEvent(EventType.leave, var2, var3);
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      this.executeNodeEvent(EventType.enter, context, instance);
+      instance.setCurrentNode(this);
+      this.executeNodeEvent(EventType.leave, context, instance);
    }
 }

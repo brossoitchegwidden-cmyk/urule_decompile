@@ -5,8 +5,8 @@ import com.bstek.urule.model.rule.Op;
 
 public class NotContainAssertor extends ContainAssertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      return var1 != null && var2 != null ? !super.eval(var1, var2, var3) : false;
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      return left != null && right != null ? !super.eval(left, right, datatype) : false;
    }
 
    @Override

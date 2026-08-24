@@ -7,130 +7,130 @@ import java.util.Date;
    ignoreUnknown = true
 )
 public class BatchDataResolverItemField {
-   private Long a;
-   private Long b;
-   private Long c;
-   private Long d;
-   private Long e;
-   private String f;
-   private String g;
-   private boolean h;
-   private String i;
-   private String j;
-   private String k;
-   private Date l;
-   private Date m;
-   private Object n;
+   private Long id;
+   private Long batchId;
+   private Long projectId;
+   private Long resolverId;
+   private Long resolverItemId;
+   private String srcProperty;
+   private String dataType;
+   private boolean key;
+   private String destProperty;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
+   private Object value;
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public Long getBatchId() {
-      return this.b;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.b = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public Long getResolverId() {
-      return this.d;
+      return this.resolverId;
    }
 
-   public void setResolverId(Long var1) {
-      this.d = var1;
+   public void setResolverId(Long resolverId) {
+      this.resolverId = resolverId;
    }
 
    public Long getProjectId() {
-      return this.c;
+      return this.projectId;
    }
 
-   public void setProjectId(Long var1) {
-      this.c = var1;
+   public void setProjectId(Long projectId) {
+      this.projectId = projectId;
    }
 
    public Long getResolverItemId() {
-      return this.e;
+      return this.resolverItemId;
    }
 
-   public void setResolverItemId(Long var1) {
-      this.e = var1;
+   public void setResolverItemId(Long resolverItemId) {
+      this.resolverItemId = resolverItemId;
    }
 
    public String getSrcProperty() {
-      return this.f;
+      return this.srcProperty;
    }
 
-   public void setSrcProperty(String var1) {
-      this.f = var1;
+   public void setSrcProperty(String srcProperty) {
+      this.srcProperty = srcProperty;
    }
 
    public String getDataType() {
-      return this.g;
+      return this.dataType;
    }
 
-   public void setDataType(String var1) {
-      this.g = var1;
+   public void setDataType(String dataType) {
+      this.dataType = dataType;
    }
 
    public boolean isKey() {
-      return this.h;
+      return this.key;
    }
 
-   public void setKey(boolean var1) {
-      this.h = var1;
+   public void setKey(boolean key) {
+      this.key = key;
    }
 
    public String getDestProperty() {
-      return this.i;
+      return this.destProperty;
    }
 
-   public void setDestProperty(String var1) {
-      this.i = var1;
+   public void setDestProperty(String destProperty) {
+      this.destProperty = destProperty;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public String getUpdateUser() {
-      return this.k;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.k = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public Date getCreateDate() {
-      return this.l;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.l = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.m;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.m = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public Object getValue() {
-      return this.n;
+      return this.value;
    }
 
-   public void setValue(Object var1) {
-      this.n = var1;
+   public void setValue(Object value) {
+      this.value = value;
    }
 }

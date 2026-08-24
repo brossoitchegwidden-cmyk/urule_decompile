@@ -16,104 +16,101 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class DefaultClientPacketCacheAdapter implements ClientPacketCacheAdapter {
-   private static final Log a = LogFactory.getLog(DefaultClientPacketCacheAdapter.class);
-
-   public List enableClientsPacket(String var1, long var2) {
-      return this.a(var1, var2, true);
+   private static final Log logger = LogFactory.getLog(DefaultClientPacketCacheAdapter.class);
+   public List enableClientsPacket(String groupId, long packetId) {
+      return this.setPacketEnabledOnClients(groupId, packetId, true);
+   }
+   public List disableClientsPacket(String groupId, long packetId) {
+      return this.setPacketEnabledOnClients(groupId, packetId, false);
    }
 
-   public List disableClientsPacket(String var1, long var2) {
-      return this.a(var1, var2, false);
-   }
+   private List setPacketEnabledOnClients(String text, long longValue, boolean flag) {
+      ArrayList items = new ArrayList();
 
-   private List a(String var1, long var2, boolean var4) {
-      ArrayList var5 = new ArrayList();
-
-      for(UrlConfig var8 : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.client, var1).getList())) {
-         HashMap var9 = new HashMap();
-         var9.put("name", var8.getName());
-         var9.put("url", var8.getUrl());
+      for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.client, text).getList())) {
+         HashMap valuesByKey = new HashMap();
+         valuesByKey.put("name", urlConfig.getName());
+         valuesByKey.put("url", urlConfig.getUrl());
 
          try {
-            this.a(var2, var4, var8.getUrl());
-            var9.put("result", true);
-         } catch (Exception var11) {
-            var9.put("result", false);
-            var9.put("error", ExceptionUtils.buildExceptionStack(var11));
+            this.setPacketEnabledOnClient(longValue, flag, urlConfig.getUrl());
+            valuesByKey.put("result", true);
+         } catch (Exception exception) {
+            valuesByKey.put("result", false);
+            valuesByKey.put("error", ExceptionUtils.buildExceptionStack(exception));
          }
 
-         var5.add(var9);
+         items.add(valuesByKey);
       }
 
-      return var5;
+      return items;
    }
 
-   private void a(long var1, boolean var3, String var4) {
-      if (var4.endsWith("/")) {
-         var4 = var4.substring(0, var4.length() - 1);
+   private void setPacketEnabledOnClient(long longValue, boolean flag, String text) {
+      if (text.endsWith("/")) {
+         text = text.substring(0, text.length() - 1);
       }
 
       try {
-         String var5 = "packageId=" + var1 + "&enable=" + var3 + "&" + HttpUtils.buildRequestValidator();
-         String var6 = var4 + "/knowledgepackagereceiver" + "?" + var5;
-         a.debug("Sync packet package to client, clientUrl:" + var6);
-         String var7 = HttpUtils.sendPostRequest(var6, (byte[])null);
-         if (!"ok".equals(var7)) {
-            throw new RuleException("Sync packet package to client error, clientUrl:" + var6);
+         String text2 = "packageId=" + longValue + "&enable=" + flag + "&" + HttpUtils.buildRequestValidator();
+         String text3 = text + "/knowledgepackagereceiver" + "?" + text2;
+         DefaultClientPacketCacheAdapter.logger.debug("Sync packet package to client, clientUrl:" + text3);
+         String text4 = HttpUtils.sendPostRequest(text3, (byte[])null);
+         if (!"ok".equals(text4)) {
+            throw new RuleException("Sync packet package to client error, clientUrl:" + text3);
          } else {
-            a.debug("Sync success!");
+            DefaultClientPacketCacheAdapter.logger.debug("Sync success!");
          }
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
+   public List pushPacketToClients(String groupId, PacketData packetData) {
+      KnowledgePackageWrapper knowledgePackageWrapper = packetData.getKnowledgePackageWrapper();
+      KnowledgePackageImpl knowledgePackage = (KnowledgePackageImpl)knowledgePackageWrapper.getKnowledgePackage();
+      String text = Utils.knowledgePackageToString(knowledgePackage);
+      byte[] bytes = Utils.compress(text);
+      List list = UrlService.ins.load(UrlType.client, groupId).getList();
+      ArrayList pushPacketToClientsResult = new ArrayList();
 
-   public List pushPacketToClients(String var1, PacketData var2) {
-      KnowledgePackageWrapper var3 = var2.getKnowledgePackageWrapper();
-      KnowledgePackageImpl var4 = (KnowledgePackageImpl)var3.getKnowledgePackage();
-      String var5 = Utils.knowledgePackageToString(var4);
-      byte[] var6 = Utils.compress(var5);
-      List var7 = UrlService.ins.load(UrlType.client, var1).getList();
-      ArrayList var8 = new ArrayList();
-
-      for(UrlConfig var10 : (Iterable<UrlConfig>)(Iterable<?>)(var7)) {
-         Map var11 = this.a(var2.getPacket(), var6, var10);
-         var8.add(var11);
+      for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(list)) {
+         Map valuesByKey = this.pushPacketToClient(packetData.getPacket(), bytes, urlConfig);
+         pushPacketToClientsResult.add(valuesByKey);
       }
 
-      return var8;
+      return pushPacketToClientsResult;
    }
 
-   private Map a(PacketConfig var1, byte[] var2, UrlConfig var3) {
-      String var4 = var3.getUrl();
-      String var5 = this.a(var1, var2, var4);
-      HashMap var6 = new HashMap();
-      if (var5 != null) {
-         var6.put("error", "<div style='color:red;word-wrap:break-word'>" + var5 + "</div>");
-         var6.put("result", false);
+   private Map pushPacketToClient(PacketConfig packetConfig, byte[] bytes, UrlConfig urlConfig) {
+      String url = urlConfig.getUrl();
+      String text = this.sendPacket(packetConfig, bytes, url);
+      HashMap valuesByKey = new HashMap();
+      if (text != null) {
+         valuesByKey.put("error", "<div style='color:red;word-wrap:break-word'>" + text + "</div>");
+         valuesByKey.put("result", false);
       } else {
-         var6.put("result", true);
+         valuesByKey.put("result", true);
       }
 
-      var6.put("url", var3.getUrl());
-      var6.put("name", var3.getName());
-      return var6;
+      valuesByKey.put("url", urlConfig.getUrl());
+      valuesByKey.put("name", urlConfig.getName());
+      return valuesByKey;
    }
 
-   private String a(PacketConfig var1, byte[] var2, String var3) {
+   private String sendPacket(PacketConfig packetConfig, byte[] bytes, String text) {
       try {
-         if (var3.endsWith("/")) {
-            var3 = var3.substring(0, var3.length() - 1);
+         if (text.endsWith("/")) {
+            text = text.substring(0, text.length() - 1);
          }
 
-         long var4 = var1.getId();
-         String var6 = var1.getCode();
-         String var7 = "packageId=" + var4 + "&code=" + var6 + "&" + HttpUtils.buildRequestValidator();
-         String var8 = var3 + "/knowledgepackagereceiver" + "?" + var7;
-         String var9 = HttpUtils.sendPostRequest(var8, var2);
-         return var9.equals("ok") ? null : "<strong>推送操作成功到达客户端，但客户端出错错误：</strong><br>" + var9;
-      } catch (Exception var10) {
-         return "<strong>服务端推送操作出现错误：</strong><br>" + ExceptionUtils.buildExceptionStack(var10);
+         long id = packetConfig.getId();
+         String code = packetConfig.getCode();
+         String text2 = "packageId=" + id + "&code=" + code + "&" + HttpUtils.buildRequestValidator();
+         String text3 = text + "/knowledgepackagereceiver" + "?" + text2;
+         String text4 = HttpUtils.sendPostRequest(text3, bytes);
+         return text4.equals("ok") ? null : "<strong>推送操作成功到达客户端，但客户端出错错误：</strong><br>" + text4;
+      } catch (Exception exception) {
+         return "<strong>服务端推送操作出现错误：</strong><br>" + ExceptionUtils.buildExceptionStack(exception);
       }
    }
 }

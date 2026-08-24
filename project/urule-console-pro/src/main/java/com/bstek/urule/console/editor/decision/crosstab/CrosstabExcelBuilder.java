@@ -42,202 +42,202 @@ import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.dom4j.Document;
 
 public class CrosstabExcelBuilder {
-   private ExcelSupport b = new ExcelSupport();
-   private CrosstableDeserializer c = (CrosstableDeserializer)Utils.getApplicationContext().getBean("urule.crosstableDeserializer");
-   String a = "predefine";
+   private ExcelSupport excelSupport = new ExcelSupport();
+   private CrosstableDeserializer crosstableDeserializer = (CrosstableDeserializer)Utils.getApplicationContext().getBean("urule.crosstableDeserializer");
+   static final String PREDEFINE_BUNDLE_TYPE = "predefine";
 
-   public CrosstabDefinition buildTable(String var1) {
+   public CrosstabDefinition buildTable(String content) {
       try {
-         Document var2 = DocumentHelper.parseText(var1);
-         return this.c.deserialize(var2.getRootElement());
-      } catch (Exception var3) {
-         throw new InfoException(var3);
+         Document text = DocumentHelper.parseText(content);
+         return this.crosstableDeserializer.deserialize(text.getRootElement());
+      } catch (Exception exception) {
+         throw new InfoException(exception);
       }
    }
 
-   private CrossCell a(List var1, int var2, int var3) {
-      CrossCell var4 = null;
+   private CrossCell findCrossCell(List items, int number, int number2) {
+      CrossCell crossCell = null;
 
-      for(CrossCell var6 : (Iterable<CrossCell>)(Iterable<?>)(var1)) {
-         if (var6.getCol() == var3 + 1 && var6.getRow() == var2 + 1) {
-            var4 = var6;
+      for(CrossCell crossCell2 : (Iterable<CrossCell>)(Iterable<?>)(items)) {
+         if (crossCell2.getCol() == number2 + 1 && crossCell2.getRow() == number + 1) {
+            crossCell = crossCell2;
             break;
          }
       }
 
-      return var4;
+      return crossCell;
    }
 
-   public void buildExcel(CrosstabDefinition var1, OutputStream var2) throws IOException {
-      SXSSFWorkbook var3 = new SXSSFWorkbook(100000);
-      SXSSFSheet var4 = var3.createSheet();
-      CellStyle var5 = var3.createCellStyle();
-      var5.setBorderBottom(BorderStyle.THIN);
-      var5.setBorderLeft(BorderStyle.THIN);
-      var5.setBorderRight(BorderStyle.THIN);
-      var5.setBorderTop(BorderStyle.THIN);
-      CellStyle var6 = var3.createCellStyle();
-      var6.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-      var6.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-      var6.setAlignment(HorizontalAlignment.CENTER);
-      var6.setVerticalAlignment(VerticalAlignment.CENTER);
-      var6.setBorderBottom(BorderStyle.THIN);
-      var6.setBorderLeft(BorderStyle.THIN);
-      var6.setBorderRight(BorderStyle.THIN);
-      var6.setBorderTop(BorderStyle.THIN);
-      Font var7 = var3.createFont();
-      var7.setColor(IndexedColors.DARK_GREEN.index);
-      var6.setFont(var7);
-      CellStyle var8 = var3.createCellStyle();
-      var8.setVerticalAlignment(VerticalAlignment.CENTER);
-      var8.setBorderBottom(BorderStyle.THIN);
-      var8.setBorderLeft(BorderStyle.THIN);
-      var8.setBorderRight(BorderStyle.THIN);
-      var8.setBorderTop(BorderStyle.THIN);
-      var8.setWrapText(true);
-      Row var9 = var4.createRow(0);
-      HeaderCell var10 = var1.getHeaderCell();
-      if (var10.getRowspan() > 1 || var10.getColspan() > 1) {
-         CellRangeAddress var11 = new CellRangeAddress(0, var10.getRowspan() - 1, 0, var10.getColspan() - 1);
-         var4.addMergedRegion(var11);
-         RegionUtil.setBorderTop(BorderStyle.THIN, var11, var4);
-         RegionUtil.setBorderBottom(BorderStyle.THIN, var11, var4);
-         RegionUtil.setBorderLeft(BorderStyle.THIN, var11, var4);
-         RegionUtil.setBorderRight(BorderStyle.THIN, var11, var4);
+   public void buildExcel(CrosstabDefinition table, OutputStream outputStream) throws IOException {
+      SXSSFWorkbook sXSSFWorkbook = new SXSSFWorkbook(100000);
+      SXSSFSheet sheet = sXSSFWorkbook.createSheet();
+      CellStyle cellStyle = sXSSFWorkbook.createCellStyle();
+      cellStyle.setBorderBottom(BorderStyle.THIN);
+      cellStyle.setBorderLeft(BorderStyle.THIN);
+      cellStyle.setBorderRight(BorderStyle.THIN);
+      cellStyle.setBorderTop(BorderStyle.THIN);
+      CellStyle cellStyle2 = sXSSFWorkbook.createCellStyle();
+      cellStyle2.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+      cellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      cellStyle2.setAlignment(HorizontalAlignment.CENTER);
+      cellStyle2.setVerticalAlignment(VerticalAlignment.CENTER);
+      cellStyle2.setBorderBottom(BorderStyle.THIN);
+      cellStyle2.setBorderLeft(BorderStyle.THIN);
+      cellStyle2.setBorderRight(BorderStyle.THIN);
+      cellStyle2.setBorderTop(BorderStyle.THIN);
+      Font font = sXSSFWorkbook.createFont();
+      font.setColor(IndexedColors.DARK_GREEN.index);
+      cellStyle2.setFont(font);
+      CellStyle cellStyle3 = sXSSFWorkbook.createCellStyle();
+      cellStyle3.setVerticalAlignment(VerticalAlignment.CENTER);
+      cellStyle3.setBorderBottom(BorderStyle.THIN);
+      cellStyle3.setBorderLeft(BorderStyle.THIN);
+      cellStyle3.setBorderRight(BorderStyle.THIN);
+      cellStyle3.setBorderTop(BorderStyle.THIN);
+      cellStyle3.setWrapText(true);
+      Row row = sheet.createRow(0);
+      HeaderCell headerCell = table.getHeaderCell();
+      if (headerCell.getRowspan() > 1 || headerCell.getColspan() > 1) {
+         CellRangeAddress cellRangeAddress = new CellRangeAddress(0, headerCell.getRowspan() - 1, 0, headerCell.getColspan() - 1);
+         sheet.addMergedRegion(cellRangeAddress);
+         RegionUtil.setBorderTop(BorderStyle.THIN, cellRangeAddress, sheet);
+         RegionUtil.setBorderBottom(BorderStyle.THIN, cellRangeAddress, sheet);
+         RegionUtil.setBorderLeft(BorderStyle.THIN, cellRangeAddress, sheet);
+         RegionUtil.setBorderRight(BorderStyle.THIN, cellRangeAddress, sheet);
       }
 
-      Cell var30 = var9.createCell(0);
-      var30.setCellStyle(var6);
-      var30.setCellValue(var10.getText());
-      double var12 = 398.44416982095004;
-      Double var14 = (double)256.0F * (var12 / (double)7.0F);
-      var4.setColumnWidth(0, Math.min(var14.intValue(), 65280));
-      SXSSFDrawing var15 = (SXSSFDrawing)var4.createDrawingPatriarch();
-      ArrayList var16 = new ArrayList();
+      Cell cell = row.createCell(0);
+      cell.setCellStyle(cellStyle2);
+      cell.setCellValue(headerCell.getText());
+      double doubleValue = 398.44416982095004;
+      Double doubleValue2 = (double)256.0F * (doubleValue / (double)7.0F);
+      sheet.setColumnWidth(0, Math.min(doubleValue2.intValue(), 65280));
+      SXSSFDrawing drawingPatriarch = (SXSSFDrawing)sheet.createDrawingPatriarch();
+      ArrayList items = new ArrayList();
 
-      for(int var17 = 0; var17 < var1.getRows().size(); ++var17) {
-         Row var18 = var9;
-         if (var17 > 0) {
-            var18 = var4.createRow(var17);
+      for(int index = 0; index < table.getRows().size(); ++index) {
+         Row row2 = row;
+         if (index > 0) {
+            row2 = sheet.createRow(index);
          }
 
-         var18.setHeight((short)1200);
-         com.bstek.urule.model.crosstab.CrossRow var19 = (com.bstek.urule.model.crosstab.CrossRow)var1.getRows().get(var17);
+         row2.setHeight((short)1200);
+         com.bstek.urule.model.crosstab.CrossRow crossRow = (com.bstek.urule.model.crosstab.CrossRow)table.getRows().get(index);
 
-         for(int var20 = 0; var20 < var1.getColumns().size(); ++var20) {
-            com.bstek.urule.model.crosstab.CrossColumn var21 = (com.bstek.urule.model.crosstab.CrossColumn)var1.getColumns().get(var20);
-            CrossCell var22 = this.a(var1.getCells(), var17, var20);
-            if (var22 != null) {
-               if (var22.getRowspan() > 1 || var22.getColspan() > 1) {
-                  int var23 = var22.getRowspan() > 1 ? var22.getRow() + var22.getRowspan() - 1 : var22.getRow();
-                  int var24 = var22.getColspan() > 1 ? var22.getCol() + var22.getColspan() - 1 : var22.getCol() - 1;
-                  if (var23 > var22.getRow() || var24 > var22.getCol() - 1) {
-                     if (var21 instanceof TopColumn) {
-                        CellRangeAddress var25 = new CellRangeAddress(var22.getRow() - 1, var23 - 1, var22.getCol() - 1, var24 - 1);
-                        var4.addMergedRegion(var25);
-                        RegionUtil.setBorderTop(BorderStyle.THIN, var25, var4);
-                        RegionUtil.setBorderBottom(BorderStyle.THIN, var25, var4);
-                        RegionUtil.setBorderLeft(BorderStyle.THIN, var25, var4);
-                        RegionUtil.setBorderRight(BorderStyle.THIN, var25, var4);
+         for(int index2 = 0; index2 < table.getColumns().size(); ++index2) {
+            com.bstek.urule.model.crosstab.CrossColumn crossColumn = (com.bstek.urule.model.crosstab.CrossColumn)table.getColumns().get(index2);
+            CrossCell crossCell = this.findCrossCell(table.getCells(), index, index2);
+            if (crossCell != null) {
+               if (crossCell.getRowspan() > 1 || crossCell.getColspan() > 1) {
+                  int number = crossCell.getRowspan() > 1 ? crossCell.getRow() + crossCell.getRowspan() - 1 : crossCell.getRow();
+                  int number2 = crossCell.getColspan() > 1 ? crossCell.getCol() + crossCell.getColspan() - 1 : crossCell.getCol() - 1;
+                  if (number > crossCell.getRow() || number2 > crossCell.getCol() - 1) {
+                     if (crossColumn instanceof TopColumn) {
+                        CellRangeAddress cellRangeAddress2 = new CellRangeAddress(crossCell.getRow() - 1, number - 1, crossCell.getCol() - 1, number2 - 1);
+                        sheet.addMergedRegion(cellRangeAddress2);
+                        RegionUtil.setBorderTop(BorderStyle.THIN, cellRangeAddress2, sheet);
+                        RegionUtil.setBorderBottom(BorderStyle.THIN, cellRangeAddress2, sheet);
+                        RegionUtil.setBorderLeft(BorderStyle.THIN, cellRangeAddress2, sheet);
+                        RegionUtil.setBorderRight(BorderStyle.THIN, cellRangeAddress2, sheet);
                      } else {
-                        CellRangeAddress var34 = new CellRangeAddress(var22.getRow() - 1, var23 - 1, var22.getCol() - 1, var24);
-                        var4.addMergedRegion(var34);
-                        RegionUtil.setBorderTop(BorderStyle.THIN, var34, var4);
-                        RegionUtil.setBorderBottom(BorderStyle.THIN, var34, var4);
-                        RegionUtil.setBorderLeft(BorderStyle.THIN, var34, var4);
-                        RegionUtil.setBorderRight(BorderStyle.THIN, var34, var4);
+                        CellRangeAddress cellRangeAddress3 = new CellRangeAddress(crossCell.getRow() - 1, number - 1, crossCell.getCol() - 1, number2);
+                        sheet.addMergedRegion(cellRangeAddress3);
+                        RegionUtil.setBorderTop(BorderStyle.THIN, cellRangeAddress3, sheet);
+                        RegionUtil.setBorderBottom(BorderStyle.THIN, cellRangeAddress3, sheet);
+                        RegionUtil.setBorderLeft(BorderStyle.THIN, cellRangeAddress3, sheet);
+                        RegionUtil.setBorderRight(BorderStyle.THIN, cellRangeAddress3, sheet);
                      }
                   }
                }
 
-               Cell var31 = var18.createCell(var20);
-               if (var20 > 0) {
-                  var4.setColumnWidth(var20, Math.min(var14.intValue() / 2, 65280));
+               Cell cell2 = row2.createCell(index2);
+               if (index2 > 0) {
+                  sheet.setColumnWidth(index2, Math.min(doubleValue2.intValue() / 2, 65280));
                }
 
-               if (var22 instanceof ConditionCrossCell) {
-                  var31.setCellStyle(var6);
-                  ConditionCrossCell var32 = (ConditionCrossCell)var22;
-                  if (var32.getJoint() != null && var32.getJoint().getConditions() != null && var32.getJoint().getConditions().size() != 0) {
-                     String var35 = ExcelExportUtils.conditions2Label(this.b, var32.getJoint().getConditions(), var32.getJoint().getType());
-                     String var26 = "";
-                     String var27 = "predefine";
-                     if (var19 instanceof TopRow) {
-                        TopRow var28 = (TopRow)var19;
-                        var26 = this.a(var28);
-                        if (!var16.contains(var19.getRowNumber() + "," + var21.getColumnNumber())) {
-                           XSSFComment var29 = (XSSFComment)var15.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, var21.getColumnNumber() - 1, var19.getRowNumber() - 1, var21.getColumnNumber(), var19.getRowNumber()));
-                           var29.setString(var26);
-                           if (var27.equals(var28.getBundleDataType())) {
-                              var29.setString(var28.getBundleDataType() + ":" + var26);
+               if (crossCell instanceof ConditionCrossCell) {
+                  cell2.setCellStyle(cellStyle2);
+                  ConditionCrossCell conditionCrossCell = (ConditionCrossCell)crossCell;
+                  if (conditionCrossCell.getJoint() != null && conditionCrossCell.getJoint().getConditions() != null && conditionCrossCell.getJoint().getConditions().size() != 0) {
+                     String text = ExcelExportUtils.conditions2Label(this.excelSupport, conditionCrossCell.getJoint().getConditions(), conditionCrossCell.getJoint().getType());
+                     String text2 = "";
+                     String text3 = "predefine";
+                     if (crossRow instanceof TopRow) {
+                        TopRow topRow = (TopRow)crossRow;
+                        text2 = this.buildBundleLabel(topRow);
+                        if (!items.contains(crossRow.getRowNumber() + "," + crossColumn.getColumnNumber())) {
+                           XSSFComment cellComment = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, crossColumn.getColumnNumber() - 1, crossRow.getRowNumber() - 1, crossColumn.getColumnNumber(), crossRow.getRowNumber()));
+                           cellComment.setString(text2);
+                           if (text3.equals(topRow.getBundleDataType())) {
+                              cellComment.setString(topRow.getBundleDataType() + ":" + text2);
                            }
 
-                           var31.setCellComment(var29);
-                           var16.add(var19.getRowNumber() + "," + var21.getColumnNumber());
+                           cell2.setCellComment(cellComment);
+                           items.add(crossRow.getRowNumber() + "," + crossColumn.getColumnNumber());
                         }
-                     } else if (var21 instanceof LeftColumn) {
-                        LeftColumn var38 = (LeftColumn)var21;
-                        var26 = this.a(var38);
-                        if (!var16.contains(var19.getRowNumber() + "," + var38.getColumnNumber())) {
-                           XSSFComment var39 = (XSSFComment)var15.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, var21.getColumnNumber() - 1, var19.getRowNumber() - 1, var21.getColumnNumber(), var19.getRowNumber()));
-                           var39.setString(var26);
-                           if (var27.equals(var38.getBundleDataType())) {
-                              var39.setString(var38.getBundleDataType() + ":" + var26);
+                     } else if (crossColumn instanceof LeftColumn) {
+                        LeftColumn leftColumn = (LeftColumn)crossColumn;
+                        text2 = this.buildBundleLabel(leftColumn);
+                        if (!items.contains(crossRow.getRowNumber() + "," + leftColumn.getColumnNumber())) {
+                           XSSFComment xSSFComment = (XSSFComment)drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, crossColumn.getColumnNumber() - 1, crossRow.getRowNumber() - 1, crossColumn.getColumnNumber(), crossRow.getRowNumber()));
+                           xSSFComment.setString(text2);
+                           if (text3.equals(leftColumn.getBundleDataType())) {
+                              xSSFComment.setString(leftColumn.getBundleDataType() + ":" + text2);
                            }
 
-                           var31.setCellComment(var39);
-                           var16.add(var19.getRowNumber() + "," + var21.getColumnNumber());
+                           cell2.setCellComment(xSSFComment);
+                           items.add(crossRow.getRowNumber() + "," + crossColumn.getColumnNumber());
                         }
                      }
 
-                     var31.setCellValue(var35);
+                     cell2.setCellValue(text);
                   } else {
-                     var31.setCellValue("");
+                     cell2.setCellValue("");
                   }
-               } else if (var22 instanceof ValueCrossCell) {
-                  var31.setCellStyle(var8);
-                  ValueCrossCell var33 = (ValueCrossCell)var22;
-                  var31.setCellValue(ExcelExportUtils.getLabelValue(this.b, (Condition)null, var33.getValue()));
+               } else if (crossCell instanceof ValueCrossCell) {
+                  cell2.setCellStyle(cellStyle3);
+                  ValueCrossCell valueCrossCell = (ValueCrossCell)crossCell;
+                  cell2.setCellValue(ExcelExportUtils.getLabelValue(this.excelSupport, (Condition)null, valueCrossCell.getValue()));
                }
             }
          }
       }
 
-      if (var1.getPredefineGroup() != null && var1.getPredefineGroup().getPredefines().size() > 0) {
-         ExcelExportUtils.exportPredefine(var3, var1.getPredefineGroup(), this.b);
+      if (table.getPredefineGroup() != null && table.getPredefineGroup().getPredefines().size() > 0) {
+         ExcelExportUtils.exportPredefine(sXSSFWorkbook, table.getPredefineGroup(), this.excelSupport);
       }
 
-      ExcelExportUtils.exportProperties(var3, var1);
-      var3.write(var2);
+      ExcelExportUtils.exportProperties(sXSSFWorkbook, table);
+      sXSSFWorkbook.write(outputStream);
    }
 
-   private String a(BundleData var1) {
-      String var2 = "";
-      if (this.a.equals(var1.getBundleDataType())) {
-         var2 = var1.getPredefineName();
-         if (StringUtils.isNotBlank(var1.getPredefinePropertyLabel())) {
-            var2 = var2 + "." + var1.getPredefinePropertyLabel();
+   private String buildBundleLabel(BundleData bundleData) {
+      String predefineName = "";
+      if (PREDEFINE_BUNDLE_TYPE.equals(bundleData.getBundleDataType())) {
+         predefineName = bundleData.getPredefineName();
+         if (StringUtils.isNotBlank(bundleData.getPredefinePropertyLabel())) {
+            predefineName = predefineName + "." + bundleData.getPredefinePropertyLabel();
          }
-      } else if (ExcelSupport.isParameter(var1.getVariableCategory())) {
-         if (StringUtils.isNotBlank(var1.getKeyCategoryUuid())) {
-            Variable var3 = null;
-            VariableCategory var4 = this.b.findVariableCategoryByUUID(var1.getKeyCategoryUuid());
-            if (var4 != null) {
-               var3 = (Variable)var4.getVariableNames().get(var1.getVariableName());
+      } else if (ExcelSupport.isParameter(bundleData.getVariableCategory())) {
+         if (StringUtils.isNotBlank(bundleData.getKeyCategoryUuid())) {
+            Variable variable = null;
+            VariableCategory variableCategoryByUUID = this.excelSupport.findVariableCategoryByUUID(bundleData.getKeyCategoryUuid());
+            if (variableCategoryByUUID != null) {
+               variable = (Variable)variableCategoryByUUID.getVariableNames().get(bundleData.getVariableName());
             }
 
-            if (var4 != null && var3 != null) {
-               var2 = "参数." + var1.getKeyName() + "." + var3.getLabel();
+            if (variableCategoryByUUID != null && variable != null) {
+               predefineName = "参数." + bundleData.getKeyName() + "." + variable.getLabel();
             } else {
-               var2 = "参数." + var1.getVariableLabel();
+               predefineName = "参数." + bundleData.getVariableLabel();
             }
          } else {
-            var2 = "参数." + var1.getVariableLabel();
+            predefineName = "参数." + bundleData.getVariableLabel();
          }
       } else {
-         var2 = var1.getVariableCategory() + "." + var1.getVariableLabel();
+         predefineName = bundleData.getVariableCategory() + "." + bundleData.getVariableLabel();
       }
 
-      return var2;
+      return predefineName;
    }
 }

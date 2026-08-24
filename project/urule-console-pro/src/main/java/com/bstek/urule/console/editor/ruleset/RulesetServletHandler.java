@@ -52,83 +52,83 @@ public class RulesetServletHandler extends ApiServletHandler {
    public static final String CONDITION_RULE_DATA = "_condition_rule_data_";
    public static final String CONDITION_CELL_DATA = "_condition_cell_data_";
    public static final String VALUE_CELL_DATA = "_value_cell_data_";
-   private static final String e = "_loop_rule_for_copy_";
-   private static final String f = "_rule_for_copy_";
-   private RuleParser g;
-   private LoopRuleParser h;
-   private ValueParser i;
-   private ExecuteMethodActionParser j;
-   private JointParser k;
-   private JunctionParser l;
-   private Collection m;
+   private static final String LOOP_RULE_FOR_COPY = "_loop_rule_for_copy_";
+   private static final String RULE_FOR_COPY = "_rule_for_copy_";
+   private RuleParser ruleParser;
+   private LoopRuleParser loopRuleParser;
+   private ValueParser valueParser;
+   private ExecuteMethodActionParser executeMethodActionParser;
+   private JointParser jointParser;
+   private JunctionParser junctionParser;
+   private Collection actionParsers;
 
    public void init() {
       super.init();
-      ApplicationContext var1 = Utils.getApplicationContext();
-      this.g = (RuleParser)var1.getBean(RuleParser.class);
-      this.h = (LoopRuleParser)var1.getBean(LoopRuleParser.class);
-      this.i = (ValueParser)var1.getBean(ValueParser.class);
-      this.j = (ExecuteMethodActionParser)var1.getBean(ExecuteMethodActionParser.class);
-      this.k = (JointParser)var1.getBean(JointParser.class);
-      this.l = (JunctionParser)var1.getBean(JunctionParser.class);
-      this.m = var1.getBeansOfType(ActionParser.class).values();
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      this.ruleParser = (RuleParser)applicationContext.getBean(RuleParser.class);
+      this.loopRuleParser = (LoopRuleParser)applicationContext.getBean(LoopRuleParser.class);
+      this.valueParser = (ValueParser)applicationContext.getBean(ValueParser.class);
+      this.executeMethodActionParser = (ExecuteMethodActionParser)applicationContext.getBean(ExecuteMethodActionParser.class);
+      this.jointParser = (JointParser)applicationContext.getBean(JointParser.class);
+      this.junctionParser = (JunctionParser)applicationContext.getBean(JunctionParser.class);
+      this.actionParsers = applicationContext.getBeansOfType(ActionParser.class).values();
    }
 
-   public void copyRule(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("type");
-      String var4 = Utils.decodeContent(var1.getParameter("xml"));
-      String var5 = Utils.decodeContent(var1.getParameter("libs"));
-      Document var6 = DocumentHelper.parseText(var4);
-      Element var7 = var6.getRootElement();
-      Object var8 = null;
-      if (var3.equals("loop")) {
-         LoopRule var11 = this.h.parse(var7);
-         var5 = CopyLibsAnalysis.ins.doAnalysis(var5, var11);
-         StoreTools.setAttribute("_loop_rule_for_copy_", new CopyRule(var11, var5));
+   public void copyRule(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("type");
+      String text2 = Utils.decodeContent(req.getParameter("xml"));
+      String text3 = Utils.decodeContent(req.getParameter("libs"));
+      Document text = DocumentHelper.parseText(text2);
+      Element rootElement = text.getRootElement();
+      Object objectValue = null;
+      if (parameter.equals("loop")) {
+         LoopRule loopRule = this.loopRuleParser.parse(rootElement);
+         text3 = CopyLibsAnalysis.ins.doAnalysis(text3, loopRule);
+         StoreTools.setAttribute("_loop_rule_for_copy_", new CopyRule(loopRule, text3));
       } else {
-         Rule var12 = this.g.parse(var7);
-         var5 = CopyLibsAnalysis.ins.doAnalysis(var5, var12);
-         StoreTools.setAttribute("_rule_for_copy_", new CopyRule(var12, var5));
+         Rule rule = this.ruleParser.parse(rootElement);
+         text3 = CopyLibsAnalysis.ins.doAnalysis(text3, rule);
+         StoreTools.setAttribute("_rule_for_copy_", new CopyRule(rule, text3));
       }
 
    }
 
-   public void pasteRule(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("type");
-      if (var3.equals("loop")) {
-         Object var4 = StoreTools.getAttribute("_loop_rule_for_copy_");
-         this.a(var2, var4);
+   public void pasteRule(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("type");
+      if (parameter.equals("loop")) {
+         Object attribute = StoreTools.getAttribute("_loop_rule_for_copy_");
+         this.writeObjectToJson(resp, attribute);
       } else {
-         Object var5 = StoreTools.getAttribute("_rule_for_copy_");
-         this.a(var2, var5);
+         Object attribute2 = StoreTools.getAttribute("_rule_for_copy_");
+         this.writeObjectToJson(resp, attribute2);
       }
 
    }
 
-   public void parseRuleData(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("type");
-      String var4 = Utils.decodeContent(var1.getParameter("xml"));
-      String var5 = Utils.decodeContent(var1.getParameter("libs"));
-      Document var6 = DocumentHelper.parseText(var4);
-      if (var3.equals("condition")) {
-         Element var7 = var6.getRootElement();
-         if (this.l.support(var7.getName())) {
-            Criterion var8 = this.l.parse(var7);
-            var5 = CopyLibsAnalysis.ins.doAnalysis(var5, var8);
-            StoreTools.setAttribute("_condition_rule_data_", new CopyCriterion(var8, var5));
+   public void parseRuleData(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("type");
+      String text2 = Utils.decodeContent(req.getParameter("xml"));
+      String text3 = Utils.decodeContent(req.getParameter("libs"));
+      Document text = DocumentHelper.parseText(text2);
+      if (parameter.equals("condition")) {
+         Element rootElement = text.getRootElement();
+         if (this.junctionParser.support(rootElement.getName())) {
+            Criterion criterion = this.junctionParser.parse(rootElement);
+            text3 = CopyLibsAnalysis.ins.doAnalysis(text3, criterion);
+            StoreTools.setAttribute("_condition_rule_data_", new CopyCriterion(criterion, text3));
          } else {
-            List var15 = this.l.parseCriterion(var7);
-            var5 = CopyLibsAnalysis.ins.doAnalysis(var5, var15);
-            StoreTools.setAttribute("_condition_rule_data_", new CopyCriterion((Criterion)var15.get(0), var5));
+            List criterion2 = this.junctionParser.parseCriterion(rootElement);
+            text3 = CopyLibsAnalysis.ins.doAnalysis(text3, criterion2);
+            StoreTools.setAttribute("_condition_rule_data_", new CopyCriterion((Criterion)criterion2.get(0), text3));
          }
-      } else if (var3.equals("action")) {
-         Element var14 = var6.getRootElement();
+      } else if (parameter.equals("action")) {
+         Element rootElement2 = text.getRootElement();
 
-         for(ActionParser var9 : (Iterable<ActionParser>)(Iterable<?>)(this.m)) {
-            if (var9.support(var14.getName())) {
-               Action var10 = (Action)var9.parse(var14);
-               var5 = CopyLibsAnalysis.ins.doAnalysis(var5, var10);
-               StoreTools.setAttribute("__action_rule_data_", new CopyAction(var10, var5));
+         for(ActionParser actionParser : (Iterable<ActionParser>)(Iterable<?>)(this.actionParsers)) {
+            if (actionParser.support(rootElement2.getName())) {
+               Action action = (Action)actionParser.parse(rootElement2);
+               text3 = CopyLibsAnalysis.ins.doAnalysis(text3, action);
+               StoreTools.setAttribute("__action_rule_data_", new CopyAction(action, text3));
                break;
             }
          }
@@ -136,162 +136,162 @@ public class RulesetServletHandler extends ApiServletHandler {
 
    }
 
-   public void loadRuleData(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getParameter("type");
-      Object var4 = null;
-      if (var3.equals("condition")) {
-         var4 = StoreTools.getAttribute("_condition_rule_data_");
-      } else if (var3.equals("action")) {
-         var4 = StoreTools.getAttribute("__action_rule_data_");
+   public void loadRuleData(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String parameter = req.getParameter("type");
+      Object attribute = null;
+      if (parameter.equals("condition")) {
+         attribute = StoreTools.getAttribute("_condition_rule_data_");
+      } else if (parameter.equals("action")) {
+         attribute = StoreTools.getAttribute("__action_rule_data_");
       }
 
-      if (var4 != null) {
-         this.a(var2, var4);
+      if (attribute != null) {
+         this.writeObjectToJson(resp, attribute);
       }
 
    }
 
-   public void parseCellData(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("type");
-      String var4 = Utils.decodeContent(var1.getParameter("xml"));
+   public void parseCellData(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("type");
+      String text = Utils.decodeContent(req.getParameter("xml"));
 
-      Document var5;
+      Document document;
       try {
-         var5 = DocumentHelper.parseText(var4);
-      } catch (DocumentException var7) {
-         throw new ServletException(var7);
+         document = DocumentHelper.parseText(text);
+      } catch (DocumentException documentException) {
+         throw new ServletException(documentException);
       }
 
-      if (var3.equals("condition")) {
-         Joint var6 = this.k.parse(var5.getRootElement());
-         StoreTools.setAttribute("_condition_cell_data_", var6);
-      } else if (var3.equals("value")) {
-         Value var8 = this.i.parse(var5.getRootElement());
-         StoreTools.setAttribute("_value_cell_data_", var8);
-      } else if (var3.equals("action")) {
-         Action var9 = this.j.parse(var5.getRootElement());
-         StoreTools.setAttribute("__action_cell_data_", var9);
-      }
-
-   }
-
-   public void loadCellData(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getParameter("type");
-      Object var4 = null;
-      if (var3.equals("condition")) {
-         var4 = StoreTools.getAttribute("_condition_cell_data_");
-      } else if (var3.equals("value")) {
-         var4 = StoreTools.getAttribute("_value_cell_data_");
-      } else if (var3.equals("action")) {
-         var4 = StoreTools.getAttribute("__action_cell_data_");
-      }
-
-      if (var4 != null) {
-         this.a(var2, var4);
+      if (parameter.equals("condition")) {
+         Joint joint = this.jointParser.parse(document.getRootElement());
+         StoreTools.setAttribute("_condition_cell_data_", joint);
+      } else if (parameter.equals("value")) {
+         Value localValue = this.valueParser.parse(document.getRootElement());
+         StoreTools.setAttribute("_value_cell_data_", localValue);
+      } else if (parameter.equals("action")) {
+         Action action = this.executeMethodActionParser.parse(document.getRootElement());
+         StoreTools.setAttribute("__action_cell_data_", action);
       }
 
    }
 
-   public void loadSimpleData(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      HashMap var3 = new HashMap();
-
-      for(SimpleDataProvider var6 : Utils.getApplicationContext().getBeansOfType(SimpleDataProvider.class).values()) {
-         var3.put(var6.name(), var6.data());
+   public void loadCellData(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String parameter = req.getParameter("type");
+      Object attribute = null;
+      if (parameter.equals("condition")) {
+         attribute = StoreTools.getAttribute("_condition_cell_data_");
+      } else if (parameter.equals("value")) {
+         attribute = StoreTools.getAttribute("_value_cell_data_");
+      } else if (parameter.equals("action")) {
+         attribute = StoreTools.getAttribute("__action_cell_data_");
       }
 
-      this.a(var2, var3);
+      if (attribute != null) {
+         this.writeObjectToJson(resp, attribute);
+      }
+
    }
 
-   public void loadPackets(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("projectId"));
-      ArrayList var5 = new ArrayList();
-      Project var6 = ProjectManager.ins.get(var3);
-      Map var7 = this.a(var6);
-      if (var7 != null) {
-         var5.add(var7);
+   public void loadSimpleData(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      HashMap valuesByKey = new HashMap();
+
+      for(SimpleDataProvider simpleDataProvider : Utils.getApplicationContext().getBeansOfType(SimpleDataProvider.class).values()) {
+         valuesByKey.put(simpleDataProvider.name(), simpleDataProvider.data());
       }
 
-      for(Project var10 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type(ProjectType.common.name()).groupId(var6.getGroupId()).list())) {
-         var7 = this.a(var10);
-         if (var7 != null) {
-            var5.add(var7);
+      this.writeObjectToJson(resp, valuesByKey);
+   }
+
+   public void loadPackets(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      ArrayList items = new ArrayList();
+      Project project = ProjectManager.ins.get(longValue);
+      Map valuesByKey = this.buildValuesByKey(project);
+      if (valuesByKey != null) {
+         items.add(valuesByKey);
+      }
+
+      for(Project project2 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type(ProjectType.common.name()).groupId(project.getGroupId()).list())) {
+         valuesByKey = this.buildValuesByKey(project2);
+         if (valuesByKey != null) {
+            items.add(valuesByKey);
          }
       }
 
-      this.a(var2, var5);
+      this.writeObjectToJson(resp, items);
    }
 
-   private Map a(Project var1) throws Exception {
-      HashMap var2 = new HashMap();
-      ArrayList var3 = new ArrayList();
-      var2.put("project", var1.getName());
-      var2.put("packets", var3);
+   private Map buildValuesByKey(Project project) throws Exception {
+      HashMap valuesByKey = new HashMap();
+      ArrayList items = new ArrayList();
+      valuesByKey.put("project", project.getName());
+      valuesByKey.put("packets", items);
 
-      for(Packet var6 : (Iterable<Packet>)(Iterable<?>)(PacketManager.ins.newQuery().projectId(var1.getId()).enable(true).list())) {
-         HashMap var7 = new HashMap();
-         var7.put("name", var6.getName());
-         var7.put("code", var6.getCode());
-         var7.put("id", var6.getId());
-         var3.add(var7);
+      for(Packet packet : (Iterable<Packet>)(Iterable<?>)(PacketManager.ins.newQuery().projectId(project.getId()).enable(true).list())) {
+         HashMap valuesByKey2 = new HashMap();
+         valuesByKey2.put("name", packet.getName());
+         valuesByKey2.put("code", packet.getCode());
+         valuesByKey2.put("id", packet.getId());
+         items.add(valuesByKey2);
       }
 
-      return var3.size() > 0 ? var2 : null;
+      return items.size() > 0 ? valuesByKey : null;
    }
 
-   public void pendedGroups(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("groupName");
-      String var4 = var1.getParameter("fileName");
-      long var5 = Long.valueOf(var1.getParameter("projectId"));
-      List var7 = FileManager.ins.newQuery().nameLike(var4).deleted(false).type(ResourceType.RuleSet.name()).asc("NAME_").list(var5);
-      HashMap var8 = new HashMap();
+   public void pendedGroups(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("groupName");
+      String parameter2 = req.getParameter("fileName");
+      long longValue = Long.valueOf(req.getParameter("projectId"));
+      List items = FileManager.ins.newQuery().nameLike(parameter2).deleted(false).type(ResourceType.RuleSet.name()).asc("NAME_").list(longValue);
+      HashMap valuesByKey = new HashMap();
 
-      for(RuleFile var10 : (Iterable<RuleFile>)(Iterable<?>)(var7)) {
-         this.a(var10, var8);
+      for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+         this.collectPendedGroups(ruleFile, valuesByKey);
       }
 
-      ArrayList var13 = new ArrayList();
+      ArrayList items2 = new ArrayList();
 
-      for(String var11 : (Iterable<String>)(Iterable<?>)(var8.keySet())) {
-         HashMap var12 = new HashMap();
-         if (!StringUtils.isNotBlank(var3) || var11.toLowerCase().indexOf(var3.toLowerCase()) != -1) {
-            var12.put("name", var11);
-            var12.put("path", var8.get(var11));
-            var13.add(var12);
+      for(String text : (Iterable<String>)(Iterable<?>)(valuesByKey.keySet())) {
+         HashMap valuesByKey2 = new HashMap();
+         if (!StringUtils.isNotBlank(parameter) || text.toLowerCase().indexOf(parameter.toLowerCase()) != -1) {
+            valuesByKey2.put("name", text);
+            valuesByKey2.put("path", valuesByKey.get(text));
+            items2.add(valuesByKey2);
          }
       }
 
-      this.a(var2, var13);
+      this.writeObjectToJson(resp, items2);
    }
 
-   protected void a(RuleFile var1, Map var2) throws Exception {
-      String var3 = FileManager.ins.loadContent(var1.getId());
-      ByteArrayInputStream var4 = new ByteArrayInputStream(var3.getBytes("utf-8"));
-      XXESAXReader var5 = new XXESAXReader();
-      Document var6 = ((SAXReader)var5).read(var4);
-      Element var7 = var6.getRootElement();
+   protected void collectPendedGroups(RuleFile ruleFile, Map valuesByKey) throws Exception {
+      String content = FileManager.ins.loadContent(ruleFile.getId());
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes("utf-8"));
+      XXESAXReader xXESAXReader = new XXESAXReader();
+      Document document = ((SAXReader)xXESAXReader).read(byteArrayInputStream);
+      Element rootElement = document.getRootElement();
 
-      for(Object var9 : var7.elements()) {
-         if (var9 != null && var9 instanceof Element) {
-            Element var10 = (Element)var9;
-            String var11 = var10.getName();
-            if (var11.equals("rule") || var11.equals("loop-rule")) {
-               String var12 = var10.attributeValue("pended-group");
-               String var13 = var1.getPath() + "(" + var1.getId() + ")";
-               if (StringUtils.isNotBlank(var12)) {
-                  if (var2.containsKey(var12)) {
-                     String var14 = (String)var2.get(var12);
-                     if (var14.indexOf(var13) == -1) {
-                        var2.put(var12, var14 + "，" + var13);
+      for(Object objectValue : rootElement.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element = (Element)objectValue;
+            String name = element.getName();
+            if (name.equals("rule") || name.equals("loop-rule")) {
+               String text = element.attributeValue("pended-group");
+               String text2 = ruleFile.getPath() + "(" + ruleFile.getId() + ")";
+               if (StringUtils.isNotBlank(text)) {
+                  if (valuesByKey.containsKey(text)) {
+                     String text3 = (String)valuesByKey.get(text);
+                     if (text3.indexOf(text2) == -1) {
+                        valuesByKey.put(text, text3 + "，" + text2);
                      }
                   } else {
-                     var2.put(var12, var13);
+                     valuesByKey.put(text, text2);
                   }
                }
             }
          }
       }
 
-      IOUtils.closeQuietly(var4);
+      IOUtils.closeQuietly(byteArrayInputStream);
    }
 
    public String url() {

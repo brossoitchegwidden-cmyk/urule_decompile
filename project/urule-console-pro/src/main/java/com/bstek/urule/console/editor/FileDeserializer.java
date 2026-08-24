@@ -30,80 +30,80 @@ import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
 
 public class FileDeserializer {
-   private List a;
+   private List deserializers;
 
    private FileDeserializer() {
-      this.a = new ArrayList();
-      ApplicationContext var1 = Utils.getApplicationContext();
-      ActionLibraryDeserializer var2 = (ActionLibraryDeserializer)var1.getBean("urule.actionLibraryDeserializer");
-      VariableLibraryDeserializer var3 = (VariableLibraryDeserializer)var1.getBean("urule.variableLibraryDeserializer");
-      ParameterLibraryDeserializer var4 = (ParameterLibraryDeserializer)var1.getBean("urule.parameterLibraryDeserializer");
-      ConstantLibraryDeserializer var5 = (ConstantLibraryDeserializer)var1.getBean("urule.constantLibraryDeserializer");
-      RuleSetDeserializer var6 = (RuleSetDeserializer)var1.getBean("urule.ruleSetDeserializer");
-      DecisionTableDeserializer var7 = (DecisionTableDeserializer)var1.getBean("urule.decisionTableDeserializer");
-      DecisionTreeDeserializer var8 = (DecisionTreeDeserializer)var1.getBean("urule.decisionTreeDeserializer");
-      ScorecardDeserializer var9 = (ScorecardDeserializer)var1.getBean("urule.scorecardDeserializer");
-      ComplexScorecardDeserializer var10 = (ComplexScorecardDeserializer)var1.getBean("urule.complexScorecardDeserializer");
-      CrosstableDeserializer var11 = (CrosstableDeserializer)var1.getBean("urule.crosstableDeserializer");
-      ConditionTemplateDeserializer var12 = (ConditionTemplateDeserializer)var1.getBean("urule.conditionTemplateDeserializer");
-      ActionTemplateDeserializer var13 = (ActionTemplateDeserializer)var1.getBean("urule.actionTemplateDeserializer");
-      FlowDeserializer var14 = (FlowDeserializer)var1.getBean("urule.flowDeserializer");
-      this.a.add(var2);
-      this.a.add(var3);
-      this.a.add(var5);
-      this.a.add(var6);
-      this.a.add(var7);
-      this.a.add(var8);
-      this.a.add(var4);
-      this.a.add(var9);
-      this.a.add(var10);
-      this.a.add(var11);
-      this.a.add(var12);
-      this.a.add(var13);
-      this.a.add(var14);
+      this.deserializers = new ArrayList();
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      ActionLibraryDeserializer actionLibraryDeserializer = (ActionLibraryDeserializer)applicationContext.getBean("urule.actionLibraryDeserializer");
+      VariableLibraryDeserializer variableLibraryDeserializer = (VariableLibraryDeserializer)applicationContext.getBean("urule.variableLibraryDeserializer");
+      ParameterLibraryDeserializer parameterLibraryDeserializer = (ParameterLibraryDeserializer)applicationContext.getBean("urule.parameterLibraryDeserializer");
+      ConstantLibraryDeserializer constantLibraryDeserializer = (ConstantLibraryDeserializer)applicationContext.getBean("urule.constantLibraryDeserializer");
+      RuleSetDeserializer ruleSetDeserializer = (RuleSetDeserializer)applicationContext.getBean("urule.ruleSetDeserializer");
+      DecisionTableDeserializer decisionTableDeserializer = (DecisionTableDeserializer)applicationContext.getBean("urule.decisionTableDeserializer");
+      DecisionTreeDeserializer decisionTreeDeserializer = (DecisionTreeDeserializer)applicationContext.getBean("urule.decisionTreeDeserializer");
+      ScorecardDeserializer scorecardDeserializer = (ScorecardDeserializer)applicationContext.getBean("urule.scorecardDeserializer");
+      ComplexScorecardDeserializer complexScorecardDeserializer = (ComplexScorecardDeserializer)applicationContext.getBean("urule.complexScorecardDeserializer");
+      CrosstableDeserializer crosstableDeserializer = (CrosstableDeserializer)applicationContext.getBean("urule.crosstableDeserializer");
+      ConditionTemplateDeserializer conditionTemplateDeserializer = (ConditionTemplateDeserializer)applicationContext.getBean("urule.conditionTemplateDeserializer");
+      ActionTemplateDeserializer actionTemplateDeserializer = (ActionTemplateDeserializer)applicationContext.getBean("urule.actionTemplateDeserializer");
+      FlowDeserializer flowDeserializer = (FlowDeserializer)applicationContext.getBean("urule.flowDeserializer");
+      this.deserializers.add(actionLibraryDeserializer);
+      this.deserializers.add(variableLibraryDeserializer);
+      this.deserializers.add(constantLibraryDeserializer);
+      this.deserializers.add(ruleSetDeserializer);
+      this.deserializers.add(decisionTableDeserializer);
+      this.deserializers.add(decisionTreeDeserializer);
+      this.deserializers.add(parameterLibraryDeserializer);
+      this.deserializers.add(scorecardDeserializer);
+      this.deserializers.add(complexScorecardDeserializer);
+      this.deserializers.add(crosstableDeserializer);
+      this.deserializers.add(conditionTemplateDeserializer);
+      this.deserializers.add(actionTemplateDeserializer);
+      this.deserializers.add(flowDeserializer);
    }
 
    public static final FileDeserializer getInstance() {
-      return FileDeserializer.Instance.a;
+      return FileDeserializer.Instance.INSTANCE;
    }
 
-   public Object deserialize(Element var1) {
+   public Object deserialize(Element element) {
       try {
-         return this.getDeserializer(var1).deserialize(var1);
-      } catch (Exception var3) {
-         if (StringUtils.isBlank(var3.getMessage())) {
-            throw new DeserializeException(var3.getClass().getName());
+         return this.getDeserializer(element).deserialize(element);
+      } catch (Exception exception) {
+         if (StringUtils.isBlank(exception.getMessage())) {
+            throw new DeserializeException(exception.getClass().getName());
          } else {
-            throw new DeserializeException(var3.getMessage());
+            throw new DeserializeException(exception.getMessage());
          }
       }
    }
 
-   public Deserializer getDeserializer(Element var1) {
-      for(Deserializer var3 : (Iterable<Deserializer>)(Iterable<?>)(this.a)) {
-         if (var3.support(var1)) {
-            return var3;
+   public Deserializer getDeserializer(Element element) {
+      for(Deserializer deserializer : (Iterable<Deserializer>)(Iterable<?>)(this.deserializers)) {
+         if (deserializer.support(element)) {
+            return deserializer;
          }
       }
 
-      throw new RuleException("Unknow element :" + var1.asXML());
+      throw new RuleException("Unknow element :" + element.asXML());
    }
 
-   public Element parseXml(String var1) throws Exception {
-      ByteArrayInputStream var2 = new ByteArrayInputStream(var1.getBytes("utf-8"));
-      XXESAXReader var3 = new XXESAXReader();
+   public Element parseXml(String content) throws Exception {
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes("utf-8"));
+      XXESAXReader xXESAXReader = new XXESAXReader();
 
       try {
-         Document var4 = ((SAXReader)var3).read(var2);
-         Element var5 = var4.getRootElement();
-         ((InputStream)var2).close();
-         return var5;
-      } catch (DocumentException var6) {
-         throw new DeserializeException(var6);
+         Document document = ((SAXReader)xXESAXReader).read(byteArrayInputStream);
+         Element rootElement = document.getRootElement();
+         ((InputStream)byteArrayInputStream).close();
+         return rootElement;
+      } catch (DocumentException documentException) {
+         throw new DeserializeException(documentException);
       }
    }
 
    private static class Instance {
-      private static FileDeserializer a = new FileDeserializer();
+      private static final FileDeserializer INSTANCE = new FileDeserializer();
    }
 }

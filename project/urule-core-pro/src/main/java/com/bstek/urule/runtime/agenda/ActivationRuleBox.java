@@ -10,98 +10,98 @@ import java.util.List;
 import java.util.Set;
 
 public class ActivationRuleBox {
-   private Context a;
-   private Set<Rule> b = new HashSet<>();
-   private Set<Rule> c = new HashSet<>();
-   private List<Activation> d = new ArrayList<>();
+   private Context context;
+   private Set<Rule> executedRules = new HashSet<>();
+   private Set<Rule> currentCycleRules = new HashSet<>();
+   private List<Activation> activations = new ArrayList<>();
 
-   public ActivationRuleBox(Context var1) {
-      this.a = var1;
+   public ActivationRuleBox(Context context) {
+      this.context = context;
    }
 
-   public void execute(AgendaFilter var1, int var2) {
-      this.c.clear();
-      List var3 = this.a();
-      int var4 = 0;
+   public void execute(AgendaFilter filter, int max) {
+      this.currentCycleRules.clear();
+      List items = this.drainActivations();
+      int number = 0;
 
-      while (var3.size() > 0) {
-         for (Activation var6 : (Iterable<Activation>)(Iterable<?>)(var3)) {
-            if (var1 == null || var1.accept(var6)) {
-               if (var4 >= var2) {
+      while (items.size() > 0) {
+         for (Activation activation : (Iterable<Activation>)(Iterable<?>)(items)) {
+            if (filter == null || filter.accept(activation)) {
+               if (number >= max) {
                   break;
                }
 
-               var6.execute(this.a);
-               var4++;
+               activation.execute(this.context);
+               number++;
             }
          }
 
-         if (var4 >= var2) {
+         if (number >= max) {
             break;
          }
 
-         var3 = this.a();
+         items = this.drainActivations();
       }
    }
 
-   private List<Activation> a() {
-      ArrayList var1 = new ArrayList(this.d.size());
-      var1.addAll(this.d);
-      this.d.clear();
-      if (var1.size() > 1) {
-         Collections.sort(var1);
+   private List<Activation> drainActivations() {
+      ArrayList items = new ArrayList(this.activations.size());
+      items.addAll(this.activations);
+      this.activations.clear();
+      if (items.size() > 1) {
+         Collections.sort(items);
       }
 
-      return var1;
+      return items;
    }
 
-   private boolean a(Rule var1, boolean var2) {
-      boolean var3 = true;
-      if (!var2 && this.b.contains(var1)) {
-         if (var1.getLoop() != null && var1.getLoop()) {
-            var3 = true;
+   private boolean canActivate(Rule rule, boolean flag) {
+      boolean flag2 = true;
+      if (!flag && this.executedRules.contains(rule)) {
+         if (rule.getLoop() != null && rule.getLoop()) {
+            flag2 = true;
          } else {
-            var3 = false;
+            flag2 = false;
          }
       }
 
-      this.a.getLogger().logAddRuleToExecuteQueue(var1, var3);
-      return var3;
+      this.context.getLogger().logAddRuleToExecuteQueue(rule, flag2);
+      return flag2;
    }
 
-   public boolean add(Activation var1, boolean var2) {
-      Rule var3 = var1.getRule();
-      this.c.add(var3);
-      if (this.a(var3, var2)) {
-         this.b.add(var3);
-         return this.d.add(var1);
+   public boolean add(Activation activation, boolean prime) {
+      Rule rule = activation.getRule();
+      this.currentCycleRules.add(rule);
+      if (this.canActivate(rule, prime)) {
+         this.executedRules.add(rule);
+         return this.activations.add(activation);
       } else {
          return false;
       }
    }
 
-   public void addElseRule(Activation var1) {
-      Rule var2 = var1.getRule();
-      if (!this.c.contains(var2)) {
-         boolean var3 = PropertyConfigurer.isEnabledActiveElseRule();
-         if (var3 || !this.b.contains(var2)) {
-            Rule var4 = var1.convertToElseRule();
-            if (!var3 && (var2.getLoop() == null || !var2.getLoop())) {
-               if (!this.b.contains(var4)) {
-                  this.b.add(var4);
-                  this.a.getLogger().logAddRuleToExecuteQueue(var4, true);
-                  this.d.add(var1);
+   public void addElseRule(Activation activation) {
+      Rule rule = activation.getRule();
+      if (!this.currentCycleRules.contains(rule)) {
+         boolean flag = PropertyConfigurer.isEnabledActiveElseRule();
+         if (flag || !this.executedRules.contains(rule)) {
+            Rule rule2 = activation.convertToElseRule();
+            if (!flag && (rule.getLoop() == null || !rule.getLoop())) {
+               if (!this.executedRules.contains(rule2)) {
+                  this.executedRules.add(rule2);
+                  this.context.getLogger().logAddRuleToExecuteQueue(rule2, true);
+                  this.activations.add(activation);
                }
             } else {
-               this.a.getLogger().logAddRuleToExecuteQueue(var4, true);
-               this.d.add(var1);
+               this.context.getLogger().logAddRuleToExecuteQueue(rule2, true);
+               this.activations.add(activation);
             }
          }
       }
    }
 
    public void clean() {
-      this.d.clear();
-      this.b.clear();
+      this.activations.clear();
+      this.executedRules.clear();
    }
 }

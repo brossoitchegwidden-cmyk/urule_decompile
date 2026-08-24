@@ -38,252 +38,252 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class BatchRunHelper {
-   static final Log a = LogFactory.getLog(StmtUtils.class);
-   private static BatchService b = new BatchTranService();
-   private static BatchService c = new PageTranService();
-   private static BatchService d = new RecordTranService();
-   private static BatchService e = new HiveTranService();
-   private static BatchService f = new HiveBatchTranService();
-   private static BatchService g = new BasicBatchService();
+   static final Log logger = LogFactory.getLog(StmtUtils.class);
+   private static BatchService batchTranService = new BatchTranService();
+   private static BatchService pageTranService = new PageTranService();
+   private static BatchService recordTranService = new RecordTranService();
+   private static BatchService hiveTranService = new HiveTranService();
+   private static BatchService hiveBatchTranService = new HiveBatchTranService();
+   private static BatchService basicBatchService = new BasicBatchService();
 
-   protected static BatchService a(Long var0) {
-      List var1 = ResolverManager.ins.createQuery().batchId(var0).list();
-      if (var1.size() > 0) {
-         BatchDataResolver var3 = (BatchDataResolver)ResolverManager.ins.createQuery().batchId(var0).list().get(0);
-         return a(var3);
+   protected static BatchService getBatchService(Long batchId) {
+      List items = ResolverManager.ins.createQuery().batchId(batchId).list();
+      if (items.size() > 0) {
+         BatchDataResolver batchDataResolver = (BatchDataResolver)ResolverManager.ins.createQuery().batchId(batchId).list().get(0);
+         return resolveBatchService(batchDataResolver);
       } else {
-         BatchDataResolver var2 = new BatchDataResolver();
-         var2.setTranScope(TranScope.page);
-         return a(var2);
+         BatchDataResolver batchDataResolver2 = new BatchDataResolver();
+         batchDataResolver2.setTranScope(TranScope.page);
+         return resolveBatchService(batchDataResolver2);
       }
    }
 
-   private static BatchService a(BatchDataResolver var0) {
-      BatchService var1 = null;
-      if (TranScope.batch == var0.getTranScope()) {
-         var1 = b;
-      } else if (TranScope.page == var0.getTranScope()) {
-         var1 = c;
-      } else if (TranScope.record == var0.getTranScope()) {
-         var1 = d;
-      } else if (TranScope.hive == var0.getTranScope()) {
-         var1 = f;
+   private static BatchService resolveBatchService(BatchDataResolver batchDataResolver) {
+      BatchService batchService = null;
+      if (TranScope.batch == batchDataResolver.getTranScope()) {
+         batchService = BatchRunHelper.batchTranService;
+      } else if (TranScope.page == batchDataResolver.getTranScope()) {
+         batchService = BatchRunHelper.pageTranService;
+      } else if (TranScope.record == batchDataResolver.getTranScope()) {
+         batchService = BatchRunHelper.recordTranService;
+      } else if (TranScope.hive == batchDataResolver.getTranScope()) {
+         batchService = BatchRunHelper.hiveBatchTranService;
       } else {
-         var1 = c;
+         batchService = BatchRunHelper.pageTranService;
       }
 
-      return var1;
+      return batchService;
    }
 
-   protected static BatchService a(Batch var0) {
-      BatchDataResolver var1 = var0.getDataResolver();
-      if (var0.isThreadMulti()) {
-         return a(var1);
+   protected static BatchService getBatchService(Batch batch) {
+      BatchDataResolver dataResolver = batch.getDataResolver();
+      if (batch.isThreadMulti()) {
+         return resolveBatchService(dataResolver);
       } else {
-         return TranScope.hive == var1.getTranScope() ? e : g;
+         return TranScope.hive == dataResolver.getTranScope() ? BatchRunHelper.hiveTranService : BatchRunHelper.basicBatchService;
       }
    }
 
-   protected static void a(BatchContext var0) {
-      BatchListener var1 = b(var0.getBatch());
-      BatchResult var2 = var0.getResult();
-      Batch var3 = var0.getBatch();
+   protected static void run(BatchContext batchContext) {
+      BatchListener batchListener = resolveBatchListener(batchContext.getBatch());
+      BatchResult batchResult = batchContext.getResult();
+      Batch batch = batchContext.getBatch();
 
       try {
-         c(var0);
-         var3.setStatus(BatchStatus.started);
-         Connection var4 = JdbcUtils.getConnection();
+         processBatchContext(batchContext);
+         batch.setStatus(BatchStatus.started);
+         Connection connection = JdbcUtils.getConnection();
 
          try {
-            var4.setAutoCommit(false);
-            BatchLogManager.ins.add(var0.getBatchLog());
-            BatchManager.ins.updateStatus(var3.getId(), BatchStatus.started);
-            var4.commit();
-         } catch (Exception var22) {
-            var4.rollback();
-            throw var22;
+            connection.setAutoCommit(false);
+            BatchLogManager.ins.add(batchContext.getBatchLog());
+            BatchManager.ins.updateStatus(batch.getId(), BatchStatus.started);
+            connection.commit();
+         } catch (Exception exception) {
+            connection.rollback();
+            throw exception;
          } finally {
-            var4.setAutoCommit(true);
-            JdbcUtils.closeConnection(var4);
+            connection.setAutoCommit(true);
+            JdbcUtils.closeConnection(connection);
          }
 
-         var1.beforeExecute(var0);
-         BatchService var5 = a(var0.getBatch());
-         var5.execute(var0);
-         var1.beforeExecute(var0);
-         if (var2.getStatus() != BatchStatus.stop) {
-            if (var3.getSkipLimit() > 0) {
-               if (var3.getSkipLimit() < var2.getExceptions().size()) {
+         batchListener.beforeExecute(batchContext);
+         BatchService batchService = getBatchService(batchContext.getBatch());
+         batchService.execute(batchContext);
+         batchListener.beforeExecute(batchContext);
+         if (batchResult.getStatus() != BatchStatus.stop) {
+            if (batch.getSkipLimit() > 0) {
+               if (batch.getSkipLimit() < batchResult.getExceptions().size()) {
                   throw new Exception("异常数量超过默认约定数量");
                }
 
-               var2.setStatus(BatchStatus.completed);
-               var2.setMsg("OK");
-               var3.setStatus(BatchStatus.completed);
-            } else if (var2.getStatus() == BatchStatus.failed) {
-               var3.setStatus(BatchStatus.failed);
+               batchResult.setStatus(BatchStatus.completed);
+               batchResult.setMsg("OK");
+               batch.setStatus(BatchStatus.completed);
+            } else if (batchResult.getStatus() == BatchStatus.failed) {
+               batch.setStatus(BatchStatus.failed);
             } else {
-               var2.setStatus(BatchStatus.completed);
-               var2.setMsg("OK");
+               batchResult.setStatus(BatchStatus.completed);
+               batchResult.setMsg("OK");
             }
          } else {
-            var3.setStatus(BatchStatus.stop);
+            batch.setStatus(BatchStatus.stop);
          }
 
-         if (var3.getStatus() == BatchStatus.started) {
-            var3.setStatus(BatchStatus.completed);
+         if (batch.getStatus() == BatchStatus.started) {
+            batch.setStatus(BatchStatus.completed);
          }
-      } catch (Exception var24) {
-         var2.setStatus(BatchStatus.failed);
-         var3.setStatus(BatchStatus.failed);
-         var2.setException(var24);
+      } catch (Exception exception2) {
+         batchResult.setStatus(BatchStatus.failed);
+         batch.setStatus(BatchStatus.failed);
+         batchResult.setException(exception2);
       } finally {
-         var2.setEndTime(new Date());
-         if (BatchStatus.started.name().equalsIgnoreCase(var2.getMsg())) {
-            var2.setMsg("OK");
+         batchResult.setEndTime(new Date());
+         if (BatchStatus.started.name().equalsIgnoreCase(batchResult.getMsg())) {
+            batchResult.setMsg("OK");
          }
 
-         a.debug("execute batch 【" + var0.getBatch().getName() + "】completed. BatchStatus:" + var2.getStatus());
+         BatchRunHelper.logger.debug("execute batch 【" + batchContext.getBatch().getName() + "】completed. BatchStatus:" + batchResult.getStatus());
 
          try {
-            b(var0);
-            var1.onExecute(var0);
-         } catch (Exception var21) {
-            var21.printStackTrace();
+            persistBatchResult(batchContext);
+            batchListener.onExecute(batchContext);
+         } catch (Exception exception3) {
+            java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception3.getMessage(), exception3);
          }
 
       }
 
    }
 
-   private static void b(BatchContext var0) {
-      BatchResult var1 = var0.getResult();
-      BatchLog var2 = var0.getBatchLog();
+   private static void persistBatchResult(BatchContext batchContext) {
+      BatchResult batchResult = batchContext.getResult();
+      BatchLog batchLog = batchContext.getBatchLog();
 
       try {
-         if (var1.getEndTime() != null) {
-            var2.setEndTime(var1.getEndTime());
-            var2.setTime(var1.getEndTime().getTime() - var1.getStartTime().getTime());
+         if (batchResult.getEndTime() != null) {
+            batchLog.setEndTime(batchResult.getEndTime());
+            batchLog.setTime(batchResult.getEndTime().getTime() - batchResult.getStartTime().getTime());
          }
 
-         var2.setReadCount(var1.getReadCount());
-         var2.setFilterCount(var1.getFilterCount());
-         var2.setMsg(var1.getMsg());
-         var2.setStatus(var1.getStatus());
-         ObjectMapper var3 = new ObjectMapper();
-         String var4 = null;
+         batchLog.setReadCount(batchResult.getReadCount());
+         batchLog.setFilterCount(batchResult.getFilterCount());
+         batchLog.setMsg(batchResult.getMsg());
+         batchLog.setStatus(batchResult.getStatus());
+         ObjectMapper objectMapper = new ObjectMapper();
+         String text = null;
 
          try {
-            var4 = var3.writeValueAsString(var1.getItemResults());
-         } catch (Exception var9) {
-            a.error(var9.getMessage());
-            var9.printStackTrace();
+            text = objectMapper.writeValueAsString(batchResult.getItemResults());
+         } catch (Exception exception) {
+            BatchRunHelper.logger.error(exception.getMessage());
+            java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
          }
 
-         var2.setItemData(var4);
-         if (var1.getExceptions().size() > 0) {
-            for(Exception var6 : (Iterable<Exception>)(Iterable<?>)(var1.getExceptions())) {
-               BatchSkipLog var7 = new BatchSkipLog();
-               var7.setBatchId(var0.getBatch().getId());
-               var7.setMsg(var6.getMessage());
-               var7.setDetail(var3.writeValueAsString(var6.getCause()));
+         batchLog.setItemData(text);
+         if (batchResult.getExceptions().size() > 0) {
+            for(Exception exception4 : (Iterable<Exception>)(Iterable<?>)(batchResult.getExceptions())) {
+               BatchSkipLog batchSkipLog = new BatchSkipLog();
+               batchSkipLog.setBatchId(batchContext.getBatch().getId());
+               batchSkipLog.setMsg(exception4.getMessage());
+               batchSkipLog.setDetail(objectMapper.writeValueAsString(exception4.getCause()));
 
                try {
-                  if (var6 instanceof ReaderException) {
-                     var7.setType("reader");
-                  } else if (var6 instanceof ProcessorException) {
-                     ProcessorException var8 = (ProcessorException)var6;
-                     var7.setType("processor");
-                     var7.setData(var3.writeValueAsString(var8.getData()));
-                  } else if (!(var6 instanceof WriterException) && !(var6 instanceof SqlBatchException)) {
-                     var7.setType("base");
+                  if (exception4 instanceof ReaderException) {
+                     batchSkipLog.setType("reader");
+                  } else if (exception4 instanceof ProcessorException) {
+                     ProcessorException processorException = (ProcessorException)exception4;
+                     batchSkipLog.setType("processor");
+                     batchSkipLog.setData(objectMapper.writeValueAsString(processorException.getData()));
+                  } else if (!(exception4 instanceof WriterException) && !(exception4 instanceof SqlBatchException)) {
+                     batchSkipLog.setType("base");
                   } else {
-                     var7.setType("writer");
+                     batchSkipLog.setType("writer");
                   }
 
-                  var7.setGroupId(var2.getGroupId());
-                  var7.setProjectId(var2.getProjectId());
-                  var7.setLogId(var2.getId());
-                  BatchSkipLogManager.ins.add(var7);
-               } catch (Exception var10) {
-                  var6.printStackTrace();
+                  batchSkipLog.setGroupId(batchLog.getGroupId());
+                  batchSkipLog.setProjectId(batchLog.getProjectId());
+                  batchSkipLog.setLogId(batchLog.getId());
+                  BatchSkipLogManager.ins.add(batchSkipLog);
+               } catch (Exception exception2) {
+                  java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception4.getMessage(), exception4);
                }
             }
          }
 
-         BatchManager.ins.updateStatus(var2.getBatchId(), var0.getBatch().getStatus());
-         BatchLogManager.ins.updateStatus(var2);
-      } catch (Exception var11) {
-         a.error(var11.getMessage());
-         var11.printStackTrace();
+         BatchManager.ins.updateStatus(batchLog.getBatchId(), batchContext.getBatch().getStatus());
+         BatchLogManager.ins.updateStatus(batchLog);
+      } catch (Exception exception3) {
+         BatchRunHelper.logger.error(exception3.getMessage());
+         java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception3.getMessage(), exception3);
       }
 
    }
 
-   private static void c(BatchContext var0) {
-      BatchLog var1 = var0.getBatchLog();
+   private static void processBatchContext(BatchContext batchContext) {
+      BatchLog batchLog = batchContext.getBatchLog();
 
       try {
-         BatchResult var2 = var0.getResult();
-         var1.setBatchId(var2.getBatchId());
-         var1.setBatchName(var2.getBatchName());
-         var1.setStartTime(var2.getStartTime());
-         if (var2.getEndTime() != null) {
-            var1.setEndTime(var2.getEndTime());
-            var1.setTime(var2.getEndTime().getTime() - var2.getStartTime().getTime());
+         BatchResult batchResult = batchContext.getResult();
+         batchLog.setBatchId(batchResult.getBatchId());
+         batchLog.setBatchName(batchResult.getBatchName());
+         batchLog.setStartTime(batchResult.getStartTime());
+         if (batchResult.getEndTime() != null) {
+            batchLog.setEndTime(batchResult.getEndTime());
+            batchLog.setTime(batchResult.getEndTime().getTime() - batchResult.getStartTime().getTime());
          }
 
-         Batch var3 = var0.getBatch();
-         var1.setProjectId(var3.getProjectId());
-         Project var4 = ProjectManager.ins.get(var3.getProjectId());
-         Group var5 = GroupManager.ins.get(var4.getGroupId());
-         var1.setGroupId(var5.getId());
-         var1.setGroupName(var5.getName());
-         var1.setProjectId(var3.getProjectId());
-         var1.setProjectName(var4.getName());
-         var1.setMsg(var2.getMsg());
-         var1.setStatus(var2.getStatus());
-         ObjectMapper var6 = new ObjectMapper();
-         String var7 = null;
+         Batch batch = batchContext.getBatch();
+         batchLog.setProjectId(batch.getProjectId());
+         Project project = ProjectManager.ins.get(batch.getProjectId());
+         Group group = GroupManager.ins.get(project.getGroupId());
+         batchLog.setGroupId(group.getId());
+         batchLog.setGroupName(group.getName());
+         batchLog.setProjectId(batch.getProjectId());
+         batchLog.setProjectName(project.getName());
+         batchLog.setMsg(batchResult.getMsg());
+         batchLog.setStatus(batchResult.getStatus());
+         ObjectMapper objectMapper = new ObjectMapper();
+         String text = null;
 
          try {
-            var7 = var6.writeValueAsString(var0.getParams());
-         } catch (Exception var11) {
-            a.error(var11.getMessage());
-            var11.printStackTrace();
+            text = objectMapper.writeValueAsString(batchContext.getParams());
+         } catch (Exception exception) {
+            BatchRunHelper.logger.error(exception.getMessage());
+            java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
          }
 
-         var1.setInParams(var7);
-         var1.setPacketId(var3.getPacketId());
-         String var8 = null;
+         batchLog.setInParams(text);
+         batchLog.setPacketId(batch.getPacketId());
+         String text2 = null;
 
          try {
-            var8 = var6.writeValueAsString(var3.getComplexPacketParams());
-         } catch (Exception var10) {
-            a.error(var10.getMessage());
-            var10.printStackTrace();
+            text2 = objectMapper.writeValueAsString(batch.getComplexPacketParams());
+         } catch (Exception exception2) {
+            BatchRunHelper.logger.error(exception2.getMessage());
+            java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception2.getMessage(), exception2);
          }
 
-         var1.setPacketParams(var8);
-      } catch (Exception var12) {
-         a.error(var12.getMessage());
-         var12.printStackTrace();
+         batchLog.setPacketParams(text2);
+      } catch (Exception exception3) {
+         BatchRunHelper.logger.error(exception3.getMessage());
+         java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception3.getMessage(), exception3);
       }
 
    }
 
-   private static BatchListener b(Batch var0) {
-      Object var1 = new DefaultBatchListener();
+   private static BatchListener resolveBatchListener(Batch batch) {
+      Object defaultBatchListener = new DefaultBatchListener();
 
       try {
-         if (StringUtils.isNotBlank(var0.getListener())) {
-            var1 = (BatchListener)Utils.getApplicationContext().getBean(var0.getListener());
+         if (StringUtils.isNotBlank(batch.getListener())) {
+            defaultBatchListener = (BatchListener)Utils.getApplicationContext().getBean(batch.getListener());
          }
-      } catch (Exception var3) {
-         a.error(var3.getMessage());
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         BatchRunHelper.logger.error(exception.getMessage());
+         java.util.logging.Logger.getLogger(BatchRunHelper.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
       }
 
-      return (BatchListener)var1;
+      return (BatchListener)defaultBatchListener;
    }
 }

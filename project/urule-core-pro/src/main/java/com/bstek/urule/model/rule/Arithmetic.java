@@ -7,8 +7,8 @@ public abstract class Arithmetic {
       return this.type;
    }
 
-   public void setType(ArithmeticType var1) {
-      this.type = var1;
+   public void setType(ArithmeticType type) {
+      this.type = type;
    }
 
    public abstract String getId();

@@ -14,55 +14,55 @@ public abstract class BaseReteNode extends ReteNode {
    private List<ReteNode> childrenNodes = new ArrayList<>();
    protected List<Line> lines;
 
-   public BaseReteNode(int var1) {
-      super(var1);
+   public BaseReteNode(int id) {
+      super(id);
    }
 
    public List<ReteNode> getChildrenNodes() {
       return this.childrenNodes;
    }
 
-   public void setChildrenNodes(List<ReteNode> var1) {
-      this.childrenNodes = var1;
+   public void setChildrenNodes(List<ReteNode> childrenNodes) {
+      this.childrenNodes = childrenNodes;
    }
 
-   protected boolean buildVariables(Context var1, Value var2, Map<String, Object> var3) {
+   protected boolean buildVariables(Context context, Value value, Map<String, Object> variableMap) {
       return true;
    }
 
-   protected Object fetchData(Object var1, String var2) {
+   protected Object fetchData(Object object, String property) {
       try {
-         return BeanUtils.getProperty(var1, var2);
-      } catch (Exception var4) {
-         throw new RuleException(var4);
+         return BeanUtils.getProperty(object, property);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
    }
 
-   public Line addLine(ReteNode var1) {
+   public Line addLine(ReteNode toNode) {
       if (this.childrenNodes == null) {
          this.childrenNodes = new ArrayList<>();
       }
 
-      this.childrenNodes.add(var1);
-      Line var2 = new Line(this, var1);
+      this.childrenNodes.add(toNode);
+      Line line = new Line(this, toNode);
       if (this.lines == null) {
          this.lines = new ArrayList<>();
       }
 
-      this.lines.add(var2);
-      if (var1 instanceof JunctionNode) {
-         JunctionNode var3 = (JunctionNode)var1;
-         var3.addToConnection(var2);
+      this.lines.add(line);
+      if (toNode instanceof JunctionNode) {
+         JunctionNode junctionNode = (JunctionNode)toNode;
+         junctionNode.addToConnection(line);
       }
 
-      return var2;
+      return line;
    }
 
    public List<Line> getLines() {
       return this.lines;
    }
 
-   public void setLines(List<Line> var1) {
-      this.lines = var1;
+   public void setLines(List<Line> lines) {
+      this.lines = lines;
    }
 }

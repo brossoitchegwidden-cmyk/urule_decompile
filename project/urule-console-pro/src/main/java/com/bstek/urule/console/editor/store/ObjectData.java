@@ -4,24 +4,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 class ObjectData {
-   private Map a = new HashMap();
-   private long b = System.currentTimeMillis();
+   private Map valuesByName = new HashMap();
+   private long lastAccessTime = System.currentTimeMillis();
 
-   public String getObject(String var1) {
-      return (String)this.a.get(var1);
+   public String getObject(String text) {
+      this.lastAccessTime = System.currentTimeMillis();
+      return (String)this.valuesByName.get(text);
    }
 
-   public Object removeObject(String var1) {
-      return this.a.remove(var1);
+   public Object removeObject(String text) {
+      this.lastAccessTime = System.currentTimeMillis();
+      return this.valuesByName.remove(text);
    }
 
-   public void putObject(String var1, String var2) {
-      this.a.put(var1, var2);
+   public void putObject(String text, String text2) {
+      this.lastAccessTime = System.currentTimeMillis();
+      this.valuesByName.put(text, text2);
    }
 
    public boolean overdue() {
-      long var1 = System.currentTimeMillis();
-      long var3 = (var1 - this.b) / 1000L;
-      return var3 >= 1200L;
+      long currentTime = System.currentTimeMillis();
+      long elapsedSeconds = (currentTime - this.lastAccessTime) / 1000L;
+      return elapsedSeconds >= 1200L;
    }
 }

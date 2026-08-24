@@ -8,8 +8,8 @@ public class LeftRow implements CrossRow {
       return this.rowNumber;
    }
 
-   public void setRowNumber(int var1) {
-      this.rowNumber = var1;
+   public void setRowNumber(int rowNumber) {
+      this.rowNumber = rowNumber;
    }
 
    @Override

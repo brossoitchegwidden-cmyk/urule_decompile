@@ -8,117 +8,117 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MonitorDataImpl implements MonitorData {
-   private String a;
-   private long b;
-   private String c;
-   private List<MatchedRuleLog> d = new ArrayList<>();
-   private List<RuleData> e = new ArrayList<>();
-   private List<FlowNodeLog> f = new ArrayList<>();
-   private List<Log> g = new ArrayList<>();
-   private List<IOData> h;
-   private List<IOData> i;
+   private String packageInfo;
+   private long totalDuration;
+   private String version;
+   private List<MatchedRuleLog> matchedRuleList = new ArrayList<>();
+   private List<RuleData> notMatchRuleList = new ArrayList<>();
+   private List<FlowNodeLog> firedFlowNodeList = new ArrayList<>();
+   private List<Log> logs = new ArrayList<>();
+   private List<IOData> inputData;
+   private List<IOData> outputData;
 
    @Override
    public long getTotalDuration() {
-      return this.b;
+      return this.totalDuration;
    }
 
-   public void setTotalDuration(long var1) {
-      this.b = var1;
+   public void setTotalDuration(long totalDuration) {
+      this.totalDuration = totalDuration;
    }
 
    @Override
    public List<MatchedRuleLog> getMatchedRuleList() {
-      return this.d;
+      return this.matchedRuleList;
    }
 
-   public void addMatchedRuleList(List<MatchedRuleLog> var1) {
-      this.d.addAll(var1);
+   public void addMatchedRuleList(List<MatchedRuleLog> matchedRuleList) {
+      this.matchedRuleList.addAll(matchedRuleList);
    }
 
    @Override
    public List<RuleData> getNotMatchRuleList() {
-      return this.e;
+      return this.notMatchRuleList;
    }
 
-   public void addNotMatchRuleList(List<RuleData> var1) {
-      this.e.addAll(var1);
+   public void addNotMatchRuleList(List<RuleData> notMatchRuleList) {
+      this.notMatchRuleList.addAll(notMatchRuleList);
    }
 
    @Override
    public List<FlowNodeLog> getFiredFlowNodeList() {
-      return this.f;
+      return this.firedFlowNodeList;
    }
 
-   public void addFiredFlowNodeList(List<FlowNodeLog> var1) {
-      this.f.addAll(var1);
+   public void addFiredFlowNodeList(List<FlowNodeLog> firedFlowNodeList) {
+      this.firedFlowNodeList.addAll(firedFlowNodeList);
    }
 
    @Override
    public String getPackageInfo() {
-      return this.a;
+      return this.packageInfo;
    }
 
-   public void setPackageInfo(String var1) {
-      this.a = var1;
+   public void setPackageInfo(String packageInfo) {
+      this.packageInfo = packageInfo;
    }
 
    @Override
    public List<Log> getLogs() {
-      return this.g;
+      return this.logs;
    }
 
-   public void addLogs(List<Log> var1) {
-      this.g.addAll(var1);
+   public void addLogs(List<Log> logs) {
+      this.logs.addAll(logs);
    }
 
    @Override
    public List<IOData> getInputData() {
-      return this.h;
+      return this.inputData;
    }
 
    @Override
    public List<IOData> getOutputData() {
-      return this.i;
+      return this.outputData;
    }
 
-   public void setInputData(List<IOData> var1) {
-      this.h = var1;
+   public void setInputData(List<IOData> inputData) {
+      this.inputData = inputData;
    }
 
-   public void setOutputData(List<IOData> var1) {
-      this.i = var1;
+   public void setOutputData(List<IOData> outputData) {
+      this.outputData = outputData;
    }
 
    @Override
    public String getVersion() {
-      return this.c;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.c = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    @Override
    public String toString() {
       return "MonitorDataImpl [packageInfo="
-         + this.a
+         + this.packageInfo
          + ", totalDuration="
-         + this.b
+         + this.totalDuration
          + ",version="
-         + this.c
+         + this.version
          + ", matchedRuleList="
-         + this.d
+         + this.matchedRuleList
          + ", notMatchRuleList="
-         + this.e
+         + this.notMatchRuleList
          + ", firedFlowNodeList="
-         + this.f
+         + this.firedFlowNodeList
          + ", logs="
-         + this.g
+         + this.logs
          + ", inputData="
-         + this.h
+         + this.inputData
          + ", outputData="
-         + this.i
+         + this.outputData
          + "]";
    }
 }

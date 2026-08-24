@@ -3,21 +3,21 @@ package com.bstek.urule.runtime;
 import java.math.BigDecimal;
 
 class ElCompute$DataWrapper {
-   private String b;
-   private BigDecimal c;
-   final ElCompute a;
+   private String originalText;
+   private BigDecimal decimalValue;
+   final ElCompute elCompute;
 
-   public ElCompute$DataWrapper(ElCompute var1, String var2, BigDecimal var3) {
-      this.a = var1;
-      this.b = var2;
-      this.c = var3;
+   public ElCompute$DataWrapper(ElCompute elCompute, String originalText, BigDecimal decimalValue) {
+      this.elCompute = elCompute;
+      this.originalText = originalText;
+      this.decimalValue = decimalValue;
    }
 
-   static BigDecimal a(ElCompute$DataWrapper var1) {
-      return var1.c;
+   static BigDecimal getDecimalValue(ElCompute$DataWrapper dataWrapper) {
+      return dataWrapper.decimalValue;
    }
 
-   static String b(ElCompute$DataWrapper var1) {
-      return var1.b;
+   static String getOriginalText(ElCompute$DataWrapper dataWrapper) {
+      return dataWrapper.originalText;
    }
 }

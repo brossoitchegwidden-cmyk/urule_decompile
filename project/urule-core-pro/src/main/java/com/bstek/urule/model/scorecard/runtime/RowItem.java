@@ -9,7 +9,7 @@ public interface RowItem {
 
    Object getActualScore();
 
-   void setActualScore(Object var1);
+   void setActualScore(Object actualScore);
 
    String getWeight();
 

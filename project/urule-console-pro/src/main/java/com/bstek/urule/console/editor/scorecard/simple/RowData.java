@@ -3,13 +3,13 @@ package com.bstek.urule.console.editor.scorecard.simple;
 import java.util.List;
 
 public class RowData {
-   private List a;
+   private List cells;
 
    public List getCells() {
-      return this.a;
+      return this.cells;
    }
 
-   public void setCells(List var1) {
-      this.a = var1;
+   public void setCells(List cells) {
+      this.cells = cells;
    }
 }

@@ -28,181 +28,181 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class ComplexScorecardParser extends LibrariesParser<ComplexScorecardDefinition> {
-   private RowParser a;
-   private ComplexColumnParser b;
-   private CellParser c;
-   private RulesRebuilder d;
+   private RowParser rowParser;
+   private ComplexColumnParser columnParser;
+   private CellParser cellParser;
+   private RulesRebuilder rulesRebuilder;
 
-   public ComplexScorecardDefinition parse(Element var1) {
-      ComplexScorecardDefinition var2 = new ComplexScorecardDefinition();
-      var2.setScoringType(ScoringType.valueOf(var1.attributeValue("scoring-type")));
-      var2.setScoringBean(var1.attributeValue("custom-scoring-bean"));
-      var2.setAssignTargetType(AssignTargetType.valueOf(var1.attributeValue("assign-target-type")));
-      var2.setVariableCategory(var1.attributeValue("var-category"));
-      var2.setVariableName(var1.attributeValue("var"));
-      var2.setVariableLabel(var1.attributeValue("var-label"));
-      var2.setKeyLabel(var1.attributeValue("key-label"));
-      var2.setKeyName(var1.attributeValue("key-name"));
-      var2.setKeyUuid(var1.attributeValue("key-uuid"));
-      var2.setCategoryUuid(var1.attributeValue("category-uuid"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      String var3 = var1.attributeValue("datatype");
-      if (StringUtils.isNotBlank(var3)) {
-         var2.setDatatype(Datatype.valueOf(var3));
+   public ComplexScorecardDefinition parse(Element element) {
+      ComplexScorecardDefinition complexScorecardDefinition = new ComplexScorecardDefinition();
+      complexScorecardDefinition.setScoringType(ScoringType.valueOf(element.attributeValue("scoring-type")));
+      complexScorecardDefinition.setScoringBean(element.attributeValue("custom-scoring-bean"));
+      complexScorecardDefinition.setAssignTargetType(AssignTargetType.valueOf(element.attributeValue("assign-target-type")));
+      complexScorecardDefinition.setVariableCategory(element.attributeValue("var-category"));
+      complexScorecardDefinition.setVariableName(element.attributeValue("var"));
+      complexScorecardDefinition.setVariableLabel(element.attributeValue("var-label"));
+      complexScorecardDefinition.setKeyLabel(element.attributeValue("key-label"));
+      complexScorecardDefinition.setKeyName(element.attributeValue("key-name"));
+      complexScorecardDefinition.setKeyUuid(element.attributeValue("key-uuid"));
+      complexScorecardDefinition.setCategoryUuid(element.attributeValue("category-uuid"));
+      complexScorecardDefinition.setUuid(element.attributeValue("uuid"));
+      String text = element.attributeValue("datatype");
+      if (StringUtils.isNotBlank(text)) {
+         complexScorecardDefinition.setDatatype(Datatype.valueOf(text));
       }
 
-      String var4 = var1.attributeValue("salience");
-      if (StringUtils.isNotEmpty(var4)) {
-         var2.setSalience(Integer.valueOf(var4));
+      String text2 = element.attributeValue("salience");
+      if (StringUtils.isNotEmpty(text2)) {
+         complexScorecardDefinition.setSalience(Integer.valueOf(text2));
       }
 
-      String var5 = var1.attributeValue("effective-date");
-      SimpleDateFormat var6 = new SimpleDateFormat(Configure.getDateFormat());
-      if (StringUtils.isNotEmpty(var5)) {
+      String text3 = element.attributeValue("effective-date");
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      if (StringUtils.isNotEmpty(text3)) {
          try {
-            var2.setEffectiveDate(var6.parse(var5));
-         } catch (ParseException var17) {
-            throw new RuleException(var17);
+            complexScorecardDefinition.setEffectiveDate(simpleDateFormat.parse(text3));
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       }
 
-      String var7 = var1.attributeValue("expires-date");
-      if (StringUtils.isNotEmpty(var7)) {
+      String text4 = element.attributeValue("expires-date");
+      if (StringUtils.isNotEmpty(text4)) {
          try {
-            var2.setExpiresDate(var6.parse(var7));
-         } catch (ParseException var16) {
-            throw new RuleException(var16);
+            complexScorecardDefinition.setExpiresDate(simpleDateFormat.parse(text4));
+         } catch (ParseException parseException2) {
+            throw new RuleException(parseException2);
          }
       }
 
-      String var8 = var1.attributeValue("enabled");
-      if (StringUtils.isNotEmpty(var8)) {
-         var2.setEnabled(Boolean.valueOf(var8));
+      String text5 = element.attributeValue("enabled");
+      if (StringUtils.isNotEmpty(text5)) {
+         complexScorecardDefinition.setEnabled(Boolean.valueOf(text5));
       }
 
-      String var9 = var1.attributeValue("debug");
-      if (StringUtils.isNotEmpty(var9)) {
-         var2.setDebug(Boolean.valueOf(var9));
+      String text6 = element.attributeValue("debug");
+      if (StringUtils.isNotEmpty(text6)) {
+         complexScorecardDefinition.setDebug(Boolean.valueOf(text6));
       }
 
-      for (Object var11 : var1.elements()) {
-         if (var11 != null && var11 instanceof Element) {
-            Element var12 = (Element)var11;
-            String var13 = var12.getName();
-            if (this.a.support(var13)) {
-               var2.addRow(this.a.parse(var12));
-            } else if (this.b.support(var13)) {
-               var2.addColumn(this.b.parse(var12));
-            } else if (this.c.support(var13)) {
-               var2.addCell(this.c.parse(var12));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.rowParser.support(name)) {
+               complexScorecardDefinition.addRow(this.rowParser.parse(element2));
+            } else if (this.columnParser.support(name)) {
+               complexScorecardDefinition.addColumn(this.columnParser.parse(element2));
+            } else if (this.cellParser.support(name)) {
+               complexScorecardDefinition.addCell(this.cellParser.parse(element2));
             }
 
-            Library var14 = this.a(var12);
-            if (var14 != null) {
-               var2.addLibrary(var14);
-            } else if (var13.equals("quick-test-data")) {
-               String var15 = var12.getTextTrim();
-               var2.setQuickTestData(var15);
-            } else if (var13.equals("remark")) {
-               var2.setRemark(var12.getText());
+            Library library = this.parseLibrary(element2);
+            if (library != null) {
+               complexScorecardDefinition.addLibrary(library);
+            } else if (name.equals("quick-test-data")) {
+               String textTrim = element2.getTextTrim();
+               complexScorecardDefinition.setQuickTestData(textTrim);
+            } else if (name.equals("remark")) {
+               complexScorecardDefinition.setRemark(element2.getText());
             }
          }
       }
 
-      this.a(var2);
-      return var2;
+      this.parseDefinition(complexScorecardDefinition);
+      return complexScorecardDefinition;
    }
 
-   private void a(ComplexScorecardDefinition var1) {
-      List var2 = var1.getLibraries();
-      ResourceLibrary var3 = this.d.getResourceLibraryBuilder().buildResourceLibrary(var2, var1.getPredefines());
-      if (var1.getAssignTargetType() == AssignTargetType.parameter && StringUtils.isBlank(var1.getKeyUuid())) {
-         Variable var4 = var3.getParameterByUuid(var1.getKeyUuid(), var1.getKeyName(), var1.getKeyLabel());
-         if (var4 != null && var4.getType() == Datatype.Object) {
-            var1.setKeyUuid(var4.getUuid());
+   private void parseDefinition(ComplexScorecardDefinition complexScorecardDefinition) {
+      List libraries = complexScorecardDefinition.getLibraries();
+      ResourceLibrary resourceLibrary = this.rulesRebuilder.getResourceLibraryBuilder().buildResourceLibrary(libraries, complexScorecardDefinition.getPredefines());
+      if (complexScorecardDefinition.getAssignTargetType() == AssignTargetType.parameter && StringUtils.isBlank(complexScorecardDefinition.getKeyUuid())) {
+         Variable parameterByUuid = resourceLibrary.getParameterByUuid(complexScorecardDefinition.getKeyUuid(), complexScorecardDefinition.getKeyName(), complexScorecardDefinition.getKeyLabel());
+         if (parameterByUuid != null && parameterByUuid.getType() == Datatype.Object) {
+            complexScorecardDefinition.setKeyUuid(parameterByUuid.getUuid());
          }
       }
 
-      List var11 = var1.getColumns();
-      if (var11 != null) {
-         for (ComplexColumn var6 : (Iterable<ComplexColumn>)(Iterable<?>)(var11)) {
-            ComplexColumnType var7 = var6.getType();
-            if (var7.equals(ComplexColumnType.Criteria)) {
-               VariableCategory var8 = var3.getVariableCategoryByUuid(var6.getUuid());
-               if (var8 != null) {
-                  var6.setVariableCategory(var8.getName());
+      List columns = complexScorecardDefinition.getColumns();
+      if (columns != null) {
+         for (ComplexColumn complexColumn : (Iterable<ComplexColumn>)(Iterable<?>)(columns)) {
+            ComplexColumnType type = complexColumn.getType();
+            if (type.equals(ComplexColumnType.Criteria)) {
+               VariableCategory variableCategoryByUuid = resourceLibrary.getVariableCategoryByUuid(complexColumn.getUuid());
+               if (variableCategoryByUuid != null) {
+                  complexColumn.setVariableCategory(variableCategoryByUuid.getName());
                }
             }
          }
       }
 
-      for (Cell var13 : var1.getCellMap().values()) {
-         if (var13.getAction() != null) {
-            this.d.rebuildAction(var13.getAction(), var3, false);
-         } else if (var13.getValue() != null) {
-            this.d.rebuildValue(var13.getValue(), var3, false);
-         } else if (var13.getJoint() != null && var13.getJoint() != null && var13.getJoint().getJunction() != null) {
-            List var14 = var13.getJoint().getConditions();
-            if (var14 != null) {
-               for (Condition var9 : (Iterable<Condition>)(Iterable<?>)(var14)) {
-                  Value var10 = var9.getValue();
-                  if (var10 != null) {
-                     this.d.rebuildValue(var10, var3, false);
+      for (Cell cell : complexScorecardDefinition.getCellMap().values()) {
+         if (cell.getAction() != null) {
+            this.rulesRebuilder.rebuildAction(cell.getAction(), resourceLibrary, false);
+         } else if (cell.getValue() != null) {
+            this.rulesRebuilder.rebuildValue(cell.getValue(), resourceLibrary, false);
+         } else if (cell.getJoint() != null && cell.getJoint() != null && cell.getJoint().getJunction() != null) {
+            List conditions = cell.getJoint().getConditions();
+            if (conditions != null) {
+               for (Condition condition : (Iterable<Condition>)(Iterable<?>)(conditions)) {
+                  Value localValue = condition.getValue();
+                  if (localValue != null) {
+                     this.rulesRebuilder.rebuildValue(localValue, resourceLibrary, false);
                   }
                }
             }
          }
 
-         if (var13.getUuid() != null) {
-            String var15 = this.a(var11, var13.getCol());
-            VariableData var17 = null;
-            if ("参数".equals(var15)) {
-               Variable var19 = var3.getParameterByUuid(var13.getKeyUuid(), var13.getKeyName(), var13.getKeyLabel());
-               if (var19 != null && var19.getType() == Datatype.Object) {
-                  var17 = var3.getVariableByUuid(var19.getDataType(), var13.getUuid());
-                  if (StringUtils.isBlank(var13.getKeyUuid())) {
-                     var13.setKeyUuid(var19.getUuid());
+         if (cell.getUuid() != null) {
+            String text = this.parseDefinition(columns, cell.getCol());
+            VariableData variableData = null;
+            if ("参数".equals(text)) {
+               Variable parameterByUuid2 = resourceLibrary.getParameterByUuid(cell.getKeyUuid(), cell.getKeyName(), cell.getKeyLabel());
+               if (parameterByUuid2 != null && parameterByUuid2.getType() == Datatype.Object) {
+                  variableData = resourceLibrary.getVariableByUuid(parameterByUuid2.getDataType(), cell.getUuid());
+                  if (StringUtils.isBlank(cell.getKeyUuid())) {
+                     cell.setKeyUuid(parameterByUuid2.getUuid());
                   }
                }
 
-               if (var17 == null) {
-                  var17 = var3.getVariableByName(var15, var13.getVariableName());
+               if (variableData == null) {
+                  variableData = resourceLibrary.getVariableByName(text, cell.getVariableName());
                }
 
-               if (var17 != null) {
-                  var13.setDatatype(var17.getVariable().getType());
-                  var13.setVariableLabel(var17.getVariable().getLabel());
-                  var13.setVariableName(var17.getVariable().getName());
+               if (variableData != null) {
+                  cell.setDatatype(variableData.getVariable().getType());
+                  cell.setVariableLabel(variableData.getVariable().getLabel());
+                  cell.setVariableName(variableData.getVariable().getName());
                }
             } else {
-               var17 = var3.getVariableByUuid(var15, var13.getUuid());
-               if (var17 != null) {
-                  if (var13.getKeyCategoryUuid() != null) {
-                     VariableData var20 = var3.getVariableByUuid(var13.getKeyCategoryUuid(), var13.getKeyUuid());
-                     var13.setDatatype(var20.getVariable().getType());
-                     var13.setVariableName(var20.getVariable().getName());
-                     var13.setVariableLabel(var20.getVariable().getLabel());
-                     var13.setKeyLabel(var17.getVariable().getLabel());
-                     var13.setKeyName(var17.getVariable().getName());
+               variableData = resourceLibrary.getVariableByUuid(text, cell.getUuid());
+               if (variableData != null) {
+                  if (cell.getKeyCategoryUuid() != null) {
+                     VariableData variableByUuid = resourceLibrary.getVariableByUuid(cell.getKeyCategoryUuid(), cell.getKeyUuid());
+                     cell.setDatatype(variableByUuid.getVariable().getType());
+                     cell.setVariableName(variableByUuid.getVariable().getName());
+                     cell.setVariableLabel(variableByUuid.getVariable().getLabel());
+                     cell.setKeyLabel(variableData.getVariable().getLabel());
+                     cell.setKeyName(variableData.getVariable().getName());
                   } else {
-                     var13.setDatatype(var17.getVariable().getType());
-                     var13.setVariableName(var17.getVariable().getName());
-                     var13.setVariableLabel(var17.getVariable().getLabel());
+                     cell.setDatatype(variableData.getVariable().getType());
+                     cell.setVariableName(variableData.getVariable().getName());
+                     cell.setVariableLabel(variableData.getVariable().getLabel());
                   }
                }
             }
          }
       }
 
-      Collections.sort(var1.getColumns(), new ComplexScorecardParser$1(this));
-      Collections.sort(var1.getRows(), new ComplexScorecardParser$2(this));
+      Collections.sort(complexScorecardDefinition.getColumns(), new ComplexScorecardColumnComparator());
+      Collections.sort(complexScorecardDefinition.getRows(), new ComplexScorecardRowComparator());
    }
 
-   private String a(List<ComplexColumn> var1, int var2) {
-      if (var1 != null) {
-         for (ComplexColumn var4 : var1) {
-            if (var4.getNum() == var2) {
-               return var4.getUuid();
+   private String parseDefinition(List<ComplexColumn> complexColumns, int number) {
+      if (complexColumns != null) {
+         for (ComplexColumn complexColumn : complexColumns) {
+            if (complexColumn.getNum() == number) {
+               return complexColumn.getUuid();
             }
          }
       }
@@ -211,23 +211,23 @@ public class ComplexScorecardParser extends LibrariesParser<ComplexScorecardDefi
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("complex-scorecard");
+   public boolean support(String name) {
+      return name.equals("complex-scorecard");
    }
 
-   public void setColumnParser(ComplexColumnParser var1) {
-      this.b = var1;
+   public void setColumnParser(ComplexColumnParser columnParser) {
+      this.columnParser = columnParser;
    }
 
-   public void setRowParser(RowParser var1) {
-      this.a = var1;
+   public void setRowParser(RowParser rowParser) {
+      this.rowParser = rowParser;
    }
 
-   public void setCellParser(CellParser var1) {
-      this.c = var1;
+   public void setCellParser(CellParser cellParser) {
+      this.cellParser = cellParser;
    }
 
-   public void setRulesRebuilder(RulesRebuilder var1) {
-      this.d = var1;
+   public void setRulesRebuilder(RulesRebuilder rulesRebuilder) {
+      this.rulesRebuilder = rulesRebuilder;
    }
 }

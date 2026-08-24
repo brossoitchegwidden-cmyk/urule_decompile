@@ -4,24 +4,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContextHolder {
-   private static final ThreadLocal<Map<String, Object>> a = new ThreadLocal<>();
+   private static final ThreadLocal<Map<String, Object>> CONTEXT_DATA = new ThreadLocal<>();
 
-   public static Object getData(String var0) {
-      Map var1 = a.get();
-      return var1 == null ? null : var1.get(var0);
+   public static Object getData(String key) {
+      Map contextData = CONTEXT_DATA.get();
+      return contextData == null ? null : contextData.get(key);
    }
 
-   public static void putData(String var0, Object var1) {
-      Map var2 = a.get();
-      if (var2 == null) {
-         var2 = new HashMap();
-         a.set(var2);
+   public static void putData(String key, Object value) {
+      Map contextData = CONTEXT_DATA.get();
+      if (contextData == null) {
+         contextData = new HashMap();
+         CONTEXT_DATA.set(contextData);
       }
 
-      var2.put(var0, var1);
+      contextData.put(key, value);
    }
 
    public static void clean() {
-      a.remove();
+      CONTEXT_DATA.remove();
    }
 }

@@ -9,23 +9,23 @@ public class CustomCol {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getWidth() {
       return this.width;
    }
 
-   public void setWidth(String var1) {
-      this.width = var1;
+   public void setWidth(String width) {
+      this.width = width;
    }
 
    public int getColNumber() {
       return this.colNumber;
    }
 
-   public void setColNumber(int var1) {
-      this.colNumber = var1;
+   public void setColNumber(int colNumber) {
+      this.colNumber = colNumber;
    }
 }

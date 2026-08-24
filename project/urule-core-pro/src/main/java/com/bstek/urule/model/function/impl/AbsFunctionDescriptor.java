@@ -14,33 +14,29 @@ public class AbsFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
-
    @Override
    public String getLabel() {
       return "求绝对值";
    }
-
    @Override
    public String getName() {
       return "Abs";
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      Object var4 = Utils.getObjectProperty(var1, var2);
-      BigDecimal var5 = Utils.toBigDecimal(var4);
-      return Math.abs(var5.doubleValue());
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      Object objectProperty = Utils.getObjectProperty(object, property);
+      BigDecimal decimalValue = Utils.toBigDecimal(objectProperty);
+      return Math.abs(decimalValue.doubleValue());
    }
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("对象");
-      var1.setEname("Object");
-      var1.setNeedProperty(true);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("对象");
+      argument.setEname("Object");
+      argument.setNeedProperty(true);
+      return argument;
    }
 }

@@ -11,44 +11,44 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class RhsParser implements Parser<Rhs>, ApplicationContextAware {
-   private Collection<ActionParser> a;
+   private Collection<ActionParser> actionParsers;
 
-   public Rhs parse(Element var1) {
-      Rhs var2 = new Rhs();
-      var2.setActions(this.parseActions(var1));
-      return var2;
+   public Rhs parse(Element element) {
+      Rhs rhs = new Rhs();
+      rhs.setActions(this.parseActions(element));
+      return rhs;
    }
 
-   public List<Action> parseActions(Element var1) {
-      ArrayList var2 = new ArrayList();
+   public List<Action> parseActions(Element element) {
+      ArrayList actions = new ArrayList();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            String var6 = var5.getName();
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for (ActionParser var8 : this.a) {
-               if (var8.support(var6)) {
-                  var2.add(var8.parse(var5));
+            for (ActionParser actionParser : this.actionParsers) {
+               if (actionParser.support(name)) {
+                  actions.add(actionParser.parse(element2));
                   break;
                }
             }
          }
       }
 
-      return var2;
+      return actions;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("then");
+   public boolean support(String name) {
+      return name.equals("then");
    }
 
    public Collection<ActionParser> getActionParsers() {
-      return this.a;
+      return this.actionParsers;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.a = var1.getBeansOfType(ActionParser.class).values();
+   public void setApplicationContext(ApplicationContext context) throws BeansException {
+      this.actionParsers = context.getBeansOfType(ActionParser.class).values();
    }
 }

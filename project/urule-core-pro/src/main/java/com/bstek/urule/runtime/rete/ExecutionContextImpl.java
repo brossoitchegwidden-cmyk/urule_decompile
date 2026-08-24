@@ -10,8 +10,8 @@ public class ExecutionContextImpl implements ExecutionContext {
    private Set<Criteria> currentRuleCriterias;
    private Map<String, Object> currentRuleFactMap;
 
-   public void setCurrentRuleCriterias(Set<Criteria> var1) {
-      this.currentRuleCriterias = var1;
+   public void setCurrentRuleCriterias(Set<Criteria> currentRuleCriterias) {
+      this.currentRuleCriterias = currentRuleCriterias;
    }
 
    @Override
@@ -19,8 +19,8 @@ public class ExecutionContextImpl implements ExecutionContext {
       return this.currentRuleCriterias;
    }
 
-   public void setCurrentRuleFactMap(Map<String, Object> var1) {
-      this.currentRuleFactMap = var1;
+   public void setCurrentRuleFactMap(Map<String, Object> currentRuleFactMap) {
+      this.currentRuleFactMap = currentRuleFactMap;
    }
 
    @Override
@@ -28,8 +28,8 @@ public class ExecutionContextImpl implements ExecutionContext {
       return this.currentRuleFactMap;
    }
 
-   public void setCurrentRule(Rule var1) {
-      this.currentRule = var1;
+   public void setCurrentRule(Rule currentRule) {
+      this.currentRule = currentRule;
    }
 
    @Override

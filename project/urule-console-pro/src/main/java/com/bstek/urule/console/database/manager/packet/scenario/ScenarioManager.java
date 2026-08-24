@@ -5,21 +5,21 @@ import com.bstek.urule.console.database.model.Scenario;
 public interface ScenarioManager {
    ScenarioManager ins = new ScenarioManagerImpl();
 
-   Scenario load(long var1);
+   Scenario load(long id);
 
    ScenarioQuery newQuery();
 
-   void uploadExcel(long var1, String var3, byte[] var4);
+   void uploadExcel(long id, String username, byte[] bytes);
 
-   byte[] loadExcelFile(long var1);
+   byte[] loadExcelFile(long id);
 
-   Scenario add(Scenario var1);
+   Scenario add(Scenario scenario);
 
-   void update(Scenario var1);
+   void update(Scenario scenario);
 
-   void delete(long var1);
+   void delete(long id);
 
-   void deleteByPacketId(long var1);
+   void deleteByPacketId(long packetId);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 }

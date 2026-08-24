@@ -22,23 +22,23 @@ public class RuleParserParser$RuleDefContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$AttributeContext.class);
    }
 
-   public RuleParserParser$AttributeContext attribute(int var1) {
-      return (RuleParserParser$AttributeContext)this.getRuleContext(RuleParserParser$AttributeContext.class, var1);
+   public RuleParserParser$AttributeContext attribute(int number) {
+      return (RuleParserParser$AttributeContext)this.getRuleContext(RuleParserParser$AttributeContext.class, number);
    }
 
    public RuleParserParser$OtherContext other() {
       return (RuleParserParser$OtherContext)this.getRuleContext(RuleParserParser$OtherContext.class, 0);
    }
 
-   public RuleParserParser$RuleDefContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$RuleDefContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 14;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitRuleDef(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitRuleDef(this) : parseTreeVisitor.visitChildren(this));
    }
 }

@@ -6,39 +6,39 @@ import com.bstek.urule.model.rule.lhs.CommonFunctionParameter;
 import org.dom4j.Element;
 
 public class CommonFunctionActionParser extends ActionParser {
-   public Action parse(Element var1) {
-      ExecuteCommonFunctionAction var2 = new ExecuteCommonFunctionAction();
-      var2.setLabel(var1.attributeValue("function-label"));
-      var2.setName(var1.attributeValue("function-name"));
+   public Action parse(Element element) {
+      ExecuteCommonFunctionAction executeCommonFunctionAction = new ExecuteCommonFunctionAction();
+      executeCommonFunctionAction.setLabel(element.attributeValue("function-label"));
+      executeCommonFunctionAction.setName(element.attributeValue("function-name"));
 
-      for (Object var4 : var1.elements()) {
-         if (var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("function-parameter")) {
-               CommonFunctionParameter var6 = new CommonFunctionParameter();
-               var6.setName(var5.attributeValue("name"));
-               var6.setProperty(var5.attributeValue("property-name"));
-               var6.setPropertyLabel(var5.attributeValue("property-label"));
+      for (Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("function-parameter")) {
+               CommonFunctionParameter commonFunctionParameter = new CommonFunctionParameter();
+               commonFunctionParameter.setName(element2.attributeValue("name"));
+               commonFunctionParameter.setProperty(element2.attributeValue("property-name"));
+               commonFunctionParameter.setPropertyLabel(element2.attributeValue("property-label"));
 
-               for (Object var8 : var5.elements()) {
-                  if (var8 instanceof Element) {
-                     Element var9 = (Element)var8;
-                     if (var9.getName().equals("value")) {
-                        var6.setObjectParameter(this.a.parse(var9));
+               for (Object objectValue2 : element2.elements()) {
+                  if (objectValue2 instanceof Element) {
+                     Element element3 = (Element)objectValue2;
+                     if (element3.getName().equals("value")) {
+                        commonFunctionParameter.setObjectParameter(this.valueParser.parse(element3));
                      }
                   }
                }
 
-               var2.setParameter(var6);
+               executeCommonFunctionAction.setParameter(commonFunctionParameter);
             }
          }
       }
 
-      return var2;
+      return executeCommonFunctionAction;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("execute-function");
+   public boolean support(String name) {
+      return name.equals("execute-function");
    }
 }

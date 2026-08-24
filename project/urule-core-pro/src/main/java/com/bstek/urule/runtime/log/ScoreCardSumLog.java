@@ -1,23 +1,21 @@
 package com.bstek.urule.runtime.log;
 
 public class ScoreCardSumLog extends DataLog {
-   private static final String b = "---评分卡%s,得分：%s";
-   private static final String c = "---scorecard %s, score: %s";
-   private String d;
-   private Object e;
+   private String cardName;
+   private Object value;
 
-   public ScoreCardSumLog(String var1, Object var2) {
-      this.d = var1;
-      this.e = var2;
-      String var3 = this.a() ? "---scorecard %s, score: %s" : "---评分卡%s,得分：%s";
-      this.a = String.format(var3, var1, var2);
+   public ScoreCardSumLog(String cardName, Object value) {
+      this.cardName = cardName;
+      this.value = value;
+      String text = this.isEnglishLanguage() ? "---scorecard %s, score: %s" : "---评分卡%s,得分：%s";
+      this.msg = String.format(text, cardName, value);
    }
 
    public String getCardName() {
-      return this.d;
+      return this.cardName;
    }
 
    public Object getValue() {
-      return this.e;
+      return this.value;
    }
 }

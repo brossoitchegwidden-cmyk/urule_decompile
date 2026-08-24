@@ -1,33 +1,27 @@
 package com.bstek.urule.runtime.log;
 
 public class ScoreCardLog extends DataLog {
-   private static final String b = "复杂评分卡";
-   private static final String c = "ComplexScorecard";
-   private static final String d = "执行[%s]:%s";
-   private static final String e = "execute [%s]:%s";
-   private static final String f = "执行评分卡[%s]:%s";
-   private static final String g = "execute scorecard [%s]:%s";
-   private String h;
-   private String i;
+   private String name;
+   private String path;
 
-   public ScoreCardLog(String var1, String var2) {
-      this.h = var1;
-      this.i = var2;
-      if (var2.endsWith(".scc")) {
-         this.h = this.a() ? "ComplexScorecard" : "复杂评分卡";
-         String var3 = this.a() ? "execute [%s]:%s" : "执行[%s]:%s";
-         this.a = String.format(var3, this.h, var2);
+   public ScoreCardLog(String name, String path) {
+      this.name = name;
+      this.path = path;
+      if (path.endsWith(".scc")) {
+         this.name = this.isEnglishLanguage() ? "ComplexScorecard" : "复杂评分卡";
+         String text = this.isEnglishLanguage() ? "execute [%s]:%s" : "执行[%s]:%s";
+         this.msg = String.format(text, this.name, path);
       } else {
-         String var4 = this.a() ? "execute scorecard [%s]:%s" : "执行评分卡[%s]:%s";
-         this.a = String.format(var4, this.h, var2);
+         String text2 = this.isEnglishLanguage() ? "execute scorecard [%s]:%s" : "执行评分卡[%s]:%s";
+         this.msg = String.format(text2, this.name, path);
       }
    }
 
    public String getName() {
-      return this.h;
+      return this.name;
    }
 
    public String getPath() {
-      return this.i;
+      return this.path;
    }
 }

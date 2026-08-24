@@ -16,201 +16,193 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupManagerImpl implements GroupManager {
-   public Group get(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public Group get(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
-      Group var7;
+      Group group;
       try {
-         String var3 = "SELECT ID_, NAME_, CREATE_USER_, CREATE_DATE_, DESC_ FROM URULE_GROUP  WHERE URULE_GROUP.ID_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         Group var5 = null;
-         ResultSet var6 = var4.executeQuery();
-         if (var6.next()) {
-            var5 = new Group();
-            var5.setId(var6.getString(1));
-            var5.setName(var6.getString(2));
-            var5.setCreateUser(var6.getString(3));
-            var5.setCreateDate(var6.getTimestamp(4));
-            var5.setDesc(var6.getString(5));
+         String text = "SELECT ID_, NAME_, CREATE_USER_, CREATE_DATE_, DESC_ FROM URULE_GROUP  WHERE URULE_GROUP.ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         Group group2 = null;
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            group2 = new Group();
+            group2.setId(resultSet.getString(1));
+            group2.setName(resultSet.getString(2));
+            group2.setCreateUser(resultSet.getString(3));
+            group2.setCreateDate(resultSet.getTimestamp(4));
+            group2.setDesc(resultSet.getString(5));
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var7 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         group = group2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return group;
    }
-
-   public void add(Group var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(Group group) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setCreateDate(new Timestamp(System.currentTimeMillis()));
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("insert into URULE_GROUP (ID_, NAME_, DESC_, CREATE_USER_,CREATE_DATE_) values (?, ?, ?, ?, ?)");
-         var3.setString(1, var1.getId());
-         var3.setString(2, var1.getName());
-         var3.setString(3, var1.getDesc());
-         var3.setString(4, var1.getCreateUser());
-         var3.setTimestamp(5, new Timestamp(var1.getCreateDate().getTime()));
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         group.setCreateDate(new Timestamp(System.currentTimeMillis()));
+         group.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_GROUP (ID_, NAME_, DESC_, CREATE_USER_,CREATE_DATE_) values (?, ?, ?, ?, ?)");
+         preparedStatement.setString(1, group.getId());
+         preparedStatement.setString(2, group.getName());
+         preparedStatement.setString(3, group.getDesc());
+         preparedStatement.setString(4, group.getCreateUser());
+         preparedStatement.setTimestamp(5, new Timestamp(group.getCreateDate().getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void update(Group var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(Group group) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("update URULE_GROUP set NAME_=?, DESC_=?, UPDATE_USER_=?, UPDATE_DATE_=? where ID_=?");
-         var3.setString(1, var1.getName());
-         var3.setString(2, var1.getDesc());
-         var3.setString(3, var1.getUpdateUser());
-         var3.setTimestamp(4, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setString(5, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         group.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_GROUP set NAME_=?, DESC_=?, UPDATE_USER_=?, UPDATE_DATE_=? where ID_=?");
+         preparedStatement.setString(1, group.getName());
+         preparedStatement.setString(2, group.getDesc());
+         preparedStatement.setString(3, group.getUpdateUser());
+         preparedStatement.setTimestamp(4, new Timestamp(group.getUpdateDate().getTime()));
+         preparedStatement.setString(5, group.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void remove(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void remove(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_GROUP where ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_GROUP where ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void addGroupUser(String var1, String var2, String var3) {
-      Connection var4 = JdbcUtils.getConnection();
+   public void addGroupUser(String groupId, String account, String username) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var5 = var4.prepareStatement("INSERT INTO URULE_GROUP_USER (ID_, GROUP_ID_, USER_ID_, USER_NAME_) VALUES (?, ?, ?, ?)");
-         var5.setLong(1, IDGenerator.getInstance().nextId(IDType.GROUP_USER));
-         var5.setString(2, var1);
-         var5.setString(3, var2);
-         var5.setString(4, var3);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO URULE_GROUP_USER (ID_, GROUP_ID_, USER_ID_, USER_NAME_) VALUES (?, ?, ?, ?)");
+         preparedStatement.setLong(1, IDGenerator.getInstance().nextId(IDType.GROUP_USER));
+         preparedStatement.setString(2, groupId);
+         preparedStatement.setString(3, account);
+         preparedStatement.setString(4, username);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
    public int count() {
-      int var1 = 0;
-      Connection var2 = JdbcUtils.getConnection();
+      int number = 0;
+      Connection connection = JdbcUtils.getConnection();
 
-      int var6;
+      int countResult;
       try {
-         String var3 = "SELECT count(*) GROUP_COUNT_ FROM URULE_GROUP";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         ResultSet var5 = var4.executeQuery();
-         if (var5.next()) {
-            var1 = var5.getInt(1);
+         String text = "SELECT count(*) GROUP_COUNT_ FROM URULE_GROUP";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var6 = var1;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         countResult = number;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var6;
+      return countResult;
    }
-
-   public void removeGroupUser(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void removeGroupUser(String groupId, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete FROM URULE_GROUP_USER where GROUP_ID_=? AND USER_ID_=?");
-         var4.setString(1, var1);
-         var4.setString(2, var2);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_GROUP_USER where GROUP_ID_=? AND USER_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setString(2, account);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
-      }
-
-   }
-
-   public void removeGroupUsers(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_GROUP_USER where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
-      } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public void removeGroupUsers(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List getUsers(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      ArrayList var13;
       try {
-         String var3 = "SELECT USER_ID_, CREATE_DATE_ FROM URULE_GROUP_USER  WHERE GROUP_ID_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_GROUP_USER where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
+      }
 
-         while(var6.next()) {
-            User var7 = new User();
-            var7.setId(var6.getString(1));
-            var7.setCreateDate(var6.getTimestamp(2));
-            var5.add(var7);
+   }
+   public List getUsers(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
+
+      ArrayList users;
+      try {
+         String text = "SELECT USER_ID_, CREATE_DATE_ FROM URULE_GROUP_USER  WHERE GROUP_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
+
+         while(resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getString(1));
+            user.setCreateDate(resultSet.getTimestamp(2));
+            items.add(user);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         users = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return users;
    }
 
    public GroupQuery createQuery() {
@@ -220,33 +212,32 @@ public class GroupManagerImpl implements GroupManager {
    public UserQuery createUserQuery() {
       return new UserQueryImpl();
    }
+   public User getGroupUser(String groupId, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public User getGroupUser(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
-
-      User var8;
+      User user;
       try {
-         String var4 = "SELECT USER_ID_, CREATE_DATE_ FROM URULE_GROUP_USER  WHERE GROUP_ID_=? and USER_ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setString(1, var1);
-         var5.setString(2, var2);
-         User var6 = null;
-         ResultSet var7 = var5.executeQuery();
-         if (var7.next()) {
-            var6 = new User();
-            var6.setId(var7.getString(1));
-            var6.setCreateDate(var7.getTimestamp(2));
+         String text = "SELECT USER_ID_, CREATE_DATE_ FROM URULE_GROUP_USER  WHERE GROUP_ID_=? and USER_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setString(2, account);
+         User user2 = null;
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            user2 = new User();
+            user2.setId(resultSet.getString(1));
+            user2.setCreateDate(resultSet.getTimestamp(2));
          }
 
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var5);
-         var8 = var6;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         user = user2;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var8;
+      return user;
    }
 }

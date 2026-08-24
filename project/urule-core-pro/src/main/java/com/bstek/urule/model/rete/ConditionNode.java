@@ -10,5 +10,5 @@ public interface ConditionNode {
 
    List<ReteNode> getChildrenNodes();
 
-   Line addLine(ReteNode var1);
+   Line addLine(ReteNode toNode);
 }

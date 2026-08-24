@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class JoinActivity extends AbstractActivity {
-   private List<Path> b = new ArrayList<>();
+   private List<Path> paths = new ArrayList<>();
 
-   protected boolean a(EvaluationContext var1) {
-      Set var2 = var1.getPathPassedSet();
+   protected boolean allPassed(EvaluationContext context) {
+      Set pathPassedSet = context.getPathPassedSet();
 
-      for (Path var4 : this.b) {
-         if (!var2.contains(var4.getId())) {
+      for (Path path : this.paths) {
+         if (!pathPassedSet.contains(path.getId())) {
             return false;
          }
       }
@@ -19,7 +19,7 @@ public abstract class JoinActivity extends AbstractActivity {
       return true;
    }
 
-   public void addFromPath(Path var1) {
-      this.b.add(var1);
+   public void addFromPath(Path fromPath) {
+      this.paths.add(fromPath);
    }
 }

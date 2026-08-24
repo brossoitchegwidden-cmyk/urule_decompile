@@ -7,42 +7,42 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class CriteriaParser extends CriterionParser {
-   private ValueParser a;
-   private LeftParser b;
+   private ValueParser valueParser;
+   private LeftParser leftParser;
 
-   public Criterion parse(Element var1) {
-      Criteria var2 = new Criteria();
-      String var3 = var1.attributeValue("op");
-      if (StringUtils.isNotBlank(var3)) {
-         Op var4 = Op.valueOf(var3);
-         var2.setOp(var4);
+   public Criterion parse(Element element) {
+      Criteria criteria = new Criteria();
+      String text = element.attributeValue("op");
+      if (StringUtils.isNotBlank(text)) {
+         Op op = Op.valueOf(text);
+         criteria.setOp(op);
       }
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            String var7 = var6.getName();
-            if (var7.equals("value")) {
-               var2.setValue(this.a.parse(var6));
-            } else if (var7.equals("left")) {
-               var2.setLeft(this.b.parse(var6));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (name.equals("value")) {
+               criteria.setValue(this.valueParser.parse(element2));
+            } else if (name.equals("left")) {
+               criteria.setLeft(this.leftParser.parse(element2));
             }
          }
       }
 
-      return var2;
+      return criteria;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("atom");
+   public boolean support(String name) {
+      return name.equals("atom");
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.a = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 
-   public void setLeftParser(LeftParser var1) {
-      this.b = var1;
+   public void setLeftParser(LeftParser leftParser) {
+      this.leftParser = leftParser;
    }
 }

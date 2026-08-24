@@ -6,96 +6,91 @@ import java.util.List;
 import java.util.Map;
 
 public class ReteNodeLayout {
-   private final int a = 50;
-   private final int b = 50;
-   private final int c = 30;
-   private final int d = 30;
-
-   public Box layout(NodeInfo var1) {
-      List var2 = var1.getChildren();
-      if (var2 == null) {
+   public Box layout(NodeInfo rootNode) {
+      List children = rootNode.getChildren();
+      if (children == null) {
          return null;
       } else {
-         HashMap var3 = new HashMap();
-         HashMap var4 = new HashMap();
-         this.a(var2, var4);
-         int var5 = this.a(var4) - 1;
-         int var6 = var5 * 30 + var5 * 50;
-         int var7 = var6 / 2 + 50 + 30;
-         var1.setX(var7);
-         var1.setY(5);
-         this.a(var2, var1, var4, var3);
-         Box var8 = new Box();
-         var8.setWidth(var6 + 100 + 30);
-         int var9 = var4.size() * 30 * 3 + 100;
-         var8.setHeight(var9);
-         return var8;
+         HashMap valuesByKey = new HashMap();
+         HashMap valuesByKey2 = new HashMap();
+         this.groupNodesByLevel(children, valuesByKey2);
+         int number = this.maxNodesPerLevel(valuesByKey2) - 1;
+         int number2 = number * 30 + number * 50;
+         int number3 = number2 / 2 + 50 + 30;
+         rootNode.setX(number3);
+         rootNode.setY(5);
+         this.positionNodes(children, rootNode, valuesByKey2, valuesByKey);
+         Box box = new Box();
+         box.setWidth(number2 + 100 + 30);
+         int number4 = valuesByKey2.size() * 30 * 3 + 100;
+         box.setHeight(number4);
+         return box;
       }
    }
 
-   private void a(List var1, NodeInfo var2, Map var3, Map var4) {
-      for(int var5 = 0; var5 < var1.size(); ++var5) {
-         NodeInfo var6 = (NodeInfo)var1.get(var5);
-         int var7 = var6.getLevel();
-         var6.setY(var7 * 50 + var7 * 30);
-         List var8 = var6.getChildren();
-         int var9 = 0;
-         if (var4.containsKey(var7)) {
-            var9 = (Integer)var4.get(var7);
+   private void positionNodes(List items, NodeInfo nodeInfo, Map valuesByKey, Map valuesByKey2) {
+      for(int index = 0; index < items.size(); ++index) {
+         NodeInfo nodeInfo2 = (NodeInfo)items.get(index);
+         int level = nodeInfo2.getLevel();
+         nodeInfo2.setY(level * 50 + level * 30);
+         List children = nodeInfo2.getChildren();
+         int number = 0;
+         if (valuesByKey2.containsKey(level)) {
+            number = (Integer)valuesByKey2.get(level);
          }
 
-         int var10 = var2.getX();
-         int var11 = ((List)var3.get(var7)).size();
-         if (var9 == 0) {
-            if (var11 > 1) {
-               int var12 = var11 * 30 + var11 * 50;
-               var9 = var10 - var12 / 2 - 50;
+         int number2 = nodeInfo.getX();
+         int number3 = ((List)valuesByKey.get(level)).size();
+         if (number == 0) {
+            if (number3 > 1) {
+               int number4 = number3 * 30 + number3 * 50;
+               number = number2 - number4 / 2 - 50;
             } else {
-               var9 = var10;
+               number = number2;
             }
          }
 
-         int var13 = 80 + var9;
-         if (var11 == 1) {
-            var13 = var9;
+         int number5 = 80 + number;
+         if (number3 == 1) {
+            number5 = number;
          }
 
-         var6.setX(var13);
-         var4.put(var7, var13);
-         if (var8 != null) {
-            this.a(var8, var2, var3, var4);
+         nodeInfo2.setX(number5);
+         valuesByKey2.put(level, number5);
+         if (children != null) {
+            this.positionNodes(children, nodeInfo, valuesByKey, valuesByKey2);
          }
       }
 
    }
 
-   private int a(Map var1) {
-      int var2 = 1;
+   private int maxNodesPerLevel(Map valuesByKey) {
+      int number = 1;
 
-      for(List var4 : (Iterable<List>)(Iterable<?>)(var1.values())) {
-         if (var4.size() > var2) {
-            var2 = var4.size();
+      for(List items : (Iterable<List>)(Iterable<?>)(valuesByKey.values())) {
+         if (items.size() > number) {
+            number = items.size();
          }
       }
 
-      return var2;
+      return number;
    }
 
-   private void a(List var1, Map var2) {
-      for(NodeInfo var4 : (Iterable<NodeInfo>)(Iterable<?>)(var1)) {
-         int var5 = var4.getLevel();
-         if (var2.containsKey(var5)) {
-            List var6 = (List)var2.get(var5);
-            var6.add(var4);
+   private void groupNodesByLevel(List items, Map valuesByKey) {
+      for(NodeInfo nodeInfo : (Iterable<NodeInfo>)(Iterable<?>)(items)) {
+         int level = nodeInfo.getLevel();
+         if (valuesByKey.containsKey(level)) {
+            List items2 = (List)valuesByKey.get(level);
+            items2.add(nodeInfo);
          } else {
-            ArrayList var7 = new ArrayList();
-            var7.add(var4);
-            var2.put(var5, var7);
+            ArrayList items3 = new ArrayList();
+            items3.add(nodeInfo);
+            valuesByKey.put(level, items3);
          }
 
-         List var8 = var4.getChildren();
-         if (var8 != null) {
-            this.a(var8, var2);
+         List children = nodeInfo.getChildren();
+         if (children != null) {
+            this.groupNodesByLevel(children, valuesByKey);
          }
       }
 

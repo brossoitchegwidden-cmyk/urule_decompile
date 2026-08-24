@@ -12,111 +12,111 @@ import java.util.Date;
 import java.util.List;
 
 public class FileCountQueryImpl implements FileCountQuery {
-   private Long a;
-   private Date b;
-   private Date c;
+   private Long projectId;
+   private Date date;
+   private Date updateDateEnd;
 
-   public FileCountQuery projectId(Long var1) {
-      this.a = var1;
+   public FileCountQuery projectId(Long projectId) {
+      this.projectId = projectId;
       return this;
    }
 
-   public FileCountQuery updateDateBegin(Date var1) {
-      this.b = var1;
+   public FileCountQuery updateDateBegin(Date date) {
+      this.date = date;
       return this;
    }
 
-   public FileCountQuery updateDateEnd(Date var1) {
-      this.c = var1;
+   public FileCountQuery updateDateEnd(Date date) {
+      this.updateDateEnd = date;
       return this;
    }
 
    public List getRuleCommits() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var11;
+      ArrayList ruleCommits;
       try {
-         PreparedStatement var2 = var1.prepareStatement("select ID_, UPDATE_DATE_ from URULE_FILE where PROJECT_ID_=? and UPDATE_DATE_>=? and UPDATE_DATE_<=?");
-         var2.setLong(1, this.a);
-         var2.setTimestamp(2, new Timestamp(this.b.getTime()));
-         var2.setTimestamp(3, new Timestamp(this.c.getTime()));
-         ResultSet var3 = var2.executeQuery();
-         ArrayList var4 = new ArrayList();
+         PreparedStatement preparedStatement = connection.prepareStatement("select ID_, UPDATE_DATE_ from URULE_FILE where PROJECT_ID_=? and UPDATE_DATE_>=? and UPDATE_DATE_<=?");
+         preparedStatement.setLong(1, this.projectId);
+         preparedStatement.setTimestamp(2, new Timestamp(this.date.getTime()));
+         preparedStatement.setTimestamp(3, new Timestamp(this.updateDateEnd.getTime()));
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ArrayList items = new ArrayList();
 
-         while(var3.next()) {
-            RuleFile var5 = new RuleFile();
-            var5.setId(var3.getLong(1));
-            var5.setModifyDate(var3.getTimestamp(2));
-            var4.add(var5);
+         while(resultSet.next()) {
+            RuleFile ruleFile = new RuleFile();
+            ruleFile.setId(resultSet.getLong(1));
+            ruleFile.setModifyDate(resultSet.getTimestamp(2));
+            items.add(ruleFile);
          }
 
-         JdbcUtils.closeResultSet(var3);
-         JdbcUtils.closeStatement(var2);
-         var11 = var4;
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         ruleCommits = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var11;
+      return ruleCommits;
    }
 
    public List getUserCommits() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var11;
+      ArrayList userCommits;
       try {
-         PreparedStatement var2 = var1.prepareStatement("select ID_, UPDATE_USER_, UPDATE_DATE_ from URULE_FILE where PROJECT_ID_=? and UPDATE_DATE_>=? and UPDATE_DATE_<=?");
-         var2.setLong(1, this.a);
-         var2.setTimestamp(2, new Timestamp(this.b.getTime()));
-         var2.setTimestamp(3, new Timestamp(this.c.getTime()));
-         ResultSet var3 = var2.executeQuery();
-         ArrayList var4 = new ArrayList();
+         PreparedStatement preparedStatement = connection.prepareStatement("select ID_, UPDATE_USER_, UPDATE_DATE_ from URULE_FILE where PROJECT_ID_=? and UPDATE_DATE_>=? and UPDATE_DATE_<=?");
+         preparedStatement.setLong(1, this.projectId);
+         preparedStatement.setTimestamp(2, new Timestamp(this.date.getTime()));
+         preparedStatement.setTimestamp(3, new Timestamp(this.updateDateEnd.getTime()));
+         ResultSet resultSet = preparedStatement.executeQuery();
+         ArrayList items = new ArrayList();
 
-         while(var3.next()) {
-            RuleFile var5 = new RuleFile();
-            var5.setId(var3.getLong(1));
-            var5.setUpdateUser(var3.getString(2));
-            var5.setModifyDate(var3.getDate(3));
-            var4.add(var5);
+         while(resultSet.next()) {
+            RuleFile ruleFile = new RuleFile();
+            ruleFile.setId(resultSet.getLong(1));
+            ruleFile.setUpdateUser(resultSet.getString(2));
+            ruleFile.setModifyDate(resultSet.getDate(3));
+            items.add(ruleFile);
          }
 
-         JdbcUtils.closeResultSet(var3);
-         JdbcUtils.closeStatement(var2);
-         var11 = var4;
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         userCommits = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var11;
+      return userCommits;
    }
 
    public Integer getRuleCount() {
-      int var1 = 0;
-      Connection var2 = JdbcUtils.getConnection();
+      int number = 0;
+      Connection connection = JdbcUtils.getConnection();
 
-      Integer var5;
+      Integer ruleCount;
       try {
-         PreparedStatement var3 = var2.prepareStatement("select COUNT(*) RULE_COUNT_ from URULE_FILE where PROJECT_ID_=? and DELETED_=?");
-         var3.setLong(1, this.a);
-         var3.setBoolean(2, false);
-         ResultSet var4 = var3.executeQuery();
-         if (var4.next()) {
-            var1 = var4.getInt(1);
+         PreparedStatement preparedStatement = connection.prepareStatement("select COUNT(*) RULE_COUNT_ from URULE_FILE where PROJECT_ID_=? and DELETED_=?");
+         preparedStatement.setLong(1, this.projectId);
+         preparedStatement.setBoolean(2, false);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         JdbcUtils.closeResultSet(var4);
-         JdbcUtils.closeStatement(var3);
-         var5 = var1;
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         ruleCount = number;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var5;
+      return ruleCount;
    }
 }

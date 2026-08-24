@@ -3,40 +3,40 @@ package com.bstek.urule.action;
 import com.bstek.urule.runtime.KnowledgePackageWrapper;
 
 public class InvokeFile {
-   private long a;
-   private String b;
-   private String c;
-   private KnowledgePackageWrapper d;
+   private long id;
+   private String path;
+   private String version;
+   private KnowledgePackageWrapper knowledgePackageWrapper;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public String getPath() {
-      return this.b;
+      return this.path;
    }
 
-   public void setPath(String var1) {
-      this.b = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public String getVersion() {
-      return this.c;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.c = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public KnowledgePackageWrapper getKnowledgePackageWrapper() {
-      return this.d;
+      return this.knowledgePackageWrapper;
    }
 
-   public void setKnowledgePackageWrapper(KnowledgePackageWrapper var1) {
-      this.d = var1;
+   public void setKnowledgePackageWrapper(KnowledgePackageWrapper knowledgePackageWrapper) {
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
    }
 }

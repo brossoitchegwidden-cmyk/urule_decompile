@@ -1,36 +1,36 @@
 package com.bstek.urule.builder.resource;
 
 public class Resource {
-   private long a;
-   private String b;
-   private String c;
-   private String d;
+   private long id;
+   private String path;
+   private String content;
+   private String version;
 
-   public Resource(long var1, String var3, String var4, String var5) {
-      this.a = var1;
-      this.c = var3;
-      this.b = var4;
-      this.d = var5;
+   public Resource(long id, String content, String path, String version) {
+      this.id = id;
+      this.content = content;
+      this.path = path;
+      this.version = version;
    }
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
    public String getPath() {
-      return this.b;
+      return this.path;
    }
 
    public String getContent() {
-      return this.c;
+      return this.content;
    }
 
    public String getVersion() {
-      return this.d;
+      return this.version;
    }
 
    @Override
    public String toString() {
-      return "ID:" + this.a + ", Version:" + this.d + ", Path:" + this.b;
+      return "ID:" + this.id + ", Version:" + this.version + ", Path:" + this.path;
    }
 }

@@ -1,27 +1,27 @@
 package com.bstek.urule.console;
 
 public class ContextHolder {
-   private static final ThreadLocal a = new ThreadLocal();
-   private static final ThreadLocal b = new ThreadLocal();
+   private static final ThreadLocal projectIdContext = new ThreadLocal();
+   private static final ThreadLocal groupIdContext = new ThreadLocal();
 
-   public static void setProjectId(Long var0) {
-      a.set(var0);
+   public static void setProjectId(Long projectId) {
+      ContextHolder.projectIdContext.set(projectId);
    }
 
    public static Long getProjectId() {
-      return (Long)a.get();
+      return (Long)ContextHolder.projectIdContext.get();
    }
 
-   public static void setGroupId(String var0) {
-      b.set(var0);
+   public static void setGroupId(String groupId) {
+      ContextHolder.groupIdContext.set(groupId);
    }
 
    public static String getGroupId() {
-      return (String)b.get();
+      return (String)ContextHolder.groupIdContext.get();
    }
 
    public static void clear() {
-      b.remove();
-      a.remove();
+      ContextHolder.groupIdContext.remove();
+      ContextHolder.projectIdContext.remove();
    }
 }

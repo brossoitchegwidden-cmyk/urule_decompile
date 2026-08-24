@@ -33,157 +33,154 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ReteDiagramServletHandler extends ApiServletHandler {
-   private ReteNodeLayout e = new ReteNodeLayout();
-   private final int f = 30;
-   private final int g = 30;
-
-   public void buildSingleRuleReteDiagram(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getParameter("content");
-      ResourceBase var4 = ServiceUtils.getKnowledgeBuilder().newResourceBase();
-      Resource var5 = new Resource(-1L, var3, "singlerule", (String)null);
-      var4.getResources().add(var5);
-      KnowledgeBase var6 = ServiceUtils.getKnowledgeBuilder().buildKnowledgeBase(var4);
-      Rete var7 = var6.getPredefineRete();
-      if (var7 == null) {
-         var7 = var6.getRete();
+   private ReteNodeLayout reteNodeLayout = new ReteNodeLayout();
+   public void buildSingleRuleReteDiagram(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String parameter = req.getParameter("content");
+      ResourceBase resourceBase = ServiceUtils.getKnowledgeBuilder().newResourceBase();
+      Resource resource = new Resource(-1L, parameter, "singlerule", (String)null);
+      resourceBase.getResources().add(resource);
+      KnowledgeBase knowledgeBase = ServiceUtils.getKnowledgeBuilder().buildKnowledgeBase(resourceBase);
+      Rete predefineRete = knowledgeBase.getPredefineRete();
+      if (predefineRete == null) {
+         predefineRete = knowledgeBase.getRete();
       }
 
-      Diagram var8 = this.a(var7);
-      this.a(var2, var8);
+      Diagram diagram = this.buildDiagram(predefineRete);
+      this.writeObjectToJson(resp, diagram);
    }
 
-   public void loadDiagramData(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      String var3 = var1.getParameter("files");
-      var3 = Utils.decodeURL(var3);
-      ResourceBase var4 = ServiceUtils.getKnowledgeBuilder().newResourceBase();
-      String[] var5 = var3.split(";");
-      Object var6 = null;
-      Rete var12;
-      if (StringUtils.isBlank(var3)) {
-         KnowledgePackage var7 = this.c(var1);
-         var12 = var7.getRete();
+   public void loadDiagramData(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String parameter = req.getParameter("files");
+      parameter = Utils.decodeURL(parameter);
+      ResourceBase resourceBase = ServiceUtils.getKnowledgeBuilder().newResourceBase();
+      String[] parts = parameter.split(";");
+      Object objectValue = null;
+      Rete rete;
+      if (StringUtils.isBlank(parameter)) {
+         KnowledgePackage knowledgePackage = this.resolveKnowledgePackage(req);
+         rete = knowledgePackage.getRete();
       } else {
-         for(String var10 : var5) {
-            var4.addResource(var10);
+         for(String text : parts) {
+            resourceBase.addResource(text);
          }
 
-         KnowledgeBase var14 = ServiceUtils.getKnowledgeBuilder().buildKnowledgeBase(var4);
-         var12 = var14.getRete();
+         KnowledgeBase knowledgeBase = ServiceUtils.getKnowledgeBuilder().buildKnowledgeBase(resourceBase);
+         rete = knowledgeBase.getRete();
       }
 
-      Diagram var15 = this.a(var12);
-      this.a(var2, var15);
+      Diagram diagram = this.buildDiagram(rete);
+      this.writeObjectToJson(resp, diagram);
    }
 
-   private Diagram a(Rete var1) {
-      HashMap var2 = new HashMap();
-      ArrayList var3 = new ArrayList();
-      NodeInfo var4 = new NodeInfo();
-      DiagramContext var5 = new DiagramContext(var3, var2);
-      var4.setId(var5.nextId());
-      var4.setLabel("入口");
-      var4.setColor("#98AFC7");
-      var4.setWidth(30);
-      var4.setHeight(30);
-      var4.setRoundCorner(10);
-      List var6 = var1.getObjectTypeNodes();
-      byte var7 = 1;
+   private Diagram buildDiagram(Rete rete) {
+      HashMap valuesByKey = new HashMap();
+      ArrayList items = new ArrayList();
+      NodeInfo nodeInfo = new NodeInfo();
+      DiagramContext diagramContext = new DiagramContext(items, valuesByKey);
+      nodeInfo.setId(diagramContext.nextId());
+      nodeInfo.setLabel("入口");
+      nodeInfo.setColor("#98AFC7");
+      nodeInfo.setWidth(30);
+      nodeInfo.setHeight(30);
+      nodeInfo.setRoundCorner(10);
+      List objectTypeNodes = rete.getObjectTypeNodes();
+      byte byteValue = 1;
 
-      for(ObjectTypeNode var9 : (Iterable<ObjectTypeNode>)(Iterable<?>)(var6)) {
-         NodeInfo var10 = new NodeInfo();
-         var10.setId(var5.nextId());
-         var10.setLabel("T");
-         String var11 = var9.getObjectTypeClass();
-         if (var11.equals("__*__")) {
-            var10.setTitle("否则");
+      for(ObjectTypeNode objectTypeNode : (Iterable<ObjectTypeNode>)(Iterable<?>)(objectTypeNodes)) {
+         NodeInfo nodeInfo2 = new NodeInfo();
+         nodeInfo2.setId(diagramContext.nextId());
+         nodeInfo2.setLabel("T");
+         String objectTypeClass = objectTypeNode.getObjectTypeClass();
+         if (objectTypeClass.equals("__*__")) {
+            nodeInfo2.setTitle("否则");
          } else {
-            var10.setTitle(var11);
+            nodeInfo2.setTitle(objectTypeClass);
          }
 
-         var10.setColor("#97CBFF");
-         var10.setLevel(var7);
-         var10.setWidth(30);
-         var10.setHeight(30);
-         var10.setRoundCorner(5);
-         var4.addChild(var10);
-         List var12 = var9.getLines();
-         if (var12 != null) {
-            int var13 = var7 + 1;
+         nodeInfo2.setColor("#97CBFF");
+         nodeInfo2.setLevel(byteValue);
+         nodeInfo2.setWidth(30);
+         nodeInfo2.setHeight(30);
+         nodeInfo2.setRoundCorner(5);
+         nodeInfo.addChild(nodeInfo2);
+         List lines = objectTypeNode.getLines();
+         if (lines != null) {
+            int number = byteValue + 1;
 
-            for(Line var15 : (Iterable<Line>)(Iterable<?>)(var12)) {
-               Edge var16 = new Edge(var4.getId(), var10.getId());
-               var3.add(var16);
-               this.a(var15, var5, var10, var13);
+            for(Line line : (Iterable<Line>)(Iterable<?>)(lines)) {
+               Edge edge = new Edge(nodeInfo.getId(), nodeInfo2.getId());
+               items.add(edge);
+               this.appendLineNodes(line, diagramContext, nodeInfo2, number);
             }
          }
       }
 
-      Box var17 = this.e.layout(var4);
-      Diagram var18 = new Diagram(var3, var4);
-      if (var17 != null) {
-         var18.setWidth(var17.getWidth() + 500);
-         var18.setHeight(var17.getHeight() + 300);
+      Box box = this.reteNodeLayout.layout(nodeInfo);
+      Diagram diagram = new Diagram(items, nodeInfo);
+      if (box != null) {
+         diagram.setWidth(box.getWidth() + 500);
+         diagram.setHeight(box.getHeight() + 300);
       }
 
-      return var18;
+      return diagram;
    }
 
-   private void a(Line var1, DiagramContext var2, NodeInfo var3, int var4) {
-      Node var5 = var1.getTo();
-      if (var5 != null) {
-         Map var6 = var2.getNodeMap();
-         NodeInfo var7 = null;
-         if (var6.containsKey(var5)) {
-            var7 = (NodeInfo)var6.get(var5);
-            var2.addEdge(new Edge(var3.getId(), var7.getId()));
+   private void appendLineNodes(Line line, DiagramContext diagramContext, NodeInfo nodeInfo, int number) {
+      Node to = line.getTo();
+      if (to != null) {
+         Map nodeMap = diagramContext.getNodeMap();
+         NodeInfo nodeInfo2 = null;
+         if (nodeMap.containsKey(to)) {
+            nodeInfo2 = (NodeInfo)nodeMap.get(to);
+            diagramContext.addEdge(new Edge(nodeInfo.getId(), nodeInfo2.getId()));
          } else {
-            List var8 = null;
-            var7 = new NodeInfo();
-            var7.setLevel(var4);
-            var7.setId(var2.nextId());
-            var7.setWidth(30);
-            var7.setHeight(30);
-            if (var5 instanceof CriteriaNode) {
-               CriteriaNode var9 = (CriteriaNode)var5;
-               var7.setColor("#B3D9D9");
-               var7.setLabel("C");
-               var7.setTitle(var9.getCriteriaInfo());
-               var7.setRoundCorner(30);
-               var8 = var9.getLines();
-            } else if (var5 instanceof AndNode) {
-               AndNode var14 = (AndNode)var5;
-               var8 = var14.getLines();
-               var7.setColor("#DAB1D5");
-               var7.setLabel("AND");
-               var7.setRoundCorner(15);
-            } else if (var5 instanceof OrNode) {
-               OrNode var15 = (OrNode)var5;
-               var8 = var15.getLines();
-               var7.setColor("#82D900");
-               var7.setLabel("OR");
-               var7.setRoundCorner(15);
-            } else if (var5 instanceof MetNode) {
-               MetNode var16 = (MetNode)var5;
-               var8 = var16.getLines();
-               var7.setColor("#82E888");
-               var7.setLabel("Met");
-               var7.setRoundCorner(15);
-            } else if (var5 instanceof TerminalNode) {
-               TerminalNode var17 = (TerminalNode)var5;
-               var7.setColor("orange");
-               var7.setLabel(var17.getRule().getName());
-               var7.setTitle(var17.getRule().getName());
-               var7.setRoundCorner(0);
+            List lines = null;
+            nodeInfo2 = new NodeInfo();
+            nodeInfo2.setLevel(number);
+            nodeInfo2.setId(diagramContext.nextId());
+            nodeInfo2.setWidth(30);
+            nodeInfo2.setHeight(30);
+            if (to instanceof CriteriaNode) {
+               CriteriaNode criteriaNode = (CriteriaNode)to;
+               nodeInfo2.setColor("#B3D9D9");
+               nodeInfo2.setLabel("C");
+               nodeInfo2.setTitle(criteriaNode.getCriteriaInfo());
+               nodeInfo2.setRoundCorner(30);
+               lines = criteriaNode.getLines();
+            } else if (to instanceof AndNode) {
+               AndNode andNode = (AndNode)to;
+               lines = andNode.getLines();
+               nodeInfo2.setColor("#DAB1D5");
+               nodeInfo2.setLabel("AND");
+               nodeInfo2.setRoundCorner(15);
+            } else if (to instanceof OrNode) {
+               OrNode orNode = (OrNode)to;
+               lines = orNode.getLines();
+               nodeInfo2.setColor("#82D900");
+               nodeInfo2.setLabel("OR");
+               nodeInfo2.setRoundCorner(15);
+            } else if (to instanceof MetNode) {
+               MetNode metNode = (MetNode)to;
+               lines = metNode.getLines();
+               nodeInfo2.setColor("#82E888");
+               nodeInfo2.setLabel("Met");
+               nodeInfo2.setRoundCorner(15);
+            } else if (to instanceof TerminalNode) {
+               TerminalNode terminalNode = (TerminalNode)to;
+               nodeInfo2.setColor("orange");
+               nodeInfo2.setLabel(terminalNode.getRule().getName());
+               nodeInfo2.setTitle(terminalNode.getRule().getName());
+               nodeInfo2.setRoundCorner(0);
             }
 
-            var6.put(var5, var7);
-            var3.addChild(var7);
-            var2.addEdge(new Edge(var3.getId(), var7.getId()));
-            if (var8 != null) {
-               int var18 = var4 + 1;
+            nodeMap.put(to, nodeInfo2);
+            nodeInfo.addChild(nodeInfo2);
+            diagramContext.addEdge(new Edge(nodeInfo.getId(), nodeInfo2.getId()));
+            if (lines != null) {
+               int number2 = number + 1;
 
-               for(Line var11 : (Iterable<Line>)(Iterable<?>)(var8)) {
-                  this.a(var11, var2, var7, var18);
+               for(Line line2 : (Iterable<Line>)(Iterable<?>)(lines)) {
+                  this.appendLineNodes(line2, diagramContext, nodeInfo2, number2);
                }
 
             }
@@ -191,20 +188,20 @@ public class ReteDiagramServletHandler extends ApiServletHandler {
       }
    }
 
-   private KnowledgePackage c(HttpServletRequest var1) {
-      String var2 = var1.getParameter("packetId");
-      if (StringUtils.isNotBlank(var2)) {
-         Packet var3 = PacketManager.ins.load(Long.valueOf(var2));
-         if (var3.getType().equals(PacketType.upload)) {
-            PacketPackage var4 = var3.getPacketPackage();
-            if (var4 != null && var4.getId() != 0L) {
-               String var5 = PacketPackageManager.ins.loadContent(var4.getId());
-               if (StringUtils.isBlank(var5)) {
+   private KnowledgePackage resolveKnowledgePackage(HttpServletRequest httpServletRequest) {
+      String parameter = httpServletRequest.getParameter("packetId");
+      if (StringUtils.isNotBlank(parameter)) {
+         Packet packet = PacketManager.ins.load(Long.valueOf(parameter));
+         if (packet.getType().equals(PacketType.upload)) {
+            PacketPackage packetPackage = packet.getPacketPackage();
+            if (packetPackage != null && packetPackage.getId() != 0L) {
+               String content = PacketPackageManager.ins.loadContent(packetPackage.getId());
+               if (StringUtils.isBlank(content)) {
                   throw new InfoException("请先上传知识包");
                }
 
-               KnowledgePackage var6 = Utils.stringToKnowledgePackage(var5);
-               return var6;
+               KnowledgePackage knowledgePackage = Utils.stringToKnowledgePackage(content);
+               return knowledgePackage;
             }
 
             throw new InfoException("请先上传知识包");

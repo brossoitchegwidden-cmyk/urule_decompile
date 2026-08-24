@@ -15,367 +15,353 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupRoleManagerImpl implements GroupRoleManager {
-   public List loadRoles(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public List loadRoles(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var13;
+      ArrayList roles;
       try {
-         String var3 = "select ID_, NAME_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_GROUP_ROLE WHERE GROUP_ID_=?";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setString(1, var1);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         String text = "select ID_, NAME_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_GROUP_ROLE WHERE GROUP_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            GroupRole var7 = new GroupRole();
-            var7.setId(var6.getLong(1));
-            var7.setName(var6.getString(2));
-            var7.setType(var6.getString(3));
-            var7.setCreateDate(var6.getTimestamp(4));
-            var7.setUpdateDate(var6.getTimestamp(5));
-            var5.add(var7);
+         while(resultSet.next()) {
+            GroupRole groupRole = new GroupRole();
+            groupRole.setId(resultSet.getLong(1));
+            groupRole.setName(resultSet.getString(2));
+            groupRole.setType(resultSet.getString(3));
+            groupRole.setCreateDate(resultSet.getTimestamp(4));
+            groupRole.setUpdateDate(resultSet.getTimestamp(5));
+            items.add(groupRole);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         roles = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return roles;
    }
+   public List loadUserRoles(String groupId, String account) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List loadUserRoles(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
-
-      ArrayList var14;
+      ArrayList userRoles;
       try {
-         String var4 = "select URULE_GROUP_ROLE.ID_, URULE_GROUP_ROLE.NAME_, URULE_GROUP_ROLE.TYPE_ from URULE_GROUP_ROLE  LEFT JOIN URULE_GROUP_USER_ROLE  ON URULE_GROUP_ROLE.ID_=URULE_GROUP_USER_ROLE.ROLE_ID_ WHERE URULE_GROUP_ROLE.GROUP_ID_=? AND URULE_GROUP_USER_ROLE.USER_ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setString(1, var1);
-         var5.setString(2, var2);
-         ArrayList var6 = new ArrayList();
-         ResultSet var7 = var5.executeQuery();
+         String text = "select URULE_GROUP_ROLE.ID_, URULE_GROUP_ROLE.NAME_, URULE_GROUP_ROLE.TYPE_ from URULE_GROUP_ROLE  LEFT JOIN URULE_GROUP_USER_ROLE  ON URULE_GROUP_ROLE.ID_=URULE_GROUP_USER_ROLE.ROLE_ID_ WHERE URULE_GROUP_ROLE.GROUP_ID_=? AND URULE_GROUP_USER_ROLE.USER_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setString(2, account);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var7.next()) {
-            GroupRole var8 = new GroupRole();
-            var8.setId(var7.getLong(1));
-            var8.setName(var7.getString(2));
-            var8.setType(var7.getString(3));
-            var6.add(var8);
+         while(resultSet.next()) {
+            GroupRole groupRole = new GroupRole();
+            groupRole.setId(resultSet.getLong(1));
+            groupRole.setName(resultSet.getString(2));
+            groupRole.setType(resultSet.getString(3));
+            items.add(groupRole);
          }
 
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var5);
-         var14 = var6;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         userRoles = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return userRoles;
    }
+   public List loadRoleUsers(String groupId, long roleId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public List loadRoleUsers(String var1, long var2) {
-      Connection var4 = JdbcUtils.getConnection();
-
-      ArrayList var15;
+      ArrayList roleUsers;
       try {
-         String var5 = "select URULE_GROUP_USER.USER_ID_, URULE_GROUP_USER.USER_NAME_ from URULE_GROUP_USER LEFT JOIN URULE_GROUP_USER_ROLE on URULE_GROUP_USER_ROLE.USER_ID_=URULE_GROUP_USER.USER_ID_ WHERE URULE_GROUP_USER.GROUP_ID_=? and URULE_GROUP_USER_ROLE.ROLE_ID_=?";
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setString(1, var1);
-         var6.setLong(2, var2);
-         ArrayList var7 = new ArrayList();
-         ResultSet var8 = var6.executeQuery();
+         String text = "select URULE_GROUP_USER.USER_ID_, URULE_GROUP_USER.USER_NAME_ from URULE_GROUP_USER LEFT JOIN URULE_GROUP_USER_ROLE on URULE_GROUP_USER_ROLE.USER_ID_=URULE_GROUP_USER.USER_ID_ WHERE URULE_GROUP_USER.GROUP_ID_=? and URULE_GROUP_USER_ROLE.ROLE_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setLong(2, roleId);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var8.next()) {
-            User var9 = new User();
-            var9.setId(var8.getString(1));
-            var9.setName(var8.getString(2));
-            var7.add(var9);
+         while(resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getString(1));
+            user.setName(resultSet.getString(2));
+            items.add(user);
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var6);
-         var15 = var7;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         roleUsers = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var15;
+      return roleUsers;
    }
-
-   public void add(GroupRole var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(GroupRole role) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setCreateDate(new Timestamp(System.currentTimeMillis()));
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         long var3 = IDGenerator.getInstance().nextId(IDType.GROUP_ROLE);
-         var1.setId(var3);
-         PreparedStatement var5 = var2.prepareStatement("insert into URULE_GROUP_ROLE (ID_, NAME_, TYPE_, GROUP_ID_, CREATE_USER_, CREATE_DATE_,UPDATE_DATE_) values (?, ?, ?, ?, ?, ?, ?)");
-         var5.setLong(1, var1.getId());
-         var5.setString(2, var1.getName());
-         var5.setString(3, var1.getType());
-         var5.setString(4, var1.getGroupId());
-         var5.setString(5, var1.getCreateUser());
-         var5.setTimestamp(6, new Timestamp(var1.getCreateDate().getTime()));
-         var5.setTimestamp(7, new Timestamp(var1.getUpdateDate().getTime()));
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         role.setCreateDate(new Timestamp(System.currentTimeMillis()));
+         role.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         long longValue = IDGenerator.getInstance().nextId(IDType.GROUP_ROLE);
+         role.setId(longValue);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_GROUP_ROLE (ID_, NAME_, TYPE_, GROUP_ID_, CREATE_USER_, CREATE_DATE_,UPDATE_DATE_) values (?, ?, ?, ?, ?, ?, ?)");
+         preparedStatement.setLong(1, role.getId());
+         preparedStatement.setString(2, role.getName());
+         preparedStatement.setString(3, role.getType());
+         preparedStatement.setString(4, role.getGroupId());
+         preparedStatement.setString(5, role.getCreateUser());
+         preparedStatement.setTimestamp(6, new Timestamp(role.getCreateDate().getTime()));
+         preparedStatement.setTimestamp(7, new Timestamp(role.getUpdateDate().getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
-      }
-
-   }
-
-   public void update(GroupRole var1) {
-      Connection var2 = JdbcUtils.getConnection();
-
-      try {
-         var1.setUpdateDate(new Timestamp(System.currentTimeMillis()));
-         PreparedStatement var3 = var2.prepareStatement("update URULE_GROUP_ROLE set NAME_=?, UPDATE_DATE_=? where ID_=?");
-         var3.setString(1, var1.getName());
-         var3.setTimestamp(2, new Timestamp(var1.getUpdateDate().getTime()));
-         var3.setLong(3, var1.getId());
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
-      } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void remove(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void update(GroupRole role) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_GROUP_ROLE where ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         role.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+         PreparedStatement preparedStatement = connection.prepareStatement("update URULE_GROUP_ROLE set NAME_=?, UPDATE_DATE_=? where ID_=?");
+         preparedStatement.setString(1, role.getName());
+         preparedStatement.setTimestamp(2, new Timestamp(role.getUpdateDate().getTime()));
+         preparedStatement.setLong(3, role.getId());
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public boolean checkExist(String var1, String var2) {
-      boolean var3 = false;
-      Connection var4 = JdbcUtils.getConnection();
+   public void remove(Long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var5 = var4.prepareStatement("select ID_ FROM URULE_GROUP_ROLE where GROUP_ID_=? and NAME_=?");
-         var5.setString(1, var1);
-         var5.setString(2, var2);
-         ResultSet var6 = var5.executeQuery();
-         if (var6.next()) {
-            var3 = true;
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_GROUP_ROLE where ID_=?");
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
+      }
+
+   }
+   public boolean checkExist(String groupId, String name) {
+      boolean checkExistResult = false;
+      Connection connection = JdbcUtils.getConnection();
+
+      try {
+         PreparedStatement preparedStatement = connection.prepareStatement("select ID_ FROM URULE_GROUP_ROLE where GROUP_ID_=? and NAME_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setString(2, name);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            checkExistResult = true;
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var3;
+      return checkExistResult;
    }
-
-   public void addUserRole(String var1, String var2, long var3) {
-      Connection var5 = JdbcUtils.getConnection();
+   public void addUserRole(String groupId, String userId, long roleId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         long var6 = IDGenerator.getInstance().nextId(IDType.GROUP_USER_ROLE);
-         PreparedStatement var8 = var5.prepareStatement("insert into URULE_GROUP_USER_ROLE (ID_, GROUP_ID_, USER_ID_, ROLE_ID_) values (?, ?, ?, ?)");
-         var8.setLong(1, var6);
-         var8.setString(2, var1);
-         var8.setString(3, var2);
-         var8.setLong(4, var3);
-         var8.executeUpdate();
-         JdbcUtils.closeStatement(var8);
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         long longValue = IDGenerator.getInstance().nextId(IDType.GROUP_USER_ROLE);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_GROUP_USER_ROLE (ID_, GROUP_ID_, USER_ID_, ROLE_ID_) values (?, ?, ?, ?)");
+         preparedStatement.setLong(1, longValue);
+         preparedStatement.setString(2, groupId);
+         preparedStatement.setString(3, userId);
+         preparedStatement.setLong(4, roleId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
-      }
-
-   }
-
-   public void removeUserRole(String var1, String var2, long var3) {
-      Connection var5 = JdbcUtils.getConnection();
-
-      try {
-         PreparedStatement var6 = var5.prepareStatement("delete from URULE_GROUP_USER_ROLE WHERE USER_ID_=? and ROLE_ID_=? and GROUP_ID_=?");
-         var6.setString(1, var2);
-         var6.setLong(2, var3);
-         var6.setString(3, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
-      } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public void removeUserRole(String groupId, String userId, long roleId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public GroupRole get(long var1) {
-      GroupRole var3 = null;
-      Connection var4 = JdbcUtils.getConnection();
-
-      GroupRole var8;
       try {
-         String var5 = "select ID_, NAME_, TYPE_, GROUP_ID_, CREATE_DATE_, UPDATE_DATE_ from URULE_GROUP_ROLE WHERE ID_=?";
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setLong(1, var1);
-         ResultSet var7 = var6.executeQuery();
-         if (var7.next()) {
-            var3 = new GroupRole();
-            var3.setId(var7.getLong(1));
-            var3.setName(var7.getString(2));
-            var3.setType(var7.getString(3));
-            var3.setGroupId(var7.getString(4));
-            var3.setCreateDate(var7.getTimestamp(5));
-            var3.setUpdateDate(var7.getTimestamp(6));
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_GROUP_USER_ROLE WHERE USER_ID_=? and ROLE_ID_=? and GROUP_ID_=?");
+         preparedStatement.setString(1, userId);
+         preparedStatement.setLong(2, roleId);
+         preparedStatement.setString(3, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
+      }
+
+   }
+   public GroupRole get(long roleId) {
+      GroupRole groupRole = null;
+      Connection connection = JdbcUtils.getConnection();
+
+      GroupRole getResult;
+      try {
+         String text = "select ID_, NAME_, TYPE_, GROUP_ID_, CREATE_DATE_, UPDATE_DATE_ from URULE_GROUP_ROLE WHERE ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, roleId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            groupRole = new GroupRole();
+            groupRole.setId(resultSet.getLong(1));
+            groupRole.setName(resultSet.getString(2));
+            groupRole.setType(resultSet.getString(3));
+            groupRole.setGroupId(resultSet.getString(4));
+            groupRole.setCreateDate(resultSet.getTimestamp(5));
+            groupRole.setUpdateDate(resultSet.getTimestamp(6));
          }
 
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var6);
-         var8 = var3;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         getResult = groupRole;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var8;
+      return getResult;
    }
-
-   public void removeRoleUsers(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void removeRoleUsers(long roleId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var4 = var3.prepareStatement("delete from URULE_GROUP_USER_ROLE WHERE ROLE_ID_=?");
-         var4.setLong(1, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_GROUP_USER_ROLE WHERE ROLE_ID_=?");
+         preparedStatement.setLong(1, roleId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
-      }
-
-   }
-
-   public void removeUserRoles(String var1, String var2) {
-      Connection var3 = JdbcUtils.getConnection();
-
-      try {
-         PreparedStatement var4 = var3.prepareStatement("delete from URULE_GROUP_USER_ROLE WHERE USER_ID_=? and GROUP_ID_=?");
-         var4.setString(1, var2);
-         var4.setString(2, var1);
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
-      } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
+   public void removeUserRoles(String groupId, String userId) {
+      Connection connection = JdbcUtils.getConnection();
 
-   public GroupRole get(String var1, String var2) {
-      GroupRole var3 = null;
-      Connection var4 = JdbcUtils.getConnection();
-
-      GroupRole var8;
       try {
-         String var5 = "select ID_, NAME_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_GROUP_ROLE WHERE GROUP_ID_=? and NAME_=?";
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setString(1, var1);
-         var6.setString(2, var2);
-         ResultSet var7 = var6.executeQuery();
-         if (var7.next()) {
-            var3 = new GroupRole();
-            var3.setId(var7.getLong(1));
-            var3.setName(var7.getString(2));
-            var3.setType(var7.getString(3));
-            var3.setCreateDate(var7.getTimestamp(4));
-            var3.setUpdateDate(var7.getTimestamp(5));
+         PreparedStatement preparedStatement = connection.prepareStatement("delete from URULE_GROUP_USER_ROLE WHERE USER_ID_=? and GROUP_ID_=?");
+         preparedStatement.setString(1, userId);
+         preparedStatement.setString(2, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
+      } finally {
+         JdbcUtils.closeConnection(connection);
+      }
+
+   }
+   public GroupRole get(String groupId, String name) {
+      GroupRole groupRole = null;
+      Connection connection = JdbcUtils.getConnection();
+
+      GroupRole getResult;
+      try {
+         String text = "select ID_, NAME_, TYPE_, CREATE_DATE_, UPDATE_DATE_ from URULE_GROUP_ROLE WHERE GROUP_ID_=? and NAME_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, groupId);
+         preparedStatement.setString(2, name);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            groupRole = new GroupRole();
+            groupRole.setId(resultSet.getLong(1));
+            groupRole.setName(resultSet.getString(2));
+            groupRole.setType(resultSet.getString(3));
+            groupRole.setCreateDate(resultSet.getTimestamp(4));
+            groupRole.setUpdateDate(resultSet.getTimestamp(5));
          }
 
-         JdbcUtils.closeResultSet(var7);
-         JdbcUtils.closeStatement(var6);
-         var8 = var3;
-      } catch (Exception var12) {
-         throw new RuleException(var12);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         getResult = groupRole;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var8;
+      return getResult;
    }
+   public UserRole getUserRole(String userId, long roleId) {
+      UserRole userRole = null;
+      Connection connection = JdbcUtils.getConnection();
 
-   public UserRole getUserRole(String var1, long var2) {
-      UserRole var4 = null;
-      Connection var5 = JdbcUtils.getConnection();
-
-      UserRole var9;
+      UserRole userRole2;
       try {
-         String var6 = "select ID_, ROLE_ID_, USER_ID_ from URULE_GROUP_USER_ROLE WHERE ROLE_ID_=? and USER_ID_=?";
-         PreparedStatement var7 = var5.prepareStatement(var6);
-         var7.setLong(1, var2);
-         var7.setString(2, var1);
-         ResultSet var8 = var7.executeQuery();
-         if (var8.next()) {
-            var4 = new UserRole();
-            var4.setId(var8.getLong(1));
-            var4.setRoleId(var8.getLong(2));
-            var4.setUserId(var8.getString(3));
+         String text = "select ID_, ROLE_ID_, USER_ID_ from URULE_GROUP_USER_ROLE WHERE ROLE_ID_=? and USER_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, roleId);
+         preparedStatement.setString(2, userId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            userRole = new UserRole();
+            userRole.setId(resultSet.getLong(1));
+            userRole.setRoleId(resultSet.getLong(2));
+            userRole.setUserId(resultSet.getString(3));
          }
 
-         JdbcUtils.closeResultSet(var8);
-         JdbcUtils.closeStatement(var7);
-         var9 = var4;
-      } catch (Exception var13) {
-         throw new RuleException(var13);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         userRole2 = userRole;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var9;
+      return userRole2;
    }
-
-   public void removeByGroupId(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByGroupId(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_GROUP_USER_ROLE where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         var3 = var2.prepareStatement("delete FROM URULE_GROUP_ROLE where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_GROUP_USER_ROLE where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         preparedStatement = connection.prepareStatement("delete FROM URULE_GROUP_ROLE where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

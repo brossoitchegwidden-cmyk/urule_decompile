@@ -28,98 +28,98 @@ public class ConstantLoader {
    private ConstantLoader() {
    }
 
-   public List load(String var1, long var2) {
-      Connection var4 = JdbcUtils.getConnection();
+   public List load(String groupId, long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var32;
+      ArrayList loadResult;
       try {
-         List var5 = this.a(var4, var1);
-         var5.add(var2);
-         String var6 = "select ID_,CONTENT_ from URULE_FILE where TYPE_=? and PROJECT_ID_ in (ids)";
-         StringBuilder var7 = new StringBuilder();
+         List items = this.loadCommonProjectIds(connection, groupId);
+         items.add(projectId);
+         String replacedText = "select ID_,CONTENT_ from URULE_FILE where TYPE_=? and PROJECT_ID_ in (ids)";
+         StringBuilder stringBuilder = new StringBuilder();
 
-         for(int var8 = 0; var8 < var5.size(); ++var8) {
-            if (var8 > 0) {
-               var7.append(",");
+         for(int index = 0; index < items.size(); ++index) {
+            if (index > 0) {
+               stringBuilder.append(",");
             }
 
-            var7.append("?");
+            stringBuilder.append("?");
          }
 
-         var6 = var6.replace("ids", var7.toString());
-         PreparedStatement var28 = var4.prepareStatement(var6);
-         var28.setString(1, ResourceType.ConstantLibrary.name());
+         replacedText = replacedText.replace("ids", stringBuilder.toString());
+         PreparedStatement preparedStatement = connection.prepareStatement(replacedText);
+         preparedStatement.setString(1, ResourceType.ConstantLibrary.name());
 
-         for(int var9 = 0; var9 < var5.size(); ++var9) {
-            long var10 = (Long)var5.get(var9);
-            var28.setLong(2 + var9, var10);
+         for(int index2 = 0; index2 < items.size(); ++index2) {
+            long longValue = (Long)items.get(index2);
+            preparedStatement.setLong(2 + index2, longValue);
          }
 
-         ResultSet var29 = var28.executeQuery();
-         HashMap var30 = new HashMap();
-         ArrayList var11 = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
+         HashMap valuesByKey = new HashMap();
+         ArrayList items2 = new ArrayList();
 
-         while(var29.next()) {
-            long var12 = var29.getLong(1);
-            var11.add(var12);
-            var30.put(var12, var29.getString(2));
+         while(resultSet.next()) {
+            long longValue2 = resultSet.getLong(1);
+            items2.add(longValue2);
+            valuesByKey.put(longValue2, resultSet.getString(2));
          }
 
-         ArrayList var31 = new ArrayList();
-         if (var11.size() > 0) {
-            for(RuleFile var15 : (Iterable<RuleFile>)(Iterable<?>)(this.a((List)var11))) {
-               long var16 = var15.getId();
-               String var18 = var15.getPath();
-               String var19 = (String)var30.get(var16);
-               ConstantLibrary var20 = this.a(var19);
-               ConstantInfo var21 = new ConstantInfo(var16, var18, var15.getType(), var20.getCategories());
-               var31.add(var21);
+         ArrayList items3 = new ArrayList();
+         if (items2.size() > 0) {
+            for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(this.loadRuleFilesById((List)items2))) {
+               long id = ruleFile.getId();
+               String path = ruleFile.getPath();
+               String text = (String)valuesByKey.get(id);
+               ConstantLibrary constantLibrary = this.deserializeConstantLibrary(text);
+               ConstantInfo constantInfo = new ConstantInfo(id, path, ruleFile.getType(), constantLibrary.getCategories());
+               items3.add(constantInfo);
             }
          }
 
-         JdbcUtils.closeResultSet(var29);
-         JdbcUtils.closeStatement(var28);
-         var32 = var31;
-      } catch (Exception var25) {
-         throw new RuleException(var25);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         loadResult = items3;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var32;
+      return loadResult;
    }
 
-   private ConstantLibrary a(String var1) {
-      ApplicationContext var2 = Utils.getApplicationContext();
-      ConstantLibraryDeserializer var3 = (ConstantLibraryDeserializer)var2.getBean("urule.constantLibraryDeserializer");
-      Element var4 = this.b(var1);
-      if (var3.support(var4)) {
-         return var3.deserialize(var4);
+   private ConstantLibrary deserializeConstantLibrary(String text) {
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      ConstantLibraryDeserializer constantLibraryDeserializer = (ConstantLibraryDeserializer)applicationContext.getBean("urule.constantLibraryDeserializer");
+      Element element = this.parseRootElement(text);
+      if (constantLibraryDeserializer.support(element)) {
+         return constantLibraryDeserializer.deserialize(element);
       } else {
-         throw new RuleException("Unknow content 【" + var1 + "】");
+         throw new RuleException("Unknow content 【" + text + "】");
       }
    }
 
-   private Element b(String var1) {
+   private Element parseRootElement(String text2) {
       try {
-         Document var2 = DocumentHelper.parseText(var1);
-         Element var3 = var2.getRootElement();
-         return var3;
-      } catch (DocumentException var4) {
-         throw new RuleException(var4);
+         Document text = DocumentHelper.parseText(text2);
+         Element rootElement = text.getRootElement();
+         return rootElement;
+      } catch (DocumentException documentException) {
+         throw new RuleException(documentException);
       }
    }
 
-   private List a(List var1) {
-      FileQuery var2 = FileManager.ins.newQuery();
-      var2.ids(var1);
-      return var2.list((Long)null);
+   private List loadRuleFilesById(List items) {
+      FileQuery fileQuery = FileManager.ins.newQuery();
+      fileQuery.ids(items);
+      return fileQuery.list((Long)null);
    }
 
-   private List a(Connection var1, String var2) throws Exception {
-      ProjectQueryImpl var3 = new ProjectQueryImpl();
-      var3.type("common");
-      var3.groupId(var2);
-      return var3.listIds();
+   private List loadCommonProjectIds(Connection connection, String text) throws Exception {
+      ProjectQueryImpl projectQueryImpl = new ProjectQueryImpl();
+      projectQueryImpl.type("common");
+      projectQueryImpl.groupId(text);
+      return projectQueryImpl.listIds();
    }
 }

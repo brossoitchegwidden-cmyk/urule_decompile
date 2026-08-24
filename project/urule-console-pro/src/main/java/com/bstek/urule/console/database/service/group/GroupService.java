@@ -5,15 +5,21 @@ import com.bstek.urule.console.database.model.Group;
 public interface GroupService {
    GroupService ins = new GroupServiceImpl();
 
-   Group get(String var1);
+   /**获取Group对象*/
+   Group get(String groupId);
 
-   void add(Group var1);
+   /**添加Group对象*/
+   void add(Group group);
 
-   void remove(String var1);
+   /**删除团队对象*/
+   void remove(String groupId);
 
-   void addGroupUser(String var1, String var2);
+   /**添加团队用户*/
+   void addGroupUser(String groupId, String account);
 
-   void removeGroupUser(String var1, String var2);
+   /**删除团队用户,并清理用户对应的角色配置信息*/
+   void removeGroupUser(String groupId, String account);
 
-   boolean isFreeCreate(String var1);
+   /**是否开放团队创建*/
+   boolean isFreeCreate(String account);
 }

@@ -5,24 +5,24 @@ import com.bstek.urule.action.ConsolePrintAction;
 import org.dom4j.Element;
 
 public class ConsolePrintActionParser extends ActionParser {
-   public Action parse(Element var1) {
-      ConsolePrintAction var2 = new ConsolePrintAction();
+   public Action parse(Element element) {
+      ConsolePrintAction consolePrintAction = new ConsolePrintAction();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (this.a.support(var5.getName())) {
-               var2.setValue(this.a.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               consolePrintAction.setValue(this.valueParser.parse(element2));
                break;
             }
          }
       }
 
-      return var2;
+      return consolePrintAction;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("console-print");
+   public boolean support(String name) {
+      return name.equals("console-print");
    }
 }

@@ -20,134 +20,134 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public abstract class ApiServletHandler extends BaseServletHandler {
-   protected static final String a = "/api";
+   protected static final String API_PATH_PREFIX = "/api";
 
    public boolean useApiPrefix() {
       return true;
    }
 
-   protected boolean handleUnauthenticated(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
+   protected boolean handleUnauthenticated(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
       return false;
    }
 
-   public final void execute(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      this.b(var1);
-      String var3 = var1.getContextPath() + "/urule";
-      String var4 = var1.getRequestURI();
-      String var5 = var4.substring(var3.length());
-      int var6 = var5.lastIndexOf("/");
-      String var7 = var5.substring(var6 + 1, var5.length());
-      this.a(var7, var1, var2);
+   public final void execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      this.initializeRequestContext(req);
+      String text = req.getContextPath() + "/urule";
+      String requestURI = req.getRequestURI();
+      String substring = requestURI.substring(text.length());
+      int number = substring.lastIndexOf("/");
+      String substring2 = substring.substring(number + 1, substring.length());
+      this.invokeAuthMethod(substring2, req, resp);
    }
 
-   public void info(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      StringBuilder var3 = new StringBuilder();
+   public void info(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      StringBuilder stringBuilder = new StringBuilder();
       if (StringUtils.isNotBlank(DynamicSpringConfigLoaderImpl.getAuthInfo())) {
-         var3.append("Authorized to " + DynamicSpringConfigLoaderImpl.getAuthInfo() + "（授权给【" + DynamicSpringConfigLoaderImpl.getAuthInfo() + "】使用）");
+         stringBuilder.append("Authorized to " + DynamicSpringConfigLoaderImpl.getAuthInfo() + "（授权给【" + DynamicSpringConfigLoaderImpl.getAuthInfo() + "】使用）");
       } else {
-         var3.append("You are using a trial version,please purchase the commercial license.（当前为试用版，请购买商业授权）");
+         stringBuilder.append("You are using a trial version,please purchase the commercial license.（当前为试用版，请购买商业授权）");
       }
 
-      this.a(var2, var3.toString());
+      this.writeObjectToJson(resp, stringBuilder.toString());
    }
 
-   protected void a(String var1, HttpServletRequest var2, HttpServletResponse var3) throws Exception {
-      Method var4 = this.getClass().getMethod(var1, HttpServletRequest.class, HttpServletResponse.class);
-      URuleAuthAnonymous var5 = (URuleAuthAnonymous)var4.getAnnotation(URuleAuthAnonymous.class);
-      if (var5 != null) {
-         this.a(var4, var2, var3);
-      } else if (SecurityUtils.getLoginUser(var2) == null) {
-         if (!this.handleUnauthenticated(var2, var3)) {
+   protected void invokeAuthMethod(String methodName, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Method method = this.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
+      URuleAuthAnonymous annotation = (URuleAuthAnonymous)method.getAnnotation(URuleAuthAnonymous.class);
+      if (annotation != null) {
+         this.invokeMethodTransactionally(method, req, resp);
+      } else if (SecurityUtils.getLoginUser(req) == null) {
+         if (!this.handleUnauthenticated(req, resp)) {
             throw new InfoException("请先登录<br/>Please Login first! ");
          }
       } else {
-         User var6 = SecurityUtils.getLoginUser(var2);
-         URuleAuthorization var7 = (URuleAuthorization)var4.getAnnotation(URuleAuthorization.class);
-         if (var7 != null) {
-            boolean var8 = this.a(var2, var3, var4, var6, var7);
-            if (!var8) {
+         User loginUser = SecurityUtils.getLoginUser(req);
+         URuleAuthorization uRuleAuthorization = (URuleAuthorization)method.getAnnotation(URuleAuthorization.class);
+         if (uRuleAuthorization != null) {
+            boolean flag = this.authorizeRequest(req, resp, method, loginUser, uRuleAuthorization);
+            if (!flag) {
                throw new PermissionDeniedException();
             }
 
-            this.a(var4, var2, var3);
+            this.invokeMethodTransactionally(method, req, resp);
          } else {
-            this.a(var4, var2, var3);
+            this.invokeMethodTransactionally(method, req, resp);
          }
 
       }
    }
 
-   private boolean a(HttpServletRequest var1, HttpServletResponse var2, Method var3, User var4, URuleAuthorization var5) {
-      boolean var6 = true;
-      if (!var5.ruleFile() && !var5.ruleDir()) {
-         var6 = AuthenticationManager.decide(var4, RoleCategory.valueOf(var5.authType()), var5.model(), var5.code());
+   private boolean authorizeRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Method method, User user, URuleAuthorization uRuleAuthorization) {
+      boolean flag = true;
+      if (!uRuleAuthorization.ruleFile() && !uRuleAuthorization.ruleDir()) {
+         flag = AuthenticationManager.decide(user, RoleCategory.valueOf(uRuleAuthorization.authType()), uRuleAuthorization.model(), uRuleAuthorization.code());
       } else {
-         String var7 = var1.getParameter("id");
-         String var8 = var5.code();
-         String var9 = "";
-         if ("add".equals(var8.toLowerCase())) {
-            var9 = var1.getParameter("type");
+         String parameter = httpServletRequest.getParameter("id");
+         String text = uRuleAuthorization.code();
+         String text2 = "";
+         if ("add".equals(text.toLowerCase())) {
+            text2 = httpServletRequest.getParameter("type");
          } else {
-            Object var10 = null;
-            RuleFile var13;
-            if (var5.ruleFile()) {
-               var13 = FileManager.ins.get(Long.parseLong(var7));
-               ContextHolder.setProjectId(var13.getProjectId());
+            Object objectValue = null;
+            RuleFile ruleFile;
+            if (uRuleAuthorization.ruleFile()) {
+               ruleFile = FileManager.ins.get(Long.parseLong(parameter));
+               ContextHolder.setProjectId(ruleFile.getProjectId());
             } else {
-               var13 = DirectoryManager.ins.get(Long.parseLong(var7));
-               if (var13 != null) {
-                  ContextHolder.setProjectId(var13.getProjectId());
+               ruleFile = DirectoryManager.ins.get(Long.parseLong(parameter));
+               if (ruleFile != null) {
+                  ContextHolder.setProjectId(ruleFile.getProjectId());
                }
             }
 
-            if (var13 == null) {
-               throw new RuleException("URule File Object " + var7 + " not exist.");
+            if (ruleFile == null) {
+               throw new RuleException("URule File Object " + parameter + " not exist.");
             }
 
-            var9 = var13.getType();
+            text2 = ruleFile.getType();
          }
 
-         RuleFileType var14 = RuleFileType.getRuleFileType(var9);
-         var6 = AuthenticationManager.decide(var4, RoleCategory.project, var14.getModel(), var5.code());
+         RuleFileType ruleFileType = RuleFileType.getRuleFileType(text2);
+         flag = AuthenticationManager.decide(user, RoleCategory.project, ruleFileType.getModel(), uRuleAuthorization.code());
       }
 
-      return var6;
+      return flag;
    }
 
-   protected void a(TransactionalInvoke var1) throws Exception {
-      Connection var2 = JdbcUtils.getConnection();
+   protected void doInTransactional(TransactionalInvoke invoke) throws Exception {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var2.setAutoCommit(false);
-         var1.doTransactional();
-         var2.commit();
-      } catch (Exception var7) {
-         var2.rollback();
-         throw var7;
+         connection.setAutoCommit(false);
+         invoke.doTransactional();
+         connection.commit();
+      } catch (Exception exception) {
+         connection.rollback();
+         throw exception;
       } finally {
-         var2.setAutoCommit(true);
-         JdbcUtils.closeConnection(var2);
+         connection.setAutoCommit(true);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   private void a(Method var1, HttpServletRequest var2, HttpServletResponse var3) throws Exception {
-      Transactional var4 = (Transactional)var1.getAnnotation(Transactional.class);
-      if (var4 == null) {
-         var1.invoke(this, var2, var3);
+   private void invokeMethodTransactionally(Method method, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+      Transactional annotation = (Transactional)method.getAnnotation(Transactional.class);
+      if (annotation == null) {
+         method.invoke(this, httpServletRequest, httpServletResponse);
       } else {
-         Connection var5 = JdbcUtils.getConnection();
+         Connection connection = JdbcUtils.getConnection();
 
          try {
-            var5.setAutoCommit(false);
-            var1.invoke(this, var2, var3);
-            var5.commit();
-         } catch (Exception var10) {
-            var5.rollback();
-            throw var10;
+            connection.setAutoCommit(false);
+            method.invoke(this, httpServletRequest, httpServletResponse);
+            connection.commit();
+         } catch (Exception exception) {
+            connection.rollback();
+            throw exception;
          } finally {
-            var5.setAutoCommit(true);
-            JdbcUtils.closeConnection(var5);
+            connection.setAutoCommit(true);
+            JdbcUtils.closeConnection(connection);
          }
       }
 

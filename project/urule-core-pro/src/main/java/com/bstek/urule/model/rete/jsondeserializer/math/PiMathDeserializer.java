@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class PiMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
+   public MathSign deserialize(JsonNode jsonNode) {
       return new PiMath();
    }
 

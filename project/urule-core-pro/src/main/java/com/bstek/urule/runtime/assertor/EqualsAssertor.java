@@ -9,72 +9,72 @@ import java.util.Date;
 
 public class EqualsAssertor implements Assertor {
    @Override
-   public boolean eval(Object var1, Object var2, Datatype var3) {
-      if (var1 == null && var2 == null) {
+   public boolean eval(Object left, Object right, Datatype datatype) {
+      if (left == null && right == null) {
          return true;
       }
 
-      if (var1 != null && var2 != null) {
-         BigDecimal var4 = null;
-         BigDecimal var5 = null;
-         switch (var3) {
+      if (left != null && right != null) {
+         BigDecimal decimalValue = null;
+         BigDecimal decimalValue2 = null;
+         switch (datatype) {
             case String:
-               if (var2 instanceof String) {
-                  return var1.toString().equals(var2.toString());
+               if (right instanceof String) {
+                  return left.toString().equals(right.toString());
                } else {
-                  if (var2 instanceof Number) {
+                  if (right instanceof Number) {
                      try {
-                        var4 = Utils.toBigDecimal(var1);
-                        var5 = Utils.toBigDecimal(var2);
-                        return var4.compareTo(var5) == 0;
-                     } catch (Exception var12) {
-                        return var1.toString().equals(var2.toString());
+                        decimalValue = Utils.toBigDecimal(left);
+                        decimalValue2 = Utils.toBigDecimal(right);
+                        return decimalValue.compareTo(decimalValue2) == 0;
+                     } catch (Exception exception) {
+                        return left.toString().equals(right.toString());
                      }
                   }
 
-                  return var1.toString().equals(var2.toString());
+                  return left.toString().equals(right.toString());
                }
             case Boolean:
-               return var1.toString().equals(var2.toString());
+               return left.toString().equals(right.toString());
             case Date:
-               Date var6 = (Date)var3.convert(var1);
-               Date var7 = (Date)var3.convert(var2);
-               Calendar var8 = Calendar.getInstance();
-               var8.setTime(var6);
-               Calendar var9 = Calendar.getInstance();
-               var9.setTime(var7);
-               return var8.compareTo(var9) == 0;
+               Date dateValue = (Date)datatype.convert(left);
+               Date dateValue2 = (Date)datatype.convert(right);
+               Calendar calendar = Calendar.getInstance();
+               calendar.setTime(dateValue);
+               Calendar calendar2 = Calendar.getInstance();
+               calendar2.setTime(dateValue2);
+               return calendar.compareTo(calendar2) == 0;
             case Double:
-               var4 = Utils.toBigDecimal(var1);
-               var5 = Utils.toBigDecimal(var2);
-               return var4.compareTo(var5) == 0;
+               decimalValue = Utils.toBigDecimal(left);
+               decimalValue2 = Utils.toBigDecimal(right);
+               return decimalValue.compareTo(decimalValue2) == 0;
             case Float:
-               var4 = Utils.toBigDecimal(var1);
-               var5 = Utils.toBigDecimal(var2);
-               return var4.compareTo(var5) == 0;
+               decimalValue = Utils.toBigDecimal(left);
+               decimalValue2 = Utils.toBigDecimal(right);
+               return decimalValue.compareTo(decimalValue2) == 0;
             case Integer:
-               var4 = Utils.toBigDecimal(var1);
-               var5 = Utils.toBigDecimal(var2);
-               return var4.compareTo(var5) == 0;
+               decimalValue = Utils.toBigDecimal(left);
+               decimalValue2 = Utils.toBigDecimal(right);
+               return decimalValue.compareTo(decimalValue2) == 0;
             case Long:
-               var4 = Utils.toBigDecimal(var1);
-               var5 = Utils.toBigDecimal(var2);
-               return var4.compareTo(var5) == 0;
+               decimalValue = Utils.toBigDecimal(left);
+               decimalValue2 = Utils.toBigDecimal(right);
+               return decimalValue.compareTo(decimalValue2) == 0;
             case BigDecimal:
-               var4 = Utils.toBigDecimal(var1);
-               var5 = Utils.toBigDecimal(var2);
-               return var4.compareTo(var5) == 0;
+               decimalValue = Utils.toBigDecimal(left);
+               decimalValue2 = Utils.toBigDecimal(right);
+               return decimalValue.compareTo(decimalValue2) == 0;
             case Enum:
-               Enum var10 = (Enum)var1;
-               if (var2 instanceof Enum) {
-                  Enum var25 = (Enum)var2;
-                  return var10.equals(var25);
+               Enum localValue = (Enum)left;
+               if (right instanceof Enum) {
+                  Enum localValue2 = (Enum)right;
+                  return localValue.equals(localValue2);
                }
 
-               Enum var11 = Enum.valueOf((Class<Enum>)var10.getClass(), var2.toString());
-               return var10.equals(var11);
+               Enum enumValue = Enum.valueOf((Class<Enum>)localValue.getClass(), right.toString());
+               return localValue.equals(enumValue);
             default:
-               return var2.toString().equals(var1.toString());
+               return right.toString().equals(left.toString());
          }
       } else {
          return false;

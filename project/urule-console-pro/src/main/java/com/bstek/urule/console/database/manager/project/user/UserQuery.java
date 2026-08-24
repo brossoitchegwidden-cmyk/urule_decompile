@@ -3,13 +3,15 @@ package com.bstek.urule.console.database.manager.project.user;
 import com.bstek.urule.console.database.model.Page;
 
 public interface UserQuery {
-   UserQuery idLike(String var1);
+   UserQuery idLike(String id);
 
-   UserQuery nameLike(String var1);
+   UserQuery nameLike(String name);
 
-   UserQuery idnameLike(String var1);
+   UserQuery idnameLike(String idnameLike);
 
-   Page users(int var1, int var2, long var3);
+   /**查询用户列表*/
+   Page users(int pageIndex, int pageSize, long projectId);
 
-   Page roleUsers(int var1, int var2, long var3, long var5);
+   /**查询用户列表*/
+   Page roleUsers(int pageIndex, int pageSize, long projectId, long roleId);
 }

@@ -22,119 +22,119 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class RecordTranService extends AbstractBatchTranService {
-   private static Log a = LogFactory.getLog(BatchTranService.class);
+   private static Log logger = LogFactory.getLog(BatchTranService.class);
 
-   public void execute(BatchContext var1) {
-      Batch var2 = var1.getBatch();
-      BatchResult var3 = var1.getResult();
-      boolean var4 = this.a(var1);
-      if (var4) {
+   public void execute(BatchContext batchContext) {
+      Batch batch = batchContext.getBatch();
+      BatchResult batchResult = batchContext.getResult();
+      boolean flag = this.beforeExecute(batchContext);
+      if (flag) {
          try {
-            ArrayList var5 = new ArrayList();
-            int var6 = 0;
-            BatchStatus var7 = var2.getStatus();
+            ArrayList items = new ArrayList();
+            int number = 0;
+            BatchStatus status = batch.getStatus();
 
-            for(int var8 = 0; var8 < var1.getBatchCount(); ++var8) {
-               if (this.getBatchStatus(var2.getId()) == BatchStatus.stop) {
-                  var7 = BatchStatus.stop;
+            for(int index = 0; index < batchContext.getBatchCount(); ++index) {
+               if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+                  status = BatchStatus.stop;
                   break;
                }
 
-               a.debug("execute batch 【" + var2.getName() + "】batchIndex:" + var8);
-               BatchResult var9 = new BatchResult();
-               var9.setStatus(BatchStatus.started);
-               this.executeSubBatch(var1, var8, var9);
-               var5.add(var9);
-               var6 += var9.getExceptions().size();
-               if (var2.getSkipLimit() >= 0 && var2.getSkipLimit() < var6) {
+               RecordTranService.logger.debug("execute batch 【" + batch.getName() + "】batchIndex:" + index);
+               BatchResult batchResult2 = new BatchResult();
+               batchResult2.setStatus(BatchStatus.started);
+               this.executeSubBatch(batchContext, index, batchResult2);
+               items.add(batchResult2);
+               number += batchResult2.getExceptions().size();
+               if (batch.getSkipLimit() >= 0 && batch.getSkipLimit() < number) {
                   break;
                }
             }
 
-            if (var7 != BatchStatus.stop) {
-               this.a(var2, var3, var5);
-               this.a(var3, var5);
-               boolean var16 = false;
+            if (status != BatchStatus.stop) {
+               this.mergeBatchResults(batch, batchResult, items);
+               this.mergeFilterCounts(batchResult, items);
+               boolean flag2 = false;
 
-               for(BatchItemResult var10 : (Iterable<BatchItemResult>)(Iterable<?>)(var3.getItemResults().values())) {
-                  if (var10.getReadCount() > 0 && (var10.getWriteCount() > 0 || var10.getFilterCount() == var10.getReadCount())) {
-                     var16 = true;
+               for(BatchItemResult batchItemResult : (Iterable<BatchItemResult>)(Iterable<?>)(batchResult.getItemResults().values())) {
+                  if (batchItemResult.getReadCount() > 0 && (batchItemResult.getWriteCount() > 0 || batchItemResult.getFilterCount() == batchItemResult.getReadCount())) {
+                     flag2 = true;
                      break;
                   }
                }
 
-               if (var16) {
-                  var3.setStatus(BatchStatus.completed);
-                  var3.setMsg(BatchStatus.completed.name());
+               if (flag2) {
+                  batchResult.setStatus(BatchStatus.completed);
+                  batchResult.setMsg(BatchStatus.completed.name());
                } else {
-                  var3.setStatus(BatchStatus.failed);
-                  var3.setMsg(BatchStatus.failed.name());
+                  batchResult.setStatus(BatchStatus.failed);
+                  batchResult.setMsg(BatchStatus.failed.name());
                }
 
-               a.debug("execute batch 【" + var2.getName() + "】" + var3.getStatus() + ":" + var3.getMsg());
+               RecordTranService.logger.debug("execute batch 【" + batch.getName() + "】" + batchResult.getStatus() + ":" + batchResult.getMsg());
             } else {
-               var3.setStatus(BatchStatus.stop);
+               batchResult.setStatus(BatchStatus.stop);
             }
-         } catch (Exception var14) {
-            a.error(var14);
-            var3.setStatus(BatchStatus.failed);
-            var3.setException(var14);
+         } catch (Exception exception) {
+            RecordTranService.logger.error(exception);
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception);
          } finally {
-            this.closeConnection(var1.getReadConnection());
+            this.closeConnection(batchContext.getReadConnection());
          }
 
       }
    }
 
-   public void executeSubBatch(final BatchContext var1, int var2, BatchResult var3) {
-      final Batch var4 = var1.getBatch();
-      int var5 = MultiThreadUtils.getThreadSize(var2, var1);
-      Thread[] var6 = new Thread[var5];
-      final CountDownLatch var7 = new CountDownLatch(var5);
-      final List var8 = Collections.synchronizedList(new ArrayList());
-      final ConcurrentHashMap var9 = new ConcurrentHashMap();
-      final List var10 = Collections.synchronizedList(new ArrayList());
-      var3.setExceptions(var10);
+   public void executeSubBatch(final BatchContext batchContext, int startBatchIndex, BatchResult batchIndexResult) {
+      final Batch batch = batchContext.getBatch();
+      int threadSize = MultiThreadUtils.getThreadSize(startBatchIndex, batchContext);
+      Thread[] thread = new Thread[threadSize];
+      final CountDownLatch countDownLatch = new CountDownLatch(threadSize);
+      final List items = Collections.synchronizedList(new ArrayList());
+      final ConcurrentHashMap valuesByKey = new ConcurrentHashMap();
+      final List items2 = Collections.synchronizedList(new ArrayList());
+      batchIndexResult.setExceptions(items2);
 
-      for(int var11 = 0; var11 < var5; ++var11) {
-         final int var12 = var11 + var4.getThreadSize() * var2;
-         var6[var11] = new Thread(new Runnable() {
+      for(int index = 0; index < threadSize; ++index) {
+         final int number = index + batch.getThreadSize() * startBatchIndex;
+         thread[index] = new Thread(new Runnable() {
             public void run() {
-               BatchDataResolver var1x = var4.getDataResolver();
-               BatchResult var2 = new BatchResult();
-               var8.add(var2);
-               HashMap var3 = new HashMap();
+               BatchDataResolver var1x = batch.getDataResolver();
+               BatchResult batchResult = new BatchResult();
+               items.add(batchResult);
+               HashMap valuesByKey = new HashMap();
 
                try {
-                  RecordTranService.a.debug("execute batch 【" + var4.getName() + "】 pageIndex:" + var12 + "...");
-                  List var4x = RecordTranService.this.loadDatas(var1.getReadConnection(), var1, var12);
-                  var9.put(var12, var4x.size());
+                  RecordTranService.logger.debug("execute batch 【" + batch.getName() + "】 pageIndex:" + number + "...");
+                  List var4x = RecordTranService.this.loadDatas(batchContext.getReadConnection(), batchContext, number);
+                  valuesByKey.put(number, var4x.size());
 
-                  for(int var5 = 0; var5 < var4x.size(); ++var5) {
-                     GeneralEntity var6 = (GeneralEntity)var4x.get(var5);
+                  for(int index = 0; index < var4x.size(); ++index) {
+                     GeneralEntity generalEntity = (GeneralEntity)var4x.get(index);
                      Map var7x = null;
-                     Map var8x = RecordTranService.this.a(var1x);
-                     var3.put(var5, var8x);
+                     Map var8x = RecordTranService.this.prepareItemResult(var1x);
+                     valuesByKey.put(index, var8x);
                      Connection var9x = null;
 
                      try {
-                        var9x = RecordTranService.this.getWriteDataSource(var4).getConnection();
+                        var9x = RecordTranService.this.getWriteDataSource(batch).getConnection();
                         if (var1x.getDialect().supportTransaction()) {
                            var9x.setAutoCommit(false);
                         }
 
-                        var7x = RecordTranService.this.a(var9x, var1x);
-                        RecordTranService.this.a(var1, var9x, var7x, var6, var8x);
+                        var7x = RecordTranService.this.prepareStmt(var9x, var1x);
+                        RecordTranService.this.processRecord(batchContext, var9x, var7x, generalEntity, var8x);
                         if (var1x.getDialect().supportTransaction()) {
-                           RecordTranService.this.b(var7x);
+                           RecordTranService.this.executePreparedStatementBatches(var7x);
                            var9x.commit();
                         }
 
-                        for(BatchItemResult var27 : (Iterable<BatchItemResult>)(Iterable<?>)(var8x.values())) {
-                           var27.setWriteCount(var27.getReadCount() - var27.getFilterCount());
+                        for(BatchItemResult batchItemResult : (Iterable<BatchItemResult>)(Iterable<?>)(var8x.values())) {
+                           batchItemResult.setWriteCount(batchItemResult.getReadCount() - batchItemResult.getFilterCount());
                         }
-                     } catch (Exception var23) {
-                        RecordTranService.a.error(var23);
+                     } catch (Exception exception) {
+                        RecordTranService.logger.error(exception);
 
                         for(BatchItemResult var12x : (Iterable<BatchItemResult>)(Iterable<?>)(var8x.values())) {
                            var12x.setWriteCount(0);
@@ -144,51 +144,53 @@ public class RecordTranService extends AbstractBatchTranService {
                            RecordTranService.this.rollbackConnection(var9x);
                         }
 
-                        var10.add(var23);
-                        if (var4.getSkipLimit() <= 0) {
-                           throw var23;
+                        items2.add(exception);
+                        if (batch.getSkipLimit() <= 0) {
+                           throw exception;
                         }
 
-                        if (var4.getSkipLimit() < var10.size()) {
-                           throw var23;
+                        if (batch.getSkipLimit() < items2.size()) {
+                           throw exception;
                         }
                      } finally {
-                        RecordTranService.this.a(var7x);
+                        RecordTranService.this.closePreparedStatements(var7x);
                         RecordTranService.this.closeConnection(var9x);
                      }
                   }
-               } catch (Exception var25) {
-                  var25.printStackTrace();
+               } catch (Exception exception2) {
+                  java.util.logging.Logger.getLogger(RecordTranService.class.getName()).log(java.util.logging.Level.SEVERE, exception2.getMessage(), exception2);
                } finally {
-                  RecordTranService.this.a(var4, var2, var3);
+                  RecordTranService.this.mergeItemResults(batch, batchResult, valuesByKey);
                }
 
-               var7.countDown();
+               countDownLatch.countDown();
             }
          });
-         var6[var11].start();
+         thread[index].start();
       }
 
       try {
-         var7.await();
-         this.a(var4, var3, var8);
-         this.a(var3, var9);
-      } catch (InterruptedException var13) {
-         var13.printStackTrace();
-         var3.setStatus(BatchStatus.failed);
-         var3.setException(var13);
+         countDownLatch.await();
+         this.mergeBatchResults(batch, batchIndexResult, items);
+         this.sumResultCounts(batchIndexResult, valuesByKey);
+      } catch (InterruptedException interruptedException) {
+         Thread.currentThread().interrupt();
+         java.util.logging.Logger.getLogger(RecordTranService.class.getName()).log(java.util.logging.Level.SEVERE, interruptedException.getMessage(), interruptedException);
+         batchIndexResult.setStatus(BatchStatus.failed);
+         batchIndexResult.setException(interruptedException);
       }
 
    }
 
-   protected Map a(Connection var1, BatchDataResolver var2) throws SQLException {
-      HashMap var3 = new HashMap();
+   protected Map prepareStmt(Connection conn, BatchDataResolver resolver) throws SQLException {
+      HashMap prepareStmtResult = new HashMap();
 
-      for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var2.getItems())) {
-         PreparedStatement var6 = var1.prepareStatement(var5.getUpdateSql());
-         var3.put(var5.getName(), var6);
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(resolver.getItems())) {
+         PreparedStatement preparedStatement = conn.prepareStatement(batchDataResolverItem.getUpdateSql());
+         prepareStmtResult.put(batchDataResolverItem.getName(), preparedStatement);
       }
 
-      return var3;
+      return prepareStmtResult;
    }
+
 }

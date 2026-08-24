@@ -1,26 +1,26 @@
 package com.bstek.urule.console.editor.scorecard.complex;
 
 public class TableHeader {
-   private String a;
-   private boolean b;
+   private String name;
+   private boolean custom;
 
    public boolean isScore() {
-      return this.a.equals("分值");
+      return this.name.equals("分值");
    }
 
    public String getName() {
-      return this.a;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.a = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public boolean isCustom() {
-      return this.b;
+      return this.custom;
    }
 
-   public void setCustom(boolean var1) {
-      this.b = var1;
+   public void setCustom(boolean custom) {
+      this.custom = custom;
    }
 }

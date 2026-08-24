@@ -10,107 +10,107 @@ import java.util.List;
 public class Resource {
    public static final String MENU_TYPE = "MENU";
    public static final String MENU_PACKAGE = "PACKAGE";
-   private Long a;
-   private String b;
-   private Long c;
-   private int d;
-   private String e;
-   private String f;
-   private String g;
-   private Date h;
-   private Date i;
-   private String j;
-   private List k;
+   private Long id;
+   private String name;
+   private Long parentId;
+   private int orderNum;
+   private String icon;
+   private String desc;
+   private String path;
+   private Date createDate;
+   private Date updateDate;
+   private String type;
+   private List children;
 
    public Long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(Long var1) {
-      this.a = var1;
+   public void setId(Long id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Long getParentId() {
-      return this.c;
+      return this.parentId;
    }
 
-   public void setParentId(Long var1) {
-      this.c = var1;
+   public void setParentId(Long parentId) {
+      this.parentId = parentId;
    }
 
    public int getOrderNum() {
-      return this.d;
+      return this.orderNum;
    }
 
-   public void setOrderNum(int var1) {
-      this.d = var1;
+   public void setOrderNum(int orderNum) {
+      this.orderNum = orderNum;
    }
 
    public String getPath() {
-      return this.g;
+      return this.path;
    }
 
-   public void setPath(String var1) {
-      this.g = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public Date getCreateDate() {
-      return this.h;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.h = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.i;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.i = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public List getChildren() {
-      return this.k;
+      return this.children;
    }
 
-   public void setChildren(List var1) {
-      this.k = var1;
+   public void setChildren(List subMenus) {
+      this.children = subMenus;
    }
 
    public String getIcon() {
-      return this.e;
+      return this.icon;
    }
 
-   public void setIcon(String var1) {
-      this.e = var1;
+   public void setIcon(String icon) {
+      this.icon = icon;
    }
 
    public String getDesc() {
-      return this.f;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.f = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getType() {
-      return this.j;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.j = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String toString() {
-      return "path:" + this.g + ",type:" + this.j;
+      return "path:" + this.path + ",type:" + this.type;
    }
 }

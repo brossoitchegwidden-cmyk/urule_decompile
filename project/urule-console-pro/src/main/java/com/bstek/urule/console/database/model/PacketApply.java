@@ -4,125 +4,125 @@ import java.util.Date;
 import java.util.List;
 
 public class PacketApply {
-   private long a;
-   private long b;
-   private long c;
-   private long d;
-   private String e;
-   private String f;
-   private ApplyType g;
-   private ApplyStatus h;
-   private String i;
-   private String j;
-   private Date k;
-   private Date l;
-   private List m;
+   private long id;
+   private long packetId;
+   private long deployedPacketId;
+   private long projectId;
+   private String title;
+   private String desc;
+   private ApplyType type;
+   private ApplyStatus status;
+   private String approver;
+   private String createUser;
+   private Date createDate;
+   private Date updateDate;
+   private List details;
 
    public PacketApply() {
-      this.h = ApplyStatus.pending;
+      this.status = ApplyStatus.pending;
    }
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getPacketId() {
-      return this.b;
+      return this.packetId;
    }
 
-   public void setPacketId(long var1) {
-      this.b = var1;
+   public void setPacketId(long packetId) {
+      this.packetId = packetId;
    }
 
    public long getDeployedPacketId() {
-      return this.c;
+      return this.deployedPacketId;
    }
 
-   public void setDeployedPacketId(long var1) {
-      this.c = var1;
+   public void setDeployedPacketId(long deployedPacketId) {
+      this.deployedPacketId = deployedPacketId;
    }
 
    public long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.d = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getTitle() {
-      return this.e;
+      return this.title;
    }
 
-   public void setTitle(String var1) {
-      this.e = var1;
+   public void setTitle(String title) {
+      this.title = title;
    }
 
    public String getDesc() {
-      return this.f;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.f = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public ApplyType getType() {
-      return this.g;
+      return this.type;
    }
 
-   public void setType(ApplyType var1) {
-      this.g = var1;
+   public void setType(ApplyType type) {
+      this.type = type;
    }
 
    public ApplyStatus getStatus() {
-      return this.h;
+      return this.status;
    }
 
-   public void setStatus(ApplyStatus var1) {
-      this.h = var1;
+   public void setStatus(ApplyStatus status) {
+      this.status = status;
    }
 
    public String getApprover() {
-      return this.i;
+      return this.approver;
    }
 
-   public void setApprover(String var1) {
-      this.i = var1;
+   public void setApprover(String approver) {
+      this.approver = approver;
    }
 
    public String getCreateUser() {
-      return this.j;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.j = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.k;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.k = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.l;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.l = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public List getDetails() {
-      return this.m;
+      return this.details;
    }
 
-   public void setDetails(List var1) {
-      this.m = var1;
+   public void setDetails(List details) {
+      this.details = details;
    }
 }

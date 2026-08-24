@@ -5,5 +5,5 @@ import com.bstek.urule.runtime.KnowledgePackage;
 public interface RemoteService {
    String BEAN_ID = "urule.remoteService";
 
-   KnowledgePackage getKnowledge(String var1, String var2);
+   KnowledgePackage getKnowledge(String packageId, String timestamp);
 }

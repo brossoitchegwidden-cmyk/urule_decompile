@@ -15,84 +15,84 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.http.HttpServletRequest;
 
 public class CaptchaBuilder {
-   private static final String a = "CAPTCHA_KEY";
+   private static final String CAPTCHA_KEY = "CAPTCHA_KEY";
    public static final CaptchaBuilder ins = new CaptchaBuilder();
 
    private CaptchaBuilder() {
    }
 
-   public InputStream build(HttpServletRequest var1, int var2, int var3) {
-      BufferedImage var4 = new BufferedImage(var2, var3, 1);
-      Graphics var5 = var4.getGraphics();
-      var5.setColor(this.a(210, 240));
-      var5.fillRect(0, 0, var2, var3);
-      int var7 = (new Random()).nextInt(20);
-      int var8 = (new Random()).nextInt(20);
-      String var9 = "";
-      int var10 = 0;
-      int var11 = (new Random()).nextInt(3);
-      if (var11 == 0) {
-         if (var7 > var8) {
-            var10 = var7 - var8;
-            var9 = var7 + " - " + var8 + " = ? ";
+   public InputStream build(HttpServletRequest req, int width, int height) {
+      BufferedImage bufferedImage = new BufferedImage(width, height, 1);
+      Graphics graphics = bufferedImage.getGraphics();
+      graphics.setColor(this.resolveColor(210, 240));
+      graphics.fillRect(0, 0, width, height);
+      int number = (new Random()).nextInt(20);
+      int number2 = (new Random()).nextInt(20);
+      String text = "";
+      int number3 = 0;
+      int number4 = (new Random()).nextInt(3);
+      if (number4 == 0) {
+         if (number > number2) {
+            number3 = number - number2;
+            text = number + " - " + number2 + " = ? ";
          } else {
-            var10 = var7 + var8;
-            var9 = var7 + " + " + var8 + " = ? ";
+            number3 = number + number2;
+            text = number + " + " + number2 + " = ? ";
          }
-      } else if (var11 == 1) {
-         if (var7 > var8) {
-            var10 = var7 - var8;
-            var9 = var7 + " - ? = " + var8;
+      } else if (number4 == 1) {
+         if (number > number2) {
+            number3 = number - number2;
+            text = number + " - ? = " + number2;
          } else {
-            var10 = var7 + var8;
-            var9 = "? - " + var7 + " = " + var8;
+            number3 = number + number2;
+            text = "? - " + number + " = " + number2;
          }
-      } else if (var7 > var8) {
-         var10 = var7 - var8;
-         var9 = var7 + " - ? = " + var8;
+      } else if (number > number2) {
+         number3 = number - number2;
+         text = number + " - ? = " + number2;
       } else {
-         var10 = var7 + var8;
-         var9 = "? - " + var7 + " = " + var8;
+         number3 = number + number2;
+         text = "? - " + number + " = " + number2;
       }
 
-      Font var12 = new Font("Times New Roman", 3, var3);
-      var5.setFont(var12);
-      var5.setColor(this.a(120, 200));
-      FontMetrics var13 = var5.getFontMetrics();
-      int var14 = var13.stringWidth(var9);
-      int var15 = (var2 - var14) / 2;
-      int var16 = var3 - (var3 - var3) / 2 - 3;
-      var5.drawString(var9, var15, var16);
-      var5.dispose();
-      var1.getSession().setAttribute("CAPTCHA_KEY", var10);
-      ByteArrayOutputStream var17 = new ByteArrayOutputStream();
+      Font font = new Font("Times New Roman", 3, height);
+      graphics.setFont(font);
+      graphics.setColor(this.resolveColor(120, 200));
+      FontMetrics fontMetrics = graphics.getFontMetrics();
+      int number5 = fontMetrics.stringWidth(text);
+      int number6 = (width - number5) / 2;
+      int number7 = height - (height - height) / 2 - 3;
+      graphics.drawString(text, number6, number7);
+      graphics.dispose();
+      req.getSession().setAttribute("CAPTCHA_KEY", number3);
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
       try {
-         ImageOutputStream var18 = ImageIO.createImageOutputStream(var17);
-         ImageIO.write(var4, "JPEG", var18);
-         var18.close();
-         ByteArrayInputStream var19 = new ByteArrayInputStream(var17.toByteArray());
-         var17.close();
-         return var19;
-      } catch (IOException var20) {
-         throw new RuntimeException(var20);
+         ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(byteArrayOutputStream);
+         ImageIO.write(bufferedImage, "JPEG", imageOutputStream);
+         imageOutputStream.close();
+         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+         byteArrayOutputStream.close();
+         return byteArrayInputStream;
+      } catch (IOException iOException) {
+         throw new RuntimeException(iOException);
       }
    }
 
-   public String getCaptchResult(HttpServletRequest var1) {
-      Object var2 = var1.getSession().getAttribute("CAPTCHA_KEY");
-      return var2 == null ? null : var2.toString();
+   public String getCaptchResult(HttpServletRequest req) {
+      Object attribute = req.getSession().getAttribute("CAPTCHA_KEY");
+      return attribute == null ? null : attribute.toString();
    }
 
-   public void cleanCaptch(HttpServletRequest var1) {
-      var1.getSession().removeAttribute("CAPTCHA_KEY");
+   public void cleanCaptch(HttpServletRequest req) {
+      req.getSession().removeAttribute("CAPTCHA_KEY");
    }
 
-   private Color a(int var1, int var2) {
-      Random var3 = new Random();
-      int var4 = var1 + var3.nextInt(var2 - var1);
-      int var5 = var1 + var3.nextInt(var2 - var1);
-      int var6 = var1 + var3.nextInt(var2 - var1);
-      return new Color(var4, var5, var6);
+   private Color resolveColor(int number, int number2) {
+      Random random = new Random();
+      int number3 = number + random.nextInt(number2 - number);
+      int number4 = number + random.nextInt(number2 - number);
+      int number5 = number + random.nextInt(number2 - number);
+      return new Color(number3, number4, number5);
    }
 }

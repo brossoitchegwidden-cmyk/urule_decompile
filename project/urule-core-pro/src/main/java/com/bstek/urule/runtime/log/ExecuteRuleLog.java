@@ -4,72 +4,70 @@ import com.bstek.urule.model.rule.Rule;
 import java.util.Date;
 
 public class ExecuteRuleLog extends DataLog {
-   private static final String b = "----执行规则【%s】中动作，位于文件[%s]中，优先级为[%s]----";
-   private static final String c = "----Execute the action in rule 【%s】, located in the file [%s], with priority of [%s]----";
-   private Integer d;
-   private String e;
-   private String f;
-   private Date g;
-   private Date h;
-   private Boolean i;
-   private Boolean j;
-   private String k;
-   private String l;
+   private Integer salience;
+   private String ruleName;
+   private String ruleFile;
+   private Date effectiveDate;
+   private Date expiresDate;
+   private Boolean enabled;
+   private Boolean debug;
+   private String activationGroup;
+   private String agendaGroup;
 
-   public ExecuteRuleLog(Rule var1) {
-      this.e = var1.getName();
-      this.f = var1.getFile();
-      this.d = var1.getSalience();
-      this.g = var1.getEffectiveDate();
-      this.h = var1.getExpiresDate();
-      this.i = var1.getEnabled();
-      this.j = var1.getDebug();
-      this.k = var1.getMutexGroup();
-      this.l = var1.getPendedGroup();
-      String var2 = this.a()
+   public ExecuteRuleLog(Rule rule) {
+      this.ruleName = rule.getName();
+      this.ruleFile = rule.getFile();
+      this.salience = rule.getSalience();
+      this.effectiveDate = rule.getEffectiveDate();
+      this.expiresDate = rule.getExpiresDate();
+      this.enabled = rule.getEnabled();
+      this.debug = rule.getDebug();
+      this.activationGroup = rule.getMutexGroup();
+      this.agendaGroup = rule.getPendedGroup();
+      String text = this.isEnglishLanguage()
          ? "----Execute the action in rule 【%s】, located in the file [%s], with priority of [%s]----"
          : "----执行规则【%s】中动作，位于文件[%s]中，优先级为[%s]----";
-      this.a = String.format(var2, var1.getName(), this.f, this.d);
+      this.msg = String.format(text, rule.getName(), this.ruleFile, this.salience);
    }
 
    public String getRuleFile() {
-      return this.f;
+      return this.ruleFile;
    }
 
    public String getRuleName() {
-      return this.e;
+      return this.ruleName;
    }
 
    public Integer getSalience() {
-      return this.d;
+      return this.salience;
    }
 
    public String getActivationGroup() {
-      return this.k;
+      return this.activationGroup;
    }
 
    public String getAgendaGroup() {
-      return this.l;
+      return this.agendaGroup;
    }
 
    public Boolean getDebug() {
-      return this.j;
+      return this.debug;
    }
 
    public Date getEffectiveDate() {
-      return this.g;
+      return this.effectiveDate;
    }
 
    public Boolean getEnabled() {
-      return this.i;
+      return this.enabled;
    }
 
    public Date getExpiresDate() {
-      return this.h;
+      return this.expiresDate;
    }
 
    @Override
    public String toString() {
-      return "ExecuteRuleLog [salience=" + this.d + ", ruleName=" + this.e + ", ruleFile=" + this.f + "]";
+      return "ExecuteRuleLog [salience=" + this.salience + ", ruleName=" + this.ruleName + ", ruleFile=" + this.ruleFile + "]";
    }
 }

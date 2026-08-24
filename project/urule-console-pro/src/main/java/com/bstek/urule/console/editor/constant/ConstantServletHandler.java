@@ -14,57 +14,57 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ConstantServletHandler extends ApiServletHandler {
-   public void excel(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      InputStream var3 = FileUtils.uploadFile(var1).getInputStream();
-      List var4 = ExcelImportUtils.parseSheets(var3);
-      Map var5 = ExcelImportUtils.parseVariables(var4);
-      var3.close();
-      this.a(var2, var5);
+   public void excel(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      InputStream inputStream = FileUtils.uploadFile(req).getInputStream();
+      List sheets = ExcelImportUtils.parseSheets(inputStream);
+      Map variables = ExcelImportUtils.parseVariables(sheets);
+      inputStream.close();
+      this.writeObjectToJson(resp, variables);
    }
 
-   public void generateConstants(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("clazz");
-      Class var4 = ClassUtils.getTargetClass(var3);
-      if (!var4.isEnum()) {
-         throw new RuleException("[" + var4 + "]");
+   public void generateConstants(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("clazz");
+      Class targetClass = ClassUtils.getTargetClass(parameter);
+      if (!targetClass.isEnum()) {
+         throw new RuleException("[" + targetClass + "]");
       } else {
-         Enum[] var6 = (Enum[])var4.getEnumConstants();
-         Method var7 = this.a(var4);
-         ArrayList var8 = new ArrayList();
+         Enum[] enumConstants = (Enum[])targetClass.getEnumConstants();
+         Method method = this.resolveMethod(targetClass);
+         ArrayList items = new ArrayList();
 
-         for(Enum var12 : var6) {
-            String var13 = var12.name();
-            EnumData var14 = new EnumData();
-            var14.setName(var13);
-            if (var7 != null) {
-               Object var15 = var7.invoke(var12);
-               if (var15 != null) {
-                  var14.setLabel(var15.toString());
+         for(Enum localValue : enumConstants) {
+            String text = localValue.name();
+            EnumData enumData = new EnumData();
+            enumData.setName(text);
+            if (method != null) {
+               Object objectValue = method.invoke(localValue);
+               if (objectValue != null) {
+                  enumData.setLabel(objectValue.toString());
                }
             }
 
-            if (var14.getLabel() == null) {
-               var14.setLabel(var14.getName());
+            if (enumData.getLabel() == null) {
+               enumData.setLabel(enumData.getName());
             }
 
-            var8.add(var14);
+            items.add(enumData);
          }
 
-         this.a(var2, var8);
+         this.writeObjectToJson(resp, items);
       }
    }
 
-   private Method a(Class var1) throws Exception {
-      Method var2 = null;
+   private Method resolveMethod(Class valueType) throws Exception {
+      Method method = null;
 
-      for(Method var6 : var1.getMethods()) {
-         if (var6.getName().equals("getLabel")) {
-            var2 = var6;
+      for(Method method2 : valueType.getMethods()) {
+         if (method2.getName().equals("getLabel")) {
+            method = method2;
             break;
          }
       }
 
-      return var2;
+      return method;
    }
 
    public String url() {

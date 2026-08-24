@@ -13,45 +13,45 @@ public class SigmaMath implements MathSign {
    private Value expr;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.ivalue, var1, var2);
-      Object var4 = var1.getValueCompute().complexValueCompute(this.superior, var1, var2);
-      int var5 = Utils.toBigDecimal(var3).intValue();
-      int var6 = Utils.toBigDecimal(var4).intValue();
-      BigDecimal var7 = new BigDecimal(0);
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.ivalue, context, factMap);
+      Object objectValue2 = context.getValueCompute().complexValueCompute(this.superior, context, factMap);
+      int number = Utils.toBigDecimal(objectValue).intValue();
+      int number2 = Utils.toBigDecimal(objectValue2).intValue();
+      BigDecimal bigDecimal = new BigDecimal(0);
 
-      for (int var8 = var5; var8 <= var6; var8++) {
-         var1.getWorkingMemory().getParameters().put("__math_sigma_step_index_", var8);
-         Object var9 = var1.getValueCompute().complexValueCompute(this.expr, var1, var2);
-         BigDecimal var10 = Utils.toBigDecimal(var9);
-         var7 = var7.add(var10);
+      for (int index = number; index <= number2; index++) {
+         context.getWorkingMemory().getParameters().put("__math_sigma_step_index_", index);
+         Object objectValue3 = context.getValueCompute().complexValueCompute(this.expr, context, factMap);
+         BigDecimal decimalValue = Utils.toBigDecimal(objectValue3);
+         bigDecimal = bigDecimal.add(decimalValue);
       }
 
-      return var7.stripTrailingZeros();
+      return bigDecimal.stripTrailingZeros();
    }
 
    public Value getIvalue() {
       return this.ivalue;
    }
 
-   public void setIvalue(Value var1) {
-      this.ivalue = var1;
+   public void setIvalue(Value ivalue) {
+      this.ivalue = ivalue;
    }
 
    public Value getSuperior() {
       return this.superior;
    }
 
-   public void setSuperior(Value var1) {
-      this.superior = var1;
+   public void setSuperior(Value superior) {
+      this.superior = superior;
    }
 
    public Value getExpr() {
       return this.expr;
    }
 
-   public void setExpr(Value var1) {
-      this.expr = var1;
+   public void setExpr(Value expr) {
+      this.expr = expr;
    }
 
    @Override
@@ -61,7 +61,7 @@ public class SigmaMath implements MathSign {
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Sigma" : "求和";
-      return "[" + var1 + "]Σ" + this.ivalue.getId() + "|" + this.superior.getId() + "|" + this.expr.getId();
+      String text = LocaleHolder.isEnglish() ? "Sigma" : "求和";
+      return "[" + text + "]Σ" + this.ivalue.getId() + "|" + this.superior.getId() + "|" + this.expr.getId();
    }
 }

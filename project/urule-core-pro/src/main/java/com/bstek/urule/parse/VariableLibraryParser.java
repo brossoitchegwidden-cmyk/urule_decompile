@@ -6,30 +6,30 @@ import java.util.List;
 import org.dom4j.Element;
 
 public class VariableLibraryParser implements Parser<List<VariableCategory>> {
-   private VariableCategoryParser a;
+   private VariableCategoryParser variableCategoryParser;
 
-   public List<VariableCategory> parse(Element var1) {
-      ArrayList var2 = new ArrayList();
+   public List<VariableCategory> parse(Element element) {
+      ArrayList parseResult = new ArrayList();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            String var6 = var5.getName();
-            if (this.a.support(var6)) {
-               var2.add(this.a.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.variableCategoryParser.support(name)) {
+               parseResult.add(this.variableCategoryParser.parse(element2));
             }
          }
       }
 
-      return var2;
+      return parseResult;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("variable-library");
+   public boolean support(String name) {
+      return name.equals("variable-library");
    }
 
-   public void setVariableCategoryParser(VariableCategoryParser var1) {
-      this.a = var1;
+   public void setVariableCategoryParser(VariableCategoryParser variableCategoryParser) {
+      this.variableCategoryParser = variableCategoryParser;
    }
 }

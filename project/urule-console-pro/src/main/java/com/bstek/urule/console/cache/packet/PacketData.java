@@ -14,71 +14,71 @@ import java.util.Map;
 import org.springframework.util.StringUtils;
 
 public class PacketData {
-   private PacketConfig a;
-   private KnowledgePackageWrapper b;
+   private PacketConfig packet;
+   private KnowledgePackageWrapper knowledgePackageWrapper;
 
-   public PacketData(Packet var1, KnowledgePackageWrapper var2) {
-      this.a = this.a(var1);
-      this.b = var2;
-      KnowledgePackageImpl var3 = (KnowledgePackageImpl)var2.getKnowledgePackage();
-      var3.setInputData(this.a.getAuditInput());
-      var3.setOutputData(this.a.getAuditOutput());
+   public PacketData(Packet pk, KnowledgePackageWrapper knowledgePackageWrapper) {
+      this.packet = this.buildPacketConfig(pk);
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
+      KnowledgePackageImpl knowledgePackage = (KnowledgePackageImpl)knowledgePackageWrapper.getKnowledgePackage();
+      knowledgePackage.setInputData(this.packet.getAuditInput());
+      knowledgePackage.setOutputData(this.packet.getAuditOutput());
    }
 
    public PacketConfig getPacket() {
-      return this.a;
+      return this.packet;
    }
 
    public KnowledgePackageWrapper getKnowledgePackageWrapper() {
-      return this.b;
+      return this.knowledgePackageWrapper;
    }
 
-   private PacketConfig a(Packet var1) {
-      PacketConfig var2 = new PacketConfig();
-      var2.setId(var1.getId());
-      var2.setCode(var1.getCode());
-      var2.setProjectId(var1.getProjectId());
-      var2.setEnable(var1.isEnable());
-      var2.setRestEnable(var1.isRestEnable());
-      var2.setRestSecurityEnable(var1.isRestSecurityEnable());
-      var2.setRestSecurityUser(var1.getRestSecurityUser());
-      var2.setRestSecurityPassword(var1.getRestSecurityPassword());
-      var2.setRestInput(this.a(var1.getRestInput()));
-      var2.setRestOutput(this.a(var1.getRestOutput()));
-      var2.setAuditInput(this.a(var1.getAuditInput()));
-      var2.setAuditOutput(this.a(var1.getAuditOutput()));
-      var2.setAuditEnable(var1.isAuditEnable());
-      return var2;
+   private PacketConfig buildPacketConfig(Packet packet) {
+      PacketConfig packetConfig = new PacketConfig();
+      packetConfig.setId(packet.getId());
+      packetConfig.setCode(packet.getCode());
+      packetConfig.setProjectId(packet.getProjectId());
+      packetConfig.setEnable(packet.isEnable());
+      packetConfig.setRestEnable(packet.isRestEnable());
+      packetConfig.setRestSecurityEnable(packet.isRestSecurityEnable());
+      packetConfig.setRestSecurityUser(packet.getRestSecurityUser());
+      packetConfig.setRestSecurityPassword(packet.getRestSecurityPassword());
+      packetConfig.setRestInput(this.parseMonitorObjects(packet.getRestInput()));
+      packetConfig.setRestOutput(this.parseMonitorObjects(packet.getRestOutput()));
+      packetConfig.setAuditInput(this.parseMonitorObjects(packet.getAuditInput()));
+      packetConfig.setAuditOutput(this.parseMonitorObjects(packet.getAuditOutput()));
+      packetConfig.setAuditEnable(packet.isAuditEnable());
+      return packetConfig;
    }
 
-   private List a(String var1) {
-      ArrayList var2 = new ArrayList();
-      if (StringUtils.isEmpty(var1)) {
-         return var2;
+   private List parseMonitorObjects(String text) {
+      ArrayList items = new ArrayList();
+      if (StringUtils.isEmpty(text)) {
+         return items;
       } else {
-         ObjectMapper var3 = JsonMapper.builder().build();
+         ObjectMapper objectMapper = JsonMapper.builder().build();
 
          try {
-            for(Map var6 : (Iterable<Map>)(Iterable<?>)((List)var3.readValue(var1, ArrayList.class))) {
-               MonitorObject var7 = new MonitorObject();
-               var7.setName(var6.get("name").toString());
-               var7.setClazz(var6.get("clazz").toString());
-               var2.add(var7);
-               ArrayList var8 = new ArrayList();
-               var7.setFields(var8);
+            for(Map valuesByKey : (Iterable<Map>)(Iterable<?>)((List)objectMapper.readValue(text, ArrayList.class))) {
+               MonitorObject monitorObject = new MonitorObject();
+               monitorObject.setName(valuesByKey.get("name").toString());
+               monitorObject.setClazz(valuesByKey.get("clazz").toString());
+               items.add(monitorObject);
+               ArrayList items2 = new ArrayList();
+               monitorObject.setFields(items2);
 
-               for(Map var11 : (Iterable<Map>)(Iterable<?>)((List)var6.get("fields"))) {
-                  MonitorObjectField var12 = new MonitorObjectField();
-                  var12.setName(var11.get("name").toString());
-                  var12.setLabel(var11.get("label").toString());
-                  var12.setType(var11.get("type").toString());
-                  var8.add(var12);
+               for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)((List)valuesByKey.get("fields"))) {
+                  MonitorObjectField monitorObjectField = new MonitorObjectField();
+                  monitorObjectField.setName(valuesByKey2.get("name").toString());
+                  monitorObjectField.setLabel(valuesByKey2.get("label").toString());
+                  monitorObjectField.setType(valuesByKey2.get("type").toString());
+                  items2.add(monitorObjectField);
                }
             }
 
-            return var2;
-         } catch (Exception var13) {
-            throw new RuleException(var13);
+            return items;
+         } catch (Exception exception) {
+            throw new RuleException(exception);
          }
       }
    }

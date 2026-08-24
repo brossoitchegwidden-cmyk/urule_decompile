@@ -17,114 +17,114 @@ public class PacketApplyManagerImpl implements PacketApplyManager {
    protected PacketApplyManagerImpl() {
    }
 
-   public void add(PacketApply var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(PacketApply apply) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setCreateDate(new Date());
-         var1.setUpdateDate(new Date());
-         String var3 = "insert into URULE_PACKET_APPLY(ID_,PACKET_ID_,DEPLOYED_PACKET_ID_,PROJECT_ID_,TYPE_,TITLE_,DESC_,APPROVER_,STATUS_,CREATE_USER_,CREATE_DATE_,UPDATE_DATE_) values(?,?,?,?,?,?,?,?,?,?,?,?)";
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var1.setId(IDGenerator.getInstance().nextId(IDType.PACKET_APPLY));
-         var4.setLong(1, var1.getId());
-         var4.setLong(2, var1.getPacketId());
-         var4.setLong(3, var1.getDeployedPacketId());
-         var4.setLong(4, var1.getProjectId());
-         var4.setString(5, var1.getType().name());
-         var4.setString(6, var1.getTitle());
-         var4.setString(7, var1.getDesc());
-         var4.setString(8, var1.getApprover());
-         var4.setString(9, var1.getStatus().name());
-         var4.setString(10, var1.getCreateUser());
-         var4.setTimestamp(11, new Timestamp(var1.getCreateDate().getTime()));
-         var4.setTimestamp(12, new Timestamp(var1.getUpdateDate().getTime()));
-         var4.executeUpdate();
-         JdbcUtils.closeStatement(var4);
-      } catch (Exception var8) {
-         throw new RuleException(var8);
+         apply.setCreateDate(new Date());
+         apply.setUpdateDate(new Date());
+         String text = "insert into URULE_PACKET_APPLY(ID_,PACKET_ID_,DEPLOYED_PACKET_ID_,PROJECT_ID_,TYPE_,TITLE_,DESC_,APPROVER_,STATUS_,CREATE_USER_,CREATE_DATE_,UPDATE_DATE_) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         apply.setId(IDGenerator.getInstance().nextId(IDType.PACKET_APPLY));
+         preparedStatement.setLong(1, apply.getId());
+         preparedStatement.setLong(2, apply.getPacketId());
+         preparedStatement.setLong(3, apply.getDeployedPacketId());
+         preparedStatement.setLong(4, apply.getProjectId());
+         preparedStatement.setString(5, apply.getType().name());
+         preparedStatement.setString(6, apply.getTitle());
+         preparedStatement.setString(7, apply.getDesc());
+         preparedStatement.setString(8, apply.getApprover());
+         preparedStatement.setString(9, apply.getStatus().name());
+         preparedStatement.setString(10, apply.getCreateUser());
+         preparedStatement.setTimestamp(11, new Timestamp(apply.getCreateDate().getTime()));
+         preparedStatement.setTimestamp(12, new Timestamp(apply.getUpdateDate().getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void delete(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void delete(long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var4 = "delete from URULE_PACKET_APPLY where ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setLong(1, var1);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         String text = "delete from URULE_PACKET_APPLY where ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void deleteByPacketId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByPacketId(long id) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         for(PacketApply var6 : (Iterable<PacketApply>)(Iterable<?>)(this.newQuery().packetId(var1).list())) {
-            PacketApplyDetailManager.ins.deleteByApplyId(var6.getId());
+         for(PacketApply packetApply : (Iterable<PacketApply>)(Iterable<?>)(this.newQuery().packetId(id).list())) {
+            PacketApplyDetailManager.ins.deleteByApplyId(packetApply.getId());
          }
 
-         String var12 = "delete from URULE_PACKET_APPLY where PACKET_ID_=?";
-         PreparedStatement var13 = var3.prepareStatement(var12);
-         var13.setLong(1, var1);
-         var13.executeUpdate();
-         JdbcUtils.closeStatement(var13);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         String text = "delete from URULE_PACKET_APPLY where PACKET_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public PacketApply load(long var1) {
-      List var3 = this.newQuery().id(var1).list();
-      return var3.size() > 0 ? (PacketApply)var3.get(0) : null;
+   public PacketApply load(long id) {
+      List items = this.newQuery().id(id).list();
+      return items.size() > 0 ? (PacketApply)items.get(0) : null;
    }
 
-   public void update(long var1, ApplyStatus var3) {
-      Connection var4 = JdbcUtils.getConnection();
+   public void update(long id, ApplyStatus status) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var5 = "update URULE_PACKET_APPLY set STATUS_=?,UPDATE_DATE_=? where ID_=?";
-         PreparedStatement var6 = var4.prepareStatement(var5);
-         var6.setString(1, var3.name());
-         var6.setTimestamp(2, new Timestamp((new Date()).getTime()));
-         var6.setLong(3, var1);
-         var6.executeUpdate();
-         JdbcUtils.closeStatement(var6);
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         String text = "update URULE_PACKET_APPLY set STATUS_=?,UPDATE_DATE_=? where ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setString(1, status.name());
+         preparedStatement.setTimestamp(2, new Timestamp((new Date()).getTime()));
+         preparedStatement.setLong(3, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var4);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
 
-   public void updateDeployedPacketId(long var1, long var3) {
-      Connection var5 = JdbcUtils.getConnection();
+   public void updateDeployedPacketId(long id, long deployedPacketId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         String var6 = "update URULE_PACKET_APPLY set DEPLOYED_PACKET_ID_=?,UPDATE_DATE_=? where ID_=?";
-         PreparedStatement var7 = var5.prepareStatement(var6);
-         var7.setLong(1, var3);
-         var7.setTimestamp(2, new Timestamp((new Date()).getTime()));
-         var7.setLong(3, var1);
-         var7.executeUpdate();
-         JdbcUtils.closeStatement(var7);
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         String text = "update URULE_PACKET_APPLY set DEPLOYED_PACKET_ID_=?,UPDATE_DATE_=? where ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, deployedPacketId);
+         preparedStatement.setTimestamp(2, new Timestamp((new Date()).getTime()));
+         preparedStatement.setLong(3, id);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var5);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
@@ -133,20 +133,20 @@ public class PacketApplyManagerImpl implements PacketApplyManager {
       return new PacketApplyQueryImpl();
    }
 
-   public void deleteByProjectId(long var1) {
-      Connection var3 = JdbcUtils.getConnection();
+   public void deleteByProjectId(long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PacketApplyDetailManager.ins.deleteByProjectId(var1);
-         String var4 = "delete from URULE_PACKET_APPLY where PROJECT_ID_=?";
-         PreparedStatement var5 = var3.prepareStatement(var4);
-         var5.setLong(1, var1);
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         PacketApplyDetailManager.ins.deleteByProjectId(projectId);
+         String text = "delete from URULE_PACKET_APPLY where PROJECT_ID_=?";
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

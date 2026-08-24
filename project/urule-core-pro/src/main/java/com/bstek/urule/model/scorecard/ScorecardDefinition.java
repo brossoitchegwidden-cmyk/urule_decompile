@@ -48,287 +48,287 @@ public class ScorecardDefinition {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Integer getSalience() {
       return this.salience;
    }
 
-   public void setSalience(Integer var1) {
-      this.salience = var1;
+   public void setSalience(Integer salience) {
+      this.salience = salience;
    }
 
    public Date getEffectiveDate() {
       return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public Boolean getEnabled() {
       return this.enabled;
    }
 
-   public void setEnabled(Boolean var1) {
-      this.enabled = var1;
+   public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
    }
 
    public Boolean getDebug() {
       return this.debug;
    }
 
-   public void setDebug(Boolean var1) {
-      this.debug = var1;
+   public void setDebug(Boolean debug) {
+      this.debug = debug;
    }
 
    public String getAttributeColName() {
       return this.attributeColName;
    }
 
-   public void setAttributeColName(String var1) {
-      this.attributeColName = var1;
+   public void setAttributeColName(String attributeColName) {
+      this.attributeColName = attributeColName;
    }
 
    public String getAttributeColWidth() {
       return this.attributeColWidth;
    }
 
-   public void setAttributeColWidth(String var1) {
-      this.attributeColWidth = var1;
+   public void setAttributeColWidth(String attributeColWidth) {
+      this.attributeColWidth = attributeColWidth;
    }
 
    public String getAttributeColVariableCategory() {
       return this.attributeColVariableCategory;
    }
 
-   public void setAttributeColVariableCategory(String var1) {
-      this.attributeColVariableCategory = var1;
+   public void setAttributeColVariableCategory(String attributeColVariableCategory) {
+      this.attributeColVariableCategory = attributeColVariableCategory;
    }
 
    public String getAttributeColVariableCategoryUuid() {
       return this.attributeColVariableCategoryUuid;
    }
 
-   public void setAttributeColVariableCategoryUuid(String var1) {
-      this.attributeColVariableCategoryUuid = var1;
+   public void setAttributeColVariableCategoryUuid(String attributeColVariableCategoryUuid) {
+      this.attributeColVariableCategoryUuid = attributeColVariableCategoryUuid;
    }
 
    public String getConditionColName() {
       return this.conditionColName;
    }
 
-   public void setConditionColName(String var1) {
-      this.conditionColName = var1;
+   public void setConditionColName(String conditionColName) {
+      this.conditionColName = conditionColName;
    }
 
    public String getConditionColWidth() {
       return this.conditionColWidth;
    }
 
-   public void setConditionColWidth(String var1) {
-      this.conditionColWidth = var1;
+   public void setConditionColWidth(String conditionColWidth) {
+      this.conditionColWidth = conditionColWidth;
    }
 
    public String getScoreColName() {
       return this.scoreColName;
    }
 
-   public void setScoreColName(String var1) {
-      this.scoreColName = var1;
+   public void setScoreColName(String scoreColName) {
+      this.scoreColName = scoreColName;
    }
 
    public String getScoreColWidth() {
       return this.scoreColWidth;
    }
 
-   public void setScoreColWidth(String var1) {
-      this.scoreColWidth = var1;
+   public void setScoreColWidth(String scoreColWidth) {
+      this.scoreColWidth = scoreColWidth;
    }
 
    public boolean isWeightSupport() {
       return this.weightSupport;
    }
 
-   public void setWeightSupport(boolean var1) {
-      this.weightSupport = var1;
+   public void setWeightSupport(boolean weightSupport) {
+      this.weightSupport = weightSupport;
    }
 
    public ScoringType getScoringType() {
       return this.scoringType;
    }
 
-   public void setScoringType(ScoringType var1) {
-      this.scoringType = var1;
+   public void setScoringType(ScoringType scoringType) {
+      this.scoringType = scoringType;
    }
 
    public String getScoringBean() {
       return this.scoringBean;
    }
 
-   public void setScoringBean(String var1) {
-      this.scoringBean = var1;
+   public void setScoringBean(String scoringBean) {
+      this.scoringBean = scoringBean;
    }
 
    public String getKeyLabel() {
       return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.keyLabel = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyName() {
       return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.keyName = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 
    public AssignTargetType getAssignTargetType() {
       return this.assignTargetType;
    }
 
-   public void setAssignTargetType(AssignTargetType var1) {
-      this.assignTargetType = var1;
+   public void setAssignTargetType(AssignTargetType assignTargetType) {
+      this.assignTargetType = assignTargetType;
    }
 
    public String getVariableCategory() {
       return this.variableCategory;
    }
 
-   public void setVariableCategory(String var1) {
-      this.variableCategory = var1;
+   public void setVariableCategory(String variableCategory) {
+      this.variableCategory = variableCategory;
    }
 
    public String getVariableName() {
       return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.variableName = var1;
+   public void setVariableName(String variableName) {
+      this.variableName = variableName;
    }
 
    public String getVariableLabel() {
       return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.variableLabel = var1;
+   public void setVariableLabel(String variableLabel) {
+      this.variableLabel = variableLabel;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getKeyCategoryUuid() {
       return this.keyCategoryUuid;
    }
 
-   public void setKeyCategoryUuid(String var1) {
-      this.keyCategoryUuid = var1;
+   public void setKeyCategoryUuid(String keyCategoryUuid) {
+      this.keyCategoryUuid = keyCategoryUuid;
    }
 
    public String getKeyUuid() {
       return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.keyUuid = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
    public String getRemark() {
       return this.remark;
    }
 
-   public void setRemark(String var1) {
-      this.remark = var1;
+   public void setRemark(String remark) {
+      this.remark = remark;
    }
 
    public String getQuickTestData() {
       return this.quickTestData;
    }
 
-   public void setQuickTestData(String var1) {
-      this.quickTestData = var1;
+   public void setQuickTestData(String quickTestData) {
+      this.quickTestData = quickTestData;
    }
 
    public Datatype getDatatype() {
       return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.datatype = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    public List<CustomCol> getCustomCols() {
       return this.customCols;
    }
 
-   public void setCustomCols(List<CustomCol> var1) {
-      this.customCols = var1;
+   public void setCustomCols(List<CustomCol> customCols) {
+      this.customCols = customCols;
    }
 
    public List<AttributeRow> getRows() {
       return this.rows;
    }
 
-   public void setRows(List<AttributeRow> var1) {
-      this.rows = var1;
+   public void setRows(List<AttributeRow> rows) {
+      this.rows = rows;
    }
 
    public List<Predefine> getPredefines() {
       return this.predefines;
    }
 
-   public void setPredefines(List<Predefine> var1) {
-      this.predefines = var1;
+   public void setPredefines(List<Predefine> predefines) {
+      this.predefines = predefines;
    }
 
    public List<Library> getLibraries() {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 
    public List<CardCell> getCells() {
       return this.cells;
    }
 
-   public void setCells(List<CardCell> var1) {
-      this.cells = var1;
+   public void setCells(List<CardCell> cells) {
+      this.cells = cells;
    }
 }

@@ -5,10 +5,10 @@ import com.bstek.urule.parse.deserializer.FlowDeserializer;
 import org.dom4j.Element;
 
 public class FlowResourceBuilder implements ResourceBuilder<FlowDefinition> {
-   private FlowDeserializer a;
+   private FlowDeserializer flowDeserializer;
 
-   public FlowDefinition build(Element var1, String var2) {
-      return this.a.deserialize(var1);
+   public FlowDefinition build(Element root, String file) {
+      return this.flowDeserializer.deserialize(root);
    }
 
    @Override
@@ -17,11 +17,11 @@ public class FlowResourceBuilder implements ResourceBuilder<FlowDefinition> {
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1);
+   public boolean support(Element root) {
+      return this.flowDeserializer.support(root);
    }
 
-   public void setFlowDeserializer(FlowDeserializer var1) {
-      this.a = var1;
+   public void setFlowDeserializer(FlowDeserializer flowDeserializer) {
+      this.flowDeserializer = flowDeserializer;
    }
 }

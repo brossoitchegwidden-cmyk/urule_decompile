@@ -19,8 +19,8 @@ public class ParameterValue extends AbstractValue {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    @Override
@@ -32,84 +32,84 @@ public class ParameterValue extends AbstractValue {
       return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.variableName = var1;
+   public void setVariableName(String variableName) {
+      this.variableName = variableName;
    }
 
    public String getVariableLabel() {
       return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.variableLabel = var1;
+   public void setVariableLabel(String variableLabel) {
+      this.variableLabel = variableLabel;
    }
 
    public String getKeyName() {
       return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.keyName = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 
    public String getKeyLabel() {
       return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.keyLabel = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyUuid() {
       return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.keyUuid = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
    public String getKeyCategoryUuid() {
       return this.keyCategoryUuid;
    }
 
-   public void setKeyCategoryUuid(String var1) {
-      this.keyCategoryUuid = var1;
+   public void setKeyCategoryUuid(String keyCategoryUuid) {
+      this.keyCategoryUuid = keyCategoryUuid;
    }
 
    public Datatype getDatatype() {
       return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.datatype = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    @JsonIgnore
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Parameter" : "参数";
-      String var2 = "[P]" + var1;
+      String text = LocaleHolder.isEnglish() ? "Parameter" : "参数";
+      String id = "[P]" + text;
       if (this.keyLabel != null) {
-         var2 = var2 + "." + this.keyLabel;
+         id = id + "." + this.keyLabel;
       }
 
-      var2 = var2 + "." + this.variableLabel;
+      id = id + "." + this.variableLabel;
       if (this.arithmetic != null) {
-         var2 = var2 + this.arithmetic.getId();
+         id = id + this.arithmetic.getId();
       }
 
-      return var2;
+      return id;
    }
 
    @JsonIgnore
    @Override
    public String getValueId() {
-      String var1 = LocaleHolder.isEnglish() ? "Parameter" : "参数";
-      String var2 = "[P]" + var1;
+      String text = LocaleHolder.isEnglish() ? "Parameter" : "参数";
+      String text2 = "[P]" + text;
       if (this.keyLabel != null) {
-         var2 = var2 + "." + this.keyLabel;
+         text2 = text2 + "." + this.keyLabel;
       }
 
-      return var2 + "." + this.variableLabel;
+      return text2 + "." + this.variableLabel;
    }
 }

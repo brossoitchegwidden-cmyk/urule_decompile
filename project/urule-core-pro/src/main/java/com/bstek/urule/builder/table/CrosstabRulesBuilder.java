@@ -31,320 +31,324 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * Converts a cross-decision table into executable rules and preserves the
+ * parent/child relationship of merged header cells.
+ */
 public class CrosstabRulesBuilder {
-   public List<Rule> buildRules(CrosstabDefinition var1, String var2) {
-      ArrayList var3 = new ArrayList();
-      ArrayList var4 = new ArrayList();
-      ArrayList var5 = new ArrayList();
-      Map var6 = this.a(var1.getCells());
-      List var7 = var1.getRows();
-      int var8 = var7.size();
-      List var9 = var1.getColumns();
-      ArrayList var10 = new ArrayList();
-      int var11 = 0;
+   public List<Rule> buildRules(CrosstabDefinition crosstab, String path) {
+      List<Rule> rules = new ArrayList<>();
+      List<CellRange> topRanges = new ArrayList<>();
+      List<CellRange> leftRanges = new ArrayList<>();
+      Map<String, CrossCell> cellsByCoordinate = this.indexCells(crosstab.getCells());
+      List<CrossRow> rows = crosstab.getRows();
+      int rowCount = rows.size();
+      List<CrossColumn> columns = crosstab.getColumns();
+      List<CellRange> valueRanges = new ArrayList<>();
+      int topRowCount = 0;
 
-      for (int var12 = 0; var12 < var8; var12++) {
-         CrossRow var13 = (CrossRow)var7.get(var12);
-         if (var13 instanceof TopRow) {
-            var11++;
+      for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+         CrossRow crossRow = rows.get(rowIndex);
+         if (crossRow instanceof TopRow) {
+            topRowCount++;
          }
 
-         for (int var14 = 0; var14 < var9.size(); var14++) {
-            Object var15 = null;
-            CrossCell var16 = (CrossCell)var6.get(var12 + 1 + "," + (var14 + 1));
-            if (var16 != null) {
-               if (var13 instanceof TopRow) {
-                  TopRow var17 = (TopRow)var13;
-                  var15 = this.a(var16, var4, var17);
+         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+            CellRange range = null;
+            CrossCell crossCell = cellsByCoordinate.get(rowIndex + 1 + "," + (columnIndex + 1));
+            if (crossCell != null) {
+               if (crossRow instanceof TopRow) {
+                  TopRow topRow = (TopRow)crossRow;
+                  range = this.buildTopRange(crossCell, topRanges, topRow);
                } else {
-                  CrossColumn var30 = (CrossColumn)var9.get(var14);
-                  var15 = this.a(var16, var5, var30);
-                  if (var16 instanceof ValueCrossCell) {
-                     var10.add(var15);
+                  CrossColumn crossColumn = columns.get(columnIndex);
+                  range = this.buildLeftRange(crossCell, leftRanges, crossColumn);
+                  if (crossCell instanceof ValueCrossCell) {
+                     valueRanges.add(range);
                   }
                }
             }
          }
       }
 
-      for (CellRange var24 : (Iterable<CellRange>)(Iterable<?>)(var10)) {
-         CrossCell var25 = var24.getCell();
-         Rule var28 = new Rule();
-         var28.setFile(var2);
-         var28.setDebug(var1.getDebug());
-         var28.setSalience(var1.getSalience());
-         var28.setExpiresDate(var1.getExpiresDate());
-         var28.setEffectiveDate(var1.getEffectiveDate());
-         var28.setEnabled(var1.getEnabled());
-         var28.setName("rule(" + var25.getRow() + "," + var25.getCol() + ")");
-         Lhs var29 = new Lhs();
-         And var31 = new And();
-         var28.setLhs(var29);
-         Rhs var18 = new Rhs();
-         var28.setRhs(var18);
-         var3.add(var28);
-         ValueCrossCell var19 = (ValueCrossCell)var25;
-         Value var20 = var19.getValue();
-         VariableAssignAction var21 = new VariableAssignAction();
-         var21.setValue(var20);
-         var21.setDatatype(var1.getAssignDatatype());
-         var21.setVariableName(var1.getAssignVariable());
-         var21.setVariableLabel(var1.getAssignVariableLabel());
-         var21.setVariableCategory(var1.getAssignVariableCategory());
-         var21.setKeyLabel(var1.getKeyLabel());
-         var21.setKeyName(var1.getKeyName());
-         var21.setCategoryUuid(var1.getCategoryUuid());
-         var21.setUuid(var1.getUuid());
-         var18.addAction(var21);
-         this.a(var31, var24);
-         if (var31.getCriterions() != null) {
-            var29.setCriterion(var31);
+      for (CellRange cellRange : valueRanges) {
+         CrossCell cell = cellRange.getCell();
+         Rule rule = new Rule();
+         rule.setFile(path);
+         rule.setDebug(crosstab.getDebug());
+         rule.setSalience(crosstab.getSalience());
+         rule.setExpiresDate(crosstab.getExpiresDate());
+         rule.setEffectiveDate(crosstab.getEffectiveDate());
+         rule.setEnabled(crosstab.getEnabled());
+         rule.setName("rule(" + cell.getRow() + "," + cell.getCol() + ")");
+         Lhs lhs = new Lhs();
+         And and = new And();
+         rule.setLhs(lhs);
+         Rhs rhs = new Rhs();
+         rule.setRhs(rhs);
+         rules.add(rule);
+         ValueCrossCell valueCrossCell = (ValueCrossCell)cell;
+         Value value = valueCrossCell.getValue();
+         VariableAssignAction variableAssignAction = new VariableAssignAction();
+         variableAssignAction.setValue(value);
+         variableAssignAction.setDatatype(crosstab.getAssignDatatype());
+         variableAssignAction.setVariableName(crosstab.getAssignVariable());
+         variableAssignAction.setVariableLabel(crosstab.getAssignVariableLabel());
+         variableAssignAction.setVariableCategory(crosstab.getAssignVariableCategory());
+         variableAssignAction.setKeyLabel(crosstab.getKeyLabel());
+         variableAssignAction.setKeyName(crosstab.getKeyName());
+         variableAssignAction.setCategoryUuid(crosstab.getCategoryUuid());
+         variableAssignAction.setUuid(crosstab.getUuid());
+         rhs.addAction(variableAssignAction);
+         this.appendParentCriteria(and, cellRange);
+         if (and.getCriterions() != null) {
+            lhs.setCriterion(and);
          }
 
-         CellRange var22 = this.a(var4, var24.getCell().getCol(), var11);
-         var24.setParentRange(var22);
-         this.a(var31, var24);
+         CellRange topRange = this.findExactRange(topRanges, cellRange.getCell().getCol(), topRowCount);
+         cellRange.setParentRange(topRange);
+         this.appendParentCriteria(and, cellRange);
       }
 
-      return var3;
+      return rules;
    }
 
-   private CellRange a(List<CellRange> var1, int var2, int var3) {
-      CellRange var4 = null;
+   private CellRange findExactRange(List<CellRange> cellRanges, int position, int row) {
+      CellRange cellRange = null;
 
-      for (CellRange var6 : var1) {
-         if (var6.getStart() == var2 && var6.getEnd() == var2 && var6.getCell().getRow() == var3) {
-            var4 = var6;
+      for (CellRange candidate : cellRanges) {
+         if (candidate.getStart() == position && candidate.getEnd() == position && candidate.getCell().getRow() == row) {
+            cellRange = candidate;
             break;
          }
 
-         var4 = this.a(var6.getChildren(), var2, var3);
-         if (var4 != null) {
+         cellRange = this.findExactRange(candidate.getChildren(), position, row);
+         if (cellRange != null) {
             break;
          }
       }
 
-      return var4;
+      return cellRange;
    }
 
-   private void a(And var1, CellRange var2) {
-      CellRange var3 = var2.getParentRange();
-      if (var3 != null) {
-         ConditionCrossCell var4 = (ConditionCrossCell)var3.getCell();
-         Criterion var5 = this.buildCriterion(var4, var3);
-         if (var5 != null) {
-            var1.addCriterion(var5);
+   private void appendParentCriteria(And and, CellRange cellRange) {
+      CellRange parentRange = cellRange.getParentRange();
+      if (parentRange != null) {
+         ConditionCrossCell cell = (ConditionCrossCell)parentRange.getCell();
+         Criterion criterion = this.buildCriterion(cell, parentRange);
+         if (criterion != null) {
+            and.addCriterion(criterion);
          }
 
-         this.a(var1, var3);
+         this.appendParentCriteria(and, parentRange);
       }
    }
 
-   public Criterion buildCriterion(ConditionCrossCell var1, CellRange var2) {
-      Joint var3 = var1.getJoint();
-      if (var3 == null) {
+   public Criterion buildCriterion(ConditionCrossCell cell, CellRange range) {
+      Joint joint = cell.getJoint();
+      if (joint == null) {
          return null;
       }
 
-      List var4 = var3.getConditions();
-      List var5 = var3.getJoints();
-      if (var4 != null && var4.size() != 0 || var5 != null && var5.size() != 0) {
-         Junction var6 = null;
-         if (var4.size() == 1) {
-            return this.a((Condition)var4.get(0), var2);
+      List conditions = joint.getConditions();
+      List joints = joint.getJoints();
+      if (conditions != null && conditions.size() != 0 || joints != null && joints.size() != 0) {
+         Junction junction = null;
+         if (conditions.size() == 1) {
+            return this.buildCriteria((Condition)conditions.get(0), range);
          }
 
-         if (var3.getType().equals(JointType.and)) {
-            var6 = new And();
+         if (joint.getType().equals(JointType.and)) {
+            junction = new And();
          } else {
-            var6 = new Or();
+            junction = new Or();
          }
 
-         this.b(var4, var6, var2);
-         this.a(var5, var6, var2);
-         return var6;
+         this.appendConditions(conditions, junction, range);
+         this.appendNestedJoints(joints, junction, range);
+         return junction;
       } else {
          return null;
       }
    }
 
-   private void a(List<Joint> var1, Junction var2, CellRange var3) {
-      if (var1 != null && var1.size() != 0) {
-         for (Joint var5 : var1) {
-            Junction var6 = var5.getJunction();
-            List var7 = var5.getConditions();
-            this.b(var7, var6, var3);
-            List var8 = var5.getJoints();
-            this.a(var8, var6, var3);
-            var2.addCriterion(var6);
+   private void appendNestedJoints(List<Joint> joints, Junction junction, CellRange cellRange) {
+      if (joints != null && joints.size() != 0) {
+         for (Joint joint : joints) {
+            Junction childJunction = joint.getJunction();
+            List conditions = joint.getConditions();
+            this.appendConditions(conditions, childJunction, cellRange);
+            List<Joint> childJoints = joint.getJoints();
+            this.appendNestedJoints(childJoints, childJunction, cellRange);
+            junction.addCriterion(childJunction);
          }
       }
    }
 
-   private void b(List<Condition> var1, Junction var2, CellRange var3) {
-      if (var1 != null && var1.size() != 0) {
-         for (Condition var5 : var1) {
-            Criteria var6 = this.a(var5, var3);
-            var2.addCriterion(var6);
+   private void appendConditions(List<Condition> conditions, Junction junction, CellRange cellRange) {
+      if (conditions != null && conditions.size() != 0) {
+         for (Condition condition : conditions) {
+            Criteria criteria = this.buildCriteria(condition, cellRange);
+            junction.addCriterion(criteria);
          }
       }
    }
 
-   private Criteria a(Condition var1, CellRange var2) {
-      Criteria var3 = new Criteria();
-      Left var4 = new Left();
-      if (StringUtils.isNotBlank(var2.getPredefineUuid())) {
-         PredefineLeftPart var5 = new PredefineLeftPart();
-         var5.setUuid(var2.getPredefineUuid());
-         var5.setName(var2.getPredefineName());
-         var5.setVariableCategory(var2.getPredefineVariableCategory());
-         var5.setVariableCategoryUuid(var2.getPredefineVariableCategoryUuid());
-         var5.setPropertyUuid(var2.getPredefinePropertyUuid());
-         var5.setPropertyName(var2.getPredefinePropertyName());
-         var5.setPropertyLabel(var2.getPredefinePropertyLabel());
-         var4.setLeftPart(var5);
-         var4.setType(LeftType.predefine);
+   private Criteria buildCriteria(Condition condition, CellRange cellRange) {
+      Criteria criteria = new Criteria();
+      Left left = new Left();
+      if (StringUtils.isNotBlank(cellRange.getPredefineUuid())) {
+         PredefineLeftPart predefineLeftPart = new PredefineLeftPart();
+         predefineLeftPart.setUuid(cellRange.getPredefineUuid());
+         predefineLeftPart.setName(cellRange.getPredefineName());
+         predefineLeftPart.setVariableCategory(cellRange.getPredefineVariableCategory());
+         predefineLeftPart.setVariableCategoryUuid(cellRange.getPredefineVariableCategoryUuid());
+         predefineLeftPart.setPropertyUuid(cellRange.getPredefinePropertyUuid());
+         predefineLeftPart.setPropertyName(cellRange.getPredefinePropertyName());
+         predefineLeftPart.setPropertyLabel(cellRange.getPredefinePropertyLabel());
+         left.setLeftPart(predefineLeftPart);
+         left.setType(LeftType.predefine);
       } else {
-         VariableLeftPart var6 = new VariableLeftPart();
-         var6.setVariableCategory(var2.getVariableCategory());
-         var6.setVariableName(var2.getVariableName());
-         var6.setVariableLabel(var2.getVariableLabel());
-         var6.setDatatype(var2.getDatatype());
-         var6.setKeyLabel(var2.getKeyLabel());
-         var6.setKeyName(var2.getKeyName());
-         var6.setCategoryUuid(var2.getCategoryUuid());
-         var6.setUuid(var2.getUuid());
-         var4.setLeftPart(var6);
-         var4.setType(LeftType.variable);
+         VariableLeftPart variableLeftPart = new VariableLeftPart();
+         variableLeftPart.setVariableCategory(cellRange.getVariableCategory());
+         variableLeftPart.setVariableName(cellRange.getVariableName());
+         variableLeftPart.setVariableLabel(cellRange.getVariableLabel());
+         variableLeftPart.setDatatype(cellRange.getDatatype());
+         variableLeftPart.setKeyLabel(cellRange.getKeyLabel());
+         variableLeftPart.setKeyName(cellRange.getKeyName());
+         variableLeftPart.setCategoryUuid(cellRange.getCategoryUuid());
+         variableLeftPart.setUuid(cellRange.getUuid());
+         left.setLeftPart(variableLeftPart);
+         left.setType(LeftType.variable);
       }
 
-      var3.setLeft(var4);
-      var3.setOp(var1.getOp());
-      var3.setValue(var1.getValue());
-      return var3;
+      criteria.setLeft(left);
+      criteria.setOp(condition.getOp());
+      criteria.setValue(condition.getValue());
+      return criteria;
    }
 
-   private CellRange a(CrossCell var1, List<CellRange> var2, TopRow var3) {
-      int var4 = var1.getCol();
-      int var5 = var1.getColspan();
-      if (var5 > 0) {
-         var5--;
+   private CellRange buildTopRange(CrossCell crossCell, List<CellRange> cellRanges, TopRow topRow) {
+      int col = crossCell.getCol();
+      int colspan = crossCell.getColspan();
+      if (colspan > 0) {
+         colspan--;
       }
 
-      int var6 = var4 + var5;
-      CellRange var7 = new CellRange();
-      var7.setStart(var4);
-      var7.setEnd(var6);
-      var7.setCell(var1);
-      var7.setPredefineUuid(var3.getPredefineUuid());
-      var7.setPredefineName(var3.getPredefineName());
-      var7.setPredefineDatatype(var3.getPredefineDatatype());
-      var7.setPredefineVariableCategory(var3.getPredefineVariableCategory());
-      var7.setPredefineVariableCategoryUuid(var3.getPredefineVariableCategoryUuid());
-      var7.setPredefinePropertyUuid(var3.getPredefinePropertyUuid());
-      var7.setPredefinePropertyName(var3.getPredefinePropertyName());
-      var7.setPredefinePropertyLabel(var3.getPredefinePropertyLabel());
-      var7.setVariableCategory(var3.getVariableCategory());
-      var7.setVariableName(var3.getVariableName());
-      var7.setVariableLabel(var3.getVariableLabel());
-      var7.setDatatype(var3.getDatatype());
-      var7.setKeyLabel(var3.getKeyLabel());
-      var7.setKeyName(var3.getKeyName());
-      var7.setCategoryUuid(var3.getCategoryUuid());
-      var7.setUuid(var3.getUuid());
-      if (var4 == 1) {
-         var2.add(var7);
+      int number = col + colspan;
+      CellRange cellRange = new CellRange();
+      cellRange.setStart(col);
+      cellRange.setEnd(number);
+      cellRange.setCell(crossCell);
+      cellRange.setPredefineUuid(topRow.getPredefineUuid());
+      cellRange.setPredefineName(topRow.getPredefineName());
+      cellRange.setPredefineDatatype(topRow.getPredefineDatatype());
+      cellRange.setPredefineVariableCategory(topRow.getPredefineVariableCategory());
+      cellRange.setPredefineVariableCategoryUuid(topRow.getPredefineVariableCategoryUuid());
+      cellRange.setPredefinePropertyUuid(topRow.getPredefinePropertyUuid());
+      cellRange.setPredefinePropertyName(topRow.getPredefinePropertyName());
+      cellRange.setPredefinePropertyLabel(topRow.getPredefinePropertyLabel());
+      cellRange.setVariableCategory(topRow.getVariableCategory());
+      cellRange.setVariableName(topRow.getVariableName());
+      cellRange.setVariableLabel(topRow.getVariableLabel());
+      cellRange.setDatatype(topRow.getDatatype());
+      cellRange.setKeyLabel(topRow.getKeyLabel());
+      cellRange.setKeyName(topRow.getKeyName());
+      cellRange.setCategoryUuid(topRow.getCategoryUuid());
+      cellRange.setUuid(topRow.getUuid());
+      if (col == 1) {
+         cellRanges.add(cellRange);
       } else {
-         CellRange var8 = this.a(var4, var6, var2);
-         if (var8 != null) {
-            var8.addChildRange(var7);
+         CellRange parentRange = this.findContainingRange(col, number, cellRanges);
+         if (parentRange != null) {
+            parentRange.addChildRange(cellRange);
          } else {
-            var2.add(var7);
+            cellRanges.add(cellRange);
          }
       }
 
-      return var7;
+      return cellRange;
    }
 
-   private CellRange a(CrossCell var1, List<CellRange> var2, CrossColumn var3) {
-      int var4 = var1.getRow();
-      int var5 = var1.getRowspan();
-      if (var5 > 0) {
-         var5--;
+   private CellRange buildLeftRange(CrossCell crossCell, List<CellRange> cellRanges, CrossColumn crossColumn) {
+      int row = crossCell.getRow();
+      int rowspan = crossCell.getRowspan();
+      if (rowspan > 0) {
+         rowspan--;
       }
 
-      int var6 = var4 + var5;
-      CellRange var7 = new CellRange();
-      var7.setStart(var4);
-      var7.setEnd(var6);
-      var7.setCell(var1);
-      if (var3 instanceof LeftColumn) {
-         LeftColumn var8 = (LeftColumn)var3;
-         var7.setPredefineUuid(var8.getPredefineUuid());
-         var7.setPredefineName(var8.getPredefineName());
-         var7.setPredefineDatatype(var8.getPredefineDatatype());
-         var7.setPredefineVariableCategory(var8.getPredefineVariableCategory());
-         var7.setPredefineVariableCategoryUuid(var8.getPredefineVariableCategoryUuid());
-         var7.setPredefinePropertyUuid(var8.getPredefinePropertyUuid());
-         var7.setPredefinePropertyName(var8.getPredefinePropertyName());
-         var7.setPredefinePropertyLabel(var8.getPredefinePropertyLabel());
-         var7.setVariableCategory(var8.getVariableCategory());
-         var7.setVariableName(var8.getVariableName());
-         var7.setVariableLabel(var8.getVariableLabel());
-         var7.setDatatype(var8.getDatatype());
-         var7.setKeyLabel(var8.getKeyLabel());
-         var7.setKeyName(var8.getKeyName());
-         var7.setCategoryUuid(var8.getCategoryUuid());
-         var7.setUuid(var8.getUuid());
+      int number = row + rowspan;
+      CellRange cellRange = new CellRange();
+      cellRange.setStart(row);
+      cellRange.setEnd(number);
+      cellRange.setCell(crossCell);
+      if (crossColumn instanceof LeftColumn) {
+         LeftColumn leftColumn = (LeftColumn)crossColumn;
+         cellRange.setPredefineUuid(leftColumn.getPredefineUuid());
+         cellRange.setPredefineName(leftColumn.getPredefineName());
+         cellRange.setPredefineDatatype(leftColumn.getPredefineDatatype());
+         cellRange.setPredefineVariableCategory(leftColumn.getPredefineVariableCategory());
+         cellRange.setPredefineVariableCategoryUuid(leftColumn.getPredefineVariableCategoryUuid());
+         cellRange.setPredefinePropertyUuid(leftColumn.getPredefinePropertyUuid());
+         cellRange.setPredefinePropertyName(leftColumn.getPredefinePropertyName());
+         cellRange.setPredefinePropertyLabel(leftColumn.getPredefinePropertyLabel());
+         cellRange.setVariableCategory(leftColumn.getVariableCategory());
+         cellRange.setVariableName(leftColumn.getVariableName());
+         cellRange.setVariableLabel(leftColumn.getVariableLabel());
+         cellRange.setDatatype(leftColumn.getDatatype());
+         cellRange.setKeyLabel(leftColumn.getKeyLabel());
+         cellRange.setKeyName(leftColumn.getKeyName());
+         cellRange.setCategoryUuid(leftColumn.getCategoryUuid());
+         cellRange.setUuid(leftColumn.getUuid());
       }
 
-      if (var4 == 1) {
-         var2.add(var7);
+      if (row == 1) {
+         cellRanges.add(cellRange);
       } else {
-         CellRange var9 = this.a(var4, var6, var2);
-         if (var9 != null) {
-            var9.addChildRange(var7);
+         CellRange parentRange = this.findContainingRange(row, number, cellRanges);
+         if (parentRange != null) {
+            parentRange.addChildRange(cellRange);
          } else {
-            var2.add(var7);
+            cellRanges.add(cellRange);
          }
       }
 
-      return var7;
+      return cellRange;
    }
 
-   private CellRange a(int var1, int var2, List<CellRange> var3) {
-      CellRange var4 = null;
+   private CellRange findContainingRange(int start, int end, List<CellRange> cellRanges) {
+      CellRange cellRange = null;
 
-      for (CellRange var6 : var3) {
-         boolean var7 = false;
-         if (!var6.isValueCell() && var6.getStart() <= var1 && var6.getEnd() >= var2) {
-            var7 = true;
+      for (CellRange candidate : cellRanges) {
+         boolean containsRange = false;
+         if (!candidate.isValueCell() && candidate.getStart() <= start && candidate.getEnd() >= end) {
+            containsRange = true;
          }
 
-         if (var7) {
-            List var8 = var6.getChildren();
-            if (var8.size() > 0) {
-               var4 = this.a(var1, var2, var8);
+         if (containsRange) {
+            List<CellRange> children = candidate.getChildren();
+            if (children.size() > 0) {
+               cellRange = this.findContainingRange(start, end, children);
             }
 
-            if (var4 == null) {
-               var4 = var6;
+            if (cellRange == null) {
+               cellRange = candidate;
             }
             break;
          }
       }
 
-      return var4;
+      return cellRange;
    }
 
-   private Map<String, CrossCell> a(List<CrossCell> var1) {
-      HashMap var2 = new HashMap();
+   private Map<String, CrossCell> indexCells(List<CrossCell> crossCells) {
+      Map<String, CrossCell> cellsByCoordinate = new HashMap<>();
 
-      for (CrossCell var4 : var1) {
-         String var5 = var4.getRow() + "," + var4.getCol();
-         var2.put(var5, var4);
+      for (CrossCell crossCell : crossCells) {
+         String coordinate = crossCell.getRow() + "," + crossCell.getCol();
+         cellsByCoordinate.put(coordinate, crossCell);
       }
 
-      return var2;
+      return cellsByCoordinate;
    }
 }

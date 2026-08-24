@@ -6,19 +6,19 @@ import java.util.List;
 import org.springframework.context.ApplicationContext;
 
 public class ActionUtils {
-   public static SpringBean getBuiltinAction(String var0) {
-      ApplicationContext var1 = Utils.getApplicationContext();
-      BuiltInActionLibraryBuilder var2 = (BuiltInActionLibraryBuilder)var1.getBean("urule.builtInActionLibraryBuilder");
-      List var3 = var2.getBuiltInActions();
-      SpringBean var4 = null;
+   public static SpringBean getBuiltinAction(String beanId) {
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      BuiltInActionLibraryBuilder builtInActionLibraryBuilder = (BuiltInActionLibraryBuilder)applicationContext.getBean("urule.builtInActionLibraryBuilder");
+      List builtInActions = builtInActionLibraryBuilder.getBuiltInActions();
+      SpringBean springBean = null;
 
-      for (SpringBean var6 : (Iterable<SpringBean>)(Iterable<?>)(var3)) {
-         if (var6.getId().equals(var0)) {
-            var4 = var6;
+      for (SpringBean springBean2 : (Iterable<SpringBean>)(Iterable<?>)(builtInActions)) {
+         if (springBean2.getId().equals(beanId)) {
+            springBean = springBean2;
             break;
          }
       }
 
-      return var4;
+      return springBean;
    }
 }

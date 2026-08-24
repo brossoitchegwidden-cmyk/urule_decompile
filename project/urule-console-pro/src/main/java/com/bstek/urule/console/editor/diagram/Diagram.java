@@ -3,45 +3,45 @@ package com.bstek.urule.console.editor.diagram;
 import java.util.List;
 
 public class Diagram {
-   private List a;
-   private NodeInfo b;
-   private int c;
-   private int d;
+   private List edges;
+   private NodeInfo rootNode;
+   private int width;
+   private int height;
 
-   public Diagram(List var1, NodeInfo var2) {
-      this.a = var1;
-      this.b = var2;
+   public Diagram(List edges, NodeInfo rootNode) {
+      this.edges = edges;
+      this.rootNode = rootNode;
    }
 
    public List getEdges() {
-      return this.a;
+      return this.edges;
    }
 
-   public void setEdges(List var1) {
-      this.a = var1;
+   public void setEdges(List edges) {
+      this.edges = edges;
    }
 
    public NodeInfo getRootNode() {
-      return this.b;
+      return this.rootNode;
    }
 
-   public void setRootNode(NodeInfo var1) {
-      this.b = var1;
+   public void setRootNode(NodeInfo rootNode) {
+      this.rootNode = rootNode;
    }
 
    public int getWidth() {
-      return this.c;
+      return this.width;
    }
 
-   public void setWidth(int var1) {
-      this.c = var1;
+   public void setWidth(int width) {
+      this.width = width;
    }
 
    public int getHeight() {
-      return this.d;
+      return this.height;
    }
 
-   public void setHeight(int var1) {
-      this.d = var1;
+   public void setHeight(int height) {
+      this.height = height;
    }
 }

@@ -24,363 +24,363 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class HiveTranService extends AbstractBatchService {
-   private static Log a = LogFactory.getLog(HiveTranService.class);
-   private static Writer b;
+   private static Log logger = LogFactory.getLog(HiveTranService.class);
+   private static Writer hiveWriter;
 
-   private Writer b() {
-      if (b == null) {
-         b = new HiveWriter();
+   private Writer resolveWriter() {
+      if (HiveTranService.hiveWriter == null) {
+         HiveTranService.hiveWriter = new HiveWriter();
       }
 
-      return b;
+      return HiveTranService.hiveWriter;
    }
 
-   protected void a(BatchContext var1, Map var2, GeneralEntity var3, Map var4) throws Exception {
-      Map var5 = this.a().fireRules(var1, var3);
-      WriterUtils.write(var1, this.b(), var2, var5, var3, var4);
+   protected void processRecord(BatchContext batchContext, Map valuesByKey2, GeneralEntity generalEntity, Map valuesByKey3) throws Exception {
+      Map valuesByKey = this.getRuleProcessor().fireRules(batchContext, generalEntity);
+      WriterUtils.write(batchContext, this.resolveWriter(), valuesByKey2, valuesByKey, generalEntity, valuesByKey3);
    }
 
-   public void execute(BatchContext var1) {
-      Batch var2 = var1.getBatch();
-      BatchResult var3 = var1.getResult();
-      boolean var4 = this.a(var1);
-      if (var4) {
+   public void execute(BatchContext batchContext) {
+      Batch batch = batchContext.getBatch();
+      BatchResult batchResult = batchContext.getResult();
+      boolean flag = this.beforeExecute(batchContext);
+      if (flag) {
          try {
-            if (var2.getDataProvider().isSupportsPaging()) {
-               this.executeByPage(var1);
+            if (batch.getDataProvider().isSupportsPaging()) {
+               this.executeByPage(batchContext);
             } else {
-               this.executeTotal(var1);
+               this.executeTotal(batchContext);
             }
-         } catch (Exception var9) {
-            a.error(var9);
-            var3.setStatus(BatchStatus.failed);
-            var3.setException(var9);
+         } catch (Exception exception) {
+            HiveTranService.logger.error(exception);
+            batchResult.setStatus(BatchStatus.failed);
+            batchResult.setException(exception);
          } finally {
-            this.closeConnection(var1.getReadConnection());
+            this.closeConnection(batchContext.getReadConnection());
          }
 
       }
    }
 
-   public void executeByPage(BatchContext var1) {
-      BatchResult var2 = var1.getResult();
-      Connection var3 = var1.getReadConnection();
-      Batch var4 = var1.getBatch();
-      BatchDataResolver var5 = var4.getDataResolver();
-      ArrayList var6 = new ArrayList();
-      ArrayList var7 = new ArrayList();
-      Map var8 = this.a(var5);
-      Connection var9 = null;
-      Statement var10 = null;
+   public void executeByPage(BatchContext batchContext) {
+      BatchResult batchResult = batchContext.getResult();
+      Connection readConnection = batchContext.getReadConnection();
+      Batch batch = batchContext.getBatch();
+      BatchDataResolver dataResolver = batch.getDataResolver();
+      ArrayList items = new ArrayList();
+      ArrayList items2 = new ArrayList();
+      Map valuesByKey = this.prepareItemResult(dataResolver);
+      Connection connection = null;
+      Statement statement = null;
 
       try {
-         int var11 = 0;
-         var9 = this.getWriteDataSource(var4).getConnection();
-         BatchStatus var12 = var4.getStatus();
-         Map var13 = this.b(var5);
-         var10 = var9.createStatement();
+         int number = 0;
+         connection = this.getWriteDataSource(batch).getConnection();
+         BatchStatus status = batch.getStatus();
+         Map valuesByKey2 = this.prepareStmts(dataResolver);
+         statement = connection.createStatement();
 
-         for(int var14 = 0; var14 < var1.getPageCount(); ++var14) {
-            if (this.getBatchStatus(var4.getId()) == BatchStatus.stop) {
-               var12 = BatchStatus.stop;
+         for(int index = 0; index < batchContext.getPageCount(); ++index) {
+            if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+               status = BatchStatus.stop;
                break;
             }
 
-            a.debug("execute batch 【" + var4.getName() + "】pageIndex:" + var14);
-            BatchResult var15 = new BatchResult();
-            var7.add(var15);
-            a.debug("execute batch 【" + var4.getName() + "】loadData pageIndex:" + var14 + "...");
-            List var16 = this.loadDatas(var3, var1, var14);
-            var11 += var16.size();
-            HashMap var17 = new HashMap();
+            HiveTranService.logger.debug("execute batch 【" + batch.getName() + "】pageIndex:" + index);
+            BatchResult batchResult2 = new BatchResult();
+            items2.add(batchResult2);
+            HiveTranService.logger.debug("execute batch 【" + batch.getName() + "】loadData pageIndex:" + index + "...");
+            List datas = this.loadDatas(readConnection, batchContext, index);
+            number += datas.size();
+            HashMap valuesByKey3 = new HashMap();
 
-            for(int var18 = 0; var18 < var16.size(); ++var18) {
-               GeneralEntity var19 = (GeneralEntity)var16.get(var18);
-               Object var20 = null;
-               Map var36 = this.a(var5);
-               var17.put(var18, var36);
+            for(int index2 = 0; index2 < datas.size(); ++index2) {
+               GeneralEntity generalEntity = (GeneralEntity)datas.get(index2);
+               Object objectValue = null;
+               Map valuesByKey4 = this.prepareItemResult(dataResolver);
+               valuesByKey3.put(index2, valuesByKey4);
 
                try {
-                  this.a(var1, var13, var19, var36);
-               } catch (Exception var28) {
-                  a.error(var28);
-                  var2.setException(var28);
-                  var6.add(var28);
-                  if (var4.getSkipLimit() <= 0) {
-                     throw var28;
+                  this.processRecord(batchContext, valuesByKey2, generalEntity, valuesByKey4);
+               } catch (Exception exception) {
+                  HiveTranService.logger.error(exception);
+                  batchResult.setException(exception);
+                  items.add(exception);
+                  if (batch.getSkipLimit() <= 0) {
+                     throw exception;
                   }
 
-                  if (var4.getSkipLimit() < var6.size()) {
-                     throw var28;
+                  if (batch.getSkipLimit() < items.size()) {
+                     throw exception;
                   }
                }
             }
 
-            this.a(var4, var15, var17);
+            this.mergeItemResults(batch, batchResult2, valuesByKey3);
 
             try {
-               this.a(var10, var13, var5, var8, false);
-            } catch (Exception var29) {
-               a.error(var29);
-               var2.setException(var29);
-               var6.add(var29);
-               if (var4.getSkipLimit() <= 0) {
-                  throw var29;
+               this.executePendingStatements(statement, valuesByKey2, dataResolver, valuesByKey, false);
+            } catch (Exception exception2) {
+               HiveTranService.logger.error(exception2);
+               batchResult.setException(exception2);
+               items.add(exception2);
+               if (batch.getSkipLimit() <= 0) {
+                  throw exception2;
                }
 
-               if (var4.getSkipLimit() < var6.size()) {
-                  throw var29;
+               if (batch.getSkipLimit() < items.size()) {
+                  throw exception2;
                }
             }
          }
 
          try {
-            this.a(var10, var13, var5, var8, true);
-         } catch (Exception var30) {
-            a.error(var30);
-            var2.setException(var30);
-            var6.add(var30);
-            if (var4.getSkipLimit() <= 0) {
-               throw var30;
+            this.executePendingStatements(statement, valuesByKey2, dataResolver, valuesByKey, true);
+         } catch (Exception exception3) {
+            HiveTranService.logger.error(exception3);
+            batchResult.setException(exception3);
+            items.add(exception3);
+            if (batch.getSkipLimit() <= 0) {
+               throw exception3;
             }
 
-            if (var4.getSkipLimit() < var6.size()) {
-               throw var30;
+            if (batch.getSkipLimit() < items.size()) {
+               throw exception3;
             }
          }
 
-         if (var12 != BatchStatus.stop) {
-            var2.setFilterCount(var2.getReadCount() - var11);
-            this.a(var4, var2, var7);
-            this.b(var4, var2, var8);
-            boolean var33 = false;
+         if (status != BatchStatus.stop) {
+            batchResult.setFilterCount(batchResult.getReadCount() - number);
+            this.mergeBatchResults(batch, batchResult, items2);
+            this.applyWriteCounts(batch, batchResult, valuesByKey);
+            boolean flag = false;
 
-            for(BatchItemResult var35 : (Iterable<BatchItemResult>)(Iterable<?>)(var2.getItemResults().values())) {
-               if (var35.getWriteCount() > 0) {
-                  var33 = true;
+            for(BatchItemResult batchItemResult : (Iterable<BatchItemResult>)(Iterable<?>)(batchResult.getItemResults().values())) {
+               if (batchItemResult.getWriteCount() > 0) {
+                  flag = true;
                   break;
                }
             }
 
-            if (var33) {
-               var2.setStatus(BatchStatus.completed);
-               var2.setMsg(BatchStatus.completed.name());
+            if (flag) {
+               batchResult.setStatus(BatchStatus.completed);
+               batchResult.setMsg(BatchStatus.completed.name());
             } else {
-               var2.setStatus(BatchStatus.failed);
+               batchResult.setStatus(BatchStatus.failed);
             }
          } else {
-            var2.setStatus(BatchStatus.stop);
+            batchResult.setStatus(BatchStatus.stop);
          }
-      } catch (Exception var31) {
-         a.error(var31);
-         var2.setStatus(BatchStatus.failed);
-         var2.setException(var31);
+      } catch (Exception exception4) {
+         HiveTranService.logger.error(exception4);
+         batchResult.setStatus(BatchStatus.failed);
+         batchResult.setException(exception4);
       } finally {
-         JdbcUtils.closeStatement(var10);
-         var2.setExceptions(var6);
-         this.closeConnection(var9);
+         JdbcUtils.closeStatement(statement);
+         batchResult.setExceptions(items);
+         this.closeConnection(connection);
       }
 
    }
 
-   protected Map b(BatchDataResolver var1) throws SQLException {
-      HashMap var2 = new HashMap();
+   protected Map prepareStmts(BatchDataResolver resolver) throws SQLException {
+      HashMap prepareStmtsResult = new HashMap();
 
-      for(BatchDataResolverItem var4 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var1.getItems())) {
-         HiveStatement var5 = new HiveStatement();
-         var2.put(var4.getName(), var5);
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(resolver.getItems())) {
+         HiveStatement hiveStatement = new HiveStatement();
+         prepareStmtsResult.put(batchDataResolverItem.getName(), hiveStatement);
       }
 
-      return var2;
+      return prepareStmtsResult;
    }
 
-   protected void a(Statement var1, Map var2, BatchDataResolver var3, Map var4, boolean var5) throws SQLException {
+   protected void executePendingStatements(Statement statement, Map valuesByKey, BatchDataResolver batchDataResolver, Map valuesByKey2, boolean flag) throws SQLException {
       try {
-         for(String var7 : (Iterable<String>)(Iterable<?>)(var2.keySet())) {
-            BatchItemResult var8 = (BatchItemResult)var4.get(var7);
-            HiveStatement var9 = (HiveStatement)var2.get(var7);
-            List var10 = var9.getBatchSqls();
+         for(String text : (Iterable<String>)(Iterable<?>)(valuesByKey.keySet())) {
+            BatchItemResult batchItemResult = (BatchItemResult)valuesByKey2.get(text);
+            HiveStatement hiveStatement = (HiveStatement)valuesByKey.get(text);
+            List batchSqls = hiveStatement.getBatchSqls();
 
-            for(BatchDataResolverItem var12 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var3.getItems())) {
-               if (var12.getName().equals(var7)) {
-                  if (var5 && var10.size() > 0) {
-                     if (var10.size() >= var12.getCommitLimit()) {
-                        this.a(var1, var9, var12, var8);
+            for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(batchDataResolver.getItems())) {
+               if (batchDataResolverItem.getName().equals(text)) {
+                  if (flag && batchSqls.size() > 0) {
+                     if (batchSqls.size() >= batchDataResolverItem.getCommitLimit()) {
+                        this.flushBatchSql(statement, hiveStatement, batchDataResolverItem, batchItemResult);
                      } else {
-                        String var13 = var12.getUpdateSql();
-                        var13 = var13 + " values ";
-                        String var14 = "";
+                        String updateSql = batchDataResolverItem.getUpdateSql();
+                        updateSql = updateSql + " values ";
+                        String text2 = "";
 
-                        for(int var15 = 0; var15 < var10.size(); ++var15) {
-                           String var16 = (String)var10.get(var15);
-                           if (var15 > 0) {
-                              var14 = var14 + ",";
+                        for(int index = 0; index < batchSqls.size(); ++index) {
+                           String text3 = (String)batchSqls.get(index);
+                           if (index > 0) {
+                              text2 = text2 + ",";
                            }
 
-                           var14 = var14 + "(" + var16 + ")";
+                           text2 = text2 + "(" + text3 + ")";
                         }
 
-                        a.debug(var13 + var14);
-                        var1.executeUpdate(var13 + var14);
-                        var8.setWriteCount(var8.getWriteCount() + var10.size());
-                        var9.setBatchSqls(new ArrayList());
+                        HiveTranService.logger.debug(updateSql + text2);
+                        statement.executeUpdate(updateSql + text2);
+                        batchItemResult.setWriteCount(batchItemResult.getWriteCount() + batchSqls.size());
+                        hiveStatement.setBatchSqls(new ArrayList());
                      }
-                  } else if (!var5 && var10.size() >= var12.getCommitLimit()) {
-                     this.a(var1, var9, var12, var8);
+                  } else if (!flag && batchSqls.size() >= batchDataResolverItem.getCommitLimit()) {
+                     this.flushBatchSql(statement, hiveStatement, batchDataResolverItem, batchItemResult);
                   }
                }
             }
          }
 
-      } catch (Exception var17) {
-         var17.printStackTrace();
-         throw new SqlBatchException(var17.getMessage(), var17);
+      } catch (Exception exception) {
+         java.util.logging.Logger.getLogger(HiveTranService.class.getName()).log(java.util.logging.Level.SEVERE, exception.getMessage(), exception);
+         throw new SqlBatchException(exception.getMessage(), exception);
       }
    }
 
-   private void a(Statement var1, HiveStatement var2, BatchDataResolverItem var3, BatchItemResult var4) throws Exception {
-      List var5 = var2.getBatchSqls();
-      String var6 = var3.getUpdateSql();
-      var6 = var6 + " values ";
-      String var7 = "";
+   private void flushBatchSql(Statement statement, HiveStatement hiveStatement, BatchDataResolverItem batchDataResolverItem, BatchItemResult batchItemResult) throws Exception {
+      List batchSqls = hiveStatement.getBatchSqls();
+      String updateSql = batchDataResolverItem.getUpdateSql();
+      updateSql = updateSql + " values ";
+      String text = "";
 
-      for(int var8 = 0; var8 < var3.getCommitLimit(); ++var8) {
-         String var9 = (String)var5.get(var8);
-         if (var8 > 0) {
-            var7 = var7 + ",";
+      for(int index = 0; index < batchDataResolverItem.getCommitLimit(); ++index) {
+         String text2 = (String)batchSqls.get(index);
+         if (index > 0) {
+            text = text + ",";
          }
 
-         var7 = var7 + "(" + var9 + ")";
+         text = text + "(" + text2 + ")";
       }
 
-      a.debug(var6 + var7);
-      var1.executeUpdate(var6 + var7);
-      var4.setWriteCount(var4.getWriteCount() + var3.getCommitLimit());
-      var5 = var5.subList(var3.getCommitLimit(), var5.size());
-      var2.setBatchSqls(var5);
-      if (var5.size() > var3.getCommitLimit()) {
-         this.a(var1, var2, var3, var4);
+      HiveTranService.logger.debug(updateSql + text);
+      statement.executeUpdate(updateSql + text);
+      batchItemResult.setWriteCount(batchItemResult.getWriteCount() + batchDataResolverItem.getCommitLimit());
+      batchSqls = batchSqls.subList(batchDataResolverItem.getCommitLimit(), batchSqls.size());
+      hiveStatement.setBatchSqls(batchSqls);
+      if (batchSqls.size() > batchDataResolverItem.getCommitLimit()) {
+         this.flushBatchSql(statement, hiveStatement, batchDataResolverItem, batchItemResult);
       }
 
    }
 
-   public void executeTotal(BatchContext var1) {
-      BatchResult var2 = var1.getResult();
-      Batch var3 = var1.getBatch();
-      BatchDataResolver var4 = var3.getDataResolver();
-      Object var5 = null;
-      List var29 = null;
+   public void executeTotal(BatchContext batchContext) {
+      BatchResult batchResult = batchContext.getResult();
+      Batch batch = batchContext.getBatch();
+      BatchDataResolver dataResolver = batch.getDataResolver();
+      Object objectValue = null;
+      List datas = null;
 
       try {
-         a.debug("execute batch 【" + var3.getName() + "】loadData ...");
-         var29 = this.loadDatas(var1.getReadConnection(), var1, -1);
-         var2.setFilterCount(var2.getReadCount() - var29.size());
-         a.debug("execute batch 【" + var3.getName() + "】data size:" + var29.size());
-      } catch (Exception var23) {
-         var2.setStatus(BatchStatus.failed);
-         var2.setException(var23);
+         HiveTranService.logger.debug("execute batch 【" + batch.getName() + "】loadData ...");
+         datas = this.loadDatas(batchContext.getReadConnection(), batchContext, -1);
+         batchResult.setFilterCount(batchResult.getReadCount() - datas.size());
+         HiveTranService.logger.debug("execute batch 【" + batch.getName() + "】data size:" + datas.size());
+      } catch (Exception exception) {
+         batchResult.setStatus(BatchStatus.failed);
+         batchResult.setException(exception);
          return;
       }
 
-      ArrayList var7 = new ArrayList();
-      HashMap var8 = new HashMap();
-      Connection var9 = null;
-      Statement var10 = null;
-      Map var11 = this.a(var4);
+      ArrayList items = new ArrayList();
+      HashMap valuesByKey = new HashMap();
+      Connection connection = null;
+      Statement statement = null;
+      Map valuesByKey2 = this.prepareItemResult(dataResolver);
 
       try {
-         var9 = this.getWriteDataSource(var3).getConnection();
-         var10 = var9.createStatement();
-         Map var28 = this.b(var4);
-         BatchStatus var12 = var3.getStatus();
+         connection = this.getWriteDataSource(batch).getConnection();
+         statement = connection.createStatement();
+         Map valuesByKey3 = this.prepareStmts(dataResolver);
+         BatchStatus status = batch.getStatus();
 
-         for(int var13 = 0; var13 < var29.size(); ++var13) {
-            GeneralEntity var14 = (GeneralEntity)var29.get(var13);
-            Map var15 = this.a(var4);
-            var8.put(var13, var15);
-            if (var13 % 10000 == 0) {
-               if (a.isDebugEnabled()) {
-                  a.debug("execute batch 【" + var3.getName() + "】record index: " + var13 + "...");
+         for(int index = 0; index < datas.size(); ++index) {
+            GeneralEntity generalEntity = (GeneralEntity)datas.get(index);
+            Map valuesByKey4 = this.prepareItemResult(dataResolver);
+            valuesByKey.put(index, valuesByKey4);
+            if (index % 10000 == 0) {
+               if (HiveTranService.logger.isDebugEnabled()) {
+                  HiveTranService.logger.debug("execute batch 【" + batch.getName() + "】record index: " + index + "...");
                }
 
-               if (this.getBatchStatus(var3.getId()) == BatchStatus.stop) {
-                  var12 = BatchStatus.stop;
+               if (this.getBatchStatus(batch.getId()) == BatchStatus.stop) {
+                  status = BatchStatus.stop;
                   break;
                }
             }
 
             try {
-               this.a(var1, var28, var14, var15);
-               this.a(var10, var28, var4, var11, false);
-            } catch (Exception var24) {
-               a.error(var24);
-               var7.add(var24);
-               if (var3.getSkipLimit() <= 0) {
-                  throw var24;
+               this.processRecord(batchContext, valuesByKey3, generalEntity, valuesByKey4);
+               this.executePendingStatements(statement, valuesByKey3, dataResolver, valuesByKey2, false);
+            } catch (Exception exception2) {
+               HiveTranService.logger.error(exception2);
+               items.add(exception2);
+               if (batch.getSkipLimit() <= 0) {
+                  throw exception2;
                }
 
-               if (var3.getSkipLimit() < var7.size()) {
-                  throw var24;
+               if (batch.getSkipLimit() < items.size()) {
+                  throw exception2;
                }
             }
          }
 
          try {
-            this.a(var10, var28, var4, var11, true);
-         } catch (Exception var25) {
-            a.error(var25);
-            var2.setException(var25);
-            var7.add(var25);
-            if (var3.getSkipLimit() <= 0) {
-               throw var25;
+            this.executePendingStatements(statement, valuesByKey3, dataResolver, valuesByKey2, true);
+         } catch (Exception exception3) {
+            HiveTranService.logger.error(exception3);
+            batchResult.setException(exception3);
+            items.add(exception3);
+            if (batch.getSkipLimit() <= 0) {
+               throw exception3;
             }
 
-            if (var3.getSkipLimit() < var7.size()) {
-               throw var25;
+            if (batch.getSkipLimit() < items.size()) {
+               throw exception3;
             }
          }
 
-         if (var12 != BatchStatus.stop) {
-            this.a(var3, var2, var8);
-            this.b(var3, var2, var11);
-            boolean var30 = false;
+         if (status != BatchStatus.stop) {
+            this.mergeItemResults(batch, batchResult, valuesByKey);
+            this.applyWriteCounts(batch, batchResult, valuesByKey2);
+            boolean flag = false;
 
-            for(BatchItemResult var32 : (Iterable<BatchItemResult>)(Iterable<?>)(var2.getItemResults().values())) {
-               if (var32.getWriteCount() > 0) {
-                  var30 = true;
+            for(BatchItemResult batchItemResult : (Iterable<BatchItemResult>)(Iterable<?>)(batchResult.getItemResults().values())) {
+               if (batchItemResult.getWriteCount() > 0) {
+                  flag = true;
                   break;
                }
             }
 
-            if (var30) {
-               var2.setStatus(BatchStatus.completed);
-               var2.setMsg(BatchStatus.completed.name());
+            if (flag) {
+               batchResult.setStatus(BatchStatus.completed);
+               batchResult.setMsg(BatchStatus.completed.name());
             } else {
-               var2.setStatus(BatchStatus.failed);
-               var2.setMsg(BatchStatus.failed.name());
+               batchResult.setStatus(BatchStatus.failed);
+               batchResult.setMsg(BatchStatus.failed.name());
             }
          } else {
-            var2.setStatus(BatchStatus.stop);
+            batchResult.setStatus(BatchStatus.stop);
          }
-      } catch (Exception var26) {
-         var2.setStatus(BatchStatus.failed);
-         var2.setException(var26);
+      } catch (Exception exception4) {
+         batchResult.setStatus(BatchStatus.failed);
+         batchResult.setException(exception4);
       } finally {
-         JdbcUtils.closeStatement(var10);
-         var2.setExceptions(var7);
-         this.closeConnection(var9);
+         JdbcUtils.closeStatement(statement);
+         batchResult.setExceptions(items);
+         this.closeConnection(connection);
       }
 
    }
 
-   protected void b(Batch var1, BatchResult var2, Map var3) {
-      for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var1.getDataResolver().getItems())) {
-         String var6 = var5.getName();
-         BatchItemResult var7 = (BatchItemResult)var2.getItemResults().get(var6);
+   protected void applyWriteCounts(Batch batch, BatchResult batchResult, Map valuesByKey) {
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(batch.getDataResolver().getItems())) {
+         String name = batchDataResolverItem.getName();
+         BatchItemResult batchItemResult = (BatchItemResult)batchResult.getItemResults().get(name);
 
-         for(BatchItemResult var9 : (Iterable<BatchItemResult>)(Iterable<?>)(var3.values())) {
-            if (var9.getName().equals(var6)) {
-               var7.setWriteCount(var9.getWriteCount());
+         for(BatchItemResult batchItemResult2 : (Iterable<BatchItemResult>)(Iterable<?>)(valuesByKey.values())) {
+            if (batchItemResult2.getName().equals(name)) {
+               batchItemResult.setWriteCount(batchItemResult2.getWriteCount());
                break;
             }
          }

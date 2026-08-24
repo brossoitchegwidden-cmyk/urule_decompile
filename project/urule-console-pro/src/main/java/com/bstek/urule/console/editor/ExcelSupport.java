@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.context.ApplicationContext;
 
+/**Excel导入导出辅助工具类*/
 public class ExcelSupport {
    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
    public static final String PREDEFINE_KEY = "Predefine";
@@ -30,137 +31,137 @@ public class ExcelSupport {
    public static final String PROPERTY_SHEET_NAME = "property";
    public static final String PREDEFINE_SHEET_CNAME = "预定义变量";
    public static final String PROPERTY_SHEET_CNAME = "属性";
-   private List a;
-   private List b;
-   private BuiltInActionLibraryBuilder c;
-   private List d = new ArrayList();
-   private Map e = new HashMap();
-   private Map f = new HashMap();
+   private List variableInfos;
+   private List constantInfos;
+   private BuiltInActionLibraryBuilder builtInActionLibraryBuilder;
+   private List functionDescriptors = new ArrayList();
+   private Map varLibraries = new HashMap();
+   private Map contLibraries = new HashMap();
 
-   public static boolean isParameter(String var0) {
-      return "参数".equals(var0) || "Parameter".equalsIgnoreCase(var0);
+   public static boolean isParameter(String value) {
+      return "参数".equals(value) || "Parameter".equalsIgnoreCase(value);
    }
 
    public ExcelSupport() {
-      this.a = VariableLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
-      this.b = ConstantLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
-      ApplicationContext var1 = Utils.getApplicationContext();
-      this.c = (BuiltInActionLibraryBuilder)var1.getBean("urule.builtInActionLibraryBuilder");
+      this.variableInfos = VariableLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
+      this.constantInfos = ConstantLoader.ins.load(ContextHolder.getGroupId(), ContextHolder.getProjectId());
+      ApplicationContext applicationContext = Utils.getApplicationContext();
+      this.builtInActionLibraryBuilder = (BuiltInActionLibraryBuilder)applicationContext.getBean("urule.builtInActionLibraryBuilder");
 
-      for(FunctionDescriptor var4 : var1.getBeansOfType(FunctionDescriptor.class).values()) {
-         if (!var4.isDisabled()) {
-            this.d.add((FunctionDescriptor)ProxyUtils.getTargetObject(var4));
+      for(FunctionDescriptor functionDescriptor : applicationContext.getBeansOfType(FunctionDescriptor.class).values()) {
+         if (!functionDescriptor.isDisabled()) {
+            this.functionDescriptors.add((FunctionDescriptor)ProxyUtils.getTargetObject(functionDescriptor));
          }
       }
 
    }
 
    public List getVariableInfos() {
-      return this.a;
+      return this.variableInfos;
    }
 
-   public void setVariableInfos(List var1) {
-      this.a = var1;
+   public void setVariableInfos(List variableInfos) {
+      this.variableInfos = variableInfos;
    }
 
    public List getConstantInfos() {
-      return this.b;
+      return this.constantInfos;
    }
 
-   public void setConstantInfos(List var1) {
-      this.b = var1;
+   public void setConstantInfos(List constantInfos) {
+      this.constantInfos = constantInfos;
    }
 
-   public void setBuiltInActionLibraryBuilder(BuiltInActionLibraryBuilder var1) {
-      this.c = var1;
+   public void setBuiltInActionLibraryBuilder(BuiltInActionLibraryBuilder builtInActionLibraryBuilder) {
+      this.builtInActionLibraryBuilder = builtInActionLibraryBuilder;
    }
 
    public List getFunctionDescriptors() {
-      return this.d;
+      return this.functionDescriptors;
    }
 
-   public void setFunctionDescriptors(List var1) {
-      this.d = var1;
+   public void setFunctionDescriptors(List functionDescriptors) {
+      this.functionDescriptors = functionDescriptors;
    }
 
    public Map getVarLibraries() {
-      return this.e;
+      return this.varLibraries;
    }
 
    public Map getContLibraries() {
-      return this.f;
+      return this.contLibraries;
    }
 
    public List getBuiltInActions() {
-      return this.c.getBuiltInActions();
+      return this.builtInActionLibraryBuilder.getBuiltInActions();
    }
 
-   public FunctionDescriptor getFunction(String var1) {
-      FunctionDescriptor var2 = null;
+   public FunctionDescriptor getFunction(String funName) {
+      FunctionDescriptor functionDescriptor = null;
 
-      for(FunctionDescriptor var4 : (Iterable<FunctionDescriptor>)(Iterable<?>)(this.d)) {
-         if (var4.getLabel().equals(var1)) {
-            var2 = var4;
+      for(FunctionDescriptor functionDescriptor2 : (Iterable<FunctionDescriptor>)(Iterable<?>)(this.functionDescriptors)) {
+         if (functionDescriptor2.getLabel().equals(funName)) {
+            functionDescriptor = functionDescriptor2;
             break;
          }
       }
 
-      return var2;
+      return functionDescriptor;
    }
 
-   public SpringBean getAction(String var1, String var2) {
-      SpringBean var3 = null;
-      Method var4 = null;
+   public SpringBean getAction(String beanName, String methodName) {
+      SpringBean springBean = null;
+      Method method = null;
 
-      for(SpringBean var6 : this.c.getBuiltInActions()) {
-         if (var6.getName().equals(var1)) {
-            var3 = var6;
+      for(SpringBean springBean2 : this.builtInActionLibraryBuilder.getBuiltInActions()) {
+         if (springBean2.getName().equals(beanName)) {
+            springBean = springBean2;
 
-            for(Method var8 : var6.getMethods()) {
-               if (var8.getName().equals(var2)) {
-                  var4 = var8;
-                  return var4 != null ? var3 : null;
+            for(Method method2 : springBean2.getMethods()) {
+               if (method2.getName().equals(methodName)) {
+                  method = method2;
+                  return method != null ? springBean : null;
                }
             }
             break;
          }
       }
 
-      return var4 != null ? var3 : null;
+      return method != null ? springBean : null;
    }
 
-   public Method getActionMethod(String var1, String var2) {
-      Object var3 = null;
-      Method var4 = null;
+   public Method getActionMethod(String beanName, String methodName) {
+      Object objectValue = null;
+      Method method = null;
 
-      for(SpringBean var6 : this.c.getBuiltInActions()) {
-         if (var6.getName().equals(var1)) {
-            for(Method var8 : var6.getMethods()) {
-               if (var8.getName().equals(var2)) {
-                  var4 = var8;
-                  return var4;
+      for(SpringBean springBean : this.builtInActionLibraryBuilder.getBuiltInActions()) {
+         if (springBean.getName().equals(beanName)) {
+            for(Method method2 : springBean.getMethods()) {
+               if (method2.getName().equals(methodName)) {
+                  method = method2;
+                  return method;
                }
             }
             break;
          }
       }
 
-      return var4;
+      return method;
    }
 
-   public Variable findVariable(String[] var1, boolean var2) {
-      String var3 = var1[0];
-      String var4 = var1[1];
+   public Variable findVariable(String[] names, boolean allowNull) {
+      String text = names[0];
+      String text2 = names[1];
 
-      for(VariableInfo var6 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-         for(VariableCategory var9 : (Iterable<VariableCategory>)(Iterable<?>)(var6.getVariableCategories())) {
-            if (var9.getName().equals(var3)) {
-               this.e.put(var6.getId(), var6);
-               List var10 = var9.getVariables();
-               if (var10 != null) {
-                  for(Variable var12 : (Iterable<Variable>)(Iterable<?>)(var10)) {
-                     if (var12.getLabel().equals(var4) || var12.getName().equals(var4)) {
-                        return var12;
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getName().equals(text)) {
+               this.varLibraries.put(variableInfo.getId(), variableInfo);
+               List variables = variableCategory.getVariables();
+               if (variables != null) {
+                  for(Variable variable : (Iterable<Variable>)(Iterable<?>)(variables)) {
+                     if (variable.getLabel().equals(text2) || variable.getName().equals(text2)) {
+                        return variable;
                      }
                   }
                }
@@ -168,149 +169,149 @@ public class ExcelSupport {
          }
       }
 
-      if (var2) {
+      if (allowNull) {
          return null;
       } else {
-         throw new InfoException("变量[" + var3 + "." + var4 + "]在当前项目中未定义!");
+         throw new InfoException("变量[" + text + "." + text2 + "]在当前项目中未定义!");
       }
    }
 
-   public VariableCategory findVariableCategory(String var1, String var2) {
-      String[] var3 = new String[]{var1, var2};
-      return this.findVariableCategory(var3);
+   public VariableCategory findVariableCategory(String categoryLabel, String propertyLabel) {
+      String[] values = new String[]{categoryLabel, propertyLabel};
+      return this.findVariableCategory(values);
    }
 
-   public VariableCategory findVariableCategory(String[] var1) {
-      VariableCategory var2 = null;
-      String var3 = var1[0];
-      String var4 = var1[1];
+   public VariableCategory findVariableCategory(String[] names) {
+      VariableCategory variableCategory = null;
+      String text = names[0];
+      String text2 = names[1];
 
-      for(VariableInfo var6 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-         for(VariableCategory var9 : (Iterable<VariableCategory>)(Iterable<?>)(var6.getVariableCategories())) {
-            if (var9.getName().equals(var3)) {
-               this.e.put(var6.getId(), var6);
-               List var10 = var9.getVariables();
-               if (var10 != null) {
-                  for(Variable var12 : (Iterable<Variable>)(Iterable<?>)(var10)) {
-                     if (var12.getLabel().equals(var4) || var12.getName().equals(var4)) {
-                        var2 = var9;
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+         for(VariableCategory variableCategory2 : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory2.getName().equals(text)) {
+               this.varLibraries.put(variableInfo.getId(), variableInfo);
+               List variables = variableCategory2.getVariables();
+               if (variables != null) {
+                  for(Variable variable : (Iterable<Variable>)(Iterable<?>)(variables)) {
+                     if (variable.getLabel().equals(text2) || variable.getName().equals(text2)) {
+                        variableCategory = variableCategory2;
                         break;
                      }
                   }
 
-                  if (var2 != null) {
+                  if (variableCategory != null) {
                      break;
                   }
                }
             }
          }
 
-         if (var2 != null) {
+         if (variableCategory != null) {
             break;
          }
       }
 
-      return var2;
+      return variableCategory;
    }
 
-   public VariableCategory findVariableCategory(String var1) {
-      VariableCategory var2 = null;
+   public VariableCategory findVariableCategory(String category) {
+      VariableCategory variableCategory = null;
 
-      for(VariableInfo var4 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-         for(VariableCategory var7 : (Iterable<VariableCategory>)(Iterable<?>)(var4.getVariableCategories())) {
-            if (var7.getName().equals(var1)) {
-               var2 = var7;
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+         for(VariableCategory variableCategory2 : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory2.getName().equals(category)) {
+               variableCategory = variableCategory2;
                break;
             }
          }
 
-         if (var2 != null) {
+         if (variableCategory != null) {
             break;
          }
       }
 
-      return var2;
+      return variableCategory;
    }
 
-   public List findVariableCategorys(String var1) {
-      ArrayList var2 = new ArrayList();
+   public List findVariableCategorys(String category) {
+      ArrayList variableCategorys = new ArrayList();
 
-      for(VariableInfo var4 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-         for(VariableCategory var7 : (Iterable<VariableCategory>)(Iterable<?>)(var4.getVariableCategories())) {
-            if (var7.getName().equals(var1)) {
-               var2.add(var7);
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory.getName().equals(category)) {
+               variableCategorys.add(variableCategory);
                break;
             }
          }
       }
 
-      return var2;
+      return variableCategorys;
    }
 
-   private List a() {
+   private List findParameterCategories() {
       return this.findVariableCategorys("参数");
    }
 
-   public Variable findParameterByUuid(String var1) {
-      if (StringUtils.isBlank(var1)) {
+   public Variable findParameterByUuid(String uuid) {
+      if (StringUtils.isBlank(uuid)) {
          return null;
       } else {
-         Variable var2 = null;
+         Variable variable = null;
 
-         for(VariableCategory var5 : (Iterable<VariableCategory>)(Iterable<?>)(this.a())) {
-            for(Variable var7 : var5.getVariables()) {
-               if (var1.equals(var7.getUuid())) {
-                  var2 = var7;
+         for(VariableCategory variableCategory : (Iterable<VariableCategory>)(Iterable<?>)(this.findParameterCategories())) {
+            for(Variable variable2 : variableCategory.getVariables()) {
+               if (uuid.equals(variable2.getUuid())) {
+                  variable = variable2;
                }
             }
          }
 
-         return var2;
+         return variable;
       }
    }
 
-   public Variable findSimpleParameterByLabel(String var1) {
-      if (StringUtils.isBlank(var1)) {
+   public Variable findSimpleParameterByLabel(String label) {
+      if (StringUtils.isBlank(label)) {
          return null;
       } else {
-         Variable var2 = null;
-         VariableCategory var3 = null;
+         Variable variable = null;
+         VariableCategory variableCategory = null;
 
-         for(VariableCategory var6 : (Iterable<VariableCategory>)(Iterable<?>)(this.a())) {
-            if (var6.getVariableLabels().containsKey(var1)) {
-               var2 = (Variable)var6.getVariableLabels().get(var1);
-               var3 = var6;
+         for(VariableCategory variableCategory2 : (Iterable<VariableCategory>)(Iterable<?>)(this.findParameterCategories())) {
+            if (variableCategory2.getVariableLabels().containsKey(label)) {
+               variable = (Variable)variableCategory2.getVariableLabels().get(label);
+               variableCategory = variableCategory2;
             }
          }
 
-         if (var2 != null && var3 != null) {
-            for(VariableInfo var11 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-               for(VariableCategory var9 : (Iterable<VariableCategory>)(Iterable<?>)(var11.getVariableCategories())) {
-                  if (var9.getUuid().equals(var3.getUuid()) && var9.getVariableLabels().containsKey(var1)) {
-                     this.e.put(var11.getId(), var11);
+         if (variable != null && variableCategory != null) {
+            for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+               for(VariableCategory variableCategory3 : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+                  if (variableCategory3.getUuid().equals(variableCategory.getUuid()) && variableCategory3.getVariableLabels().containsKey(label)) {
+                     this.varLibraries.put(variableInfo.getId(), variableInfo);
                   }
                }
             }
          }
 
-         return var2;
+         return variable;
       }
    }
 
-   public Variable findParameterByLabel(String var1, String var2) {
-      Variable var3 = null;
-      VariableCategory var4 = null;
+   public Variable findParameterByLabel(String label, String propertyLabel) {
+      Variable variable = null;
+      VariableCategory variableCategory = null;
 
-      for(VariableCategory var7 : (Iterable<VariableCategory>)(Iterable<?>)(this.a())) {
-         if (var7.getVariableLabels().containsKey(var1)) {
-            Variable var8 = (Variable)var7.getVariableLabels().get(var1);
-            if (StringUtils.isNotBlank(var8.getDataType())) {
-               VariableCategory var9 = this.findVariableCategoryByUUID(var8.getDataType());
-               if (var9 != null) {
-                  Variable var10 = (Variable)var9.getVariableLabels().get(var2);
-                  if (var10 != null) {
-                     var3 = var8;
-                     var4 = var7;
+      for(VariableCategory variableCategory2 : (Iterable<VariableCategory>)(Iterable<?>)(this.findParameterCategories())) {
+         if (variableCategory2.getVariableLabels().containsKey(label)) {
+            Variable variable2 = (Variable)variableCategory2.getVariableLabels().get(label);
+            if (StringUtils.isNotBlank(variable2.getDataType())) {
+               VariableCategory variableCategoryByUUID = this.findVariableCategoryByUUID(variable2.getDataType());
+               if (variableCategoryByUUID != null) {
+                  Variable variable3 = (Variable)variableCategoryByUUID.getVariableLabels().get(propertyLabel);
+                  if (variable3 != null) {
+                     variable = variable2;
+                     variableCategory = variableCategory2;
                      break;
                   }
                }
@@ -318,66 +319,66 @@ public class ExcelSupport {
          }
       }
 
-      if (var3 != null && var4 != null) {
-         for(VariableInfo var12 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-            for(VariableCategory var15 : (Iterable<VariableCategory>)(Iterable<?>)(var12.getVariableCategories())) {
-               if (var15.getUuid().equals(var4.getUuid()) && var15.getVariableLabels().containsKey(var1)) {
-                  this.e.put(var12.getId(), var12);
+      if (variable != null && variableCategory != null) {
+         for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+            for(VariableCategory variableCategory3 : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+               if (variableCategory3.getUuid().equals(variableCategory.getUuid()) && variableCategory3.getVariableLabels().containsKey(label)) {
+                  this.varLibraries.put(variableInfo.getId(), variableInfo);
                }
             }
          }
       }
 
-      return var3;
+      return variable;
    }
 
-   public VariableCategory findVariableCategoryByUUID(String var1) {
-      VariableCategory var2 = null;
+   public VariableCategory findVariableCategoryByUUID(String uuid) {
+      VariableCategory variableCategory = null;
 
-      for(VariableInfo var4 : (Iterable<VariableInfo>)(Iterable<?>)(this.a)) {
-         for(VariableCategory var7 : (Iterable<VariableCategory>)(Iterable<?>)(var4.getVariableCategories())) {
-            if (var7.getUuid().equals(var1)) {
-               this.e.put(var4.getId(), var4);
-               var2 = var7;
+      for(VariableInfo variableInfo : (Iterable<VariableInfo>)(Iterable<?>)(this.variableInfos)) {
+         for(VariableCategory variableCategory2 : (Iterable<VariableCategory>)(Iterable<?>)(variableInfo.getVariableCategories())) {
+            if (variableCategory2.getUuid().equals(uuid)) {
+               this.varLibraries.put(variableInfo.getId(), variableInfo);
+               variableCategory = variableCategory2;
                break;
             }
          }
 
-         if (var2 != null) {
+         if (variableCategory != null) {
             break;
          }
       }
 
-      return var2;
+      return variableCategory;
    }
 
-   public Variable findVariable(String var1, String var2, boolean var3) {
-      String[] var4 = new String[]{var1, var2};
-      return this.findVariable(var4, false);
+   public Variable findVariable(String categoryLabel, String variableLabel, boolean allowNull) {
+      String[] values = new String[]{categoryLabel, variableLabel};
+      return this.findVariable(values, false);
    }
 
-   public Variable findVariable(String var1, String var2) {
-      return this.findVariable(var1, var2, false);
+   public Variable findVariable(String categoryLabel, String variableLabel) {
+      return this.findVariable(categoryLabel, variableLabel, false);
    }
 
-   public Variable findVariable(String[] var1) {
-      return this.findVariable(var1, false);
+   public Variable findVariable(String[] names) {
+      return this.findVariable(names, false);
    }
 
-   public Constant findConstant(String[] var1, boolean var2) {
-      String var3 = var1[0];
-      String var4 = var1[1];
+   public Constant findConstant(String[] names, boolean allowNull) {
+      String text = names[0];
+      String text2 = names[1];
 
-      for(ConstantInfo var6 : (Iterable<ConstantInfo>)(Iterable<?>)(this.b)) {
-         this.f.put(var6.getId(), var6);
+      for(ConstantInfo constantInfo : (Iterable<ConstantInfo>)(Iterable<?>)(this.constantInfos)) {
+         this.contLibraries.put(constantInfo.getId(), constantInfo);
 
-         for(ConstantCategory var9 : (Iterable<ConstantCategory>)(Iterable<?>)(var6.getConstantCategories())) {
-            if (var9.getLabel().equals(var3)) {
-               List var10 = var9.getConstants();
-               if (var10 != null) {
-                  for(Constant var12 : (Iterable<Constant>)(Iterable<?>)(var10)) {
-                     if (var12.getLabel().equals(var4) || var12.getName().equals(var4)) {
-                        return var12;
+         for(ConstantCategory constantCategory : (Iterable<ConstantCategory>)(Iterable<?>)(constantInfo.getConstantCategories())) {
+            if (constantCategory.getLabel().equals(text)) {
+               List constants = constantCategory.getConstants();
+               if (constants != null) {
+                  for(Constant constant : (Iterable<Constant>)(Iterable<?>)(constants)) {
+                     if (constant.getLabel().equals(text2) || constant.getName().equals(text2)) {
+                        return constant;
                      }
                   }
                }
@@ -385,29 +386,29 @@ public class ExcelSupport {
          }
       }
 
-      if (var2) {
+      if (allowNull) {
          return null;
       } else {
-         throw new InfoException("常量[" + var3 + "." + var4 + "]在当前项目中未定义!");
+         throw new InfoException("常量[" + text + "." + text2 + "]在当前项目中未定义!");
       }
    }
 
-   public ConstantCategory findConstantCategory(String[] var1) {
-      ConstantCategory var2 = null;
-      String var3 = var1[0];
-      String var4 = var1[1];
+   public ConstantCategory findConstantCategory(String[] names) {
+      ConstantCategory constantCategory = null;
+      String text = names[0];
+      String text2 = names[1];
 
-      for(ConstantInfo var6 : (Iterable<ConstantInfo>)(Iterable<?>)(this.b)) {
-         List var7 = var6.getConstantCategories();
-         this.f.put(var6.getId(), var6);
+      for(ConstantInfo constantInfo : (Iterable<ConstantInfo>)(Iterable<?>)(this.constantInfos)) {
+         List constantCategories = constantInfo.getConstantCategories();
+         this.contLibraries.put(constantInfo.getId(), constantInfo);
 
-         for(ConstantCategory var9 : (Iterable<ConstantCategory>)(Iterable<?>)(var7)) {
-            if (var9.getLabel().equals(var3)) {
-               List var10 = var9.getConstants();
-               if (var10 != null) {
-                  for(Constant var12 : (Iterable<Constant>)(Iterable<?>)(var10)) {
-                     if (var12.getLabel().equals(var4) || var12.getName().equals(var4)) {
-                        var2 = var9;
+         for(ConstantCategory constantCategory2 : (Iterable<ConstantCategory>)(Iterable<?>)(constantCategories)) {
+            if (constantCategory2.getLabel().equals(text)) {
+               List constants = constantCategory2.getConstants();
+               if (constants != null) {
+                  for(Constant constant : (Iterable<Constant>)(Iterable<?>)(constants)) {
+                     if (constant.getLabel().equals(text2) || constant.getName().equals(text2)) {
+                        constantCategory = constantCategory2;
                      }
                   }
                }
@@ -415,6 +416,6 @@ public class ExcelSupport {
          }
       }
 
-      return var2;
+      return constantCategory;
    }
 }

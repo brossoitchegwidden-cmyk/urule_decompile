@@ -6,41 +6,41 @@ import java.util.Collection;
 import java.util.List;
 
 public class MetActivity extends JoinActivity {
-   private int b;
-   private boolean c;
-   private boolean d;
-   private List<Criterion> e;
+   private int met;
+   private boolean only;
+   private boolean debug;
+   private List<Criterion> criterions;
 
-   public MetActivity(int var1, List<Criterion> var2, boolean var3, boolean var4) {
-      this.b = var1;
-      this.e = var2;
-      this.d = var3;
-      this.c = var4;
+   public MetActivity(int met, List<Criterion> criterions, boolean debug, boolean only) {
+      this.met = met;
+      this.criterions = criterions;
+      this.debug = debug;
+      this.only = only;
    }
 
    @Override
-   public Collection<FactTracker> enter(EvaluationContext var1, Object var2, FactTracker var3) {
-      if (var1.metActivityIsPassed(this)) {
+   public Collection<FactTracker> enter(EvaluationContext context, Object obj, FactTracker tracker) {
+      if (context.metActivityIsPassed(this)) {
          return new ArrayList<>();
       }
 
-      int var4 = 0;
+      int number = 0;
 
-      for (Criterion var6 : this.e) {
-         if (var6.doEval(var1, this.d)) {
-            var4++;
+      for (Criterion criterion : this.criterions) {
+         if (criterion.doEval(context, this.debug)) {
+            number++;
          }
       }
 
-      if (this.d) {
-         var1.getLogger().logMet(this.b, var4, this.c);
+      if (this.debug) {
+         context.getLogger().logMet(this.met, number, this.only);
       }
 
-      var1.addPassedMetActivity(this);
-      if (this.c) {
-         return var4 == this.b ? this.a(var1, var2, var3) : new ArrayList<>();
+      context.addPassedMetActivity(this);
+      if (this.only) {
+         return number == this.met ? this.visitPahs(context, obj, tracker) : new ArrayList<>();
       } else {
-         return var4 >= this.b ? this.a(var1, var2, var3) : new ArrayList<>();
+         return number >= this.met ? this.visitPahs(context, obj, tracker) : new ArrayList<>();
       }
    }
 }

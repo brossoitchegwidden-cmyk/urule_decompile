@@ -17,44 +17,44 @@ public class MetBuilder {
    private MetBuilder() {
    }
 
-   public List<BaseReteNode> buildCriterion(BaseCriterion var1, List<BaseReteNode> var2, BuildContext var3) {
-      MetNode var4 = this.a(var3, (Met)var1);
-      ArrayList var5 = new ArrayList();
-      if (var2 != null && var2.size() > 0) {
-         for (BaseReteNode var12 : var2) {
-            var12.addLine(var4);
-            var5.add(var4);
+   public List<BaseReteNode> buildCriterion(BaseCriterion baseCriterion, List<BaseReteNode> prevNodes, BuildContext context) {
+      MetNode metNode = this.resolveMetNode(context, (Met)baseCriterion);
+      ArrayList criterion = new ArrayList();
+      if (prevNodes != null && prevNodes.size() > 0) {
+         for (BaseReteNode baseReteNode : prevNodes) {
+            baseReteNode.addLine(metNode);
+            criterion.add(metNode);
          }
       } else {
-         HashSet var6 = new HashSet();
+         HashSet uniqueItems = new HashSet();
 
-         for (String var9 : var3.getObjectTypeByCriterions(var4.getCriterions())) {
-            if (!var6.contains(var9)) {
-               var6.add(var9);
-               if (var9.equals("*")) {
-                  var9 = HashMap.class.getName();
+         for (String text : context.getObjectTypeByCriterions(metNode.getCriterions())) {
+            if (!uniqueItems.contains(text)) {
+               uniqueItems.add(text);
+               if (text.equals("*")) {
+                  text = HashMap.class.getName();
                }
 
-               ObjectTypeNode var10 = var3.buildObjectTypeNode(var9);
-               var10.addLine(var4);
+               ObjectTypeNode objectTypeNode = context.buildObjectTypeNode(text);
+               objectTypeNode.addLine(metNode);
             }
          }
 
-         var5.add(var4);
+         criterion.add(metNode);
       }
 
-      return var5;
+      return criterion;
    }
 
-   private MetNode a(BuildContext var1, Met var2) {
-      MetNode var3 = new MetNode(var1.nextId(), var1.currentRuleIsDebug());
-      var3.setMet(var2.getMet());
-      var3.setOnly(var2.isOnly());
-      var3.setCriterions(var2.getCriterions());
-      return var3;
+   private MetNode resolveMetNode(BuildContext buildContext, Met met) {
+      MetNode metNode = new MetNode(buildContext.nextId(), buildContext.currentRuleIsDebug());
+      metNode.setMet(met.getMet());
+      metNode.setOnly(met.isOnly());
+      metNode.setCriterions(met.getCriterions());
+      return metNode;
    }
 
-   public boolean support(Criterion var1) {
-      return var1 instanceof Met;
+   public boolean support(Criterion criterion) {
+      return criterion instanceof Met;
    }
 }

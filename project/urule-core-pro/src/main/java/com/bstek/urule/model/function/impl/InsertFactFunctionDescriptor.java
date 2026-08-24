@@ -6,27 +6,23 @@ import com.bstek.urule.runtime.WorkingMemory;
 
 public class InsertFactFunctionDescriptor implements FunctionDescriptor {
    private boolean disabled = false;
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("要插入的对象");
-      var1.setEname("Object");
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("要插入的对象");
+      argument.setEname("Object");
+      return argument;
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      boolean var4 = var3.insert(var1);
-      var3.update(var1);
-      return var4;
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      boolean doFunctionResult = workingMemory.insert(object);
+      workingMemory.update(object);
+      return doFunctionResult;
    }
-
    @Override
    public String getName() {
       return "InsertFact";
    }
-
    @Override
    public String getLabel() {
       return "插入对象到工作区";
@@ -37,7 +33,7 @@ public class InsertFactFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
 }

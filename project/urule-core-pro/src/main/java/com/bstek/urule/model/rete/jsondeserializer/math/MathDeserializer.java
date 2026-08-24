@@ -5,7 +5,7 @@ import com.bstek.urule.model.rule.math.MathType;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface MathDeserializer {
-   MathSign deserialize(JsonNode var1);
+   MathSign deserialize(JsonNode jsonNode);
 
    MathType getType();
 }

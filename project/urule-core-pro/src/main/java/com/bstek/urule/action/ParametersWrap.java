@@ -3,44 +3,44 @@ package com.bstek.urule.action;
 import com.bstek.urule.model.library.Datatype;
 
 class ParametersWrap {
-   private Datatype[] a;
-   private Object[] b;
+   private Datatype[] datatypes;
+   private Object[] values;
 
    public Datatype[] getDatatypes() {
-      return this.a;
+      return this.datatypes;
    }
 
-   public void setDatatypes(Datatype[] var1) {
-      this.a = var1;
+   public void setDatatypes(Datatype[] datatype) {
+      this.datatypes = datatype;
    }
 
    public Object[] getValues() {
-      return this.b;
+      return this.values;
    }
 
-   public void setValues(Object[] var1) {
-      this.b = var1;
+   public void setValues(Object[] values2) {
+      this.values = values2;
    }
 
    public String valuesToString() {
-      if (this.b == null) {
+      if (this.values == null) {
          return "";
       }
 
-      StringBuffer var1 = new StringBuffer();
+      StringBuffer stringBuffer = new StringBuffer();
 
-      for (Object var5 : this.b) {
-         if (var1.length() > 0) {
-            var1.append(",");
+      for (Object objectValue : this.values) {
+         if (stringBuffer.length() > 0) {
+            stringBuffer.append(",");
          }
 
-         if (var5 == null) {
-            var1.append("null");
+         if (objectValue == null) {
+            stringBuffer.append("null");
          } else {
-            var1.append(var5);
+            stringBuffer.append(objectValue);
          }
       }
 
-      return var1.toString();
+      return stringBuffer.toString();
    }
 }

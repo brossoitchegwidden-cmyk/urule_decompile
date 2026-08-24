@@ -1,121 +1,121 @@
 package com.bstek.urule.console.config.setup;
 
 public class DataSourceInfo {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private int i;
-   private int j;
-   private int k;
-   private int l;
-   private String m;
+   private String driver;
+   private String url;
+   private String username;
+   private String password;
+   private String connectionType;
+   private String platform;
+   private String jndi;
+   private String connectionClassName;
+   private int initialSize;
+   private int maxTotal;
+   private int maxIdle;
+   private int minIdle;
+   private String validationQuery;
 
    public String getDriver() {
-      return this.a;
+      return this.driver;
    }
 
-   public void setDriver(String var1) {
-      this.a = var1;
+   public void setDriver(String driver) {
+      this.driver = driver;
    }
 
    public String getUrl() {
-      return this.b;
+      return this.url;
    }
 
-   public void setUrl(String var1) {
-      this.b = var1;
+   public void setUrl(String url) {
+      this.url = url;
    }
 
    public String getUsername() {
-      return this.c;
+      return this.username;
    }
 
-   public void setUsername(String var1) {
-      this.c = var1;
+   public void setUsername(String username) {
+      this.username = username;
    }
 
    public String getPassword() {
-      return this.d;
+      return this.password;
    }
 
-   public void setPassword(String var1) {
-      this.d = var1;
+   public void setPassword(String password) {
+      this.password = password;
    }
 
    public String getConnectionType() {
-      return this.e;
+      return this.connectionType;
    }
 
-   public void setConnectionType(String var1) {
-      this.e = var1;
+   public void setConnectionType(String connectionType) {
+      this.connectionType = connectionType;
    }
 
    public String getPlatform() {
-      return this.f;
+      return this.platform;
    }
 
-   public void setPlatform(String var1) {
-      this.f = var1;
+   public void setPlatform(String platform) {
+      this.platform = platform;
    }
 
    public String getJndi() {
-      return this.g;
+      return this.jndi;
    }
 
-   public void setJndi(String var1) {
-      this.g = var1;
+   public void setJndi(String jndi) {
+      this.jndi = jndi;
    }
 
    public String getConnectionClassName() {
-      return this.h;
+      return this.connectionClassName;
    }
 
-   public void setConnectionClassName(String var1) {
-      this.h = var1;
+   public void setConnectionClassName(String connectionClassName) {
+      this.connectionClassName = connectionClassName;
    }
 
    public int getInitialSize() {
-      return this.i;
+      return this.initialSize;
    }
 
-   public void setInitialSize(int var1) {
-      this.i = var1;
+   public void setInitialSize(int initialSize) {
+      this.initialSize = initialSize;
    }
 
    public int getMaxTotal() {
-      return this.j;
+      return this.maxTotal;
    }
 
-   public void setMaxTotal(int var1) {
-      this.j = var1;
+   public void setMaxTotal(int maxTotal) {
+      this.maxTotal = maxTotal;
    }
 
    public int getMaxIdle() {
-      return this.k;
+      return this.maxIdle;
    }
 
-   public void setMaxIdle(int var1) {
-      this.k = var1;
+   public void setMaxIdle(int maxIdle) {
+      this.maxIdle = maxIdle;
    }
 
    public int getMinIdle() {
-      return this.l;
+      return this.minIdle;
    }
 
-   public void setMinIdle(int var1) {
-      this.l = var1;
+   public void setMinIdle(int minIdle) {
+      this.minIdle = minIdle;
    }
 
    public String getValidationQuery() {
-      return this.m;
+      return this.validationQuery;
    }
 
-   public void setValidationQuery(String var1) {
-      this.m = var1;
+   public void setValidationQuery(String validationQuery) {
+      this.validationQuery = validationQuery;
    }
 }

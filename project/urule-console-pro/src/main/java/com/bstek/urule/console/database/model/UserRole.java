@@ -6,31 +6,31 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
    ignoreUnknown = true
 )
 public class UserRole {
-   private long a;
-   private String b;
-   private long c;
+   private long id;
+   private String userId;
+   private long roleId;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public String getUserId() {
-      return this.b;
+      return this.userId;
    }
 
-   public void setUserId(String var1) {
-      this.b = var1;
+   public void setUserId(String userId) {
+      this.userId = userId;
    }
 
    public long getRoleId() {
-      return this.c;
+      return this.roleId;
    }
 
-   public void setRoleId(long var1) {
-      this.c = var1;
+   public void setRoleId(long roleId) {
+      this.roleId = roleId;
    }
 }

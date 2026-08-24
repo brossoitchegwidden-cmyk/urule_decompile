@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface WorkingMemory {
-   boolean insert(Object var1);
+   /**插入一个业务数据对象，对应到规则当中就是一个变量对象*/
+   boolean insert(Object fact);
 
-   boolean update(Object var1);
+   /**更新一个在当前WorkingMemory中已存在的业务对象，如果对象存在，那么WorkingMemory会重新评估这个对象*/
+   boolean update(Object fact);
 
-   Object getParameter(String var1);
+   /**获取当前WorkingMemory中的某个参数值*/
+   Object getParameter(String key);
 
    Map<String, Object> getParameters();
 
@@ -18,22 +21,30 @@ public interface WorkingMemory {
 
    List<Object> getFactList();
 
-   KnowledgeSession getKnowledgeSession(String var1);
+   /**根据knowledgePackageWrapper的id返回对应的KnowledgeSession对象*/
+   KnowledgeSession getKnowledgeSession(String id);
 
-   void putKnowledgeSession(String var1, KnowledgeSession var2);
+   /**将KnowledgeSession对象放入缓存以备下次调用时使用*/
+   void putKnowledgeSession(String id, KnowledgeSession session);
 
-   void setSessionValue(String var1, Object var2);
+   /**向当前Session中放入变量*/
+   void setSessionValue(String key, Object value);
 
-   Object getSessionValue(String var1);
+   /**取出当前Session中对应的变量*/
+   Object getSessionValue(String key);
 
    Map<String, Object> getSessionValueMap();
 
-   void activeRule(String var1, String var2);
+   /**激活某个设置了互斥组属性的具体的规则*/
+   void activeRule(String activationGroupName, String ruleName);
 
-   void activePendedGroup(String var1);
+   /**激活指定名称的执行组*/
+   void activePendedGroup(String groupName);
 
-   void activePendedGroupAndExecute(String var1);
+   /**激活指定名称的执行组并立即执行执行组规则对应的动作部分*/
+   void activePendedGroupAndExecute(String groupName);
 
+   /**返回当前上下文对象*/
    Context getContext();
 
    LogManager getLogManager();

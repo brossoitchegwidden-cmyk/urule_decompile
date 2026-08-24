@@ -140,53 +140,53 @@ public enum Op {
    Op() {
    }
 
-   public static Op parse(String var0) {
-      if (var0.equals(">")) {
+   public static Op parse(String op) {
+      if (op.equals(">")) {
          return GreaterThen;
-      } else if (var0.equals(">=")) {
+      } else if (op.equals(">=")) {
          return GreaterThenEquals;
-      } else if (var0.equals("==")) {
+      } else if (op.equals("==")) {
          return Equals;
-      } else if (var0.equals("EqualsIgnoreCase")) {
+      } else if (op.equals("EqualsIgnoreCase")) {
          return EqualsIgnoreCase;
-      } else if (var0.equals("!=")) {
+      } else if (op.equals("!=")) {
          return NotEquals;
-      } else if (var0.equals("NotEqualsIgnoreCase")) {
+      } else if (op.equals("NotEqualsIgnoreCase")) {
          return NotEqualsIgnoreCase;
-      } else if (var0.equals("<")) {
+      } else if (op.equals("<")) {
          return LessThen;
-      } else if (var0.equals("<=")) {
+      } else if (op.equals("<=")) {
          return LessThenEquals;
-      } else if (var0.equals("In")) {
+      } else if (op.equals("In")) {
          return In;
-      } else if (var0.equals("NotIn")) {
+      } else if (op.equals("NotIn")) {
          return NotIn;
-      } else if (var0.equals("StartWith")) {
+      } else if (op.equals("StartWith")) {
          return StartWith;
-      } else if (var0.equals("NotStartWidth")) {
+      } else if (op.equals("NotStartWidth")) {
          return NotStartWith;
-      } else if (var0.equals("EndWith")) {
+      } else if (op.equals("EndWith")) {
          return EndWith;
-      } else if (var0.equals("NotEndWith")) {
+      } else if (op.equals("NotEndWith")) {
          return NotEndWith;
-      } else if (var0.equals("Null")) {
+      } else if (op.equals("Null")) {
          return Null;
-      } else if (var0.equals("Notnull")) {
+      } else if (op.equals("Notnull")) {
          return NotNull;
-      } else if (var0.equals("Match")) {
+      } else if (op.equals("Match")) {
          return Match;
-      } else if (var0.equals("NotMatch")) {
+      } else if (op.equals("NotMatch")) {
          return NotMatch;
-      } else if (var0.equals("Contain")) {
+      } else if (op.equals("Contain")) {
          return Contain;
-      } else if (var0.equals("NotContain")) {
+      } else if (op.equals("NotContain")) {
          return NotContain;
-      } else if (var0.equals("Between")) {
+      } else if (op.equals("Between")) {
          return Between;
-      } else if (var0.equals("NotBetween")) {
+      } else if (op.equals("NotBetween")) {
          return NotBetween;
       } else {
-         throw new RuleException("Unsupport op " + var0 + "");
+         throw new RuleException("Unsupport op " + op + "");
       }
    }
 }

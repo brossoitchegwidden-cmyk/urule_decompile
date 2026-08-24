@@ -41,42 +41,42 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 
 public class PacketServletHandler extends ApiServletHandler {
-   public void load(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      int var3 = Integer.valueOf(var1.getParameter("pageIndex"));
-      int var4 = Integer.valueOf(var1.getParameter("pageSize"));
-      PacketQuery var5 = PacketManager.ins.newQuery();
-      var5.nameLike(var1.getParameter("name"));
-      var5.descLike(var1.getParameter("desc"));
-      var5.createUserLike(var1.getParameter("createUser"));
-      var5.projectId(Long.valueOf(var1.getParameter("projectId")));
-      var5.typeLike(var1.getParameter("type"));
-      String var6 = var1.getParameter("enable");
-      if (StringUtils.isNotBlank(var6)) {
-         var5.enable(Boolean.valueOf(var6));
+   public void load(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      int number = Integer.valueOf(req.getParameter("pageIndex"));
+      int number2 = Integer.valueOf(req.getParameter("pageSize"));
+      PacketQuery packetQuery = PacketManager.ins.newQuery();
+      packetQuery.nameLike(req.getParameter("name"));
+      packetQuery.descLike(req.getParameter("desc"));
+      packetQuery.createUserLike(req.getParameter("createUser"));
+      packetQuery.projectId(Long.valueOf(req.getParameter("projectId")));
+      packetQuery.typeLike(req.getParameter("type"));
+      String parameter = req.getParameter("enable");
+      if (StringUtils.isNotBlank(parameter)) {
+         packetQuery.enable(Boolean.valueOf(parameter));
       }
 
-      String var7 = var1.getParameter("id");
-      if (StringUtils.isNotBlank(var7)) {
-         var5.idLike(var7);
+      String parameter2 = req.getParameter("id");
+      if (StringUtils.isNotBlank(parameter2)) {
+         packetQuery.idLike(parameter2);
       }
 
-      String var8 = var1.getParameter("code");
-      if (StringUtils.isNotBlank(var8)) {
-         var5.codeLike(var8);
+      String parameter3 = req.getParameter("code");
+      if (StringUtils.isNotBlank(parameter3)) {
+         packetQuery.codeLike(parameter3);
       }
 
-      String var9 = var1.getParameter("restEnable");
-      if (StringUtils.isNotBlank(var9)) {
-         var5.restEnable(Boolean.valueOf(var9));
+      String parameter4 = req.getParameter("restEnable");
+      if (StringUtils.isNotBlank(parameter4)) {
+         packetQuery.restEnable(Boolean.valueOf(parameter4));
       }
 
-      String var10 = var1.getParameter("auditEnable");
-      if (StringUtils.isNotBlank(var10)) {
-         var5.auditEnable(Boolean.valueOf(var10));
+      String parameter5 = req.getParameter("auditEnable");
+      if (StringUtils.isNotBlank(parameter5)) {
+         packetQuery.auditEnable(Boolean.valueOf(parameter5));
       }
 
-      Page var11 = var5.paging(var3, var4);
-      this.a(var2, var11);
+      Page page = packetQuery.paging(number, number2);
+      this.writeObjectToJson(resp, page);
    }
 
    @URuleAuthorization(
@@ -84,41 +84,41 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void add(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Packet var3 = new Packet();
-      String var4 = var1.getParameter("code");
-      if (StringUtils.isNotBlank(var4)) {
-         var4 = var4.trim();
-         if (StringUtils.hasChineseChar(var4)) {
+   public void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Packet packet = new Packet();
+      String parameter = req.getParameter("code");
+      if (StringUtils.isNotBlank(parameter)) {
+         parameter = parameter.trim();
+         if (StringUtils.hasChineseChar(parameter)) {
             throw new InfoException("编码不能包含中文字符<br>The code cannot contain Chinese characters.");
          }
 
-         if (StringUtils.hasSpecialChar(var4)) {
+         if (StringUtils.hasSpecialChar(parameter)) {
             throw new InfoException("编码不能包含特殊字符.<br/>The code cannot contain special characters.");
          }
 
-         var3.setCode(var4);
-         List var5 = PacketManager.ins.newQuery().code(var4).list();
-         if (var5.size() > 0) {
-            Project var6 = ProjectManager.ins.get(((Packet)var5.get(0)).getProjectId());
-            String var7 = "Duplicate packet code " + var4 + "!<br/>The code under " + var6.getName() + "(" + var3.getProjectId() + ") of " + var6.getGroupId() + " repeated";
-            throw new InfoException(var7);
+         packet.setCode(parameter);
+         List items = PacketManager.ins.newQuery().code(parameter).list();
+         if (items.size() > 0) {
+            Project project = ProjectManager.ins.get(((Packet)items.get(0)).getProjectId());
+            String text = "Duplicate packet code " + parameter + "!<br/>The code under " + project.getName() + "(" + packet.getProjectId() + ") of " + project.getGroupId() + " repeated";
+            throw new InfoException(text);
          }
       }
 
-      var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setProjectId(ContextHolder.getProjectId());
-      var3.setName(var1.getParameter("name"));
-      var3.setDesc(var1.getParameter("desc"));
-      PacketType var9 = PacketType.valueOf(var1.getParameter("type"));
-      var3.setType(var9);
-      var3.setInputData(var1.getParameter("inputData"));
-      var3.setOutputData(var1.getParameter("outputData"));
-      var3.setEnable(Boolean.valueOf(var1.getParameter("enable")));
-      var3.setProjectId(Long.valueOf(var1.getParameter("projectId")));
-      PacketManager.ins.add(var3);
-      SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "add", var3.getId(), String.format("Add packet %s[%s]", var3.getName(), var3.getCode()));
-      this.a(var2, var3);
+      packet.setCreateUser(SecurityUtils.getLoginUsername(req));
+      packet.setProjectId(ContextHolder.getProjectId());
+      packet.setName(req.getParameter("name"));
+      packet.setDesc(req.getParameter("desc"));
+      PacketType packetType = PacketType.valueOf(req.getParameter("type"));
+      packet.setType(packetType);
+      packet.setInputData(req.getParameter("inputData"));
+      packet.setOutputData(req.getParameter("outputData"));
+      packet.setEnable(Boolean.valueOf(req.getParameter("enable")));
+      packet.setProjectId(Long.valueOf(req.getParameter("projectId")));
+      PacketManager.ins.add(packet);
+      SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "add", packet.getId(), String.format("Add packet %s[%s]", packet.getName(), packet.getCode()));
+      this.writeObjectToJson(resp, packet);
    }
 
    @URuleAuthorization(
@@ -126,32 +126,32 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void update(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Packet var3 = new Packet();
-      Long var4 = Long.valueOf(var1.getParameter("id"));
-      String var5 = var1.getParameter("code");
-      Packet var6 = PacketManager.ins.load(var4);
-      var3.setId(var4);
-      var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setName(var1.getParameter("name"));
-      var3.setCode(var5);
-      var3.setDesc(var1.getParameter("desc"));
-      var3.setInputData(var1.getParameter("inputData"));
-      var3.setOutputData(var1.getParameter("outputData"));
-      var3.setEnable(Boolean.valueOf(var1.getParameter("enable")));
-      var3.setUpdateDate(new Date());
-      if (var6 != null) {
-         PacketManager.ins.update(var3);
-         if (StringUtils.isNotBlank(var6.getCode()) && !var6.getCode().equals(var5)) {
-            String var7 = var6.getCode();
-            ((PacketCacheImpl)PacketCache.ins).removePacket(var7);
-            PacketCache.ins.refreshPacket(var4);
+   public void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Packet packet = new Packet();
+      Long longValue = Long.valueOf(req.getParameter("id"));
+      String parameter = req.getParameter("code");
+      Packet packet2 = PacketManager.ins.load(longValue);
+      packet.setId(longValue);
+      packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      packet.setName(req.getParameter("name"));
+      packet.setCode(parameter);
+      packet.setDesc(req.getParameter("desc"));
+      packet.setInputData(req.getParameter("inputData"));
+      packet.setOutputData(req.getParameter("outputData"));
+      packet.setEnable(Boolean.valueOf(req.getParameter("enable")));
+      packet.setUpdateDate(new Date());
+      if (packet2 != null) {
+         PacketManager.ins.update(packet);
+         if (StringUtils.isNotBlank(packet2.getCode()) && !packet2.getCode().equals(parameter)) {
+            String code = packet2.getCode();
+            ((PacketCacheImpl)PacketCache.ins).removePacket(code);
+            PacketCache.ins.refreshPacket(longValue);
          }
       }
 
-      var3 = PacketManager.ins.load(var3.getId());
-      SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", var3.getId(), String.format("Update packet %s[%s]", var3.getName(), var3.getCode()));
-      this.a(var2, var3);
+      packet = PacketManager.ins.load(packet.getId());
+      SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", packet.getId(), String.format("Update packet %s[%s]", packet.getName(), packet.getCode()));
+      this.writeObjectToJson(resp, packet);
    }
 
    @URuleAuthorization(
@@ -159,20 +159,20 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void updateAuditConfig(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Packet var3 = new Packet();
-      var3.setId(Long.valueOf(var1.getParameter("id")));
-      var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setAuditEnable(Boolean.valueOf(var1.getParameter("auditEnable")));
-      if (var3.isAuditEnable()) {
-         var3.setAuditInput(var1.getParameter("auditInput"));
-         var3.setAuditOutput(var1.getParameter("auditOutput"));
+   public void updateAuditConfig(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Packet packet = new Packet();
+      packet.setId(Long.valueOf(req.getParameter("id")));
+      packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      packet.setAuditEnable(Boolean.valueOf(req.getParameter("auditEnable")));
+      if (packet.isAuditEnable()) {
+         packet.setAuditInput(req.getParameter("auditInput"));
+         packet.setAuditOutput(req.getParameter("auditOutput"));
       }
 
-      var3.setUpdateDate(new Date());
-      PacketManager.ins.updateAuditConfig(var3);
-      PacketCache.ins.refreshPacketConfig(var3.getId());
-      this.a(var2, var3);
+      packet.setUpdateDate(new Date());
+      PacketManager.ins.updateAuditConfig(packet);
+      PacketCache.ins.refreshPacketConfig(packet.getId());
+      this.writeObjectToJson(resp, packet);
    }
 
    @URuleAuthorization(
@@ -180,26 +180,26 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      boolean var5 = Boolean.valueOf(var1.getParameter("force"));
-      Packet var6 = PacketManager.ins.load(var3);
-      if (var6 != null) {
-         if (!var5) {
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      boolean flag = Boolean.valueOf(req.getParameter("force"));
+      Packet packet = PacketManager.ins.load(longValue);
+      if (packet != null) {
+         if (!flag) {
             try {
-               List var7 = ReferenceService.ins.packet(var6.getProjectId(), var3, var6.getCode());
-               if (var7.size() > 0) {
-                  throw new ReferenceDeleteException(var7.size());
+               List items = ReferenceService.ins.packet(packet.getProjectId(), longValue, packet.getCode());
+               if (items.size() > 0) {
+                  throw new ReferenceDeleteException(items.size());
                }
-            } catch (DeserializeException var8) {
-               throw new ReferenceDeleteException(var8.getMessage());
+            } catch (DeserializeException deserializeException) {
+               throw new ReferenceDeleteException(deserializeException.getMessage());
             }
          }
 
-         PacketManager.ins.delete(var3);
-         ((PacketCacheImpl)PacketCache.ins).removePacket(var3);
-         ((PacketCacheImpl)PacketCache.ins).removePacket(var6.getCode());
-         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "delete", var6.getId(), String.format("Remove packet %s[%s]", var6.getName(), var6.getCode()));
+         PacketManager.ins.delete(longValue);
+         ((PacketCacheImpl)PacketCache.ins).removePacket(longValue);
+         ((PacketCacheImpl)PacketCache.ins).removePacket(packet.getCode());
+         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "delete", packet.getId(), String.format("Remove packet %s[%s]", packet.getName(), packet.getCode()));
       }
 
    }
@@ -210,25 +210,25 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void addFile(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      PacketFile var3 = new PacketFile();
-      var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setFileId(Long.valueOf(var1.getParameter("fileId")));
-      var3.setPacketId(Long.valueOf(var1.getParameter("packetId")));
-      var3.setDesc(var1.getParameter("desc"));
-      var3.setPath(var1.getParameter("path"));
-      var3.setVersion(var1.getParameter("version"));
-      RuleFile var4 = FileManager.ins.get(var3.getFileId());
-      Packet var5 = PacketManager.ins.load(var3.getPacketId());
-      if (var4 != null && var5 != null) {
-         var3.setProjectId(var5.getProjectId());
-         PacketFileManager.ins.add(var3);
-         var5.setUpdateDate(new Date());
-         var5.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-         PacketManager.ins.update(var5);
-         String var6 = String.format("Add rule file %s[%s] to packet %s[%s]", var4.getName(), var4.getId(), var5.getName(), var5.getCode());
-         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", var5.getId(), var6);
-         this.a(var2, var3);
+   public void addFile(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      PacketFile packetFile = new PacketFile();
+      packetFile.setCreateUser(SecurityUtils.getLoginUsername(req));
+      packetFile.setFileId(Long.valueOf(req.getParameter("fileId")));
+      packetFile.setPacketId(Long.valueOf(req.getParameter("packetId")));
+      packetFile.setDesc(req.getParameter("desc"));
+      packetFile.setPath(req.getParameter("path"));
+      packetFile.setVersion(req.getParameter("version"));
+      RuleFile ruleFile = FileManager.ins.get(packetFile.getFileId());
+      Packet packet = PacketManager.ins.load(packetFile.getPacketId());
+      if (ruleFile != null && packet != null) {
+         packetFile.setProjectId(packet.getProjectId());
+         PacketFileManager.ins.add(packetFile);
+         packet.setUpdateDate(new Date());
+         packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+         PacketManager.ins.update(packet);
+         String text = String.format("Add rule file %s[%s] to packet %s[%s]", ruleFile.getName(), ruleFile.getId(), packet.getName(), packet.getCode());
+         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", packet.getId(), text);
+         this.writeObjectToJson(resp, packetFile);
       }
 
    }
@@ -238,61 +238,61 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void uploadPackage(final HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      final PacketPackage var3 = new PacketPackage();
-      var3.setCreateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      var3.setPacketId(Long.valueOf(var1.getParameter("packetId")));
-      var3.setUpdateDate(new Date());
-      final Packet var4 = PacketManager.ins.load(var3.getPacketId());
-      var3.setProjectId(var4.getProjectId());
-      DiskFileItemFactory var5 = new DiskFileItemFactory();
-      ServletFileUpload var6 = new ServletFileUpload(var5);
-      var6.setHeaderEncoding("UTF-8");
+   public void uploadPackage(final HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      final PacketPackage packetPackage = new PacketPackage();
+      packetPackage.setCreateUser(SecurityUtils.getLoginUsername(req));
+      packetPackage.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      packetPackage.setPacketId(Long.valueOf(req.getParameter("packetId")));
+      packetPackage.setUpdateDate(new Date());
+      final Packet packet = PacketManager.ins.load(packetPackage.getPacketId());
+      packetPackage.setProjectId(packet.getProjectId());
+      DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory();
+      ServletFileUpload servletFileUpload = new ServletFileUpload(diskFileItemFactory);
+      servletFileUpload.setHeaderEncoding("UTF-8");
 
-      for(FileItem var9 : var6.parseRequest(var1)) {
-         String var10 = var9.getFieldName();
-         if (var10.equals("file")) {
-            InputStream var11 = var9.getInputStream();
-            String var12 = Utils.uncompress(IOUtils.toByteArray(var11));
-            var3.setContent(var12);
-         } else if (var10.contentEquals("desc")) {
-            String var15 = var9.getString("utf-8");
-            var3.setDesc(var15);
+      for(FileItem fileItem : servletFileUpload.parseRequest(req)) {
+         String fieldName = fileItem.getFieldName();
+         if (fieldName.equals("file")) {
+            InputStream inputStream = fileItem.getInputStream();
+            String text = Utils.uncompress(IOUtils.toByteArray(inputStream));
+            packetPackage.setContent(text);
+         } else if (fieldName.contentEquals("desc")) {
+            String string = fileItem.getString("utf-8");
+            packetPackage.setDesc(string);
          }
       }
 
-      if (StringUtils.isBlank(var3.getContent())) {
+      if (StringUtils.isBlank(packetPackage.getContent())) {
          throw new InfoException("请上传导出的知识包文件");
       } else {
-         final String var13 = var1.getParameter("id");
-         this.a(new TransactionalInvoke() {
+         final String parameter = req.getParameter("id");
+         this.doInTransactional(new TransactionalInvoke() {
             public void doTransactional() {
-               if (StringUtils.isBlank(var13)) {
-                  PacketPackageManager.ins.add(var3);
+               if (StringUtils.isBlank(parameter)) {
+                  PacketPackageManager.ins.add(packetPackage);
                } else {
-                  var3.setId(Long.valueOf(var13));
-                  PacketPackageManager.ins.update(var3);
+                  packetPackage.setId(Long.valueOf(parameter));
+                  PacketPackageManager.ins.update(packetPackage);
                }
 
-               var4.setUpdateDate(new Date());
-               var4.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-               PacketManager.ins.update(var4);
+               packet.setUpdateDate(new Date());
+               packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+               PacketManager.ins.update(packet);
             }
          });
-         String var14 = String.format("Pocket File Additional Packet %s[%s]", var4.getName(), var4.getCode());
-         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", var4.getId(), var14);
-         var3.setContent((String)null);
-         HashMap var16 = new HashMap();
-         if (var4.isEnable()) {
-            PacketCache.ins.cacheUploadPacketPackage(var4.getId());
-            List var17 = PacketCache.ins.refreshPacket(var4.getId());
-            var16.put("sendResult", var17);
+         String text2 = String.format("Pocket File Additional Packet %s[%s]", packet.getName(), packet.getCode());
+         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", packet.getId(), text2);
+         packetPackage.setContent((String)null);
+         HashMap valuesByKey = new HashMap();
+         if (packet.isEnable()) {
+            PacketCache.ins.cacheUploadPacketPackage(packet.getId());
+            List items = PacketCache.ins.refreshPacket(packet.getId());
+            valuesByKey.put("sendResult", items);
          } else {
-            var16.put("pk", var3);
+            valuesByKey.put("pk", packetPackage);
          }
 
-         this.a(var2, var16);
+         this.writeObjectToJson(resp, valuesByKey);
       }
    }
 
@@ -302,21 +302,21 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void updateFile(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      PacketFile var5 = PacketFileManager.ins.load(var3);
-      var5.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      var5.setDesc(var1.getParameter("desc"));
-      var5.setFileId(Long.valueOf(var1.getParameter("fileId")));
-      var5.setPath(var1.getParameter("path"));
-      var5.setVersion(var1.getParameter("version"));
-      var5.setUpdateDate(new Date());
-      PacketFileManager.ins.update(var5);
-      Packet var6 = PacketManager.ins.load(var5.getPacketId());
-      var6.setUpdateDate(new Date());
-      var6.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      PacketManager.ins.update(var6);
-      this.a(var2, var5);
+   public void updateFile(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      PacketFile packetFile = PacketFileManager.ins.load(longValue);
+      packetFile.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      packetFile.setDesc(req.getParameter("desc"));
+      packetFile.setFileId(Long.valueOf(req.getParameter("fileId")));
+      packetFile.setPath(req.getParameter("path"));
+      packetFile.setVersion(req.getParameter("version"));
+      packetFile.setUpdateDate(new Date());
+      PacketFileManager.ins.update(packetFile);
+      Packet packet = PacketManager.ins.load(packetFile.getPacketId());
+      packet.setUpdateDate(new Date());
+      packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      PacketManager.ins.update(packet);
+      this.writeObjectToJson(resp, packetFile);
    }
 
    @Transactional
@@ -325,15 +325,15 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void deleteFile(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      long var3 = Long.valueOf(var1.getParameter("id"));
-      PacketFile var5 = PacketFileManager.ins.load(var3);
-      if (var5 != null) {
-         PacketFileManager.ins.delete(var3);
-         Packet var6 = PacketManager.ins.load(var5.getPacketId());
-         var6.setUpdateDate(new Date());
-         var6.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-         PacketManager.ins.update(var6);
+   public void deleteFile(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      long longValue = Long.valueOf(req.getParameter("id"));
+      PacketFile packetFile = PacketFileManager.ins.load(longValue);
+      if (packetFile != null) {
+         PacketFileManager.ins.delete(longValue);
+         Packet packet = PacketManager.ins.load(packetFile.getPacketId());
+         packet.setUpdateDate(new Date());
+         packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+         PacketManager.ins.update(packet);
       }
 
    }
@@ -344,52 +344,52 @@ public class PacketServletHandler extends ApiServletHandler {
       code = "manager",
       model = "rule_knowledge"
    )
-   public void updateRestConfig(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      Packet var3 = new Packet();
-      var3.setId(Long.valueOf(var1.getParameter("id")));
-      var3.setRestEnable(Boolean.valueOf(var1.getParameter("restEnable")));
-      if (var3.isRestEnable()) {
-         var3.setRestInput(var1.getParameter("restInput"));
-         var3.setRestOutput(var1.getParameter("restOutput"));
-         var3.setRestSecurityEnable(Boolean.valueOf(var1.getParameter("restSecurityEnable")));
-         var3.setRestSecurityUser(var1.getParameter("restSecurityUser"));
-         var3.setRestSecurityPassword(var1.getParameter("restSecurityPassword"));
+   public void updateRestConfig(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      Packet packet = new Packet();
+      packet.setId(Long.valueOf(req.getParameter("id")));
+      packet.setRestEnable(Boolean.valueOf(req.getParameter("restEnable")));
+      if (packet.isRestEnable()) {
+         packet.setRestInput(req.getParameter("restInput"));
+         packet.setRestOutput(req.getParameter("restOutput"));
+         packet.setRestSecurityEnable(Boolean.valueOf(req.getParameter("restSecurityEnable")));
+         packet.setRestSecurityUser(req.getParameter("restSecurityUser"));
+         packet.setRestSecurityPassword(req.getParameter("restSecurityPassword"));
       }
 
-      var3.setUpdateDate(new Date());
-      var3.setUpdateUser(SecurityUtils.getLoginUsername(var1));
-      Packet var4 = PacketManager.ins.load(var3.getId());
-      boolean var5 = false;
-      if (var4.isRestEnable() != var3.isRestEnable()) {
-         var5 = true;
+      packet.setUpdateDate(new Date());
+      packet.setUpdateUser(SecurityUtils.getLoginUsername(req));
+      Packet packet2 = PacketManager.ins.load(packet.getId());
+      boolean flag = false;
+      if (packet2.isRestEnable() != packet.isRestEnable()) {
+         flag = true;
       }
 
-      if (var3.isRestEnable()) {
-         if (!StringUtils.trimToEmpty(var3.getRestInput()).equals(StringUtils.trimToEmpty(var4.getRestInput()))) {
-            var5 = true;
+      if (packet.isRestEnable()) {
+         if (!StringUtils.trimToEmpty(packet.getRestInput()).equals(StringUtils.trimToEmpty(packet2.getRestInput()))) {
+            flag = true;
          }
 
-         if (!StringUtils.trimToEmpty(var3.getRestOutput()).equals(StringUtils.trimToEmpty(var4.getRestOutput()))) {
-            var5 = true;
+         if (!StringUtils.trimToEmpty(packet.getRestOutput()).equals(StringUtils.trimToEmpty(packet2.getRestOutput()))) {
+            flag = true;
          }
 
-         if (var3.isRestSecurityEnable() != var4.isRestSecurityEnable()) {
-            var5 = true;
+         if (packet.isRestSecurityEnable() != packet2.isRestSecurityEnable()) {
+            flag = true;
          }
 
-         if (!StringUtils.trimToEmpty(var3.getRestSecurityUser()).equals(StringUtils.trimToEmpty(var4.getRestSecurityUser()))) {
-            var5 = true;
+         if (!StringUtils.trimToEmpty(packet.getRestSecurityUser()).equals(StringUtils.trimToEmpty(packet2.getRestSecurityUser()))) {
+            flag = true;
          }
 
-         if (!StringUtils.trimToEmpty(var3.getRestSecurityPassword()).equals(StringUtils.trimToEmpty(var4.getRestSecurityPassword()))) {
-            var5 = true;
+         if (!StringUtils.trimToEmpty(packet.getRestSecurityPassword()).equals(StringUtils.trimToEmpty(packet2.getRestSecurityPassword()))) {
+            flag = true;
          }
       }
 
-      if (var5) {
-         PacketManager.ins.updateRestConfig(var3);
-         PacketCache.ins.refreshPacketConfig(var3.getId());
-         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", var4.getId(), String.format("Update packet %s[%s]", var4.getName(), var4.getCode()));
+      if (flag) {
+         PacketManager.ins.updateRestConfig(packet);
+         PacketCache.ins.refreshPacketConfig(packet.getId());
+         SystemLogUtils.addProjectOperationLog(RuleFileType.Knowledge.name(), "update", packet2.getId(), String.format("Update packet %s[%s]", packet2.getName(), packet2.getCode()));
       }
 
    }

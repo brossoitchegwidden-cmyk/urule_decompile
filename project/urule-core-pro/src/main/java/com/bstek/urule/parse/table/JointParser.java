@@ -9,49 +9,49 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class JointParser implements Parser<Joint> {
-   private ValueParser a;
+   private ValueParser valueParser;
 
-   public Joint parse(Element var1) {
-      Joint var2 = new Joint();
-      var2.setType(JointType.valueOf(var1.attributeValue("type")));
+   public Joint parse(Element element) {
+      Joint joint = new Joint();
+      joint.setType(JointType.valueOf(element.attributeValue("type")));
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("condition")) {
-               var2.addCondition(this.parseCondition(var5));
-            } else if (this.support(var5.getName())) {
-               var2.addJoint(this.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("condition")) {
+               joint.addCondition(this.parseCondition(element2));
+            } else if (this.support(element2.getName())) {
+               joint.addJoint(this.parse(element2));
             }
          }
       }
 
-      return var2;
+      return joint;
    }
 
-   public Condition parseCondition(Element var1) {
-      Condition var2 = new Condition();
-      var2.setOp(Op.valueOf(var1.attributeValue("op")));
+   public Condition parseCondition(Element element) {
+      Condition condition = new Condition();
+      condition.setOp(Op.valueOf(element.attributeValue("op")));
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (this.a.support(var5.getName())) {
-               var2.setValue(this.a.parse(var5));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               condition.setValue(this.valueParser.parse(element2));
                break;
             }
          }
       }
 
-      return var2;
+      return condition;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("joint");
+   public boolean support(String name) {
+      return name.equals("joint");
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.a = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 }

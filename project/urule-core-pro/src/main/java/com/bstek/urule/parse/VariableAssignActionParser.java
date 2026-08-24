@@ -10,58 +10,58 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class VariableAssignActionParser extends ActionParser {
-   public Action parse(Element var1) {
-      String var2 = var1.attributeValue("type");
-      LeftType var3 = LeftType.variable;
-      if (StringUtils.isNotEmpty(var2)) {
-         var3 = LeftType.valueOf(var2);
+   public Action parse(Element element) {
+      String text = element.attributeValue("type");
+      LeftType leftType = LeftType.variable;
+      if (StringUtils.isNotEmpty(text)) {
+         leftType = LeftType.valueOf(text);
       }
 
-      if (var3.equals(LeftType.predefine)) {
-         PredefineAssignAction var9 = new PredefineAssignAction();
-         var9.setUuid(var1.attributeValue("uuid"));
-         var9.setPropertyUuid(var1.attributeValue("property-uuid"));
-         var9.setValue(this.a(var1));
-         return var9;
+      if (leftType.equals(LeftType.predefine)) {
+         PredefineAssignAction predefineAssignAction = new PredefineAssignAction();
+         predefineAssignAction.setUuid(element.attributeValue("uuid"));
+         predefineAssignAction.setPropertyUuid(element.attributeValue("property-uuid"));
+         predefineAssignAction.setValue(this.resolveValue(element));
+         return predefineAssignAction;
       }
 
-      VariableAssignAction var4 = new VariableAssignAction();
-      var4.setType(var3);
-      String var5 = var1.attributeValue("var");
-      if (StringUtils.isEmpty(var5)) {
-         var5 = var1.attributeValue("property-name");
+      VariableAssignAction variableAssignAction = new VariableAssignAction();
+      variableAssignAction.setType(leftType);
+      String text2 = element.attributeValue("var");
+      if (StringUtils.isEmpty(text2)) {
+         text2 = element.attributeValue("property-name");
       }
 
-      var4.setCategoryUuid(var1.attributeValue("category-uuid"));
-      var4.setUuid(var1.attributeValue("uuid"));
-      var4.setVariableName(var5);
-      String var6 = var1.attributeValue("var-label");
-      if (StringUtils.isEmpty(var6)) {
-         var6 = var1.attributeValue("property-label");
+      variableAssignAction.setCategoryUuid(element.attributeValue("category-uuid"));
+      variableAssignAction.setUuid(element.attributeValue("uuid"));
+      variableAssignAction.setVariableName(text2);
+      String text3 = element.attributeValue("var-label");
+      if (StringUtils.isEmpty(text3)) {
+         text3 = element.attributeValue("property-label");
       }
 
-      var4.setVariableLabel(var6);
-      String var7 = var1.attributeValue("var-category");
-      var4.setVariableCategory(var7);
-      String var8 = var1.attributeValue("datatype");
-      if (StringUtils.isNotEmpty(var8)) {
-         var4.setDatatype(Datatype.valueOf(var8));
+      variableAssignAction.setVariableLabel(text3);
+      String text4 = element.attributeValue("var-category");
+      variableAssignAction.setVariableCategory(text4);
+      String text5 = element.attributeValue("datatype");
+      if (StringUtils.isNotEmpty(text5)) {
+         variableAssignAction.setDatatype(Datatype.valueOf(text5));
       }
 
-      var4.setKeyLabel(var1.attributeValue("key-label"));
-      var4.setKeyName(var1.attributeValue("key-name"));
-      var4.setKeyUuid(var1.attributeValue("key-uuid"));
-      var4.setKeyCategoryUuid(var1.attributeValue("key-category-uuid"));
-      var4.setValue(this.a(var1));
-      return var4;
+      variableAssignAction.setKeyLabel(element.attributeValue("key-label"));
+      variableAssignAction.setKeyName(element.attributeValue("key-name"));
+      variableAssignAction.setKeyUuid(element.attributeValue("key-uuid"));
+      variableAssignAction.setKeyCategoryUuid(element.attributeValue("key-category-uuid"));
+      variableAssignAction.setValue(this.resolveValue(element));
+      return variableAssignAction;
    }
 
-   private Value a(Element var1) {
-      for (Object var3 : var1.elements()) {
-         if (var3 != null && var3 instanceof Element) {
-            Element var4 = (Element)var3;
-            if (this.a.support(var4.getName())) {
-               return this.a.parse(var4);
+   private Value resolveValue(Element element) {
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               return this.valueParser.parse(element2);
             }
          }
       }
@@ -70,7 +70,7 @@ public class VariableAssignActionParser extends ActionParser {
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("var-assign");
+   public boolean support(String name) {
+      return name.equals("var-assign");
    }
 }

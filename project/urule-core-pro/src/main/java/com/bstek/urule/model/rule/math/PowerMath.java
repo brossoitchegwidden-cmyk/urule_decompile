@@ -12,28 +12,28 @@ public class PowerMath implements MathSign {
    private Value base;
 
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
-      Object var3 = var1.getValueCompute().complexValueCompute(this.power, var1, var2);
-      Object var4 = var1.getValueCompute().complexValueCompute(this.base, var1, var2);
-      BigDecimal var5 = Utils.toBigDecimal(var3);
-      BigDecimal var6 = Utils.toBigDecimal(var4);
-      return new BigDecimal(Math.pow(var6.doubleValue(), var5.doubleValue())).stripTrailingZeros();
+   public Object calculate(Context context, Map<String, Object> factMap) {
+      Object objectValue = context.getValueCompute().complexValueCompute(this.power, context, factMap);
+      Object objectValue2 = context.getValueCompute().complexValueCompute(this.base, context, factMap);
+      BigDecimal decimalValue = Utils.toBigDecimal(objectValue);
+      BigDecimal decimalValue2 = Utils.toBigDecimal(objectValue2);
+      return new BigDecimal(Math.pow(decimalValue2.doubleValue(), decimalValue.doubleValue())).stripTrailingZeros();
    }
 
    public Value getPower() {
       return this.power;
    }
 
-   public void setPower(Value var1) {
-      this.power = var1;
+   public void setPower(Value power) {
+      this.power = power;
    }
 
    public Value getBase() {
       return this.base;
    }
 
-   public void setBase(Value var1) {
-      this.base = var1;
+   public void setBase(Value base) {
+      this.base = base;
    }
 
    @Override
@@ -43,7 +43,7 @@ public class PowerMath implements MathSign {
 
    @Override
    public String getId() {
-      String var1 = LocaleHolder.isEnglish() ? "Power" : "乘方";
-      return "[" + var1 + "]" + this.base.getId() + "^" + this.power.getId();
+      String text = LocaleHolder.isEnglish() ? "Power" : "乘方";
+      return "[" + text + "]" + this.base.getId() + "^" + this.power.getId();
    }
 }

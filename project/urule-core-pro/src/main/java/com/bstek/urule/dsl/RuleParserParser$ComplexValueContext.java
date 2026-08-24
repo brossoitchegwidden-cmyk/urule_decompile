@@ -50,8 +50,8 @@ public class RuleParserParser$ComplexValueContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$ComplexValueContext.class);
    }
 
-   public RuleParserParser$ComplexValueContext complexValue(int var1) {
-      return (RuleParserParser$ComplexValueContext)this.getRuleContext(RuleParserParser$ComplexValueContext.class, var1);
+   public RuleParserParser$ComplexValueContext complexValue(int number) {
+      return (RuleParserParser$ComplexValueContext)this.getRuleContext(RuleParserParser$ComplexValueContext.class, number);
    }
 
    public RuleParserParser$RightParenContext rightParen() {
@@ -62,19 +62,19 @@ public class RuleParserParser$ComplexValueContext extends ParserRuleContext {
       return this.getTokens(93);
    }
 
-   public TerminalNode ARITH(int var1) {
-      return this.getToken(93, var1);
+   public TerminalNode ARITH(int number) {
+      return this.getToken(93, number);
    }
 
-   public RuleParserParser$ComplexValueContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$ComplexValueContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 58;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitComplexValue(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitComplexValue(this) : parseTreeVisitor.visitChildren(this));
    }
 }

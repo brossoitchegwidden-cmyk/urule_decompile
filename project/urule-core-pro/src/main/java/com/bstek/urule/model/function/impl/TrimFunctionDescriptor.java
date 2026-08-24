@@ -13,32 +13,28 @@ public class TrimFunctionDescriptor implements FunctionDescriptor {
       return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.disabled = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
-
    @Override
    public String getLabel() {
       return "字符去空格";
    }
-
    @Override
    public String getName() {
       return "Trim";
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      Object var4 = Utils.getObjectProperty(var1, var2);
-      return var4 == null ? "null" : var4.toString().trim();
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      Object objectProperty = Utils.getObjectProperty(object, property);
+      return objectProperty == null ? "null" : objectProperty.toString().trim();
    }
-
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("对象");
-      var1.setEname("Object");
-      var1.setNeedProperty(true);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("对象");
+      argument.setEname("Object");
+      argument.setNeedProperty(true);
+      return argument;
    }
 }

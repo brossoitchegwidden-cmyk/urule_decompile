@@ -14,257 +14,258 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ReportProjectQuery {
-   public static List listLastModifyFiles(Long var0) {
-      Connection var1 = JdbcUtils.getConnection();
-      String var2 = "select URULE_FILE.ID_, URULE_FILE.NAME_, URULE_FILE.TYPE_, URULE_FILE.UPDATE_USER_, URULE_FILE.UPDATE_DATE_, URULE_FILE.PROJECT_ID_ from URULE_FILE";
-      var2 = var2 + " where URULE_FILE.PROJECT_ID_=? order by URULE_FILE.UPDATE_DATE_ DESC";
+   public static List listLastModifyFiles(Long projectId) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select URULE_FILE.ID_, URULE_FILE.NAME_, URULE_FILE.TYPE_, URULE_FILE.UPDATE_USER_, URULE_FILE.UPDATE_DATE_, URULE_FILE.PROJECT_ID_ from URULE_FILE";
+      text = text + " where URULE_FILE.PROJECT_ID_=? order by URULE_FILE.UPDATE_DATE_ DESC";
 
-      ArrayList var13;
+      ArrayList listLastModifyFilesResult;
       try {
-         PreparedStatement var3 = var1.prepareStatement(var2);
-         var3.setLong(1, var0);
-         ArrayList var4 = new ArrayList();
-         ResultSet var5 = var3.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var5.next()) {
-            RuleFile var6 = new RuleFile();
-            var6.setId(var5.getLong(1));
-            var6.setName(var5.getString(2));
-            var6.setType(var5.getString(3));
-            var6.setUpdateUser(var5.getString(4));
-            var6.setCreateUser(var5.getString(4));
-            var6.setModifyDate(var5.getDate(5));
-            var6.setProjectId(var5.getLong(6));
-            var4.add(var6);
+         while(resultSet.next()) {
+            RuleFile ruleFile = new RuleFile();
+            ruleFile.setId(resultSet.getLong(1));
+            ruleFile.setName(resultSet.getString(2));
+            ruleFile.setType(resultSet.getString(3));
+            ruleFile.setUpdateUser(resultSet.getString(4));
+            ruleFile.setCreateUser(resultSet.getString(4));
+            ruleFile.setModifyDate(resultSet.getDate(5));
+            ruleFile.setProjectId(resultSet.getLong(6));
+            items.add(ruleFile);
          }
 
-         JdbcUtils.closeStatement(var3);
-         var13 = var4;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeStatement(preparedStatement);
+         listLastModifyFilesResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return listLastModifyFilesResult;
    }
 
-   public static List listPacketDeploys(Long var0) {
-      Connection var1 = JdbcUtils.getConnection();
-      String var2 = "SELECT URULE_DEPLOYED_PACKET.ID_, URULE_DEPLOYED_PACKET.PACKET_ID_, URULE_PACKET.NAME_, URULE_DEPLOYED_PACKET.DESC_, URULE_DEPLOYED_PACKET.CREATE_USER_, URULE_DEPLOYED_PACKET.CREATE_DATE_ from URULE_DEPLOYED_PACKET";
-      var2 = var2 + " LEFT JOIN URULE_PACKET ON URULE_PACKET.ID_=URULE_DEPLOYED_PACKET.PACKET_ID_";
-      var2 = var2 + " WHERE URULE_DEPLOYED_PACKET.PROJECT_ID_=? order by URULE_DEPLOYED_PACKET.CREATE_DATE_ DESC";
+   public static List listPacketDeploys(Long projectId) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "SELECT URULE_DEPLOYED_PACKET.ID_, URULE_DEPLOYED_PACKET.PACKET_ID_, URULE_PACKET.NAME_, URULE_DEPLOYED_PACKET.DESC_, URULE_DEPLOYED_PACKET.CREATE_USER_, URULE_DEPLOYED_PACKET.CREATE_DATE_ from URULE_DEPLOYED_PACKET";
+      text = text + " LEFT JOIN URULE_PACKET ON URULE_PACKET.ID_=URULE_DEPLOYED_PACKET.PACKET_ID_";
+      text = text + " WHERE URULE_DEPLOYED_PACKET.PROJECT_ID_=? order by URULE_DEPLOYED_PACKET.CREATE_DATE_ DESC";
 
-      ArrayList var14;
+      ArrayList listPacketDeploysResult;
       try {
-         PreparedStatement var3 = var1.prepareStatement(var2);
-         var3.setLong(1, var0);
-         ArrayList var4 = new ArrayList();
-         ResultSet var5 = var3.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var5.next()) {
-            PacketDeployVO var6 = new PacketDeployVO();
-            var6.setId(var5.getLong(1));
-            var6.setPacketId(var5.getLong(2));
-            var6.setPacketName(var5.getString(3));
-            var6.setDesc(var5.getString(4));
-            var6.setCreateUser(var5.getString(4));
-            var6.setCreateDate(var5.getTimestamp(5));
-            var4.add(var6);
+         while(resultSet.next()) {
+            PacketDeployVO packetDeployVO = new PacketDeployVO();
+            packetDeployVO.setId(resultSet.getLong(1));
+            packetDeployVO.setPacketId(resultSet.getLong(2));
+            packetDeployVO.setPacketName(resultSet.getString(3));
+            packetDeployVO.setDesc(resultSet.getString(4));
+            packetDeployVO.setCreateUser(resultSet.getString(4));
+            packetDeployVO.setCreateDate(resultSet.getTimestamp(5));
+            items.add(packetDeployVO);
          }
 
-         JdbcUtils.closeStatement(var3);
-         var14 = var4;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeStatement(preparedStatement);
+         listPacketDeploysResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return listPacketDeploysResult;
    }
 
-   public static List countUserRuleFiles(Long var0) {
-      Connection var1 = JdbcUtils.getConnection();
-      String var2 = "select URULE_FILE.CREATE_USER_, COUNT(URULE_FILE.ID_) from URULE_FILE";
-      var2 = var2 + " where URULE_FILE.PROJECT_ID_=? and URULE_FILE.DELETED_=?";
-      var2 = var2 + " GROUP BY URULE_FILE.CREATE_USER_";
+   public static List countUserRuleFiles(Long projectId) {
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select URULE_FILE.CREATE_USER_, COUNT(URULE_FILE.ID_) from URULE_FILE";
+      text = text + " where URULE_FILE.PROJECT_ID_=? and URULE_FILE.DELETED_=?";
+      text = text + " GROUP BY URULE_FILE.CREATE_USER_";
 
-      ArrayList var14;
+      ArrayList countUserRuleFilesResult;
       try {
-         PreparedStatement var3 = var1.prepareStatement(var2);
-         var3.setLong(1, var0);
-         var3.setBoolean(2, false);
-         ArrayList var4 = new ArrayList();
-         ResultSet var5 = var3.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.setBoolean(2, false);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var5.next()) {
-            LinkedHashMap var6 = new LinkedHashMap();
-            var6.put("createUser", var5.getString(1));
-            var6.put("count", var5.getInt(2));
-            var4.add(var6);
+         while(resultSet.next()) {
+            LinkedHashMap valuesByKey = new LinkedHashMap();
+            valuesByKey.put("createUser", resultSet.getString(1));
+            valuesByKey.put("count", resultSet.getInt(2));
+            items.add(valuesByKey);
          }
 
-         JdbcUtils.closeStatement(var3);
-         var14 = var4;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeStatement(preparedStatement);
+         countUserRuleFilesResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var14;
+      return countUserRuleFilesResult;
    }
 
-   public static int countFile(Long var0) {
-      int var1 = 0;
-      Connection var2 = JdbcUtils.getConnection();
-      String var3 = "select count(URULE_FILE.ID_) from URULE_FILE";
-      var3 = var3 + " where URULE_FILE.PROJECT_ID_=? and URULE_FILE.DELETED_=?";
+   public static int countFile(Long projectId) {
+      int number = 0;
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select count(URULE_FILE.ID_) from URULE_FILE";
+      text = text + " where URULE_FILE.PROJECT_ID_=? and URULE_FILE.DELETED_=?";
 
-      int var6;
+      int countFileResult;
       try {
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setLong(1, var0);
-         var4.setBoolean(2, false);
-         ResultSet var5 = var4.executeQuery();
-         if (var5.next()) {
-            var1 = var5.getInt(1);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.setBoolean(2, false);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         JdbcUtils.closeStatement(var4);
-         var6 = var1;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeStatement(preparedStatement);
+         countFileResult = number;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var6;
+      return countFileResult;
    }
 
-   public static int countPacket(Long var0) {
-      int var1 = 0;
-      Connection var2 = JdbcUtils.getConnection();
-      String var3 = "select count(URULE_PACKET.ID_) from URULE_PACKET";
-      var3 = var3 + " where URULE_PACKET.PROJECT_ID_=?";
+   public static int countPacket(Long projectId) {
+      int number = 0;
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select count(URULE_PACKET.ID_) from URULE_PACKET";
+      text = text + " where URULE_PACKET.PROJECT_ID_=?";
 
-      int var6;
+      int countPacketResult;
       try {
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setLong(1, var0);
-         ResultSet var5 = var4.executeQuery();
-         if (var5.next()) {
-            var1 = var5.getInt(1);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         JdbcUtils.closeStatement(var4);
-         var6 = var1;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeStatement(preparedStatement);
+         countPacketResult = number;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var6;
+      return countPacketResult;
    }
 
-   public static int countBatch(Long var0) {
-      int var1 = 0;
-      Connection var2 = JdbcUtils.getConnection();
-      String var3 = "select count(URULE_BATCH.ID_) from URULE_BATCH";
-      var3 = var3 + " where URULE_BATCH.PROJECT_ID_=?";
+   public static int countBatch(Long projectId) {
+      int number = 0;
+      Connection connection = JdbcUtils.getConnection();
+      String text = "select count(URULE_BATCH.ID_) from URULE_BATCH";
+      text = text + " where URULE_BATCH.PROJECT_ID_=?";
 
-      int var6;
+      int countBatchResult;
       try {
-         PreparedStatement var4 = var2.prepareStatement(var3);
-         var4.setLong(1, var0);
-         ResultSet var5 = var4.executeQuery();
-         if (var5.next()) {
-            var1 = var5.getInt(1);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         preparedStatement.setLong(1, projectId);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         if (resultSet.next()) {
+            number = resultSet.getInt(1);
          }
 
-         JdbcUtils.closeStatement(var4);
-         var6 = var1;
-      } catch (Exception var10) {
-         throw new RuleException(var10);
+         JdbcUtils.closeStatement(preparedStatement);
+         countBatchResult = number;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var6;
+      return countBatchResult;
    }
 
-   public static List countUserLogin(Long var0, Date var1, Date var2) {
-      int var3 = a(var1, var2);
-      if (var3 > 31) {
+   /**统计每天用户登录信息(时间范围为一个月内)*/
+   public static List countUserLogin(Long projectId, Date startDate, Date endDate) {
+      int number = calculateDaysBetween(startDate, endDate);
+      if (number > 31) {
          throw new RuleException("无法统计超过一个月的数据");
       } else {
-         ArrayList var4 = new ArrayList();
-         Date var5 = new Date(var1.getTime());
-         Connection var6 = JdbcUtils.getConnection();
-         String var7 = "select count(URULE_LOG_USERLOGIN.ID_) from URULE_LOG_USERLOGIN";
-         var7 = var7 + " left join URULE_PROJECT_USER on URULE_PROJECT_USER.USER_ID_=URULE_LOG_USERLOGIN.USER_ID_";
-         var7 = var7 + " where URULE_PROJECT_USER.PROJECT_ID_=? and URULE_LOG_USERLOGIN.CREATE_DATE_>? and URULE_LOG_USERLOGIN.CREATE_DATE_<?";
+         ArrayList countUserLoginResult = new ArrayList();
+         Date date = new Date(startDate.getTime());
+         Connection connection = JdbcUtils.getConnection();
+         String text = "select count(URULE_LOG_USERLOGIN.ID_) from URULE_LOG_USERLOGIN";
+         text = text + " left join URULE_PROJECT_USER on URULE_PROJECT_USER.USER_ID_=URULE_LOG_USERLOGIN.USER_ID_";
+         text = text + " where URULE_PROJECT_USER.PROJECT_ID_=? and URULE_LOG_USERLOGIN.CREATE_DATE_>? and URULE_LOG_USERLOGIN.CREATE_DATE_<?";
 
          try {
-            PreparedStatement var8 = var6.prepareStatement(var7);
+            PreparedStatement preparedStatement = connection.prepareStatement(text);
 
-            for(int var9 = 0; var9 < var3; ++var9) {
-               Calendar var10 = Calendar.getInstance();
-               var10.setTime(var5);
-               var10.add(6, 1);
-               Date var11 = var10.getTime();
-               int var12 = 0;
-               var8.setLong(1, var0);
-               var8.setTimestamp(2, new Timestamp(var5.getTime()));
-               var8.setTimestamp(3, new Timestamp(var11.getTime()));
-               ResultSet var13 = var8.executeQuery();
-               if (var13.next()) {
-                  var12 = var13.getInt(1);
+            for(int index = 0; index < number; ++index) {
+               Calendar calendar = Calendar.getInstance();
+               calendar.setTime(date);
+               calendar.add(6, 1);
+               Date time = calendar.getTime();
+               int number2 = 0;
+               preparedStatement.setLong(1, projectId);
+               preparedStatement.setTimestamp(2, new Timestamp(date.getTime()));
+               preparedStatement.setTimestamp(3, new Timestamp(time.getTime()));
+               ResultSet resultSet = preparedStatement.executeQuery();
+               if (resultSet.next()) {
+                  number2 = resultSet.getInt(1);
                }
 
-               LinkedHashMap var14 = new LinkedHashMap();
-               var14.put("count", var12);
-               var14.put("loginDate", var5);
-               var4.add(var14);
-               var5 = var10.getTime();
+               LinkedHashMap valuesByKey = new LinkedHashMap();
+               valuesByKey.put("count", number2);
+               valuesByKey.put("loginDate", date);
+               countUserLoginResult.add(valuesByKey);
+               date = calendar.getTime();
             }
 
-            JdbcUtils.closeStatement(var8);
-         } catch (Exception var18) {
-            throw new RuleException(var18);
+            JdbcUtils.closeStatement(preparedStatement);
+         } catch (Exception exception) {
+            throw new RuleException(exception);
          } finally {
-            JdbcUtils.closeConnection(var6);
+            JdbcUtils.closeConnection(connection);
          }
 
-         return var4;
+         return countUserLoginResult;
       }
    }
 
-   private static int a(Date var0, Date var1) {
-      Calendar var2 = Calendar.getInstance();
-      var2.setTime(var0);
-      Calendar var3 = Calendar.getInstance();
-      var3.setTime(var1);
-      int var4 = var2.get(6);
-      int var5 = var3.get(6);
-      int var6 = var2.get(1);
-      int var7 = var3.get(1);
-      if (var6 == var7) {
-         return var5 - var4;
+   private static int calculateDaysBetween(Date dateValue, Date dateValue2) {
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(dateValue);
+      Calendar calendar2 = Calendar.getInstance();
+      calendar2.setTime(dateValue2);
+      int number = calendar.get(6);
+      int number2 = calendar2.get(6);
+      int number3 = calendar.get(1);
+      int number4 = calendar2.get(1);
+      if (number3 == number4) {
+         return number2 - number;
       } else {
-         int var8 = 0;
+         int number5 = 0;
 
-         for(int var9 = var6; var9 < var7; ++var9) {
-            if ((var9 % 4 != 0 || var9 % 100 == 0) && var9 % 400 != 0) {
-               var8 += 365;
+         for(int index = number3; index < number4; ++index) {
+            if ((index % 4 != 0 || index % 100 == 0) && index % 400 != 0) {
+               number5 += 365;
             } else {
-               var8 += 366;
+               number5 += 366;
             }
          }
 
-         return var8 + (var5 - var4);
+         return number5 + (number2 - number);
       }
    }
 }

@@ -10,87 +10,87 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResolverFieldQueryImpl implements ResolverFieldQuery {
-   private Long a;
-   private Long b;
-   private List c = new ArrayList();
+   private Long id;
+   private Long itemId;
+   private List queryParameters = new ArrayList();
 
-   public ResolverFieldQuery id(Long var1) {
-      this.a = var1;
+   public ResolverFieldQuery id(Long id) {
+      this.id = id;
       return this;
    }
 
-   public ResolverFieldQuery itemId(Long var1) {
-      this.b = var1;
+   public ResolverFieldQuery itemId(Long itemId) {
+      this.itemId = itemId;
       return this;
    }
 
-   private StringBuilder a() {
-      this.c.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.c.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.itemId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ITEM_ID_=?");
-         this.c.add(this.b);
+         stringBuilder.append(" ITEM_ID_=?");
+         this.queryParameters.add(this.itemId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
    public List list() {
-      Connection var1 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      ArrayList var13;
+      ArrayList listResult;
       try {
-         String var2 = "SELECT SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, KEY_, RESOLVER_ID_, ITEM_ID_ FROM URULE_BATCH_RESOLVER_FIELD ";
-         StringBuilder var3 = this.a();
-         if (var3.length() > 0) {
-            var2 = var2 + " where" + var3.toString();
+         String text = "SELECT SRC_PROPERTY_, DATA_TYPE_, DEST_PROPERTY_, CREATE_USER_, CREATE_DATE_, UPDATE_USER_, UPDATE_DATE_, ID_, PROJECT_ID_, BATCH_ID_, KEY_, RESOLVER_ID_, ITEM_ID_ FROM URULE_BATCH_RESOLVER_FIELD ";
+         StringBuilder stringBuilder = this.buildWhereClause();
+         if (stringBuilder.length() > 0) {
+            text = text + " where" + stringBuilder.toString();
          }
 
-         PreparedStatement var4 = var1.prepareStatement(var2);
-         JdbcUtils.fillPreparedStatementParameters(this.c, var4);
-         ArrayList var5 = new ArrayList();
-         ResultSet var6 = var4.executeQuery();
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ArrayList items = new ArrayList();
+         ResultSet resultSet = preparedStatement.executeQuery();
 
-         while(var6.next()) {
-            BatchDataResolverItemField var7 = new BatchDataResolverItemField();
-            var7.setSrcProperty(var6.getString(1));
-            var7.setDataType(var6.getString(2));
-            var7.setDestProperty(var6.getString(3));
-            var7.setCreateUser(var6.getString(4));
-            var7.setCreateDate(var6.getTimestamp(5));
-            var7.setUpdateUser(var6.getString(6));
-            var7.setUpdateDate(var6.getTimestamp(7));
-            var7.setId(var6.getLong(8));
-            var7.setProjectId(var6.getLong(9));
-            var7.setBatchId(var6.getLong(10));
-            var7.setKey(var6.getBoolean(11));
-            var7.setResolverId(var6.getLong(12));
-            var7.setResolverItemId(var6.getLong(13));
-            var5.add(var7);
+         while(resultSet.next()) {
+            BatchDataResolverItemField batchDataResolverItemField = new BatchDataResolverItemField();
+            batchDataResolverItemField.setSrcProperty(resultSet.getString(1));
+            batchDataResolverItemField.setDataType(resultSet.getString(2));
+            batchDataResolverItemField.setDestProperty(resultSet.getString(3));
+            batchDataResolverItemField.setCreateUser(resultSet.getString(4));
+            batchDataResolverItemField.setCreateDate(resultSet.getTimestamp(5));
+            batchDataResolverItemField.setUpdateUser(resultSet.getString(6));
+            batchDataResolverItemField.setUpdateDate(resultSet.getTimestamp(7));
+            batchDataResolverItemField.setId(resultSet.getLong(8));
+            batchDataResolverItemField.setProjectId(resultSet.getLong(9));
+            batchDataResolverItemField.setBatchId(resultSet.getLong(10));
+            batchDataResolverItemField.setKey(resultSet.getBoolean(11));
+            batchDataResolverItemField.setResolverId(resultSet.getLong(12));
+            batchDataResolverItemField.setResolverItemId(resultSet.getLong(13));
+            items.add(batchDataResolverItemField);
          }
 
-         JdbcUtils.closeResultSet(var6);
-         JdbcUtils.closeStatement(var4);
-         var13 = var5;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var1);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var13;
+      return listResult;
    }
 }

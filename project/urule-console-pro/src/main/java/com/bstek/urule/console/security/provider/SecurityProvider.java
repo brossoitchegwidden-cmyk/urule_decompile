@@ -6,9 +6,12 @@ import javax.servlet.http.HttpServletRequest;
 public interface SecurityProvider {
    String BEAN_ID = "urule.securityProvider";
 
-   User getLoginUser(HttpServletRequest var1);
+   /**获取登录用户对象,同时需要初始化用户的团队信息*/
+   User getLoginUser(HttpServletRequest req);
 
-   void login(HttpServletRequest var1, String var2, String var3);
+   /**执行登录操作*/
+   void login(HttpServletRequest req, String account, String password);
 
-   void logout(HttpServletRequest var1);
+   /**执行登出操作*/
+   void logout(HttpServletRequest req);
 }

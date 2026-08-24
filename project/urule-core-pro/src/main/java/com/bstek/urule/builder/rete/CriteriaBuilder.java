@@ -8,13 +8,13 @@ import java.util.List;
 
 public class CriteriaBuilder extends CriterionBuilder {
    @Override
-   public List<BaseReteNode> buildCriterion(BaseCriterion var1, BuildContext var2) {
-      Criteria var3 = (Criteria)var1;
-      return this.a(var3, null, var2);
+   public List<BaseReteNode> buildCriterion(BaseCriterion baseCriterion, BuildContext context) {
+      Criteria criteria = (Criteria)baseCriterion;
+      return this.buildCriteria(criteria, null, context);
    }
 
    @Override
-   public boolean support(Criterion var1) {
-      return var1 instanceof Criteria;
+   public boolean support(Criterion criterion) {
+      return criterion instanceof Criteria;
    }
 }

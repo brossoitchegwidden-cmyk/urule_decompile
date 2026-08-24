@@ -13,168 +13,168 @@ import java.util.regex.Pattern;
 import org.apache.commons.beanutils.PropertyUtils;
 
 public class Tools {
-   private static Pattern a = Pattern.compile("-?[0-9]+\\.?[0-9]*");
-   private static final List b = new ArrayList();
-   private static final List c = new ArrayList();
+   private static Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
+   private static final List dateFormats = new ArrayList();
+   private static final List dateTimeFormats = new ArrayList();
 
-   public static boolean isNumber(Object var0) {
-      if (var0 == null) {
+   public static boolean isNumber(Object obj) {
+      if (obj == null) {
          return false;
-      } else if (var0 instanceof String) {
-         String var1 = (String)var0;
-         return a.matcher(var1).matches();
+      } else if (obj instanceof String) {
+         String obj2 = (String)obj;
+         return Tools.pattern.matcher(obj2).matches();
       } else {
-         return var0 instanceof Number;
+         return obj instanceof Number;
       }
    }
 
-   public static BigDecimal toBigDecimal(Object var0) {
-      if (var0 == null) {
+   public static BigDecimal toBigDecimal(Object obj) {
+      if (obj == null) {
          return null;
-      } else if (var0 instanceof BigDecimal) {
-         return (BigDecimal)var0;
-      } else if (var0 instanceof String) {
+      } else if (obj instanceof BigDecimal) {
+         return (BigDecimal)obj;
+      } else if (obj instanceof String) {
          try {
-            String var3 = var0.toString().trim();
-            return new BigDecimal(var3);
-         } catch (Exception var2) {
-            throw new RuleException("Can not convert " + var0 + " to BigDecimal.");
+            String trimmedText = obj.toString().trim();
+            return new BigDecimal(trimmedText);
+         } catch (Exception exception) {
+            throw new RuleException("Can not convert " + obj + " to BigDecimal.");
          }
-      } else if (var0 instanceof Number) {
-         Number var1 = (Number)var0;
-         if (var1 instanceof Integer) {
-            return new BigDecimal(Integer.toString(var1.intValue()));
-         } else if (var1 instanceof Float) {
-            return new BigDecimal(Float.toString(var1.floatValue()));
-         } else if (var1 instanceof Double) {
-            return new BigDecimal(Double.toString(var1.doubleValue()));
-         } else if (var1 instanceof Long) {
-            return new BigDecimal(Long.toString(var1.longValue()));
+      } else if (obj instanceof Number) {
+         Number number = (Number)obj;
+         if (number instanceof Integer) {
+            return new BigDecimal(Integer.toString(number.intValue()));
+         } else if (number instanceof Float) {
+            return new BigDecimal(Float.toString(number.floatValue()));
+         } else if (number instanceof Double) {
+            return new BigDecimal(Double.toString(number.doubleValue()));
+         } else if (number instanceof Long) {
+            return new BigDecimal(Long.toString(number.longValue()));
          } else {
-            return var1 instanceof Byte ? new BigDecimal(Byte.toString(var1.byteValue())) : new BigDecimal(var1.toString());
+            return number instanceof Byte ? new BigDecimal(Byte.toString(number.byteValue())) : new BigDecimal(number.toString());
          }
       } else {
-         throw new RuleException("Can not convert " + var0 + " to BigDecimal.");
+         throw new RuleException("Can not convert " + obj + " to BigDecimal.");
       }
    }
 
-   public static Date toDateOrDatatime(String var0) {
+   public static Date toDateOrDatatime(String value) {
       try {
-         return toDate(var0);
-      } catch (Exception var2) {
-         return toDatetime(var0);
+         return toDate(value);
+      } catch (Exception exception) {
+         return toDatetime(value);
       }
    }
 
-   public static Date toDate(String var0) {
-      for(String var2 : (Iterable<String>)(Iterable<?>)(b)) {
+   public static Date toDate(String value) {
+      for(String text : (Iterable<String>)(Iterable<?>)(Tools.dateFormats)) {
          try {
-            SimpleDateFormat var3 = new SimpleDateFormat(var2);
-            return var3.parse(var0);
-         } catch (Exception var4) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(text);
+            return simpleDateFormat.parse(value);
+         } catch (Exception exception) {
          }
       }
 
-      throw new RuleException("Can not convert [" + var0 + "] to date");
+      throw new RuleException("Can not convert [" + value + "] to date");
    }
 
-   public static Date toDatetime(String var0) {
-      for(String var2 : (Iterable<String>)(Iterable<?>)(c)) {
+   public static Date toDatetime(String value) {
+      for(String text : (Iterable<String>)(Iterable<?>)(Tools.dateTimeFormats)) {
          try {
-            SimpleDateFormat var3 = new SimpleDateFormat(var2);
-            return var3.parse(var0);
-         } catch (Exception var4) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(text);
+            return simpleDateFormat.parse(value);
+         } catch (Exception exception) {
          }
       }
 
-      throw new RuleException("Can not convert [" + var0 + "] to date time");
+      throw new RuleException("Can not convert [" + value + "] to date time");
    }
 
-   public static List toList(String var0) {
-      String[] var1 = var0.split(",");
-      ArrayList var2 = new ArrayList();
+   public static List toList(String value) {
+      String[] parts = value.split(",");
+      ArrayList toListResult = new ArrayList();
 
-      for(String var6 : var1) {
-         var2.add(var6);
+      for(String text : parts) {
+         toListResult.add(text);
       }
 
-      return var2;
+      return toListResult;
    }
 
-   public static Object getProperty(Object var0, String var1) {
-      if (var0 == null) {
+   public static Object getProperty(Object obj, String property) {
+      if (obj == null) {
          return null;
       } else {
          try {
-            if (var0 instanceof Map && var1.indexOf(".") == -1) {
-               Map var2 = (Map)var0;
-               return var2.get(var1);
+            if (obj instanceof Map && property.indexOf(".") == -1) {
+               Map obj2 = (Map)obj;
+               return obj2.get(property);
             } else {
-               return PropertyUtils.getProperty(var0, var1);
+               return PropertyUtils.getProperty(obj, property);
             }
-         } catch (Exception var3) {
-            throw new RuleException(var3);
+         } catch (Exception exception) {
+            throw new RuleException(exception);
          }
       }
    }
 
-   public static int processSpan(int var0) {
-      if (var0 == 1) {
-         var0 = 0;
-      } else if (var0 > 1) {
-         --var0;
+   public static int processSpan(int span) {
+      if (span == 1) {
+         span = 0;
+      } else if (span > 1) {
+         --span;
       }
 
-      return var0;
+      return span;
    }
 
-   public static Date toDate(String var0, String var1) {
-      if (StringUtils.isEmpty(var0)) {
+   public static Date toDate(String value, String pattern) {
+      if (StringUtils.isEmpty(value)) {
          return null;
-      } else if (StringUtils.isEmpty(var1)) {
+      } else if (StringUtils.isEmpty(pattern)) {
          throw new RuleException("日期格式的格式不能为空！");
       } else {
-         SimpleDateFormat var2 = new SimpleDateFormat(var1);
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
          try {
-            return var2.parse(var0.toString());
-         } catch (ParseException var4) {
-            throw new RuleException(var4);
+            return simpleDateFormat.parse(value.toString());
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       }
    }
 
-   public static String formatDate(Object var0, String var1) {
-      if (StringUtils.isEmpty(var0)) {
+   public static String formatDate(Object value, String pattern) {
+      if (StringUtils.isEmpty(value)) {
          return "";
-      } else if (StringUtils.isEmpty(var1)) {
+      } else if (StringUtils.isEmpty(pattern)) {
          throw new RuleException("日期格式的格式不能为空！");
       } else {
-         Date var2 = (Date)var0;
-         SimpleDateFormat var3 = new SimpleDateFormat(var1);
-         return var3.format(var2);
+         Date dateValue = (Date)value;
+         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+         return simpleDateFormat.format(dateValue);
       }
    }
 
-   public static String formatNumber(Object var0, String var1) {
-      if (StringUtils.isEmpty(var0)) {
+   public static String formatNumber(Object value, String pattern) {
+      if (StringUtils.isEmpty(value)) {
          return "";
-      } else if (StringUtils.isEmpty(var1)) {
+      } else if (StringUtils.isEmpty(pattern)) {
          throw new RuleException("数字格式化的格式不能为空！");
       } else {
-         DecimalFormat var2 = new DecimalFormat(var1);
-         return var2.format(toBigDecimal(var0).doubleValue());
+         DecimalFormat decimalFormat = new DecimalFormat(pattern);
+         return decimalFormat.format(toBigDecimal(value).doubleValue());
       }
    }
 
    static {
-      b.add("yyyy-MM-dd");
-      b.add("yyyy/MM/dd");
-      b.add("yyyy.MM.dd");
-      b.add("yyyy年MM月dd日");
-      c.add("yyyy-MM-dd HH:mm:ss");
-      c.add("yyyy/MM/dd HH:mm:ss");
-      c.add("yyyy.MM.dd HH:mm:ss");
-      c.add("yyyy年MM月dd日 HH:mm:ss");
+      Tools.dateFormats.add("yyyy-MM-dd");
+      Tools.dateFormats.add("yyyy/MM/dd");
+      Tools.dateFormats.add("yyyy.MM.dd");
+      Tools.dateFormats.add("yyyy年MM月dd日");
+      Tools.dateTimeFormats.add("yyyy-MM-dd HH:mm:ss");
+      Tools.dateTimeFormats.add("yyyy/MM/dd HH:mm:ss");
+      Tools.dateTimeFormats.add("yyyy.MM.dd HH:mm:ss");
+      Tools.dateTimeFormats.add("yyyy年MM月dd日 HH:mm:ss");
    }
 }

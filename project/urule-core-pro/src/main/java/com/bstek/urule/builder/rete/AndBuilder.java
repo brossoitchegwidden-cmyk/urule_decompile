@@ -14,83 +14,83 @@ import java.util.List;
 
 public class AndBuilder extends JunctionBuilder {
    @Override
-   public List<BaseReteNode> buildCriterion(BaseCriterion var1, BuildContext var2) {
-      And var3 = (And)var1;
-      AndNode var4 = null;
-      List var5 = var3.getCriterions();
-      if (var5 != null && var5.size() != 0) {
-         BaseReteNode var6 = null;
+   public List<BaseReteNode> buildCriterion(BaseCriterion baseCriterion, BuildContext context) {
+      And and = (And)baseCriterion;
+      AndNode andNode = null;
+      List criterions = and.getCriterions();
+      if (criterions != null && criterions.size() != 0) {
+         BaseReteNode baseReteNode = null;
 
-         for (Criterion var8 : (Iterable<Criterion>)(Iterable<?>)(var5)) {
-            ArrayList var9 = new ArrayList();
-            if (var6 != null) {
-               var9.add(var6);
+         for (Criterion criterion : (Iterable<Criterion>)(Iterable<?>)(criterions)) {
+            ArrayList items = new ArrayList();
+            if (baseReteNode != null) {
+               items.add(baseReteNode);
             }
 
-            List var10 = this.a(var8, var2, var9);
-            if (var10 != null) {
-               for (BaseReteNode var12 : (Iterable<BaseReteNode>)(Iterable<?>)(var10)) {
-                  if (var12 instanceof CriteriaNode) {
-                     if (var6 != null) {
-                        List var13 = var6.getChildrenNodes();
-                        if (!var13.contains(var12)) {
-                           if (var4 == null) {
-                              var4 = new AndNode(var2.nextId());
+            List criterion2 = this.buildCriterion(criterion, context, items);
+            if (criterion2 != null) {
+               for (BaseReteNode baseReteNode2 : (Iterable<BaseReteNode>)(Iterable<?>)(criterion2)) {
+                  if (baseReteNode2 instanceof CriteriaNode) {
+                     if (baseReteNode != null) {
+                        List childrenNodes = baseReteNode.getChildrenNodes();
+                        if (!childrenNodes.contains(baseReteNode2)) {
+                           if (andNode == null) {
+                              andNode = new AndNode(context.nextId());
                            }
 
-                           var6.addLine(var4);
+                           baseReteNode.addLine(andNode);
                         }
                      }
 
-                     var6 = var12;
-                  } else if (var12 instanceof MetNode) {
-                     if (var6 != null) {
-                        List var15 = var6.getChildrenNodes();
-                        if (!var15.contains(var12)) {
-                           if (var4 == null) {
-                              var4 = new AndNode(var2.nextId());
+                     baseReteNode = baseReteNode2;
+                  } else if (baseReteNode2 instanceof MetNode) {
+                     if (baseReteNode != null) {
+                        List childrenNodes2 = baseReteNode.getChildrenNodes();
+                        if (!childrenNodes2.contains(baseReteNode2)) {
+                           if (andNode == null) {
+                              andNode = new AndNode(context.nextId());
                            }
 
-                           var6.addLine(var4);
+                           baseReteNode.addLine(andNode);
                         }
                      }
 
-                     var6 = var12;
-                  } else if (var12 instanceof JunctionNode) {
-                     if (var4 == null) {
-                        var4 = new AndNode(var2.nextId());
+                     baseReteNode = baseReteNode2;
+                  } else if (baseReteNode2 instanceof JunctionNode) {
+                     if (andNode == null) {
+                        andNode = new AndNode(context.nextId());
                      }
 
-                     ((JunctionNode)var12).addLine(var4);
+                     ((JunctionNode)baseReteNode2).addLine(andNode);
                   }
                }
             }
          }
 
-         ArrayList var14 = new ArrayList();
-         if (var5.size() == 1 && var6 != null) {
-            var14.add(var6);
-            return var14;
+         ArrayList criterion3 = new ArrayList();
+         if (criterions.size() == 1 && baseReteNode != null) {
+            criterion3.add(baseReteNode);
+            return criterion3;
          }
 
-         if (var4 == null) {
-            var14.add(var6);
-            return var14;
+         if (andNode == null) {
+            criterion3.add(baseReteNode);
+            return criterion3;
          }
 
-         if (var4 != null && var6 != null) {
-            var6.addLine(var4);
+         if (andNode != null && baseReteNode != null) {
+            baseReteNode.addLine(andNode);
          }
 
-         var14.add(var4);
-         return var14;
+         criterion3.add(andNode);
+         return criterion3;
       } else {
          throw new RuleException("Condition join node[and] need one child at least.");
       }
    }
 
    @Override
-   public boolean support(Criterion var1) {
-      return var1 instanceof And;
+   public boolean support(Criterion criterion) {
+      return criterion instanceof And;
    }
 }

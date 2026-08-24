@@ -3,11 +3,11 @@ package com.bstek.urule.console.database.manager.user;
 import com.bstek.urule.console.database.model.Page;
 
 public interface UserQuery {
-   UserQuery idLike(String var1);
+   UserQuery idLike(String userId);
 
-   UserQuery nameLike(String var1);
+   UserQuery nameLike(String name);
 
-   Page paging(int var1, int var2, long var3);
+   Page paging(int pageIndex, int pageSize, long projectId);
 
-   Page paging(int var1, int var2, String var3);
+   Page paging(int pageIndex, int pageSize, String groupId);
 }

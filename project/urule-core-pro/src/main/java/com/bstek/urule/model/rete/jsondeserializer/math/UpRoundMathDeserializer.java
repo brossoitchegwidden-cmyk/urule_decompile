@@ -8,10 +8,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class UpRoundMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      UpRoundMath var2 = new UpRoundMath();
-      var2.setValue(JsonUtils.parseValueNode(var1.get("value")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      UpRoundMath upRoundMath = new UpRoundMath();
+      upRoundMath.setValue(JsonUtils.parseValueNode(jsonNode.get("value")));
+      return upRoundMath;
    }
 
    @Override

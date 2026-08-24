@@ -132,17 +132,21 @@ Styles.frameStyle={
         return _getStyle("flowLibIconStyle",{color:'rgb(31, 90, 163)'});
     },
     getFolderIcon:function () {
-        return _getStyle("flowIcon","rf rf-folder");
+        return _getStyle("folderIcon","rf rf-folder", "flowIcon");
     },
     getFolderIconStyle:function () {
-        return _getStyle("flowIconStyle",{color:'rgb(224, 126, 1)'});
+        return _getStyle("folderIconStyle",{color:'rgb(224, 126, 1)'}, "flowIconStyle");
     },
 };
-function _getStyle(styleName,defaultValue) {
-    if(window._frameStyles){
-        return window._frameStyles[styleName];
-    }else{
-        return defaultValue;
+function _getStyle(styleName,defaultValue,legacyStyleName) {
+    const customStyles=window._frameStyles;
+    if(customStyles && Object.prototype.hasOwnProperty.call(customStyles,styleName)){
+        return customStyles[styleName];
     }
+    // Older deployments accidentally stored folder overrides under flowIcon*.
+    if(customStyles && legacyStyleName && Object.prototype.hasOwnProperty.call(customStyles,legacyStyleName)){
+        return customStyles[legacyStyleName];
+    }
+    return defaultValue;
 }
 export default Styles;

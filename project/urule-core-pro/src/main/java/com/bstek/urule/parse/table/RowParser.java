@@ -5,15 +5,15 @@ import com.bstek.urule.parse.Parser;
 import org.dom4j.Element;
 
 public class RowParser implements Parser<Row> {
-   public Row parse(Element var1) {
-      Row var2 = new Row();
-      var2.setHeight(Integer.valueOf(var1.attributeValue("height")));
-      var2.setNum(Integer.valueOf(var1.attributeValue("num")));
-      return var2;
+   public Row parse(Element element) {
+      Row row = new Row();
+      row.setHeight(Integer.valueOf(element.attributeValue("height")));
+      row.setNum(Integer.valueOf(element.attributeValue("num")));
+      return row;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("row");
+   public boolean support(String name) {
+      return name.equals("row");
    }
 }

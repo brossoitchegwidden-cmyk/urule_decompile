@@ -6,13 +6,13 @@ public enum ProjectModule {
    permissions("权限配置"),
    setting("项目设置");
 
-   private String a;
+   private String label;
 
-   private ProjectModule(String var3) {
-      this.a = var3;
+   private ProjectModule(String text) {
+      this.label = text;
    }
 
    public String getLabel() {
-      return this.a;
+      return this.label;
    }
 }

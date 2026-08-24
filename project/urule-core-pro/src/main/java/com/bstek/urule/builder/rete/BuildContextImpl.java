@@ -32,241 +32,241 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuildContextImpl implements BuildContext {
-   private ResourceLibrary a;
-   private List<ObjectTypeNode> b;
-   private IdGenerator c;
-   private Rule d;
+   private ResourceLibrary resourceLibrary;
+   private List<ObjectTypeNode> objectTypeNodes;
+   private IdGenerator idGenerator;
+   private Rule currentRule;
 
-   public BuildContextImpl(ResourceLibrary var1, List<ObjectTypeNode> var2) {
-      this.a = var1;
-      this.b = var2;
-      this.c = new IdGenerator();
+   public BuildContextImpl(ResourceLibrary resourceLibrary, List<ObjectTypeNode> objectTypeNodes) {
+      this.resourceLibrary = resourceLibrary;
+      this.objectTypeNodes = objectTypeNodes;
+      this.idGenerator = new IdGenerator();
    }
 
-   public BuildContextImpl(List<ObjectTypeNode> var1, BuildContext var2) {
-      this.a = var2.getResourceLibrary();
-      this.b = var1;
-      this.c = var2.getIdGenerator();
+   public BuildContextImpl(List<ObjectTypeNode> objectTypeNodes, BuildContext parentContent) {
+      this.resourceLibrary = parentContent.getResourceLibrary();
+      this.objectTypeNodes = objectTypeNodes;
+      this.idGenerator = parentContent.getIdGenerator();
    }
 
    @Override
-   public boolean assertSameType(BaseCriteria var1, BaseCriteria var2) {
-      VariableCategory var3 = this.a(var1);
-      VariableCategory var4 = this.a(var2);
-      return var3 != null && var4 != null ? var3.getClazz().equals(var4.getClazz()) : false;
+   public boolean assertSameType(BaseCriteria left, BaseCriteria right) {
+      VariableCategory variableCategory = this.resolveVariableCategory(left);
+      VariableCategory variableCategory2 = this.resolveVariableCategory(right);
+      return variableCategory != null && variableCategory2 != null ? variableCategory.getClazz().equals(variableCategory2.getClazz()) : false;
    }
 
-   private VariableCategory a(BaseCriteria var1) {
-      VariableCategory var2 = null;
-      if (var1 instanceof Criteria) {
-         Criteria var3 = (Criteria)var1;
-         LeftPart var4 = var3.getLeft().getLeftPart();
-         if (var4 instanceof VariableLeftPart) {
-            VariableLeftPart var5 = (VariableLeftPart)var4;
-            var2 = this.a.getVariableCategoryByUuid(var5.getCategoryUuid());
+   private VariableCategory resolveVariableCategory(BaseCriteria baseCriteria) {
+      VariableCategory variableCategory = null;
+      if (baseCriteria instanceof Criteria) {
+         Criteria criteria = (Criteria)baseCriteria;
+         LeftPart leftPart = criteria.getLeft().getLeftPart();
+         if (leftPart instanceof VariableLeftPart) {
+            VariableLeftPart variableLeftPart = (VariableLeftPart)leftPart;
+            variableCategory = this.resourceLibrary.getVariableCategoryByUuid(variableLeftPart.getCategoryUuid());
          }
 
-         return var2;
+         return variableCategory;
       } else {
-         throw new RuleException("Unknow Criteria : " + var1);
+         throw new RuleException("Unknow Criteria : " + baseCriteria);
       }
    }
 
    @Override
-   public List<String> getObjectTypeByCriterions(List<Criterion> var1) {
-      ArrayList var2 = new ArrayList();
+   public List<String> getObjectTypeByCriterions(List<Criterion> criterions) {
+      ArrayList objectTypeByCriterions = new ArrayList();
 
-      for (Criterion var4 : var1) {
-         if (var4 instanceof Criteria) {
-            var2.addAll(this.getObjectType((Criteria)var4));
-         } else if (var4 instanceof Junction) {
-            Junction var5 = (Junction)var4;
-            var2.addAll(this.getObjectTypeByCriterions(var5.getCriterions()));
-         } else if (var4 instanceof ConditionTemplateCriterion) {
+      for (Criterion criterion : criterions) {
+         if (criterion instanceof Criteria) {
+            objectTypeByCriterions.addAll(this.getObjectType((Criteria)criterion));
+         } else if (criterion instanceof Junction) {
+            Junction junction = (Junction)criterion;
+            objectTypeByCriterions.addAll(this.getObjectTypeByCriterions(junction.getCriterions()));
+         } else if (criterion instanceof ConditionTemplateCriterion) {
             throw new RuleException("条件模版不能在N个条件中使用");
          }
       }
 
-      return var2;
+      return objectTypeByCriterions;
    }
 
    @Override
-   public List<String> getObjectType(BaseCriteria var1) {
-      ArrayList var2 = new ArrayList();
-      if (!(var1 instanceof Criteria)) {
-         throw new RuleException("Unknow Criteria : " + var1);
+   public List<String> getObjectType(BaseCriteria criteria) {
+      ArrayList objectType = new ArrayList();
+      if (!(criteria instanceof Criteria)) {
+         throw new RuleException("Unknow Criteria : " + criteria);
       }
 
-      Criteria var3 = (Criteria)var1;
-      LeftPart var4 = var3.getLeft().getLeftPart();
-      if (var4 instanceof VariableLeftPart) {
-         VariableLeftPart var5 = (VariableLeftPart)var4;
-         VariableCategory var6 = this.a.getVariableCategoryByUuid(var5.getCategoryUuid());
-         if (var6 == null) {
-            var6 = this.a.getVariableCategoryByCategoryName(var5.getVariableCategory());
+      Criteria criteria2 = (Criteria)criteria;
+      LeftPart leftPart = criteria2.getLeft().getLeftPart();
+      if (leftPart instanceof VariableLeftPart) {
+         VariableLeftPart variableLeftPart = (VariableLeftPart)leftPart;
+         VariableCategory variableCategoryByUuid = this.resourceLibrary.getVariableCategoryByUuid(variableLeftPart.getCategoryUuid());
+         if (variableCategoryByUuid == null) {
+            variableCategoryByUuid = this.resourceLibrary.getVariableCategoryByCategoryName(variableLeftPart.getVariableCategory());
          }
 
-         var2.add(var6.getClazz());
-      } else if (var4 instanceof CommonFunctionLeftPart) {
-         CommonFunctionLeftPart var12 = (CommonFunctionLeftPart)var4;
-         CommonFunctionParameter var17 = var12.getParameter();
-         Value var7 = var17.getObjectParameter();
-         this.a(var7, var2);
-      } else if (var4 instanceof MethodLeftPart) {
-         MethodLeftPart var13 = (MethodLeftPart)var4;
-         List var18 = var13.getParameters();
-         if (var18 != null) {
-            for (Parameter var8 : (Iterable<Parameter>)(Iterable<?>)(var18)) {
-               Value var9 = var8.getValue();
-               this.a(var9, var2);
+         objectType.add(variableCategoryByUuid.getClazz());
+      } else if (leftPart instanceof CommonFunctionLeftPart) {
+         CommonFunctionLeftPart commonFunctionLeftPart = (CommonFunctionLeftPart)leftPart;
+         CommonFunctionParameter parameter = commonFunctionLeftPart.getParameter();
+         Value objectParameter = parameter.getObjectParameter();
+         this.collectReferencedClasses(objectParameter, objectType);
+      } else if (leftPart instanceof MethodLeftPart) {
+         MethodLeftPart methodLeftPart = (MethodLeftPart)leftPart;
+         List parameters = methodLeftPart.getParameters();
+         if (parameters != null) {
+            for (Parameter parameter2 : (Iterable<Parameter>)(Iterable<?>)(parameters)) {
+               Value localValue = parameter2.getValue();
+               this.collectReferencedClasses(localValue, objectType);
             }
          }
-      } else if (var4 instanceof FunctionLeftPart) {
-         FunctionLeftPart var14 = (FunctionLeftPart)var4;
-         List var19 = var14.getParameters();
-         if (var19 != null) {
-            for (Parameter var26 : (Iterable<Parameter>)(Iterable<?>)(var19)) {
-               Value var29 = var26.getValue();
-               this.a(var29, var2);
+      } else if (leftPart instanceof FunctionLeftPart) {
+         FunctionLeftPart functionLeftPart = (FunctionLeftPart)leftPart;
+         List parameters2 = functionLeftPart.getParameters();
+         if (parameters2 != null) {
+            for (Parameter parameter3 : (Iterable<Parameter>)(Iterable<?>)(parameters2)) {
+               Value localValue2 = parameter3.getValue();
+               this.collectReferencedClasses(localValue2, objectType);
             }
          }
-      } else if (var4 instanceof AccumulateLeftPart) {
-         AccumulateLeftPart var15 = (AccumulateLeftPart)var4;
-         Value var20 = var15.getLoopTarget().getValue();
-         this.a(var20, var2);
+      } else if (leftPart instanceof AccumulateLeftPart) {
+         AccumulateLeftPart accumulateLeftPart = (AccumulateLeftPart)leftPart;
+         Value localValue3 = accumulateLeftPart.getLoopTarget().getValue();
+         this.collectReferencedClasses(localValue3, objectType);
 
-         for (ConditionItem var27 : var15.getConditionItems()) {
-            var20 = var27.getValue();
-            if (var20 != null) {
-               this.a(var20, var2);
+         for (ConditionItem conditionItem : accumulateLeftPart.getConditionItems()) {
+            localValue3 = conditionItem.getValue();
+            if (localValue3 != null) {
+               this.collectReferencedClasses(localValue3, objectType);
             }
          }
 
-         for (CalculateItem var28 : var15.getCalculateItems()) {
-            if (var28.isEnableAssignment()) {
-               VariableCategory var30 = this.a.getVariableCategoryByUuid(var28.getAssignCategoryUuid());
-               String var10 = var30.getClazz();
-               if (!var2.contains(var10)) {
-                  var2.add(var10);
+         for (CalculateItem calculateItem : accumulateLeftPart.getCalculateItems()) {
+            if (calculateItem.isEnableAssignment()) {
+               VariableCategory variableCategoryByUuid2 = this.resourceLibrary.getVariableCategoryByUuid(calculateItem.getAssignCategoryUuid());
+               String clazz = variableCategoryByUuid2.getClazz();
+               if (!objectType.contains(clazz)) {
+                  objectType.add(clazz);
                }
             }
          }
       }
 
-      ComplexArithmetic var16 = var3.getLeft().getArithmetic();
-      if (var16 != null) {
-         this.a(var16.getValue(), var2);
+      ComplexArithmetic arithmetic = criteria2.getLeft().getArithmetic();
+      if (arithmetic != null) {
+         this.collectReferencedClasses(arithmetic.getValue(), objectType);
       }
 
-      this.a(var3.getValue(), var2);
-      if (var2.size() == 0) {
-         var2.add("*");
+      this.collectReferencedClasses(criteria2.getValue(), objectType);
+      if (objectType.size() == 0) {
+         objectType.add("*");
       }
 
-      if (var1 instanceof Criteria) {
-         var3 = (Criteria)var1;
-         var3.addNecessaryClasses(var2);
+      if (criteria instanceof Criteria) {
+         criteria2 = (Criteria)criteria;
+         criteria2.addNecessaryClasses(objectType);
       }
 
-      return var2;
+      return objectType;
    }
 
-   private void a(Value var1, List<String> var2) {
-      if (var1 != null) {
-         if (var1 instanceof CommonFunctionValue) {
-            CommonFunctionValue var3 = (CommonFunctionValue)var1;
-            CommonFunctionParameter var4 = var3.getParameter();
-            Value var5 = var4.getObjectParameter();
-            this.a(var5, var2);
-         } else if (var1 instanceof MethodValue) {
-            MethodValue var8 = (MethodValue)var1;
-            List var14 = var8.getParameters();
-            if (var14 != null) {
-               for (Parameter var6 : (Iterable<Parameter>)(Iterable<?>)(var14)) {
-                  Value var7 = var6.getValue();
-                  this.a(var7, var2);
+   private void collectReferencedClasses(Value localValue, List<String> strings) {
+      if (localValue != null) {
+         if (localValue instanceof CommonFunctionValue) {
+            CommonFunctionValue commonFunctionValue = (CommonFunctionValue)localValue;
+            CommonFunctionParameter parameter = commonFunctionValue.getParameter();
+            Value objectParameter = parameter.getObjectParameter();
+            this.collectReferencedClasses(objectParameter, strings);
+         } else if (localValue instanceof MethodValue) {
+            MethodValue methodValue = (MethodValue)localValue;
+            List parameters = methodValue.getParameters();
+            if (parameters != null) {
+               for (Parameter parameter2 : (Iterable<Parameter>)(Iterable<?>)(parameters)) {
+                  Value localValue2 = parameter2.getValue();
+                  this.collectReferencedClasses(localValue2, strings);
                }
             }
-         } else if (var1 instanceof ParameterValue) {
-            VariableCategory var9 = this.a.getVariableCategoryByUuid("参数");
-            String var15 = var9.getClazz();
-            if (!var2.contains(var15)) {
-               var2.add(var15);
+         } else if (localValue instanceof ParameterValue) {
+            VariableCategory variableCategoryByUuid = this.resourceLibrary.getVariableCategoryByUuid("参数");
+            String clazz = variableCategoryByUuid.getClazz();
+            if (!strings.contains(clazz)) {
+               strings.add(clazz);
             }
-         } else if (var1 instanceof ParenValue) {
-            ParenValue var10 = (ParenValue)var1;
-            Value var16 = var10.getValue();
-            this.a(var16, var2);
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var11 = (VariableCategoryValue)var1;
-            VariableCategory var17 = this.a.getVariableCategoryByUuid(var11.getUuid());
-            String var21 = var17.getClazz();
-            if (!var2.contains(var21)) {
-               var2.add(var21);
+         } else if (localValue instanceof ParenValue) {
+            ParenValue parenValue = (ParenValue)localValue;
+            Value localValue3 = parenValue.getValue();
+            this.collectReferencedClasses(localValue3, strings);
+         } else if (localValue instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)localValue;
+            VariableCategory variableCategoryByUuid2 = this.resourceLibrary.getVariableCategoryByUuid(variableCategoryValue.getUuid());
+            String clazz2 = variableCategoryByUuid2.getClazz();
+            if (!strings.contains(clazz2)) {
+               strings.add(clazz2);
             }
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var12 = (VariableValue)var1;
-            VariableCategory var18 = this.a.getVariableCategoryByUuid(var12.getCategoryUuid());
-            String var22 = var18.getClazz();
-            if (!var2.contains(var22)) {
-               var2.add(var22);
+         } else if (localValue instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)localValue;
+            VariableCategory variableCategoryByUuid3 = this.resourceLibrary.getVariableCategoryByUuid(variableValue.getCategoryUuid());
+            String clazz3 = variableCategoryByUuid3.getClazz();
+            if (!strings.contains(clazz3)) {
+               strings.add(clazz3);
             }
          }
 
-         ComplexArithmetic var13 = var1.getArithmetic();
-         if (var13 != null) {
-            Value var19 = var13.getValue();
-            this.a(var19, var2);
+         ComplexArithmetic arithmetic = localValue.getArithmetic();
+         if (arithmetic != null) {
+            Value localValue4 = arithmetic.getValue();
+            this.collectReferencedClasses(localValue4, strings);
          }
       }
    }
 
    @Override
-   public ObjectTypeNode buildObjectTypeNode(String var1) {
-      ObjectTypeNode var2 = null;
+   public ObjectTypeNode buildObjectTypeNode(String className) {
+      ObjectTypeNode objectTypeNode = null;
 
-      for (ObjectTypeNode var4 : this.b) {
-         if (var4.support(var1)) {
-            var2 = var4;
+      for (ObjectTypeNode objectTypeNode2 : this.objectTypeNodes) {
+         if (objectTypeNode2.support(className)) {
+            objectTypeNode = objectTypeNode2;
             break;
          }
       }
 
-      if (var2 == null) {
-         var2 = new ObjectTypeNode(var1, this.nextId());
-         this.b.add(var2);
+      if (objectTypeNode == null) {
+         objectTypeNode = new ObjectTypeNode(className, this.nextId());
+         this.objectTypeNodes.add(objectTypeNode);
       }
 
-      return var2;
+      return objectTypeNode;
    }
 
    @Override
    public ResourceLibrary getResourceLibrary() {
-      return this.a;
+      return this.resourceLibrary;
    }
 
    @Override
    public int nextId() {
-      return this.c.nextId();
+      return this.idGenerator.nextId();
    }
 
    @Override
    public IdGenerator getIdGenerator() {
-      return this.c;
+      return this.idGenerator;
    }
 
    @Override
-   public void setCurrentRule(Rule var1) {
-      this.d = var1;
+   public void setCurrentRule(Rule rule) {
+      this.currentRule = rule;
    }
 
    @Override
    public Rule currentRule() {
-      return this.d;
+      return this.currentRule;
    }
 
    @Override
    public boolean currentRuleIsDebug() {
-      return this.d == null ? false : this.d.getDebug() != null && this.d.getDebug();
+      return this.currentRule == null ? false : this.currentRule.getDebug() != null && this.currentRule.getDebug();
    }
 }

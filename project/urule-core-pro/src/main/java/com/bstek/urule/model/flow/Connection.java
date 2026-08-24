@@ -12,22 +12,22 @@ public class Connection {
    private String name;
    private String toName;
    private String script;
-   private String g;
+   private String text;
    private KnowledgePackageWrapper knowledgePackageWrapper;
    @JsonIgnore
    private FlowNode to;
 
-   public boolean evaluate(FlowContext var1) {
+   public boolean evaluate(FlowContext context) {
       if (this.knowledgePackageWrapper == null) {
          return true;
       }
 
-      KnowledgeSession var2 = (KnowledgeSession)var1.getWorkingMemory();
-      KnowledgeSession var3 = KnowledgeSessionFactory.newKnowledgeSession(this.knowledgePackageWrapper, var1, var2);
-      var3.fireRules(var1.getVariables());
-      var1.addRuleData(var3.getLogManager().getRuleData());
-      Object var4 = var3.getParameter("return_value__");
-      return var4 == null ? false : Boolean.valueOf(var4.toString());
+      KnowledgeSession workingMemory = (KnowledgeSession)context.getWorkingMemory();
+      KnowledgeSession knowledgeSession = KnowledgeSessionFactory.newKnowledgeSession(this.knowledgePackageWrapper, context, workingMemory);
+      knowledgeSession.fireRules(context.getVariables());
+      context.addRuleData(knowledgeSession.getLogManager().getRuleData());
+      Object parameter = knowledgeSession.getParameter("return_value__");
+      return parameter == null ? false : Boolean.valueOf(parameter.toString());
    }
 
    public void buildDeserialize() {
@@ -36,55 +36,55 @@ public class Connection {
       }
    }
 
-   public void execute(Exception var1, FlowContext var2, FlowInstance var3) {
-      this.to.enter(var1, var2, var3);
+   public void execute(Exception ex, FlowContext context, FlowInstance instance) {
+      this.to.enter(ex, context, instance);
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getToName() {
       return this.toName;
    }
 
-   public void setToName(String var1) {
-      this.toName = var1;
+   public void setToName(String toName) {
+      this.toName = toName;
    }
 
    public FlowNode getTo() {
       return this.to;
    }
 
-   public void setTo(FlowNode var1) {
-      this.to = var1;
+   public void setTo(FlowNode to) {
+      this.to = to;
    }
 
    public String getScript() {
       return this.script;
    }
 
-   public void setScript(String var1) {
-      this.script = var1;
+   public void setScript(String script) {
+      this.script = script;
    }
 
    public KnowledgePackageWrapper getKnowledgePackageWrapper() {
       return this.knowledgePackageWrapper;
    }
 
-   public void setKnowledgePackageWrapper(KnowledgePackageWrapper var1) {
-      this.knowledgePackageWrapper = var1;
+   public void setKnowledgePackageWrapper(KnowledgePackageWrapper knowledgePackageWrapper) {
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
    }
 
    public String getG() {
-      return this.g;
+      return this.text;
    }
 
-   public void setG(String var1) {
-      this.g = var1;
+   public void setG(String text) {
+      this.text = text;
    }
 }

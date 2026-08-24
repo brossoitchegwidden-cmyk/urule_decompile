@@ -8,13 +8,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class FractionMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      FractionMath var2 = new FractionMath();
-      JsonNode var3 = var1.get("numerator");
-      var2.setNumerator(JsonUtils.parseValueNode(var3));
-      JsonNode var4 = var1.get("denominator");
-      var2.setDenominator(JsonUtils.parseValueNode(var4));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      FractionMath fractionMath = new FractionMath();
+      JsonNode numerator = jsonNode.get("numerator");
+      fractionMath.setNumerator(JsonUtils.parseValueNode(numerator));
+      JsonNode denominator = jsonNode.get("denominator");
+      fractionMath.setDenominator(JsonUtils.parseValueNode(denominator));
+      return fractionMath;
    }
 
    @Override

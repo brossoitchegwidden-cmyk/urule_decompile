@@ -10,51 +10,51 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public class CardCellParser implements Parser<CardCell> {
-   private ValueParser a;
-   private JointParser b;
+   private ValueParser valueParser;
+   private JointParser jointParser;
 
-   public CardCell parse(Element var1) {
-      CardCell var2 = new CardCell();
-      var2.setType(CellType.valueOf(var1.attributeValue("type")));
-      var2.setCol(Integer.valueOf(var1.attributeValue("col")));
-      var2.setRow(Integer.valueOf(var1.attributeValue("row")));
-      String var3 = var1.attributeValue("datatype");
-      if (StringUtils.isNotBlank(var3)) {
-         var2.setDatatype(Datatype.valueOf(var3));
+   public CardCell parse(Element element) {
+      CardCell cardCell = new CardCell();
+      cardCell.setType(CellType.valueOf(element.attributeValue("type")));
+      cardCell.setCol(Integer.valueOf(element.attributeValue("col")));
+      cardCell.setRow(Integer.valueOf(element.attributeValue("row")));
+      String text = element.attributeValue("datatype");
+      if (StringUtils.isNotBlank(text)) {
+         cardCell.setDatatype(Datatype.valueOf(text));
       }
 
-      var2.setVariableName(var1.attributeValue("var"));
-      var2.setVariableLabel(var1.attributeValue("var-label"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setKeyLabel(var1.attributeValue("key-label"));
-      var2.setKeyName(var1.attributeValue("key-name"));
-      var2.setKeyUuid(var1.attributeValue("key-uuid"));
-      var2.setWeight(var1.attributeValue("weight"));
+      cardCell.setVariableName(element.attributeValue("var"));
+      cardCell.setVariableLabel(element.attributeValue("var-label"));
+      cardCell.setUuid(element.attributeValue("uuid"));
+      cardCell.setKeyLabel(element.attributeValue("key-label"));
+      cardCell.setKeyName(element.attributeValue("key-name"));
+      cardCell.setKeyUuid(element.attributeValue("key-uuid"));
+      cardCell.setWeight(element.attributeValue("weight"));
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            if (this.a.support(var6.getName())) {
-               var2.setValue(this.a.parse(var6));
-            } else if (this.b.support(var6.getName())) {
-               var2.setJoint(this.b.parse(var6));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.valueParser.support(element2.getName())) {
+               cardCell.setValue(this.valueParser.parse(element2));
+            } else if (this.jointParser.support(element2.getName())) {
+               cardCell.setJoint(this.jointParser.parse(element2));
             }
          }
       }
 
-      return var2;
+      return cardCell;
    }
 
-   public void setJointParser(JointParser var1) {
-      this.b = var1;
+   public void setJointParser(JointParser jointParser) {
+      this.jointParser = jointParser;
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.a = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("card-cell");
+   public boolean support(String name) {
+      return name.equals("card-cell");
    }
 }

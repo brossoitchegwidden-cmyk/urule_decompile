@@ -1,31 +1,31 @@
 package com.bstek.urule.console.batch.filter;
 
 public class PropertyFilterValue {
-   private String a;
-   private String b;
-   private Object c;
+   private String op;
+   private String value;
+   private Object objectValue;
 
    public String getOp() {
-      return this.a;
+      return this.op;
    }
 
-   public void setOp(String var1) {
-      this.a = var1;
+   public void setOp(String op) {
+      this.op = op;
    }
 
    public String getValue() {
-      return this.b;
+      return this.value;
    }
 
-   public void setValue(String var1) {
-      this.b = var1;
+   public void setValue(String value) {
+      this.value = value;
    }
 
    public Object getObjectValue() {
-      return this.c;
+      return this.objectValue;
    }
 
-   public void setObjectValue(Object var1) {
-      this.c = var1;
+   public void setObjectValue(Object objectValue) {
+      this.objectValue = objectValue;
    }
 }

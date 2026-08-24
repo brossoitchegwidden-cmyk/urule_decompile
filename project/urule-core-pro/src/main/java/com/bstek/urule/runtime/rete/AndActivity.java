@@ -12,120 +12,120 @@ import java.util.Set;
 
 public class AndActivity extends JoinActivity {
    @Override
-   public Collection<FactTracker> enter(EvaluationContext var1, Object var2, FactTracker var3) {
-      AndActivityState var4 = var1.getAndActivityState(this.a);
-      Set var5 = var4.getTokensSet();
-      var5.addAll(var3.getTokens());
-      this.a(var3, var4);
-      if (!var4.isPassed() && !this.a(var1)) {
+   public Collection<FactTracker> enter(EvaluationContext context, Object obj, FactTracker tracker) {
+      AndActivityState andActivityState = context.getAndActivityState(this.activityId);
+      Set tokensSet = andActivityState.getTokensSet();
+      tokensSet.addAll(tracker.getTokens());
+      this.storePathState(tracker, andActivityState);
+      if (!andActivityState.isPassed() && !this.allPassed(context)) {
          return null;
       }
 
-      var4.setPassed(true);
-      Set var6 = this.c(var3, var4);
-      List var7 = this.b(var3, var4);
-      ArrayList var8 = new ArrayList();
+      andActivityState.setPassed(true);
+      Set uniqueItems = this.collectCriterias(tracker, andActivityState);
+      List items = this.buildPathFactMaps(tracker, andActivityState);
+      ArrayList enterResult = new ArrayList();
 
-      for (Map var10 : (Iterable<Map>)(Iterable<?>)(var7)) {
-         FactTracker var11 = new FactTracker();
-         var11.setTokens(var5);
-         var11.addFactMap(var10);
-         var11.addCriterias(var6);
-         List var12 = this.a(var1, var2, var11);
-         if (var12 != null) {
-            var8.addAll(var12);
+      for (Map valuesByKey : (Iterable<Map>)(Iterable<?>)(items)) {
+         FactTracker factTracker = new FactTracker();
+         factTracker.setTokens(tokensSet);
+         factTracker.addFactMap(valuesByKey);
+         factTracker.addCriterias(uniqueItems);
+         List items2 = this.visitPahs(context, obj, factTracker);
+         if (items2 != null) {
+            enterResult.addAll(items2);
          }
       }
 
-      return var8;
+      return enterResult;
    }
 
-   private void a(FactTracker var1, AndActivityState var2) {
-      Path var3 = var1.getCurrentPath();
-      Map var4 = var2.getPathFactMaps();
-      Map var5 = var2.getPathCriteriaMap();
-      var5.put(var3, var1.getCriterias());
-      Map var6 = var1.getFactMap();
-      if (var6.size() > 0) {
-         List var7 = null;
-         if (var4.containsKey(var3)) {
-            var7 = (List)var4.get(var3);
+   private void storePathState(FactTracker factTracker, AndActivityState andActivityState) {
+      Path currentPath = factTracker.getCurrentPath();
+      Map pathFactMaps = andActivityState.getPathFactMaps();
+      Map pathCriteriaMap = andActivityState.getPathCriteriaMap();
+      pathCriteriaMap.put(currentPath, factTracker.getCriterias());
+      Map factMap = factTracker.getFactMap();
+      if (factMap.size() > 0) {
+         List items = null;
+         if (pathFactMaps.containsKey(currentPath)) {
+            items = (List)pathFactMaps.get(currentPath);
          } else {
-            var7 = new ArrayList();
-            var4.put(var3, var7);
+            items = new ArrayList();
+            pathFactMaps.put(currentPath, items);
          }
 
-         var7.add(var6);
+         items.add(factMap);
       }
    }
 
-   private List<Map<String, Object>> b(FactTracker var1, AndActivityState var2) {
-      Path var3 = var1.getCurrentPath();
-      Map var4 = var2.getPathFactMaps();
-      List var5 = new ArrayList();
-      var5.add(var1.getFactMap());
-      Iterator var6 = var4.keySet().iterator();
+   private List<Map<String, Object>> buildPathFactMaps(FactTracker factTracker, AndActivityState andActivityState) {
+      Path currentPath = factTracker.getCurrentPath();
+      Map pathFactMaps = andActivityState.getPathFactMaps();
+      List items = new ArrayList();
+      items.add(factTracker.getFactMap());
+      Iterator iterator = pathFactMaps.keySet().iterator();
 
-      while (var6.hasNext() && var5.size() != 0) {
-         var5 = this.a(var3, var6, var5, var4);
+      while (iterator.hasNext() && items.size() != 0) {
+         items = this.mergeNextPathFactMaps(currentPath, iterator, items, pathFactMaps);
       }
 
-      return var5;
+      return items;
    }
 
-   private List<Map<String, Object>> a(Path var1, Iterator<Path> var2, List<Map<String, Object>> var3, Map<Path, List<Map<String, Object>>> var4) {
-      Path var5 = (Path)var2.next();
-      if (var5 == var1) {
-         return var3;
+   private List<Map<String, Object>> mergeNextPathFactMaps(Path path, Iterator<Path> iterator, List<Map<String, Object>> maps, Map<Path, List<Map<String, Object>>> valuesByKey) {
+      Path path2 = (Path)iterator.next();
+      if (path2 == path) {
+         return maps;
       }
 
-      ArrayList var6 = new ArrayList();
-      List var7 = (List)var4.get(var5);
+      ArrayList items = new ArrayList();
+      List items2 = (List)valuesByKey.get(path2);
 
-      for (Map var9 : var3) {
-         for (Map var11 : (Iterable<Map>)(Iterable<?>)(var7)) {
-            boolean var12 = this.a(var9, var11);
-            if (var12) {
-               HashMap var13 = new HashMap();
-               var13.putAll(var9);
-               var13.putAll(var11);
-               var6.add(var13);
+      for (Map valuesByKey2 : maps) {
+         for (Map valuesByKey3 : (Iterable<Map>)(Iterable<?>)(items2)) {
+            boolean flag = this.areFactMapsCompatible(valuesByKey2, valuesByKey3);
+            if (flag) {
+               HashMap valuesByKey4 = new HashMap();
+               valuesByKey4.putAll(valuesByKey2);
+               valuesByKey4.putAll(valuesByKey3);
+               items.add(valuesByKey4);
             }
          }
       }
 
-      return var6;
+      return items;
    }
 
-   private boolean a(Map<String, Object> var1, Map<String, Object> var2) {
-      boolean var3 = true;
+   private boolean areFactMapsCompatible(Map<String, Object> valuesByKey, Map<String, Object> valuesByKey2) {
+      boolean flag = true;
 
-      for (String var5 : var2.keySet()) {
-         if (var1.containsKey(var5)) {
-            Object var6 = var1.get(var5);
-            Object var7 = var2.get(var5);
-            if (var6 != var7) {
-               var3 = false;
+      for (String text : valuesByKey2.keySet()) {
+         if (valuesByKey.containsKey(text)) {
+            Object objectValue = valuesByKey.get(text);
+            Object objectValue2 = valuesByKey2.get(text);
+            if (objectValue != objectValue2) {
+               flag = false;
                break;
             }
          }
       }
 
-      return var3;
+      return flag;
    }
 
-   private Set<Criteria> c(FactTracker var1, AndActivityState var2) {
-      Map var3 = var2.getPathCriteriaMap();
-      HashSet var4 = new HashSet();
-      var4.addAll(var1.getCriterias());
-      Path var5 = var1.getCurrentPath();
+   private Set<Criteria> collectCriterias(FactTracker factTracker, AndActivityState andActivityState) {
+      Map pathCriteriaMap = andActivityState.getPathCriteriaMap();
+      HashSet uniqueItems = new HashSet();
+      uniqueItems.addAll(factTracker.getCriterias());
+      Path currentPath = factTracker.getCurrentPath();
 
-      for (Path var7 : (Iterable<Path>)(Iterable<?>)(var3.keySet())) {
-         if (var7 != var5) {
-            var4.addAll((Collection)var3.get(var7));
+      for (Path path : (Iterable<Path>)(Iterable<?>)(pathCriteriaMap.keySet())) {
+         if (path != currentPath) {
+            uniqueItems.addAll((Collection)pathCriteriaMap.get(path));
          }
       }
 
-      return var4;
+      return uniqueItems;
    }
 }

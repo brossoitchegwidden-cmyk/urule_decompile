@@ -20,53 +20,55 @@ public class PredefineGroup {
    public PredefineGroup() {
    }
 
-   public PredefineGroup(boolean var1) {
-      this.alone = var1;
+   public PredefineGroup(boolean alone) {
+      this.alone = alone;
    }
 
    public Predefine getPredefine() {
       return this.predefine;
    }
 
-   public void setPredefine(Predefine var1) {
-      this.predefine = var1;
+   public void setPredefine(Predefine predefine) {
+      this.predefine = predefine;
    }
 
    public PredefineGroup getParent() {
       return this.parent;
    }
 
-   public void setParent(PredefineGroup var1) {
-      this.parent = var1;
+   public void setParent(PredefineGroup parent) {
+      this.parent = parent;
    }
 
    public List<Rule> getRules() {
       return this.rules;
    }
 
-   public void setRules(List<Rule> var1) {
-      this.rules = var1;
+   public void setRules(List<Rule> rules) {
+      this.rules = rules;
    }
 
    public PredefineGroup getNextGroup() {
       return this.nextGroup;
    }
 
-   public void setNextGroup(PredefineGroup var1) {
-      this.nextGroup = var1;
+   public void setNextGroup(PredefineGroup nextGroup) {
+      this.nextGroup = nextGroup;
    }
 
    public KnowledgePackageWrapper getKnowledgePackageWrapper() {
       return this.knowledgePackageWrapper;
    }
 
-   public void resetKnowledgePackageWrapper(KnowledgePackageWrapper var1) {
-      this.knowledgePackageWrapper = var1;
+   /**此方法供代码中设置使用KnowledgePackageWrapper使用*/
+   public void resetKnowledgePackageWrapper(KnowledgePackageWrapper knowledgePackageWrapper) {
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
    }
 
-   public void setKnowledgePackageWrapper(KnowledgePackageWrapper var1) {
-      var1.buildDeserialize();
-      this.knowledgePackageWrapper = var1;
+   /**此方法专供Jackson反序列化时自动填充时使用，因为反序列化时需要执行KnowledgePackageWrapper的buildDeserialize方法*/
+   public void setKnowledgePackageWrapper(KnowledgePackageWrapper knowledgePackageWrapper) {
+      knowledgePackageWrapper.buildDeserialize();
+      this.knowledgePackageWrapper = knowledgePackageWrapper;
    }
 
    public boolean isAlone() {
@@ -77,7 +79,7 @@ public class PredefineGroup {
       return this.filePath;
    }
 
-   public void setFilePath(String var1) {
-      this.filePath = var1;
+   public void setFilePath(String filePath) {
+      this.filePath = filePath;
    }
 }

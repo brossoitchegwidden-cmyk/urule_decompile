@@ -10,62 +10,60 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 
 public class BatchSkipLogManagerImpl implements BatchSkipLogManager {
-   public void add(BatchSkipLog var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void add(BatchSkipLog log) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         var1.setCreateDate(new Timestamp(System.currentTimeMillis()));
-         long var3 = IDGenerator.getInstance().nextId(IDType.LOG_BATCH_SKIP);
-         PreparedStatement var5 = var2.prepareStatement("insert into URULE_LOG_BATCH_SKIP (ID_, LOG_ID_, BATCH_ID_, TYPE_, MSG_, DETAIL_, DATA_, GROUP_ID_, PROJECT_ID_, CREATE_DATE_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-         var1.setId(var3);
-         var5.setLong(1, var1.getId());
-         var5.setLong(2, var1.getLogId());
-         var5.setLong(3, var1.getBatchId());
-         var5.setString(4, var1.getType());
-         var5.setString(5, var1.getMsg());
-         var5.setString(6, var1.getDetail());
-         var5.setString(7, var1.getData());
-         var5.setString(8, var1.getGroupId());
-         var5.setLong(9, var1.getProjectId());
-         var5.setTimestamp(10, new Timestamp(var1.getCreateDate().getTime()));
-         var5.executeUpdate();
-         JdbcUtils.closeStatement(var5);
-      } catch (Exception var9) {
-         throw new RuleException(var9);
+         log.setCreateDate(new Timestamp(System.currentTimeMillis()));
+         long longValue = IDGenerator.getInstance().nextId(IDType.LOG_BATCH_SKIP);
+         PreparedStatement preparedStatement = connection.prepareStatement("insert into URULE_LOG_BATCH_SKIP (ID_, LOG_ID_, BATCH_ID_, TYPE_, MSG_, DETAIL_, DATA_, GROUP_ID_, PROJECT_ID_, CREATE_DATE_) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+         log.setId(longValue);
+         preparedStatement.setLong(1, log.getId());
+         preparedStatement.setLong(2, log.getLogId());
+         preparedStatement.setLong(3, log.getBatchId());
+         preparedStatement.setString(4, log.getType());
+         preparedStatement.setString(5, log.getMsg());
+         preparedStatement.setString(6, log.getDetail());
+         preparedStatement.setString(7, log.getData());
+         preparedStatement.setString(8, log.getGroupId());
+         preparedStatement.setLong(9, log.getProjectId());
+         preparedStatement.setTimestamp(10, new Timestamp(log.getCreateDate().getTime()));
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void removeByGroupId(String var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByGroupId(String groupId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_LOG_BATCH_SKIP where GROUP_ID_=?");
-         var3.setString(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_LOG_BATCH_SKIP where GROUP_ID_=?");
+         preparedStatement.setString(1, groupId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }
-
-   public void removeByProject(Long var1) {
-      Connection var2 = JdbcUtils.getConnection();
+   public void removeByProject(Long projectId) {
+      Connection connection = JdbcUtils.getConnection();
 
       try {
-         PreparedStatement var3 = var2.prepareStatement("delete FROM URULE_LOG_BATCH_SKIP where PROJECT_ID_=?");
-         var3.setLong(1, var1);
-         var3.executeUpdate();
-         JdbcUtils.closeStatement(var3);
-      } catch (Exception var7) {
-         throw new RuleException(var7);
+         PreparedStatement preparedStatement = connection.prepareStatement("delete FROM URULE_LOG_BATCH_SKIP where PROJECT_ID_=?");
+         preparedStatement.setLong(1, projectId);
+         preparedStatement.executeUpdate();
+         JdbcUtils.closeStatement(preparedStatement);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var2);
+         JdbcUtils.closeConnection(connection);
       }
 
    }

@@ -16,102 +16,105 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Shared execution state and rete registration for rule execution strategies.
+ */
 public abstract class AbstractExecution {
-   protected Agenda a;
-   protected FactManager b;
-   protected MonitorManager c;
-   protected KnowledgeSession d;
-   protected List<ReteInstance> e;
-   protected List<PredefineExecutionUnit> f;
-   private Map<String, List<ReteInstanceUnit>> g = new HashMap<>();
-   private Map<String, List<ReteInstanceUnit>> h = new HashMap<>();
+   protected Agenda agenda;
+   protected FactManager factManager;
+   protected MonitorManager monitorManager;
+   protected KnowledgeSession knowledgeSession;
+   protected List<ReteInstance> reteInstanceList;
+   protected List<PredefineExecutionUnit> predefineExecutionUnits;
+   private Map<String, List<ReteInstanceUnit>> mutexReteInstancesByGroup = new HashMap<>();
+   private Map<String, List<ReteInstanceUnit>> pendedReteInstancesByGroup = new HashMap<>();
 
-   public AbstractExecution(KnowledgeSession var1, Map<String, String> var2) {
-      this.d = var1;
-      this.b = var1.getFactManager();
-      this.a = new Agenda(var1, var2, this.h, this.g);
-      this.c = new MonitorManager(var1);
-      this.a(var1);
+   public AbstractExecution(KnowledgeSession knowledgeSession, Map<String, String> allVariableCateogoryMap) {
+      this.knowledgeSession = knowledgeSession;
+      this.factManager = knowledgeSession.getFactManager();
+      this.agenda = new Agenda(knowledgeSession, allVariableCateogoryMap, this.pendedReteInstancesByGroup, this.mutexReteInstancesByGroup);
+      this.monitorManager = new MonitorManager(knowledgeSession);
+      this.initializeExecutionState(knowledgeSession);
    }
 
-   private void a(KnowledgeSession var1) {
-      KnowledgeSession var2 = var1.getParentSession();
-      if (var2 != null) {
-         this.b(var2);
+   private void initializeExecutionState(KnowledgeSession knowledgeSession) {
+      KnowledgeSession parentSession = knowledgeSession.getParentSession();
+      if (parentSession != null) {
+         this.registerParentSessionRetes(parentSession);
       }
 
-      this.e = var1.getReteInstanceList();
-      this.f = ((KnowledgeSessionImpl)var1).getPredefineExecutionUnits();
+      this.reteInstanceList = knowledgeSession.getReteInstanceList();
+      this.predefineExecutionUnits = ((KnowledgeSessionImpl)knowledgeSession).getPredefineExecutionUnits();
 
-      for (PredefineExecutionUnit var4 : this.f) {
-         PredefineGroup var5 = var4.getGroup();
-         if (var5 != null) {
-            this.a(var5);
+      for (PredefineExecutionUnit predefineExecutionUnit : this.predefineExecutionUnits) {
+         PredefineGroup group = predefineExecutionUnit.getGroup();
+         if (group != null) {
+            this.registerPredefineGroupRetes(group);
          }
       }
 
-      this.a(this.e);
+      this.registerSessionRetes(this.reteInstanceList);
    }
 
-   private void a(PredefineGroup var1) {
-      KnowledgePackageWrapper var2 = var1.getKnowledgePackageWrapper();
-      if (var2 != null) {
-         ArrayList var3 = new ArrayList();
-         List var4 = var2.getKnowledgePackage().getAloneReteInstances();
-         var3.addAll(var4);
-         ReteInstance var5 = var2.getKnowledgePackage().loadReteInstance();
-         if (var5 != null) {
-            var3.add(var5);
+   private void registerPredefineGroupRetes(PredefineGroup predefineGroup) {
+      KnowledgePackageWrapper knowledgePackageWrapper = predefineGroup.getKnowledgePackageWrapper();
+      if (knowledgePackageWrapper != null) {
+         List<ReteInstance> reteInstances = new ArrayList<>();
+         List<ReteInstance> standaloneReteInstances = knowledgePackageWrapper.getKnowledgePackage().getAloneReteInstances();
+         reteInstances.addAll(standaloneReteInstances);
+         ReteInstance reteInstance = knowledgePackageWrapper.getKnowledgePackage().loadReteInstance();
+         if (reteInstance != null) {
+            reteInstances.add(reteInstance);
          }
 
-         this.a(var3);
+         this.registerSessionRetes(reteInstances);
       }
 
-      if (var1.getNextGroup() != null) {
-         this.a(var1.getNextGroup());
-      }
-   }
-
-   private void b(KnowledgeSession var1) {
-      KnowledgeSession var2 = var1.getParentSession();
-      if (var2 != null) {
-         this.b(var2);
-      }
-
-      LogManager var3 = this.d.getLogManager();
-
-      for (ReteInstance var6 : var1.getReteInstanceList()) {
-         var3.addRuleData(var6.getAllRuleData());
-         Map var7 = var6.getPendedGroupReteInstancesMap();
-         if (var7 != null) {
-            this.h.putAll(var7);
-         }
+      if (predefineGroup.getNextGroup() != null) {
+         this.registerPredefineGroupRetes(predefineGroup.getNextGroup());
       }
    }
 
-   private void a(List<ReteInstance> var1) {
-      LogManager var2 = this.d.getLogManager();
+   private void registerParentSessionRetes(KnowledgeSession knowledgeSession) {
+      KnowledgeSession parentSession = knowledgeSession.getParentSession();
+      if (parentSession != null) {
+         this.registerParentSessionRetes(parentSession);
+      }
 
-      for (ReteInstance var4 : var1) {
-         var2.addRuleData(var4.getAllRuleData());
-         Map var5 = var4.getPendedGroupReteInstancesMap();
-         if (var5 != null) {
-            this.h.putAll(var5);
+      LogManager logManager = this.knowledgeSession.getLogManager();
+
+      for (ReteInstance reteInstance : knowledgeSession.getReteInstanceList()) {
+         logManager.addRuleData(reteInstance.getAllRuleData());
+         Map<String, List<ReteInstanceUnit>> pendedGroupReteInstancesMap = reteInstance.getPendedGroupReteInstancesMap();
+         if (pendedGroupReteInstancesMap != null) {
+            this.pendedReteInstancesByGroup.putAll(pendedGroupReteInstancesMap);
+         }
+      }
+   }
+
+   private void registerSessionRetes(List<ReteInstance> reteInstances) {
+      LogManager logManager = this.knowledgeSession.getLogManager();
+
+      for (ReteInstance reteInstance : reteInstances) {
+         logManager.addRuleData(reteInstance.getAllRuleData());
+         Map<String, List<ReteInstanceUnit>> pendedGroupReteInstancesMap = reteInstance.getPendedGroupReteInstancesMap();
+         if (pendedGroupReteInstancesMap != null) {
+            this.pendedReteInstancesByGroup.putAll(pendedGroupReteInstancesMap);
          }
 
-         Map var6 = var4.getMutexGroupReteInstancesMap();
-         if (var6 != null) {
-            this.g.putAll(var6);
+         Map<String, List<ReteInstanceUnit>> mutexGroupReteInstancesMap = reteInstance.getMutexGroupReteInstancesMap();
+         if (mutexGroupReteInstancesMap != null) {
+            this.mutexReteInstancesByGroup.putAll(mutexGroupReteInstancesMap);
          }
       }
    }
 
    public Agenda getAgenda() {
-      return this.a;
+      return this.agenda;
    }
 
-   protected void a() {
-      this.a.clean();
-      this.b.clean();
+   protected void reset() {
+      this.agenda.clean();
+      this.factManager.clean();
    }
 }

@@ -8,34 +8,34 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class OtherParser implements Parser<Other>, ApplicationContextAware {
-   private Collection<ActionParser> a;
+   private Collection<ActionParser> actionParsers;
 
-   public Other parse(Element var1) {
-      Other var2 = new Other();
+   public Other parse(Element element) {
+      Other other = new Other();
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            String var6 = var5.getName();
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for (ActionParser var8 : this.a) {
-               if (var8.support(var6)) {
-                  var2.addAction(var8.parse(var5));
+            for (ActionParser actionParser : this.actionParsers) {
+               if (actionParser.support(name)) {
+                  other.addAction(actionParser.parse(element2));
                   break;
                }
             }
          }
       }
 
-      return var2;
+      return other;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("else");
+   public boolean support(String name) {
+      return name.equals("else");
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.a = var1.getBeansOfType(ActionParser.class).values();
+   public void setApplicationContext(ApplicationContext context) throws BeansException {
+      this.actionParsers = context.getBeansOfType(ActionParser.class).values();
    }
 }

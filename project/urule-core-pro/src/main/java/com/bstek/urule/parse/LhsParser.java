@@ -10,26 +10,26 @@ import org.springframework.context.ApplicationContextAware;
 
 public class LhsParser implements Parser<Lhs>, ApplicationContextAware {
    public static final String BEAN_ID = "urule.lhsParser";
-   private Collection<CriterionParser> a;
+   private Collection<CriterionParser> criterionParsers;
 
-   public Lhs parse(Element var1) {
-      Lhs var2 = new Lhs();
-      var2.setCriterion(this.parseCriterion(var1));
-      return var2;
+   public Lhs parse(Element element) {
+      Lhs lhs = new Lhs();
+      lhs.setCriterion(this.parseCriterion(element));
+      return lhs;
    }
 
-   public Criterion parseCriterion(Element var1) {
-      Criterion var2 = null;
+   public Criterion parseCriterion(Element element) {
+      Criterion criterion = null;
 
-      for (Object var4 : var1.elements()) {
-         if (var4 != null && var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            String var6 = var5.getName();
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
 
-            for (CriterionParser var8 : this.a) {
-               if (var8.support(var6)) {
-                  var2 = var8.parse(var5);
-                  if (var2 != null) {
+            for (CriterionParser criterionParser : this.criterionParsers) {
+               if (criterionParser.support(name)) {
+                  criterion = criterionParser.parse(element2);
+                  if (criterion != null) {
                      break;
                   }
                }
@@ -37,19 +37,19 @@ public class LhsParser implements Parser<Lhs>, ApplicationContextAware {
          }
       }
 
-      return var2;
+      return criterion;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("if");
+   public boolean support(String name) {
+      return name.equals("if");
    }
 
    public Collection<CriterionParser> getCriterionParsers() {
-      return this.a;
+      return this.criterionParsers;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      this.a = var1.getBeansOfType(CriterionParser.class).values();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.criterionParsers = applicationContext.getBeansOfType(CriterionParser.class).values();
    }
 }

@@ -35,7 +35,7 @@ public interface KnowledgePackage {
 
    List<VariableCategory> getVariableCategories();
 
-   VariableCategory getVariableCategoryWithDefaultValue(String var1);
+   VariableCategory getVariableCategoryWithDefaultValue(String clazz);
 
    Map<String, FlowDefinition> getFlowMap();
 

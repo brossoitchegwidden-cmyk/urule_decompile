@@ -25,27 +25,27 @@ public class RuleParserParser$ExprConditionContext extends ParserRuleContext {
       return this.getRuleContexts(RuleParserParser$ExprConditionContext.class);
    }
 
-   public RuleParserParser$ExprConditionContext exprCondition(int var1) {
-      return (RuleParserParser$ExprConditionContext)this.getRuleContext(RuleParserParser$ExprConditionContext.class, var1);
+   public RuleParserParser$ExprConditionContext exprCondition(int number) {
+      return (RuleParserParser$ExprConditionContext)this.getRuleContext(RuleParserParser$ExprConditionContext.class, number);
    }
 
    public List<RuleParserParser$JoinContext> join() {
       return this.getRuleContexts(RuleParserParser$JoinContext.class);
    }
 
-   public RuleParserParser$JoinContext join(int var1) {
-      return (RuleParserParser$JoinContext)this.getRuleContext(RuleParserParser$JoinContext.class, var1);
+   public RuleParserParser$JoinContext join(int number) {
+      return (RuleParserParser$JoinContext)this.getRuleContext(RuleParserParser$JoinContext.class, number);
    }
 
-   public RuleParserParser$ExprConditionContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$ExprConditionContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 41;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitExprCondition(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitExprCondition(this) : parseTreeVisitor.visitChildren(this));
    }
 }

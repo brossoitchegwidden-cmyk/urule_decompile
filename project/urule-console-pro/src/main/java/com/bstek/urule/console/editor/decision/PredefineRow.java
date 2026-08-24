@@ -1,85 +1,85 @@
 package com.bstek.urule.console.editor.decision;
 
 public class PredefineRow {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
+   private String uuid;
+   private String name;
+   private String fromOrIn;
+   private String type;
+   private String fromType;
+   private String fromCategory;
+   private String fromValue;
+   private String params;
+   private String condition;
 
    public String getUuid() {
-      return this.a;
+      return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.a = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getFromOrIn() {
-      return this.c;
+      return this.fromOrIn;
    }
 
-   public void setFromOrIn(String var1) {
-      this.c = var1;
+   public void setFromOrIn(String fromOrIn) {
+      this.fromOrIn = fromOrIn;
    }
 
    public String getType() {
-      return this.d;
+      return this.type;
    }
 
-   public void setType(String var1) {
-      this.d = var1;
+   public void setType(String type) {
+      this.type = type;
    }
 
    public String getFromType() {
-      return this.e;
+      return this.fromType;
    }
 
-   public void setFromType(String var1) {
-      this.e = var1;
+   public void setFromType(String fromType) {
+      this.fromType = fromType;
    }
 
    public String getFromCategory() {
-      return this.f;
+      return this.fromCategory;
    }
 
-   public void setFromCategory(String var1) {
-      this.f = var1;
+   public void setFromCategory(String fromCategory) {
+      this.fromCategory = fromCategory;
    }
 
    public String getFromValue() {
-      return this.g;
+      return this.fromValue;
    }
 
-   public void setFromValue(String var1) {
-      this.g = var1;
+   public void setFromValue(String fromValue) {
+      this.fromValue = fromValue;
    }
 
    public String getParams() {
-      return this.h;
+      return this.params;
    }
 
-   public void setParams(String var1) {
-      this.h = var1;
+   public void setParams(String params) {
+      this.params = params;
    }
 
    public String getCondition() {
-      return this.i;
+      return this.condition;
    }
 
-   public void setCondition(String var1) {
-      this.i = var1;
+   public void setCondition(String condition) {
+      this.condition = condition;
    }
 }

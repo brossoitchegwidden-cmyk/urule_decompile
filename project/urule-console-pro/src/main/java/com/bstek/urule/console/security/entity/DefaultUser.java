@@ -6,44 +6,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultUser implements User, Serializable {
-   private static final long a = -6556033039846260545L;
-   private String b;
-   private String c;
-   private List d = new ArrayList();
+   private static final long serialVersionUID = -6556033039846260545L;
+   private String name;
+   private String desc;
+   private List groups = new ArrayList();
 
-   public DefaultUser(String var1, String var2, List var3) {
-      this.b = var1;
-      this.c = var2;
-      this.d = var3;
+   public DefaultUser(String name, String desc, List groups) {
+      this.name = name;
+      this.desc = desc;
+      this.groups = groups;
    }
-
    public String getName() {
-      return this.b;
+      return this.name;
    }
-
    public String getDesc() {
-      return this.c;
+      return this.desc;
    }
-
    public List getGroups() {
-      return this.d;
+      return this.groups;
    }
 
    public String toString() {
-      StringBuffer var1 = new StringBuffer(this.b);
-      var1.append(" desc:");
-      var1.append(this.c);
-      var1.append(" group:(");
+      StringBuffer stringBuffer = new StringBuffer(this.name);
+      stringBuffer.append(" desc:");
+      stringBuffer.append(this.desc);
+      stringBuffer.append(" group:(");
 
-      for(Group var3 : (Iterable<Group>)(Iterable<?>)(this.d)) {
-         var1.append(var3.toString()).append(";");
+      for(Group group : (Iterable<Group>)(Iterable<?>)(this.groups)) {
+         stringBuffer.append(group.toString()).append(";");
       }
 
-      var1.append(")");
-      return var1.toString();
+      stringBuffer.append(")");
+      return stringBuffer.toString();
    }
-
-   public void setGroups(List var1) {
-      this.d = var1;
+   public void setGroups(List groups) {
+      this.groups = groups;
    }
 }

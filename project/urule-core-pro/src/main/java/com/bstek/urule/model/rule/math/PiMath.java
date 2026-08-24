@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class PiMath implements MathSign {
    @Override
-   public Object calculate(Context var1, Map<String, Object> var2) {
+   public Object calculate(Context context, Map<String, Object> factMap) {
       return Math.PI;
    }
 

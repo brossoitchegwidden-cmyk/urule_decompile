@@ -8,15 +8,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class SigmaMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      SigmaMath var2 = new SigmaMath();
-      JsonNode var3 = var1.get("expr");
-      var2.setExpr(JsonUtils.parseValueNode(var3));
-      JsonNode var4 = var1.get("ivalue");
-      var2.setIvalue(JsonUtils.parseValueNode(var4));
-      JsonNode var5 = var1.get("superior");
-      var2.setSuperior(JsonUtils.parseValueNode(var5));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      SigmaMath sigmaMath = new SigmaMath();
+      JsonNode expr = jsonNode.get("expr");
+      sigmaMath.setExpr(JsonUtils.parseValueNode(expr));
+      JsonNode ivalue = jsonNode.get("ivalue");
+      sigmaMath.setIvalue(JsonUtils.parseValueNode(ivalue));
+      JsonNode superior = jsonNode.get("superior");
+      sigmaMath.setSuperior(JsonUtils.parseValueNode(superior));
+      return sigmaMath;
    }
 
    @Override

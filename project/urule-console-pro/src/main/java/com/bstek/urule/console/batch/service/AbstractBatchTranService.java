@@ -16,55 +16,54 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public abstract class AbstractBatchTranService extends AbstractBatchService {
-   private static Log a = LogFactory.getLog(AbstractBatchTranService.class);
-   private static BatchWriter b;
+   private static Log logger = LogFactory.getLog(AbstractBatchTranService.class);
+   private static BatchWriter batchWriter;
 
-   private BatchWriter b() {
-      if (b == null) {
-         b = new BatchWriter();
+   private BatchWriter resolveBatchWriter() {
+      if (AbstractBatchTranService.batchWriter == null) {
+         AbstractBatchTranService.batchWriter = new BatchWriter();
       }
 
-      return b;
+      return AbstractBatchTranService.batchWriter;
    }
 
-   protected void a(Map var1) {
-      if (var1 != null) {
+   protected void closePreparedStatements(Map valuesByKey) {
+      if (valuesByKey != null) {
          try {
-            for(String var3 : (Iterable<String>)(Iterable<?>)(var1.keySet())) {
-               JdbcUtils.closeStatement((PreparedStatement)var1.get(var3));
+            for(String text : (Iterable<String>)(Iterable<?>)(valuesByKey.keySet())) {
+               JdbcUtils.closeStatement((PreparedStatement)valuesByKey.get(text));
             }
-         } catch (Exception var4) {
-            a.error(var4);
-            var4.printStackTrace();
+         } catch (Exception exception) {
+            AbstractBatchTranService.logger.error(exception);
          }
 
       }
    }
 
-   protected void b(Map var1) throws SQLException {
+   protected void executePreparedStatementBatches(Map valuesByKey) throws SQLException {
       try {
-         for(String var3 : (Iterable<String>)(Iterable<?>)(var1.keySet())) {
-            ((PreparedStatement)var1.get(var3)).executeBatch();
+         for(String text : (Iterable<String>)(Iterable<?>)(valuesByKey.keySet())) {
+            ((PreparedStatement)valuesByKey.get(text)).executeBatch();
          }
 
-      } catch (Exception var4) {
-         throw new SqlBatchException(var4.getMessage(), var4);
+      } catch (Exception exception) {
+         throw new SqlBatchException(exception.getMessage(), exception);
       }
    }
 
-   protected Map a(Connection var1, BatchDataResolver var2) throws SQLException {
-      HashMap var3 = new HashMap();
+   protected Map prepareStmt(Connection conn, BatchDataResolver resolver) throws SQLException {
+      HashMap prepareStmtResult = new HashMap();
 
-      for(BatchDataResolverItem var5 : (Iterable<BatchDataResolverItem>)(Iterable<?>)(var2.getItems())) {
-         PreparedStatement var6 = var1.prepareStatement(var5.getUpdateSql());
-         var3.put(var5.getName(), var6);
+      for(BatchDataResolverItem batchDataResolverItem : (Iterable<BatchDataResolverItem>)(Iterable<?>)(resolver.getItems())) {
+         PreparedStatement preparedStatement = conn.prepareStatement(batchDataResolverItem.getUpdateSql());
+         prepareStmtResult.put(batchDataResolverItem.getName(), preparedStatement);
       }
 
-      return var3;
+      return prepareStmtResult;
    }
 
-   protected void a(BatchContext var1, Connection var2, Map var3, GeneralEntity var4, Map var5) throws Exception {
-      Map var6 = this.a().fireRules(var1, var4);
-      WriterUtils.write(var1, this.b(), var3, var6, var4, var5);
+   protected void processRecord(BatchContext batchContext, Connection connection, Map valuesByKey2, GeneralEntity generalEntity, Map valuesByKey3) throws Exception {
+      Map valuesByKey = this.getRuleProcessor().fireRules(batchContext, generalEntity);
+      WriterUtils.write(batchContext, this.resolveBatchWriter(), valuesByKey2, valuesByKey, generalEntity, valuesByKey3);
    }
 }

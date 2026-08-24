@@ -5,10 +5,10 @@ import com.bstek.urule.parse.deserializer.DecisionTreeDeserializer;
 import org.dom4j.Element;
 
 public class DecisionTreeResourceBuilder implements ResourceBuilder<DecisionTree> {
-   private DecisionTreeDeserializer a;
+   private DecisionTreeDeserializer decisionTreeDeserializer;
 
-   public DecisionTree build(Element var1, String var2) {
-      return this.a.deserialize(var1);
+   public DecisionTree build(Element root, String file) {
+      return this.decisionTreeDeserializer.deserialize(root);
    }
 
    @Override
@@ -17,11 +17,11 @@ public class DecisionTreeResourceBuilder implements ResourceBuilder<DecisionTree
    }
 
    @Override
-   public boolean support(Element var1) {
-      return this.a.support(var1);
+   public boolean support(Element root) {
+      return this.decisionTreeDeserializer.support(root);
    }
 
-   public void setDecisionTreeDeserializer(DecisionTreeDeserializer var1) {
-      this.a = var1;
+   public void setDecisionTreeDeserializer(DecisionTreeDeserializer decisionTreeDeserializer) {
+      this.decisionTreeDeserializer = decisionTreeDeserializer;
    }
 }

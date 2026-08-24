@@ -19,43 +19,43 @@ public class RuleSetReference extends PacketSupportReference {
    protected RuleSetReference() {
    }
 
-   public boolean exist(Object var1, Long var2) {
-      RuleSet var3 = (RuleSet)var1;
-      List var4 = var3.getLibraries();
-      if (var4 != null) {
-         for(Library var6 : (Iterable<Library>)(Iterable<?>)(var4)) {
-            if (var6.getId() == var2) {
+   public boolean exist(Object obj, Long fileId) {
+      RuleSet ruleSet = (RuleSet)obj;
+      List libraries = ruleSet.getLibraries();
+      if (libraries != null) {
+         for(Library library : (Iterable<Library>)(Iterable<?>)(libraries)) {
+            if (library.getId() == fileId) {
                return true;
             }
          }
       }
 
-      for(ParentFile var7 : var3.getParents()) {
-         if (var7.getId() == var2) {
+      for(ParentFile parentFile : ruleSet.getParents()) {
+         if (parentFile.getId() == fileId) {
             return true;
          }
       }
 
-      List var17 = var3.getRules();
-      if (var17 != null) {
-         for(Rule var8 : (Iterable<Rule>)(Iterable<?>)(var17)) {
-            Rhs var9 = var8.getRhs();
-            if (var9 != null && this.a(var9.getActions(), var2)) {
+      List rules = ruleSet.getRules();
+      if (rules != null) {
+         for(Rule rule : (Iterable<Rule>)(Iterable<?>)(rules)) {
+            Rhs rhs = rule.getRhs();
+            if (rhs != null && this.containsFileReference(rhs.getActions(), fileId)) {
                return true;
             }
 
-            Other var10 = var8.getOther();
-            if (var10 != null && this.a(var10.getActions(), var2)) {
+            Other other = rule.getOther();
+            if (other != null && this.containsFileReference(other.getActions(), fileId)) {
                return true;
             }
 
-            if (var8 instanceof LoopRule) {
-               LoopRule var11 = (LoopRule)var8;
-               List var12 = var11.getUnits();
-               if (var12 != null) {
-                  for(LoopRuleUnit var14 : (Iterable<LoopRuleUnit>)(Iterable<?>)(var12)) {
-                     var9 = var14.getRhs();
-                     if (var9 != null && this.a(var9.getActions(), var2)) {
+            if (rule instanceof LoopRule) {
+               LoopRule loopRule = (LoopRule)rule;
+               List units = loopRule.getUnits();
+               if (units != null) {
+                  for(LoopRuleUnit loopRuleUnit : (Iterable<LoopRuleUnit>)(Iterable<?>)(units)) {
+                     rhs = loopRuleUnit.getRhs();
+                     if (rhs != null && this.containsFileReference(rhs.getActions(), fileId)) {
                         return true;
                      }
                   }
@@ -67,28 +67,28 @@ public class RuleSetReference extends PacketSupportReference {
       return false;
    }
 
-   public boolean existPacket(Object var1, Long var2, String var3) {
-      RuleSet var4 = (RuleSet)var1;
-      List var5 = var4.getRules();
-      if (var5 != null) {
-         for(Rule var7 : (Iterable<Rule>)(Iterable<?>)(var5)) {
-            Rhs var8 = var7.getRhs();
-            if (var8 != null && this.a(var8.getActions(), var2, var3)) {
+   public boolean existPacket(Object obj, Long packetId, String code) {
+      RuleSet ruleSet = (RuleSet)obj;
+      List rules = ruleSet.getRules();
+      if (rules != null) {
+         for(Rule rule : (Iterable<Rule>)(Iterable<?>)(rules)) {
+            Rhs rhs = rule.getRhs();
+            if (rhs != null && this.containsPacketReference(rhs.getActions(), packetId, code)) {
                return true;
             }
 
-            Other var9 = var7.getOther();
-            if (var9 != null && this.a(var9.getActions(), var2, var3)) {
+            Other other = rule.getOther();
+            if (other != null && this.containsPacketReference(other.getActions(), packetId, code)) {
                return true;
             }
 
-            if (var7 instanceof LoopRule) {
-               LoopRule var10 = (LoopRule)var7;
-               List var11 = var10.getUnits();
-               if (var11 != null) {
-                  for(LoopRuleUnit var13 : (Iterable<LoopRuleUnit>)(Iterable<?>)(var11)) {
-                     var8 = var13.getRhs();
-                     if (var8 != null && this.a(var8.getActions(), var2, var3)) {
+            if (rule instanceof LoopRule) {
+               LoopRule loopRule = (LoopRule)rule;
+               List units = loopRule.getUnits();
+               if (units != null) {
+                  for(LoopRuleUnit loopRuleUnit : (Iterable<LoopRuleUnit>)(Iterable<?>)(units)) {
+                     rhs = loopRuleUnit.getRhs();
+                     if (rhs != null && this.containsPacketReference(rhs.getActions(), packetId, code)) {
                         return true;
                      }
                   }
@@ -100,64 +100,64 @@ public class RuleSetReference extends PacketSupportReference {
       return false;
    }
 
-   public FileReference build(Object var1) {
-      RuleSet var2 = (RuleSet)var1;
-      FileReference var3 = new FileReference();
-      var3.setType(ResourceType.RuleSet);
-      ArrayList var4 = new ArrayList();
-      var3.setChildren(var4);
-      FileReference var5 = this.b(var2.getLibraries());
-      if (var5 != null) {
-         var4.add(var5);
+   public FileReference build(Object obj) {
+      RuleSet ruleSet = (RuleSet)obj;
+      FileReference fileReference = new FileReference();
+      fileReference.setType(ResourceType.RuleSet);
+      ArrayList items = new ArrayList();
+      fileReference.setChildren(items);
+      FileReference fileReference2 = this.buildLibraryReferences(ruleSet.getLibraries());
+      if (fileReference2 != null) {
+         items.add(fileReference2);
       }
 
-      FileReference var6 = new FileReference();
-      var6.setPathInfo("Parents");
-      ArrayList var7 = new ArrayList();
-      var6.setChildren(var7);
+      FileReference fileReference3 = new FileReference();
+      fileReference3.setPathInfo("Parents");
+      ArrayList items2 = new ArrayList();
+      fileReference3.setChildren(items2);
 
-      for(ParentFile var10 : var2.getParents()) {
-         RuleFile var11 = FileManager.ins.get(var10.getId());
-         FileReference var12 = this.a(var11);
-         var7.add(var12);
+      for(ParentFile parentFile : ruleSet.getParents()) {
+         RuleFile ruleFile = FileManager.ins.get(parentFile.getId());
+         FileReference file = this.buildFile(ruleFile);
+         items2.add(file);
       }
 
-      if (var7.size() > 0) {
-         var4.add(var6);
+      if (items2.size() > 0) {
+         items.add(fileReference3);
       }
 
-      for(Rule var17 : var2.getRules()) {
-         if (var17 instanceof LoopRule) {
-            LoopRule var19 = (LoopRule)var17;
+      for(Rule rule : ruleSet.getRules()) {
+         if (rule instanceof LoopRule) {
+            LoopRule loopRule = (LoopRule)rule;
 
-            for(LoopRuleUnit var14 : var19.getUnits()) {
-               this.a(var4, var14.getRhs());
-               Other var15 = var14.getOther();
-               if (var15 != null) {
-                  var4.addAll(this.a(var15.getActions()));
+            for(LoopRuleUnit loopRuleUnit : loopRule.getUnits()) {
+               this.appendRhsActionReferences(items, loopRuleUnit.getRhs());
+               Other other = loopRuleUnit.getOther();
+               if (other != null) {
+                  items.addAll(this.buildActionReferences(other.getActions()));
                }
             }
          } else {
-            Rhs var18 = var17.getRhs();
-            this.a(var4, var18);
-            Other var20 = var17.getOther();
-            if (var20 != null) {
-               var4.addAll(this.a(var20.getActions()));
+            Rhs rhs = rule.getRhs();
+            this.appendRhsActionReferences(items, rhs);
+            Other other2 = rule.getOther();
+            if (other2 != null) {
+               items.addAll(this.buildActionReferences(other2.getActions()));
             }
          }
       }
 
-      return var3;
+      return fileReference;
    }
 
-   private void a(List var1, Rhs var2) {
-      if (var2 != null) {
-         List var3 = var2.getActions();
-         var1.addAll(this.a(var3));
+   private void appendRhsActionReferences(List items, Rhs rhs) {
+      if (rhs != null) {
+         List actions = rhs.getActions();
+         items.addAll(this.buildActionReferences(actions));
       }
    }
 
-   public boolean support(Object var1) {
-      return var1 instanceof RuleSet;
+   public boolean support(Object obj) {
+      return obj instanceof RuleSet;
    }
 }

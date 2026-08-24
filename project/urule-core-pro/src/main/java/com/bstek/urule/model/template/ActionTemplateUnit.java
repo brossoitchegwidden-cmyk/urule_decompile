@@ -13,31 +13,31 @@ public class ActionTemplateUnit {
       return this.id;
    }
 
-   public void setId(String var1) {
-      this.id = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getName() {
       return this.name;
    }
 
-   public void setName(String var1) {
-      this.name = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getPath() {
       return this.path;
    }
 
-   public void setPath(String var1) {
-      this.path = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public List<Action> getActions() {
       return this.actions;
    }
 
-   public void setActions(List<Action> var1) {
-      this.actions = var1;
+   public void setActions(List<Action> actions) {
+      this.actions = actions;
    }
 }

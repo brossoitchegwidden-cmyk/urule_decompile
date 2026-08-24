@@ -23,107 +23,107 @@ public class CardCell implements Comparable<CardCell> {
       return this.variableLabel;
    }
 
-   public void setVariableLabel(String var1) {
-      this.variableLabel = var1;
+   public void setVariableLabel(String variableLabel) {
+      this.variableLabel = variableLabel;
    }
 
    public String getVariableName() {
       return this.variableName;
    }
 
-   public void setVariableName(String var1) {
-      this.variableName = var1;
+   public void setVariableName(String variableName) {
+      this.variableName = variableName;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getKeyLabel() {
       return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.keyLabel = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyName() {
       return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.keyName = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 
    public String getKeyUuid() {
       return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.keyUuid = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
    public Datatype getDatatype() {
       return this.datatype;
    }
 
-   public void setDatatype(Datatype var1) {
-      this.datatype = var1;
+   public void setDatatype(Datatype datatype) {
+      this.datatype = datatype;
    }
 
    public CellType getType() {
       return this.type;
    }
 
-   public void setType(CellType var1) {
-      this.type = var1;
+   public void setType(CellType type) {
+      this.type = type;
    }
 
    public String getWeight() {
       return this.weight;
    }
 
-   public void setWeight(String var1) {
-      this.weight = var1;
+   public void setWeight(String weight) {
+      this.weight = weight;
    }
 
    public Joint getJoint() {
       return this.joint;
    }
 
-   public void setJoint(Joint var1) {
-      this.joint = var1;
+   public void setJoint(Joint joint) {
+      this.joint = joint;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public int getRow() {
       return this.row;
    }
 
-   public void setRow(int var1) {
-      this.row = var1;
+   public void setRow(int row) {
+      this.row = row;
    }
 
    public int getCol() {
       return this.col;
    }
 
-   public void setCol(int var1) {
-      this.col = var1;
+   public void setCol(int col) {
+      this.col = col;
    }
 
-   public int compareTo(CardCell var1) {
-      return this.row - var1.getRow();
+   public int compareTo(CardCell cardCell) {
+      return this.row - cardCell.getRow();
    }
 }

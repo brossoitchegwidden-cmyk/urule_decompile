@@ -16,118 +16,118 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 public class ScriptDecisionTableRulesBuilder {
-   private CellScriptDSLBuilder a;
-   private DSLRuleSetBuilder b;
+   private CellScriptDSLBuilder cellScriptDSLBuilder;
+   private DSLRuleSetBuilder dslRuleSetBuilder;
 
-   public RuleSet buildRules(ScriptDecisionTable var1, String var2) throws IOException {
-      List var3 = var1.getRows();
-      List var4 = var1.getColumns();
-      List var5 = var1.getLibraries();
-      StringBuffer var6 = this.a(var5);
+   public RuleSet buildRules(ScriptDecisionTable table, String path) throws IOException {
+      List rows = table.getRows();
+      List columns = table.getColumns();
+      List libraries = table.getLibraries();
+      StringBuffer stringBuffer = this.buildLibraryImports(libraries);
 
-      for (Row var8 : (Iterable<Row>)(Iterable<?>)(var3)) {
-         var6.append("rule \"r" + var8.getNum() + "\"");
-         var6.append("\r\n");
-         var6.append("if");
-         var6.append("\r\n");
-         StringBuffer var9 = new StringBuffer();
-         StringBuffer var10 = new StringBuffer();
+      for (Row row : (Iterable<Row>)(Iterable<?>)(rows)) {
+         stringBuffer.append("rule \"r" + row.getNum() + "\"");
+         stringBuffer.append("\r\n");
+         stringBuffer.append("if");
+         stringBuffer.append("\r\n");
+         StringBuffer stringBuffer2 = new StringBuffer();
+         StringBuffer stringBuffer3 = new StringBuffer();
 
-         for (Column var12 : (Iterable<Column>)(Iterable<?>)(var4)) {
-            ScriptCell var13 = this.a(var1, var8.getNum(), var12.getNum());
-            String var14 = var13.getScript();
-            if (!StringUtils.isBlank(var14)) {
-               ColumnType var15 = var12.getType();
-               switch (var15) {
+         for (Column column : (Iterable<Column>)(Iterable<?>)(columns)) {
+            ScriptCell scriptCell = this.resolveScriptCell(table, row.getNum(), column.getNum());
+            String script = scriptCell.getScript();
+            if (!StringUtils.isBlank(script)) {
+               ColumnType type = column.getType();
+               switch (type) {
                   case Criteria:
-                     String var18 = var12.getVariableCategory() + "." + var12.getVariableLabel();
-                     String var17 = this.a.buildCriteriaScript(var14, var18);
-                     if (!StringUtils.isBlank(var17)) {
-                        var17 = var17.trim();
-                        if (var9.length() > 1) {
-                           var9.append(" and ");
+                     String text = column.getVariableCategory() + "." + column.getVariableLabel();
+                     String criteriaScript = this.cellScriptDSLBuilder.buildCriteriaScript(script, text);
+                     if (!StringUtils.isBlank(criteriaScript)) {
+                        criteriaScript = criteriaScript.trim();
+                        if (stringBuffer2.length() > 1) {
+                           stringBuffer2.append(" and ");
                         }
 
-                        if (!var17.startsWith("(")) {
-                           var17 = "(" + var17 + ")";
+                        if (!criteriaScript.startsWith("(")) {
+                           criteriaScript = "(" + criteriaScript + ")";
                         }
 
-                        var9.append(var17);
+                        stringBuffer2.append(criteriaScript);
                      }
                      break;
                   case ConsolePrint:
-                     var10.append("out(" + var14 + ");\r\n");
+                     stringBuffer3.append("out(" + script + ");\r\n");
                      break;
                   case Assignment:
-                     String var16 = var12.getVariableCategory() + "." + var12.getVariableLabel();
-                     var10.append(var16 + " = " + var14 + ";\r\n");
+                     String text2 = column.getVariableCategory() + "." + column.getVariableLabel();
+                     stringBuffer3.append(text2 + " = " + script + ";\r\n");
                      break;
                   case ExecuteMethod:
-                     var10.append(var14 + ";\r\n");
+                     stringBuffer3.append(script + ";\r\n");
                }
             }
          }
 
-         var6.append(var9);
-         var6.append("\r\n");
-         var6.append("then");
-         var6.append("\r\n");
-         var6.append(var10);
-         var6.append("\r\n");
-         var6.append("end;");
-         var6.append("\r\n");
+         stringBuffer.append(stringBuffer2);
+         stringBuffer.append("\r\n");
+         stringBuffer.append("then");
+         stringBuffer.append("\r\n");
+         stringBuffer.append(stringBuffer3);
+         stringBuffer.append("\r\n");
+         stringBuffer.append("end;");
+         stringBuffer.append("\r\n");
       }
 
-      return this.b.build(var6.toString(), var2);
+      return this.dslRuleSetBuilder.build(stringBuffer.toString(), path);
    }
 
-   private StringBuffer a(List<Library> var1) {
-      StringBuffer var2 = new StringBuffer();
+   private StringBuffer buildLibraryImports(List<Library> libraries) {
+      StringBuffer stringBuffer = new StringBuffer();
 
-      for (Library var4 : var1) {
-         LibraryType var5 = var4.getType();
-         switch (var5) {
+      for (Library library : libraries) {
+         LibraryType type = library.getType();
+         switch (type) {
             case Action:
-               var2.append("importActionLibrary \"" + var4.getPath() + "\";\r\n");
+               stringBuffer.append("importActionLibrary \"" + library.getPath() + "\";\r\n");
                break;
             case Constant:
-               var2.append("importConstantLibrary \"" + var4.getPath() + "\";\r\n");
+               stringBuffer.append("importConstantLibrary \"" + library.getPath() + "\";\r\n");
                break;
             case Parameter:
-               var2.append("importParameterLibrary \"" + var4.getPath() + "\";\r\n");
+               stringBuffer.append("importParameterLibrary \"" + library.getPath() + "\";\r\n");
                break;
             case Variable:
-               var2.append("importVariableLibrary \"" + var4.getPath() + "\";\r\n");
+               stringBuffer.append("importVariableLibrary \"" + library.getPath() + "\";\r\n");
          }
       }
 
-      return var2;
+      return stringBuffer;
    }
 
-   private ScriptCell a(ScriptDecisionTable var1, int var2, int var3) {
-      Map var4 = var1.getCellMap();
-      ScriptCell var5 = null;
+   private ScriptCell resolveScriptCell(ScriptDecisionTable scriptDecisionTable, int number, int number2) {
+      Map cellMap = scriptDecisionTable.getCellMap();
+      ScriptCell scriptCell = null;
 
-      for (int var6 = var2; var6 > -1; var6--) {
-         String var7 = var1.buildCellKey(var6, var3);
-         if (var4.containsKey(var7)) {
-            var5 = (ScriptCell)var4.get(var7);
+      for (int index = number; index > -1; index--) {
+         String cellKey = scriptDecisionTable.buildCellKey(index, number2);
+         if (cellMap.containsKey(cellKey)) {
+            scriptCell = (ScriptCell)cellMap.get(cellKey);
             break;
          }
       }
 
-      if (var5 == null) {
-         throw new RuleException("Decision table cell[" + var2 + "," + var3 + "] not exist.");
+      if (scriptCell == null) {
+         throw new RuleException("Decision table cell[" + number + "," + number2 + "] not exist.");
       } else {
-         return var5;
+         return scriptCell;
       }
    }
 
-   public void setCellScriptDSLBuilder(CellScriptDSLBuilder var1) {
-      this.a = var1;
+   public void setCellScriptDSLBuilder(CellScriptDSLBuilder cellScriptDSLBuilder) {
+      this.cellScriptDSLBuilder = cellScriptDSLBuilder;
    }
 
-   public void setDslRuleSetBuilder(DSLRuleSetBuilder var1) {
-      this.b = var1;
+   public void setDslRuleSetBuilder(DSLRuleSetBuilder dslRuleSetBuilder) {
+      this.dslRuleSetBuilder = dslRuleSetBuilder;
    }
 }

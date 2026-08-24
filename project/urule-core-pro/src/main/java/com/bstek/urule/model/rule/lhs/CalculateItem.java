@@ -23,81 +23,81 @@ public class CalculateItem {
    private String keyLabel;
    private String keyName;
 
-   public void init(Map<String, CalculateData> var1) {
-      CalculateData var2 = new CalculateData(this);
-      var2.setCount(0);
-      var2.setValue(new BigDecimal(0));
-      var1.put(this.type.name(), var2);
+   public void init(Map<String, CalculateData> resultMap) {
+      CalculateData calculateData = new CalculateData(this);
+      calculateData.setCount(0);
+      calculateData.setValue(new BigDecimal(0));
+      resultMap.put(this.type.name(), calculateData);
    }
 
-   public void calculate(EvaluationContext var1, Map<String, Object> var2, Object var3, Map<String, CalculateData> var4) {
+   public void calculate(EvaluationContext context, Map<String, Object> factMap, Object obj, Map<String, CalculateData> resultMap) {
       switch (this.type) {
          case count:
-            CalculateData var5 = (CalculateData)var4.get(this.type.toString());
-            if (var5 == null) {
-               var5 = new CalculateData(this);
-               var4.put(this.type.name(), var5);
+            CalculateData calculateData = (CalculateData)resultMap.get(this.type.toString());
+            if (calculateData == null) {
+               calculateData = new CalculateData(this);
+               resultMap.put(this.type.name(), calculateData);
             } else {
-               var5.setCount(var5.getCount() + 1);
+               calculateData.setCount(calculateData.getCount() + 1);
             }
             break;
          case avg:
-            this.doCal(var1, var2, var4);
+            this.doCal(context, factMap, resultMap);
             break;
          case max:
-            this.doCal(var1, var2, var4);
+            this.doCal(context, factMap, resultMap);
             break;
          case min:
-            this.doCal(var1, var2, var4);
+            this.doCal(context, factMap, resultMap);
             break;
          case sum:
-            this.doCal(var1, var2, var4);
+            this.doCal(context, factMap, resultMap);
             break;
          case collect:
-            CalculateData var6 = (CalculateData)var4.get(this.type.toString());
-            if (var6 == null) {
-               var6 = new CalculateData(this);
-               var6.addObject(var3);
-               var4.put(this.type.name(), var6);
+            CalculateData calculateData2 = (CalculateData)resultMap.get(this.type.toString());
+            if (calculateData2 == null) {
+               calculateData2 = new CalculateData(this);
+               calculateData2.addObject(obj);
+               resultMap.put(this.type.name(), calculateData2);
             } else {
-               var6.addObject(var3);
+               calculateData2.addObject(obj);
             }
       }
    }
 
-   private void doCal(EvaluationContext var1, Map<String, Object> var2, Map<String, CalculateData> var3) {
-      Object var4 = var1.getValueCompute().complexValueCompute(this.value, var1, var2);
-      BigDecimal var5 = null;
-      if (var4 != null) {
-         var5 = Utils.toBigDecimal(var4);
+   private void doCal(EvaluationContext evaluationContext, Map<String, Object> valuesByKey, Map<String, CalculateData> valuesByKey2) {
+      Object objectValue = evaluationContext.getValueCompute().complexValueCompute(this.value, evaluationContext, valuesByKey);
+      BigDecimal decimalValue = null;
+      if (objectValue != null) {
+         decimalValue = Utils.toBigDecimal(objectValue);
       }
 
-      CalculateData var6 = (CalculateData)var3.get(this.type.name());
-      if (var6 == null) {
-         var6 = new CalculateData(this);
-         var6.setValue(var5);
-         var3.put(this.type.name(), var6);
+      CalculateData calculateData = (CalculateData)valuesByKey2.get(this.type.name());
+      if (calculateData == null) {
+         calculateData = new CalculateData(this);
+         calculateData.setValue(decimalValue);
+         valuesByKey2.put(this.type.name(), calculateData);
       } else {
-         var6.setCount(var6.getCount() + 1);
-         if (var5 != null) {
-            BigDecimal var7 = var6.getValue();
-            if (var7 != null) {
+         calculateData.setCount(calculateData.getCount() + 1);
+         if (decimalValue != null) {
+            BigDecimal decimalValue2 = calculateData.getValue();
+            if (decimalValue2 != null) {
                if (this.type.equals(CalculateType.max)) {
-                  int var8 = var5.compareTo(var7);
-                  if (var8 == 1) {
-                     var6.setValue(var5);
+                  int number = decimalValue.compareTo(decimalValue2);
+                  if (number == 1) {
+                     calculateData.setValue(decimalValue);
                   }
                } else if (this.type.equals(CalculateType.min)) {
-                  int var10 = var5.compareTo(var7);
-                  if (var10 == 0) {
-                     var6.setValue(var5);
+                  int number2 = decimalValue.compareTo(decimalValue2);
+                  if (number2 == 0) {
+                     calculateData.setValue(decimalValue);
                   }
                } else {
-                  BigDecimal var11 = Utils.toBigDecimal(var7);
-                  var6.setValue(var5.add(var11));
+                  BigDecimal decimalValue3 = Utils.toBigDecimal(decimalValue2);
+                  calculateData.setValue(decimalValue.add(decimalValue3));
                }
             } else {
-               var6.setValue(var5);
+               calculateData.setValue(decimalValue);
             }
          }
       }
@@ -107,56 +107,56 @@ public class CalculateItem {
       return this.type;
    }
 
-   public void setType(CalculateType var1) {
-      this.type = var1;
+   public void setType(CalculateType type) {
+      this.type = type;
    }
 
    public Value getValue() {
       return this.value;
    }
 
-   public void setValue(Value var1) {
-      this.value = var1;
+   public void setValue(Value value) {
+      this.value = value;
    }
 
    public boolean isEnableAssignment() {
       return this.enableAssignment;
    }
 
-   public void setEnableAssignment(boolean var1) {
-      this.enableAssignment = var1;
+   public void setEnableAssignment(boolean enableAssignment) {
+      this.enableAssignment = enableAssignment;
    }
 
    public String getAssignTargetType() {
       return this.assignTargetType;
    }
 
-   public void setAssignTargetType(String var1) {
-      this.assignTargetType = var1;
+   public void setAssignTargetType(String assignTargetType) {
+      this.assignTargetType = assignTargetType;
    }
 
    public String getAssignVariableCategory() {
       return this.assignVariableCategory;
    }
 
-   public void setAssignVariableCategory(String var1) {
-      this.assignVariableCategory = var1;
+   public void setAssignVariableCategory(String assignVariableCategory) {
+      this.assignVariableCategory = assignVariableCategory;
    }
 
    public String getAssignVariable() {
       return this.assignVariable;
    }
 
-   public void setAssignVariable(String var1) {
-      this.assignVariable = var1;
+   public void setAssignVariable(String assignVariable) {
+      this.assignVariable = assignVariable;
    }
 
    public String getAssignVariableLabel() {
       return this.assignVariableLabel;
    }
 
-   public void setAssignVariableLabel(String var1) {
-      this.assignVariableLabel = var1;
+   public void setAssignVariableLabel(String assignVariableLabel) {
+      this.assignVariableLabel = assignVariableLabel;
    }
 
    public String getAssignCategoryUuid() {
@@ -167,51 +167,51 @@ public class CalculateItem {
       return this.keyCategoryUuid;
    }
 
-   public void setKeyCategoryUuid(String var1) {
-      this.keyCategoryUuid = var1;
+   public void setKeyCategoryUuid(String keyCategoryUuid) {
+      this.keyCategoryUuid = keyCategoryUuid;
    }
 
    public String getKeyUuid() {
       return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.keyUuid = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
-   public void setAssignCategoryUuid(String var1) {
-      this.assignCategoryUuid = var1;
+   public void setAssignCategoryUuid(String assignCategoryUuid) {
+      this.assignCategoryUuid = assignCategoryUuid;
    }
 
    public String getAssignVariableUuid() {
       return this.assignVariableUuid;
    }
 
-   public void setAssignVariableUuid(String var1) {
-      this.assignVariableUuid = var1;
+   public void setAssignVariableUuid(String assignVariableUuid) {
+      this.assignVariableUuid = assignVariableUuid;
    }
 
    public Datatype getAssignDatatype() {
       return this.assignDatatype;
    }
 
-   public void setAssignDatatype(Datatype var1) {
-      this.assignDatatype = var1;
+   public void setAssignDatatype(Datatype assignDatatype) {
+      this.assignDatatype = assignDatatype;
    }
 
    public String getKeyLabel() {
       return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.keyLabel = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyName() {
       return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.keyName = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 }

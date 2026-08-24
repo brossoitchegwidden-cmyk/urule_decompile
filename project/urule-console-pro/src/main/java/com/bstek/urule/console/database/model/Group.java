@@ -8,72 +8,72 @@ import java.util.Date;
    ignoreUnknown = true
 )
 public class Group implements Serializable {
-   private static final long a = 311678914470393316L;
-   private String b;
-   private String c;
-   private String d;
-   private String e;
-   private String f;
-   private Date g;
-   private Date h;
+   private static final long serialVersionUID = 311678914470393316L;
+   private String id;
+   private String name;
+   private String desc;
+   private String createUser;
+   private String updateUser;
+   private Date createDate;
+   private Date updateDate;
 
    public String getId() {
-      return this.b;
+      return this.id;
    }
 
-   public void setId(String var1) {
-      this.b = var1;
+   public void setId(String id) {
+      this.id = id;
    }
 
    public String getName() {
-      return this.c;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.c = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public String getDesc() {
-      return this.d;
+      return this.desc;
    }
 
-   public void setDesc(String var1) {
-      this.d = var1;
+   public void setDesc(String desc) {
+      this.desc = desc;
    }
 
    public String getCreateUser() {
-      return this.e;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.e = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.g;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.g = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 
    public Date getUpdateDate() {
-      return this.h;
+      return this.updateDate;
    }
 
-   public void setUpdateDate(Date var1) {
-      this.h = var1;
+   public void setUpdateDate(Date updateDate) {
+      this.updateDate = updateDate;
    }
 
    public String getUpdateUser() {
-      return this.f;
+      return this.updateUser;
    }
 
-   public void setUpdateUser(String var1) {
-      this.f = var1;
+   public void setUpdateUser(String updateUser) {
+      this.updateUser = updateUser;
    }
 
    public String toString() {
-      return "id:" + this.b + ",name:" + this.c;
+      return "id:" + this.id + ",name:" + this.name;
    }
 }

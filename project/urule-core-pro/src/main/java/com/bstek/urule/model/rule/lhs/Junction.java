@@ -10,21 +10,21 @@ public abstract class Junction extends BaseCriterion {
       return this.criterions;
    }
 
-   public void addCriterion(Criterion var1) {
+   public void addCriterion(Criterion criterion) {
       if (this.criterions == null) {
          this.criterions = new ArrayList<>();
       }
 
-      var1.setParent(this);
-      this.criterions.add(var1);
+      criterion.setParent(this);
+      this.criterions.add(criterion);
    }
 
-   public void setCriterions(List<Criterion> var1) {
-      for (Criterion var3 : var1) {
-         var3.setParent(this);
+   public void setCriterions(List<Criterion> criterions) {
+      for (Criterion criterion : criterions) {
+         criterion.setParent(this);
       }
 
-      this.criterions = var1;
+      this.criterions = criterions;
    }
 
    public abstract String getJunctionType();

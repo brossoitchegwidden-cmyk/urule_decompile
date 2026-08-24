@@ -16,48 +16,48 @@ public class ScriptDecisionTable {
       return this.rows;
    }
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 
-   public void addRow(Row var1) {
+   public void addRow(Row row) {
       if (this.rows == null) {
          this.rows = new ArrayList<>();
       }
 
-      this.rows.add(var1);
+      this.rows.add(row);
    }
 
-   public void addColumn(Column var1) {
+   public void addColumn(Column col) {
       if (this.columns == null) {
          this.columns = new ArrayList<>();
       }
 
-      this.columns.add(var1);
+      this.columns.add(col);
    }
 
-   public void addCell(ScriptCell var1) {
+   public void addCell(ScriptCell cell) {
       if (this.cellMap == null) {
          this.cellMap = new HashMap<>();
       }
 
-      this.cellMap.put(this.buildCellKey(var1.getRow(), var1.getCol()), var1);
+      this.cellMap.put(this.buildCellKey(cell.getRow(), cell.getCol()), cell);
    }
 
-   public void setRows(List<Row> var1) {
-      this.rows = var1;
+   public void setRows(List<Row> rows) {
+      this.rows = rows;
    }
 
    public List<Column> getColumns() {
       return this.columns;
    }
 
-   public void setColumns(List<Column> var1) {
-      this.columns = var1;
+   public void setColumns(List<Column> columns) {
+      this.columns = columns;
    }
 
    public Map<String, ScriptCell> getCellMap() {
@@ -68,11 +68,11 @@ public class ScriptDecisionTable {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
-   public String buildCellKey(int var1, int var2) {
-      return var1 + "," + var2;
+   public String buildCellKey(int row, int col) {
+      return row + "," + col;
    }
 }

@@ -26,143 +26,143 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 public class URuleServlet extends HttpServlet {
-   private static final long a = -532678553551034556L;
-   private PageServletHandler b;
-   private Map c = new HashMap();
-   private Map d = new HashMap();
+   private static final long serialVersionUID = -532678553551034556L;
+   private PageServletHandler pageServletHandler;
+   private Map apiHandlersByPath = new HashMap();
+   private Map anonymousHandlersByPath = new HashMap();
 
-   public void init(ServletConfig var1) throws ServletException {
-      for(ServletHandler var4 : ServiceLoader.load(ServletHandler.class)) {
-         var4.init();
-         String var5 = var4.url();
-         if (var4 instanceof ApiServletHandler && ((ApiServletHandler)var4).useApiPrefix()) {
-            var5 = "/api" + var5;
+   public void init(ServletConfig config) throws ServletException {
+      for(ServletHandler servletHandler : ServiceLoader.load(ServletHandler.class)) {
+         servletHandler.init();
+         String text = servletHandler.url();
+         if (servletHandler instanceof ApiServletHandler && ((ApiServletHandler)servletHandler).useApiPrefix()) {
+            text = "/api" + text;
          }
 
-         if (this.c.containsKey(var5) || this.d.containsKey(var5)) {
-            throw new RuntimeException("Handler [" + var5 + "] not unique.");
+         if (this.apiHandlersByPath.containsKey(text) || this.anonymousHandlersByPath.containsKey(text)) {
+            throw new RuntimeException("Handler [" + text + "] not unique.");
          }
 
-         if (var4 instanceof ApiServletHandler) {
-            this.c.put(var5, var4);
+         if (servletHandler instanceof ApiServletHandler) {
+            this.apiHandlersByPath.put(text, servletHandler);
          } else {
-            if (!(var4 instanceof AnonymousServletHandler)) {
-               throw new RuleException("Unsupport ServletHandler :" + var5);
+            if (!(servletHandler instanceof AnonymousServletHandler)) {
+               throw new RuleException("Unsupport ServletHandler :" + text);
             }
 
-            this.d.put(var5, var4);
+            this.anonymousHandlersByPath.put(text, servletHandler);
          }
       }
 
-      ServletHandler var6 = new com.bstek.urule.console.admin.license.LicenseServletHandler();
-      var6.init();
-      String var7 = var6.url();
-      if (this.c.containsKey(var7) || this.d.containsKey(var7)) {
-         throw new RuntimeException("Handler [" + var7 + "] not unique.");
+      ServletHandler licenseServletHandler = new com.bstek.urule.console.admin.license.LicenseServletHandler();
+      licenseServletHandler.init();
+      String text2 = licenseServletHandler.url();
+      if (this.apiHandlersByPath.containsKey(text2) || this.anonymousHandlersByPath.containsKey(text2)) {
+         throw new RuntimeException("Handler [" + text2 + "] not unique.");
       }
-      this.c.put(var7, var6);
+      this.apiHandlersByPath.put(text2, licenseServletHandler);
 
-      this.b = new PageServletHandler();
-      this.b.init();
+      this.pageServletHandler = new PageServletHandler();
+      this.pageServletHandler.init();
    }
 
-   protected void service(HttpServletRequest var1, HttpServletResponse var2) throws ServletException, IOException {
-      HttpServletResponseWrapper var4 = new HttpServletResponseWrapper(var2);
-      String var5 = var1.getRequestURI();
-      String var6 = var1.getContextPath() + "/urule";
-      String var7 = var5.startsWith(var6) ? var5.substring(var6.length()) : var5;
-      if (var7.length() < 1) {
-         RequestHolder.setRequest(var1);
+   protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+      HttpServletResponseWrapper httpServletResponseWrapper = new HttpServletResponseWrapper(response);
+      String requestURI = request.getRequestURI();
+      String text = request.getContextPath() + "/urule";
+      String substring = requestURI.startsWith(text) ? requestURI.substring(text.length()) : requestURI;
+      if (substring.length() < 1) {
+         RequestHolder.setRequest(request);
          RequestHolder.clean();
       } else {
-         Object var8 = null;
-         if (!var7.startsWith("/api") && !var7.startsWith("/rest")) {
-            int var12 = var7.indexOf("/");
-            if (var12 == 0) {
-               String var10 = var7.substring(1, var7.length());
-               var12 = var10.indexOf("/") + 1;
+         Object servletHandler = null;
+         if (!substring.startsWith("/api") && !substring.startsWith("/rest")) {
+            int number = substring.indexOf("/");
+            if (number == 0) {
+               String substring2 = substring.substring(1, substring.length());
+               number = substring2.indexOf("/") + 1;
             }
 
-            if (var12 > 0) {
-               var7 = var7.substring(0, var12);
+            if (number > 0) {
+               substring = substring.substring(0, number);
             }
          } else {
-            int var9 = var7.lastIndexOf("/");
-            var7 = var7.substring(0, var9);
+            int number2 = substring.lastIndexOf("/");
+            substring = substring.substring(0, number2);
          }
 
-         if (this.c.containsKey(var7)) {
-            var8 = (ServletHandler)this.c.get(var7);
-         } else if (this.d.containsKey(var7)) {
-            var8 = (ServletHandler)this.d.get(var7);
+         if (this.apiHandlersByPath.containsKey(substring)) {
+            servletHandler = (ServletHandler)this.apiHandlersByPath.get(substring);
+         } else if (this.anonymousHandlersByPath.containsKey(substring)) {
+            servletHandler = (ServletHandler)this.anonymousHandlersByPath.get(substring);
          } else {
-            var8 = this.b;
+            servletHandler = this.pageServletHandler;
          }
 
-         if (BootstrapManager.get().needCheckBootstrapped(var5) && !BootstrapManager.get().isBootstrapped()) {
-            var4.sendRedirect(var6 + "/setup");
+         if (BootstrapManager.get().needCheckBootstrapped(requestURI) && !BootstrapManager.get().isBootstrapped()) {
+            httpServletResponseWrapper.sendRedirect(text + "/setup");
          } else {
-            RequestHolder.setRequest(var1);
-            this.doServletHandler(var1, var4, (ServletHandler)var8);
+            RequestHolder.setRequest(request);
+            this.doServletHandler(request, httpServletResponseWrapper, (ServletHandler)servletHandler);
          }
       }
    }
 
-   public void doServletHandler(HttpServletRequest var1, HttpServletResponse var2, ServletHandler var3) throws IOException, ServletException {
+   public void doServletHandler(HttpServletRequest req, HttpServletResponse resp, ServletHandler targetHandler) throws IOException, ServletException {
       try {
          try {
-            var3.execute(var1, var2);
+            targetHandler.execute(req, resp);
             return;
-         } catch (Exception var22) {
-            StringBuilder var5 = new StringBuilder();
-            Throwable var6 = this.b(var22, var5);
-            if (!(var6 instanceof RuleDueException)) {
-               var2.setCharacterEncoding("UTF-8");
-               String var7 = NullPointerException.class.getName();
-               if (!(var6 instanceof NullPointerException)) {
-                  var7 = var6.getMessage();
+         } catch (Exception exception) {
+            StringBuilder stringBuilder = new StringBuilder();
+            Throwable throwable = this.resolveThrowable(exception, stringBuilder);
+            if (!(throwable instanceof RuleDueException)) {
+               resp.setCharacterEncoding("UTF-8");
+               String name = NullPointerException.class.getName();
+               if (!(throwable instanceof NullPointerException)) {
+                  name = throwable.getMessage();
                }
 
-               if (var7 == null) {
-                  var7 = NullPointerException.class.getName();
+               if (name == null) {
+                  name = NullPointerException.class.getName();
                }
 
-               var2.addHeader("errorMsg", URLEncoder.encode(var7, "utf-8"));
-               var2.setStatus(500);
-               String var8 = this.getErrorMsg(var6);
-               if (var6 instanceof PermissionDeniedException) {
-                  var2.setContentType("text/html;charset=utf-8");
-                  var2.setCharacterEncoding("utf-8");
-                  PrintWriter var24 = var2.getWriter();
-                  var24.write("<h2>" + var8 + "</h2>");
-                  var24.flush();
-                  var24.close();
+               resp.addHeader("errorMsg", URLEncoder.encode(name, "utf-8"));
+               resp.setStatus(500);
+               String errorMsg = this.getErrorMsg(throwable);
+               if (throwable instanceof PermissionDeniedException) {
+                  resp.setContentType("text/html;charset=utf-8");
+                  resp.setCharacterEncoding("utf-8");
+                  PrintWriter writer = resp.getWriter();
+                  writer.write("<h2>" + errorMsg + "</h2>");
+                  writer.flush();
+                  writer.close();
                   return;
                }
 
-               HashMap var9 = new HashMap();
-               String var10 = this.a(var6, var5);
-               var9.put("errorMsg", var8);
-               var9.put("stack", var10);
-               ObjectMapper var11 = JsonMapper.builder().build();
-               ServletOutputStream var12 = var2.getOutputStream();
+               HashMap valuesByKey = new HashMap();
+               String text = this.formatStackTrace(throwable, stringBuilder);
+               valuesByKey.put("errorMsg", errorMsg);
+               valuesByKey.put("stack", text);
+               ObjectMapper objectMapper = JsonMapper.builder().build();
+               ServletOutputStream outputStream = resp.getOutputStream();
 
                try {
-                  var11.writeValue(var12, var9);
+                  objectMapper.writeValue(outputStream, valuesByKey);
                } finally {
-                  ((OutputStream)var12).flush();
-                  ((OutputStream)var12).close();
+                  ((OutputStream)outputStream).flush();
+                  ((OutputStream)outputStream).close();
                }
 
-               if (!(var6 instanceof RuleException) && !(var6 instanceof InfoException)) {
-                  var6.printStackTrace();
+               if (!(throwable instanceof RuleException) && !(throwable instanceof InfoException)) {
+                  java.util.logging.Logger.getLogger(URuleServlet.class.getName()).log(java.util.logging.Level.SEVERE, throwable.getMessage(), throwable);
                }
 
                return;
             }
          }
 
-         var2.setStatus(888);
+         resp.setStatus(888);
       } finally {
          ParsePhaseHolder.cleanParsePhase();
          RequestHolder.clean();
@@ -170,40 +170,41 @@ public class URuleServlet extends HttpServlet {
 
    }
 
-   protected String getErrorMsg(Throwable var1) {
-      String var2 = var1.getMessage();
-      if (var2 == null || var2.contentEquals("")) {
-         var2 = var1.getClass().getName();
+   /**获取异常消息*/
+   protected String getErrorMsg(Throwable throwable) {
+      String message = throwable.getMessage();
+      if (message == null || message.contentEquals("")) {
+         message = throwable.getClass().getName();
       }
 
-      return var2;
+      return message;
    }
 
-   private String a(Throwable var1, StringBuilder var2) {
-      ByteArrayOutputStream var3 = new ByteArrayOutputStream();
-      PrintStream var4 = new PrintStream(var3);
-      var1.printStackTrace(var4);
-      String var5 = new String(var3.toByteArray());
-      IOUtils.closeQuietly(var4);
-      IOUtils.closeQuietly(var3);
-      var5 = var5.replaceAll("\n", "<br>");
-      if (var2.length() > 0) {
-         var2.append("<br>");
+   private String formatStackTrace(Throwable throwable, StringBuilder stringBuilder) {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      PrintStream printStream = new PrintStream(byteArrayOutputStream);
+      throwable.printStackTrace(printStream);
+      String string = new String(byteArrayOutputStream.toByteArray());
+      IOUtils.closeQuietly(printStream);
+      IOUtils.closeQuietly(byteArrayOutputStream);
+      string = string.replaceAll("\n", "<br>");
+      if (stringBuilder.length() > 0) {
+         stringBuilder.append("<br>");
       }
 
-      var2.append(var5);
-      return var2.toString();
+      stringBuilder.append(string);
+      return stringBuilder.toString();
    }
 
-   private Throwable b(Throwable var1, StringBuilder var2) {
-      if (var1 instanceof RuleAssertException) {
-         RuleAssertException var3 = (RuleAssertException)var1;
-         String var4 = var3.getTipMsg();
-         if (var4 != null) {
-            var2.append(var4);
+   private Throwable resolveThrowable(Throwable throwable, StringBuilder stringBuilder) {
+      if (throwable instanceof RuleAssertException) {
+         RuleAssertException ruleAssertException = (RuleAssertException)throwable;
+         String tipMsg = ruleAssertException.getTipMsg();
+         if (tipMsg != null) {
+            stringBuilder.append(tipMsg);
          }
       }
 
-      return var1.getCause() != null ? this.b(var1.getCause(), var2) : var1;
+      return throwable.getCause() != null ? this.resolveThrowable(throwable.getCause(), stringBuilder) : throwable;
    }
 }

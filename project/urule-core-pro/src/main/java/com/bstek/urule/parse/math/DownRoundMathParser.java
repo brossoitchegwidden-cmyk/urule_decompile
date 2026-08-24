@@ -6,18 +6,18 @@ import com.bstek.urule.parse.ValueParser;
 import org.dom4j.Element;
 
 public class DownRoundMathParser extends MathParser {
-   public DownRoundMathParser(ValueParser var1) {
-      super(var1);
+   public DownRoundMathParser(ValueParser valueParser) {
+      super(valueParser);
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("down-round");
+   public boolean support(String name) {
+      return name.equals("down-round");
    }
 
-   public MathSign parse(Element var1) {
-      DownRoundMath var2 = new DownRoundMath();
-      var2.setValue(this.a(var1));
-      return var2;
+   public MathSign parse(Element element) {
+      DownRoundMath downRoundMath = new DownRoundMath();
+      downRoundMath.setValue(this.parseValue(element));
+      return downRoundMath;
    }
 }

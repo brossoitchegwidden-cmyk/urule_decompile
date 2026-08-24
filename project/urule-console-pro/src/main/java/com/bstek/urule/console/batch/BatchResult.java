@@ -8,126 +8,126 @@ import java.util.List;
 import java.util.Map;
 
 public class BatchResult {
-   private Long a;
-   private String b;
-   private Date c;
-   private Date d;
-   private String e;
-   private int f = 0;
-   private int g = 0;
-   private BatchStatus h;
-   private String i;
-   private String j;
+   private Long batchId;
+   private String batchName;
+   private Date startTime;
+   private Date endTime;
+   private String ip;
+   private int readCount = 0;
+   private int filterCount = 0;
+   private BatchStatus status;
+   private String msg;
+   private String userAgent;
    @JsonIgnore
-   private List k = new ArrayList();
-   private Map l = new HashMap();
+   private List exceptions = new ArrayList();
+   private Map itemResults = new HashMap();
 
    public Long getBatchId() {
-      return this.a;
+      return this.batchId;
    }
 
-   public void setBatchId(Long var1) {
-      this.a = var1;
+   public void setBatchId(Long batchId) {
+      this.batchId = batchId;
    }
 
    public String getBatchName() {
-      return this.b;
+      return this.batchName;
    }
 
-   public void setBatchName(String var1) {
-      this.b = var1;
+   public void setBatchName(String batchName) {
+      this.batchName = batchName;
    }
 
    public Date getStartTime() {
-      return this.c;
+      return this.startTime;
    }
 
-   public void setStartTime(Date var1) {
-      this.c = var1;
+   public void setStartTime(Date startTime) {
+      this.startTime = startTime;
    }
 
    public String getIp() {
-      return this.e;
+      return this.ip;
    }
 
-   public void setIp(String var1) {
-      this.e = var1;
+   public void setIp(String ip) {
+      this.ip = ip;
    }
 
    public int getReadCount() {
-      return this.f;
+      return this.readCount;
    }
 
-   public void setReadCount(int var1) {
-      this.f = var1;
+   public void setReadCount(int readCount) {
+      this.readCount = readCount;
    }
 
    public BatchStatus getStatus() {
-      return this.h;
+      return this.status;
    }
 
-   public void setStatus(BatchStatus var1) {
-      this.h = var1;
+   public void setStatus(BatchStatus status) {
+      this.status = status;
    }
 
    public String getMsg() {
-      return this.i;
+      return this.msg;
    }
 
-   public void setMsg(String var1) {
-      this.i = var1;
+   public void setMsg(String msg) {
+      this.msg = msg;
    }
 
    public Date getEndTime() {
-      return this.d;
+      return this.endTime;
    }
 
-   public void setEndTime(Date var1) {
-      this.d = var1;
+   public void setEndTime(Date endTime) {
+      this.endTime = endTime;
    }
 
    public Map getItemResults() {
-      return this.l;
+      return this.itemResults;
    }
 
-   public void setItemResults(Map var1) {
-      this.l = var1;
+   public void setItemResults(Map itemResults) {
+      this.itemResults = itemResults;
    }
 
    public String getUserAgent() {
-      return this.j;
+      return this.userAgent;
    }
 
-   public void setUserAgent(String var1) {
-      this.j = var1;
+   public void setUserAgent(String userAgent) {
+      this.userAgent = userAgent;
    }
 
-   public void setException(Exception var1) {
-      this.i = var1.getClass() + ":" + var1.getMessage();
+   public void setException(Exception exception) {
+      this.msg = exception.getClass() + ":" + exception.getMessage();
    }
 
    public int getFilterCount() {
-      return this.g;
+      return this.filterCount;
    }
 
-   public void setFilterCount(int var1) {
-      this.g = var1;
+   public void setFilterCount(int filterCount) {
+      this.filterCount = filterCount;
    }
 
    public List getExceptions() {
-      return this.k;
+      return this.exceptions;
    }
 
-   public void setExceptions(List var1) {
-      this.k = var1;
+   public void setExceptions(List exceptions) {
+      this.exceptions = exceptions;
    }
 
    public String toString() {
-      String var1 = "id:" + this.a + ",batchName:" + this.b + ",status:" + this.h + ",recordCount:" + this.f;
-      if (this.d != null) {
-         var1 = var1 + ",time:" + (this.d.getTime() - this.c.getTime()) / 1000L;
+      String toStringResult = "id:" + this.batchId + ",batchName:" + this.batchName + ",status:" + this.status + ",recordCount:" + this.readCount;
+      if (this.endTime != null) {
+         toStringResult = toStringResult + ",time:" + (this.endTime.getTime() - this.startTime.getTime()) / 1000L;
       }
 
-      return var1;
+      return toStringResult;
    }
 }

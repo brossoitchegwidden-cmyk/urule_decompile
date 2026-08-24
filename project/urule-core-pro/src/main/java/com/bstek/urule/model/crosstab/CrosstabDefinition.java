@@ -37,199 +37,199 @@ public class CrosstabDefinition {
       return this.salience;
    }
 
-   public void setSalience(Integer var1) {
-      this.salience = var1;
+   public void setSalience(Integer salience) {
+      this.salience = salience;
    }
 
    public Date getEffectiveDate() {
       return this.effectiveDate;
    }
 
-   public void setEffectiveDate(Date var1) {
-      this.effectiveDate = var1;
+   public void setEffectiveDate(Date effectiveDate) {
+      this.effectiveDate = effectiveDate;
    }
 
    public Date getExpiresDate() {
       return this.expiresDate;
    }
 
-   public void setExpiresDate(Date var1) {
-      this.expiresDate = var1;
+   public void setExpiresDate(Date expiresDate) {
+      this.expiresDate = expiresDate;
    }
 
    public Boolean getEnabled() {
       return this.enabled;
    }
 
-   public void setEnabled(Boolean var1) {
-      this.enabled = var1;
+   public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
    }
 
    public Boolean getDebug() {
       return this.debug;
    }
 
-   public void setDebug(Boolean var1) {
-      this.debug = var1;
+   public void setDebug(Boolean debug) {
+      this.debug = debug;
    }
 
    public String getQuickTestData() {
       return this.quickTestData;
    }
 
-   public void setQuickTestData(String var1) {
-      this.quickTestData = var1;
+   public void setQuickTestData(String quickTestData) {
+      this.quickTestData = quickTestData;
    }
 
    public String getRemark() {
       return this.remark;
    }
 
-   public void setRemark(String var1) {
-      this.remark = var1;
+   public void setRemark(String remark) {
+      this.remark = remark;
    }
 
    public String getKeyLabel() {
       return this.keyLabel;
    }
 
-   public void setKeyLabel(String var1) {
-      this.keyLabel = var1;
+   public void setKeyLabel(String keyLabel) {
+      this.keyLabel = keyLabel;
    }
 
    public String getKeyName() {
       return this.keyName;
    }
 
-   public void setKeyName(String var1) {
-      this.keyName = var1;
+   public void setKeyName(String keyName) {
+      this.keyName = keyName;
    }
 
    public String getKeyCategoryUuid() {
       return this.keyCategoryUuid;
    }
 
-   public void setKeyCategoryUuid(String var1) {
-      this.keyCategoryUuid = var1;
+   public void setKeyCategoryUuid(String keyCategoryUuid) {
+      this.keyCategoryUuid = keyCategoryUuid;
    }
 
    public String getKeyUuid() {
       return this.keyUuid;
    }
 
-   public void setKeyUuid(String var1) {
-      this.keyUuid = var1;
+   public void setKeyUuid(String keyUuid) {
+      this.keyUuid = keyUuid;
    }
 
    public String getCategoryUuid() {
       return this.categoryUuid;
    }
 
-   public void setCategoryUuid(String var1) {
-      this.categoryUuid = var1;
+   public void setCategoryUuid(String categoryUuid) {
+      this.categoryUuid = categoryUuid;
    }
 
    public String getUuid() {
       return this.uuid;
    }
 
-   public void setUuid(String var1) {
-      this.uuid = var1;
+   public void setUuid(String uuid) {
+      this.uuid = uuid;
    }
 
    public String getAssignTargetType() {
       return this.assignTargetType;
    }
 
-   public void setAssignTargetType(String var1) {
-      this.assignTargetType = var1;
+   public void setAssignTargetType(String assignTargetType) {
+      this.assignTargetType = assignTargetType;
    }
 
    public String getAssignVariableCategory() {
       return this.assignVariableCategory;
    }
 
-   public void setAssignVariableCategory(String var1) {
-      this.assignVariableCategory = var1;
+   public void setAssignVariableCategory(String assignVariableCategory) {
+      this.assignVariableCategory = assignVariableCategory;
    }
 
    public String getAssignVariable() {
       return this.assignVariable;
    }
 
-   public void setAssignVariable(String var1) {
-      this.assignVariable = var1;
+   public void setAssignVariable(String assignVariable) {
+      this.assignVariable = assignVariable;
    }
 
    public String getAssignVariableLabel() {
       return this.assignVariableLabel;
    }
 
-   public void setAssignVariableLabel(String var1) {
-      this.assignVariableLabel = var1;
+   public void setAssignVariableLabel(String assignVariableLabel) {
+      this.assignVariableLabel = assignVariableLabel;
    }
 
    public Datatype getAssignDatatype() {
       return this.assignDatatype;
    }
 
-   public void setAssignDatatype(Datatype var1) {
-      this.assignDatatype = var1;
+   public void setAssignDatatype(Datatype assignDatatype) {
+      this.assignDatatype = assignDatatype;
    }
 
    public HeaderCell getHeaderCell() {
       return this.headerCell;
    }
 
-   public void setHeaderCell(HeaderCell var1) {
-      this.headerCell = var1;
+   public void setHeaderCell(HeaderCell headerCell) {
+      this.headerCell = headerCell;
    }
 
    public List<CrossCell> getCells() {
       return this.cells;
    }
 
-   public void setCells(List<CrossCell> var1) {
-      this.cells = var1;
+   public void setCells(List<CrossCell> cells) {
+      this.cells = cells;
    }
 
    public List<CrossRow> getRows() {
       return this.rows;
    }
 
-   public void setRows(List<CrossRow> var1) {
-      this.rows = var1;
+   public void setRows(List<CrossRow> rows) {
+      this.rows = rows;
    }
 
    public List<CrossColumn> getColumns() {
       return this.columns;
    }
 
-   public void setColumns(List<CrossColumn> var1) {
-      this.columns = var1;
+   public void setColumns(List<CrossColumn> columns) {
+      this.columns = columns;
    }
 
    public PredefineGroupDefinition getPredefineGroup() {
       return this.predefineGroup;
    }
 
-   public void setPredefineGroup(PredefineGroupDefinition var1) {
-      this.predefineGroup = var1;
+   public void setPredefineGroup(PredefineGroupDefinition predefineGroup) {
+      this.predefineGroup = predefineGroup;
    }
 
    public List<Library> getLibraries() {
       return this.libraries;
    }
 
-   public void setLibraries(List<Library> var1) {
-      this.libraries = var1;
+   public void setLibraries(List<Library> libraries) {
+      this.libraries = libraries;
    }
 
-   public void addLibrary(Library var1) {
+   public void addLibrary(Library library) {
       if (this.libraries == null) {
          this.libraries = new ArrayList<>();
       }
 
-      this.libraries.add(var1);
+      this.libraries.add(library);
    }
 }

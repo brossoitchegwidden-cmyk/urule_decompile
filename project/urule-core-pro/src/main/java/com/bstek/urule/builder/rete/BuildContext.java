@@ -8,19 +8,19 @@ import com.bstek.urule.model.rule.lhs.Criterion;
 import java.util.List;
 
 public interface BuildContext {
-   List<String> getObjectType(BaseCriteria var1);
+   List<String> getObjectType(BaseCriteria criteria);
 
-   List<String> getObjectTypeByCriterions(List<Criterion> var1);
+   List<String> getObjectTypeByCriterions(List<Criterion> criterions);
 
-   boolean assertSameType(BaseCriteria var1, BaseCriteria var2);
+   boolean assertSameType(BaseCriteria left, BaseCriteria right);
 
    ResourceLibrary getResourceLibrary();
 
-   ObjectTypeNode buildObjectTypeNode(String var1);
+   ObjectTypeNode buildObjectTypeNode(String className);
 
    int nextId();
 
-   void setCurrentRule(Rule var1);
+   void setCurrentRule(Rule rule);
 
    Rule currentRule();
 

@@ -15,50 +15,53 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class RecyclerServletHandler extends ApiServletHandler {
-   private static final String e = "-HH-mm-ss";
+   private static final String HH_MM_SS = "-HH-mm-ss";
 
-   public void undo(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("id");
-      String var4 = SecurityUtils.getLoginUsername(var1);
-      Long var5 = Long.parseLong(var3);
-      RuleFile var6 = FileManager.ins.get(var5);
-      if (var4.equals(var6.getUpdateUser())) {
-         boolean var7 = FileManager.ins.checkExist(var6.getProjectId(), var6.getParentId(), var6.getType(), var6.getName());
-         if (var7) {
-            Calendar var8 = Calendar.getInstance();
-            var8.setTimeInMillis(System.currentTimeMillis());
-            SimpleDateFormat var9 = new SimpleDateFormat("-HH-mm-ss");
-            FileManager.ins.rename(var5, var4, var6.getName() + var9.format(new Date(System.currentTimeMillis())));
+   /**撤销删除*/
+   public void undo(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("id");
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      Long longValue = Long.parseLong(parameter);
+      RuleFile ruleFile = FileManager.ins.get(longValue);
+      if (loginUsername.equals(ruleFile.getUpdateUser())) {
+         boolean flag = FileManager.ins.checkExist(ruleFile.getProjectId(), ruleFile.getParentId(), ruleFile.getType(), ruleFile.getName());
+         if (flag) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("-HH-mm-ss");
+            FileManager.ins.rename(longValue, loginUsername, ruleFile.getName() + simpleDateFormat.format(new Date(System.currentTimeMillis())));
          }
 
-         FileManager.ins.updateDeleteFlag(var5, false, var4);
+         FileManager.ins.updateDeleteFlag(longValue, false, loginUsername);
       }
 
    }
 
+   /**彻底删除文件*/
    @Transactional
-   public void delete(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("id");
-      String var4 = SecurityUtils.getLoginUsername(var1);
-      Long var5 = Long.parseLong(var3);
-      RuleFile var6 = FileManager.ins.get(var5);
-      if (var4.equals(var6.getUpdateUser())) {
-         FileManager.ins.remove(var5);
+   public void delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("id");
+      String loginUsername = SecurityUtils.getLoginUsername(req);
+      Long longValue = Long.parseLong(parameter);
+      RuleFile ruleFile = FileManager.ins.get(longValue);
+      if (loginUsername.equals(ruleFile.getUpdateUser())) {
+         FileManager.ins.remove(longValue);
       }
 
    }
 
-   public void list(HttpServletRequest var1, HttpServletResponse var2) throws Exception {
-      String var3 = var1.getParameter("name");
-      FileQuery var4 = FileManager.ins.newQuery();
-      var4.deleted(true);
-      var4.updateUser(SecurityUtils.getLoginUsername(var1));
-      var4.desc("UPDATE_DATE_");
-      if (StringUtils.isNotBlank(var3)) {
-         var4.nameLike(var3);
+   /**查询所有被删除的文件对象*/
+   public void list(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+      String parameter = req.getParameter("name");
+      FileQuery fileQuery = FileManager.ins.newQuery();
+      fileQuery.deleted(true);
+      fileQuery.updateUser(SecurityUtils.getLoginUsername(req));
+      fileQuery.desc("UPDATE_DATE_");
+      if (StringUtils.isNotBlank(parameter)) {
+         fileQuery.nameLike(parameter);
       }
 
-      this.a(var2, var4.list(ContextHolder.getProjectId()));
+      this.writeObjectToJson(resp, fileQuery.list(ContextHolder.getProjectId()));
    }
 
    public String url() {

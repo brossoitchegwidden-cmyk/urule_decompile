@@ -43,126 +43,126 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 
 public class ProjectImport {
-   private static final Log a = LogFactory.getLog(ProjectImport.class);
-   private Map b = new HashMap();
-   private Map c = new HashMap();
-   private Map d = new HashMap();
-   private List e = new ArrayList();
-   private Map f = new HashMap();
-   private Map g = new HashMap();
-   private Map h = new HashMap();
+   private static final Log logger = LogFactory.getLog(ProjectImport.class);
+   private Map idTextReplacements = new HashMap();
+   private Map importedFilesByOriginalId = new HashMap();
+   private Map existingFilesByPath = new HashMap();
+   private List importedVersionFiles = new ArrayList();
+   private Map knowledgePackageReferenceReplacements = new HashMap();
+   private Map resourceReferenceReplacements = new HashMap();
+   private Map importedFileIdsByPath = new HashMap();
 
-   public void doImport(InputStream var1, Group var2, ConfigInfo var3) throws Exception {
-      this.b(var2.getId());
-      byte[] var4 = IOUtils.toByteArray(var1);
-      String var5 = Utils.uncompress(var4);
-      Document var6 = DocumentHelper.parseText(var5);
-      Element var7 = var6.getRootElement();
-      if (!var7.getName().contentEquals("project")) {
+   public void doImport(InputStream inputStream, Group group, ConfigInfo info) throws Exception {
+      this.importReferencedResources(group.getId());
+      byte[] bytes = IOUtils.toByteArray(inputStream);
+      String text2 = Utils.uncompress(bytes);
+      Document text = DocumentHelper.parseText(text2);
+      Element rootElement = text.getRootElement();
+      if (!rootElement.getName().contentEquals("project")) {
          throw new InfoException("文件不合法，不能导入，请选择一个URule Pro4+项目导出的备份文件");
       } else {
-         Long var8 = Long.parseLong(var7.attributeValue("id"));
-         String var9 = var7.attributeValue("name");
-         String var10 = var7.attributeValue("type");
-         String var11 = var7.attributeValue("viewModel");
-         ProjectViewModel var12 = ProjectViewModel.category;
-         if (StringUtils.isNotBlank(var11)) {
-            var12 = ProjectViewModel.valueOf(var11);
+         Long longValue = Long.parseLong(rootElement.attributeValue("id"));
+         String text3 = rootElement.attributeValue("name");
+         String text4 = rootElement.attributeValue("type");
+         String text5 = rootElement.attributeValue("viewModel");
+         ProjectViewModel projectViewModel = ProjectViewModel.category;
+         if (StringUtils.isNotBlank(text5)) {
+            projectViewModel = ProjectViewModel.valueOf(text5);
          }
 
-         if (!StringUtils.isBlank(var9) && !StringUtils.isBlank(var10)) {
-            Project var13 = null;
-            User var14 = SecurityUtils.getLoginUser(RequestHolder.getRequest());
-            List var15 = ProjectManager.ins.newQuery().groupId(var2.getId()).name(var9).list();
-            if (var3.isReplace() && var15.size() > 0) {
-               var13 = (Project)var15.get(0);
-               var13.setType(var10);
-               var13.setViewModel(var12);
-               var13.setUpdateUser(var14.getName());
-               var13.setUpdateDate(new Date());
-               String var25 = this.a(var7, "desc");
-               var13.setDesc(var25);
-               ProjectManager.ins.update(var13);
-               a.debug("processProject(replace):" + var13.getName());
+         if (!StringUtils.isBlank(text3) && !StringUtils.isBlank(text4)) {
+            Project project = null;
+            User loginUser = SecurityUtils.getLoginUser(RequestHolder.getRequest());
+            List items = ProjectManager.ins.newQuery().groupId(group.getId()).name(text3).list();
+            if (info.isReplace() && items.size() > 0) {
+               project = (Project)items.get(0);
+               project.setType(text4);
+               project.setViewModel(projectViewModel);
+               project.setUpdateUser(loginUser.getName());
+               project.setUpdateDate(new Date());
+               String text6 = this.readEncodedChild(rootElement, "desc");
+               project.setDesc(text6);
+               ProjectManager.ins.update(project);
+               ProjectImport.logger.debug("processProject(replace):" + project.getName());
 
-               for(RuleFile var19 : (Iterable<RuleFile>)(Iterable<?>)(FileManager.ins.newQuery().list(var13.getId()))) {
-                  if (!var19.isDeleted()) {
-                     this.d.put(var19.getPath(), var19);
+               for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(FileManager.ins.newQuery().list(project.getId()))) {
+                  if (!ruleFile.isDeleted()) {
+                     this.existingFilesByPath.put(ruleFile.getPath(), ruleFile);
                   }
                }
             } else {
-               var13 = new Project();
-               var9 = this.a(var2.getId(), var9);
-               var13.setName(var9);
-               var13.setType(var10);
-               var13.setViewModel(var12);
-               var13.setCreateUser(var14.getName());
-               var13.setId(0L);
-               var13.setGroupId(var2.getId());
-               var13.setDeployApproveUser(var14.getName());
-               var13.setDisableApproveUser(var14.getName());
-               var13.setEnableApproveUser(var14.getName());
-               var13.setUpdateUser(var14.getName());
-               String var16 = this.a(var7, "desc");
-               var13.setDesc(var16);
-               ProjectService.ins.add(var13);
-               a.debug("processProject(add):" + var13.getName());
+               project = new Project();
+               text3 = this.ensureUniqueProjectName(group.getId(), text3);
+               project.setName(text3);
+               project.setType(text4);
+               project.setViewModel(projectViewModel);
+               project.setCreateUser(loginUser.getName());
+               project.setId(0L);
+               project.setGroupId(group.getId());
+               project.setDeployApproveUser(loginUser.getName());
+               project.setDisableApproveUser(loginUser.getName());
+               project.setEnableApproveUser(loginUser.getName());
+               project.setUpdateUser(loginUser.getName());
+               String text7 = this.readEncodedChild(rootElement, "desc");
+               project.setDesc(text7);
+               ProjectService.ins.add(project);
+               ProjectImport.logger.debug("processProject(add):" + project.getName());
             }
 
-            if (var8 != var13.getId()) {
-               String var26 = "project=\"" + var8 + "\"";
-               String var30 = "project=\"" + var13.getId() + "\"";
-               this.b.put(var26, var30);
+            if (longValue != project.getId()) {
+               String text8 = "project=\"" + longValue + "\"";
+               String text9 = "project=\"" + project.getId() + "\"";
+               this.idTextReplacements.put(text8, text9);
             }
 
-            for(Object var31 : var7.elements()) {
-               if (var31 instanceof Element) {
-                  Element var34 = (Element)var31;
-                  if (!this.b(var34, var13, var3) && this.a(var34, var13, var3)) {
+            for(Object objectValue : rootElement.elements()) {
+               if (objectValue instanceof Element) {
+                  Element element = (Element)objectValue;
+                  if (!this.importReferencedResources(element, project, info) && this.importPacket(element, project, info)) {
                   }
                }
             }
 
-            for(RuleFile var32 : (Iterable<RuleFile>)(Iterable<?>)(this.c.values())) {
-               String var35 = var32.getType();
-               if (!var35.contentEquals(ResourceType.ActionLibrary.name()) && !var35.contentEquals(ResourceType.ConstantLibrary.name()) && !var35.contentEquals(ResourceType.ParameterLibrary.name()) && !var35.contentEquals(ResourceType.VariableLibrary.name())) {
-                  String var37 = var32.getContent();
+            for(RuleFile ruleFile2 : (Iterable<RuleFile>)(Iterable<?>)(this.importedFilesByOriginalId.values())) {
+               String type = ruleFile2.getType();
+               if (!type.contentEquals(ResourceType.ActionLibrary.name()) && !type.contentEquals(ResourceType.ConstantLibrary.name()) && !type.contentEquals(ResourceType.ParameterLibrary.name()) && !type.contentEquals(ResourceType.VariableLibrary.name())) {
+                  String content = ruleFile2.getContent();
 
-                  for(String var21 : (Iterable<String>)(Iterable<?>)(this.b.keySet())) {
-                     String var22 = (String)this.b.get(var21);
-                     if (var21.startsWith("file=")) {
-                        if (var35.contentEquals(ResourceType.Flow.name())) {
-                           var37 = var37.replace(var21, var22);
+                  for(String text10 : (Iterable<String>)(Iterable<?>)(this.idTextReplacements.keySet())) {
+                     String text11 = (String)this.idTextReplacements.get(text10);
+                     if (text10.startsWith("file=")) {
+                        if (type.contentEquals(ResourceType.Flow.name())) {
+                           content = content.replace(text10, text11);
                         }
                      } else {
-                        var37 = var37.replace(var21, var22);
+                        content = content.replace(text10, text11);
                      }
                   }
 
-                  for(String var43 : (Iterable<String>)(Iterable<?>)(this.g.keySet())) {
-                     String var46 = (String)this.g.get(var43);
-                     var37 = this.a(var43, var37, var46);
+                  for(String text12 : (Iterable<String>)(Iterable<?>)(this.resourceReferenceReplacements.keySet())) {
+                     String text13 = (String)this.resourceReferenceReplacements.get(text12);
+                     content = this.replaceReferences(text12, content, text13);
                   }
 
-                  for(String var44 : (Iterable<String>)(Iterable<?>)(this.f.keySet())) {
-                     String var47 = (String)this.f.get(var44);
-                     var37 = this.a(var44, var37, var47);
+                  for(String text14 : (Iterable<String>)(Iterable<?>)(this.knowledgePackageReferenceReplacements.keySet())) {
+                     String text15 = (String)this.knowledgePackageReferenceReplacements.get(text14);
+                     content = this.replaceReferences(text14, content, text15);
                   }
 
-                  FileManager.ins.updateContent(var32.getId(), var32.getCreateUser(), var37);
+                  FileManager.ins.updateContent(ruleFile2.getId(), ruleFile2.getCreateUser(), content);
                }
             }
 
-            for(VersionFile var33 : (Iterable<VersionFile>)(Iterable<?>)(this.e)) {
-               String var36 = var33.getContent();
+            for(VersionFile versionFile : (Iterable<VersionFile>)(Iterable<?>)(this.importedVersionFiles)) {
+               String replacedText = versionFile.getContent();
 
-               for(String var42 : (Iterable<String>)(Iterable<?>)(this.b.keySet())) {
-                  String var45 = (String)this.b.get(var42);
-                  var36 = var36.replace(var42, var45);
+               for(String text16 : (Iterable<String>)(Iterable<?>)(this.idTextReplacements.keySet())) {
+                  String text17 = (String)this.idTextReplacements.get(text16);
+                  replacedText = replacedText.replace(text16, text17);
                }
 
-               VersionFileManagerImpl var39 = (VersionFileManagerImpl)VersionFileManager.ins;
-               var39.updateContent(var33.getId(), var36);
+               VersionFileManagerImpl versionFileManagerImpl = (VersionFileManagerImpl)VersionFileManager.ins;
+               versionFileManagerImpl.updateContent(versionFile.getId(), replacedText);
             }
 
          } else {
@@ -171,159 +171,159 @@ public class ProjectImport {
       }
    }
 
-   private String a(String var1, String var2, String var3) {
-      Pattern var4 = Pattern.compile(var1);
-      Matcher var5 = var4.matcher(var2);
-      StringBuffer var6 = new StringBuffer();
+   private String replaceReferences(String text, String text2, String text3) {
+      Pattern pattern = Pattern.compile(text);
+      Matcher matcher = pattern.matcher(text2);
+      StringBuffer stringBuffer = new StringBuffer();
 
-      while(var5.find()) {
-         var5.appendReplacement(var6, var3);
+      while(matcher.find()) {
+         matcher.appendReplacement(stringBuffer, text3);
       }
 
-      var5.appendTail(var6);
-      return var6.toString();
+      matcher.appendTail(stringBuffer);
+      return stringBuffer.toString();
    }
 
-   private String a(String var1, String var2) {
-      List var3 = ProjectManager.ins.newQuery().groupId(var1).list();
+   private String ensureUniqueProjectName(String text, String text2) {
+      List items = ProjectManager.ins.newQuery().groupId(text).list();
 
-      for(int var4 = 0; var4 < 10000; ++var4) {
-         String var5 = var2;
-         if (var4 > 0) {
-            var5 = var2 + var4;
+      for(int index = 0; index < 10000; ++index) {
+         String text22 = text2;
+         if (index > 0) {
+            text22 = text2 + index;
          }
 
-         boolean var6 = false;
+         boolean flag = false;
 
-         for(Project var8 : (Iterable<Project>)(Iterable<?>)(var3)) {
-            if (var8.getName().contentEquals(var5)) {
-               var6 = true;
+         for(Project project : (Iterable<Project>)(Iterable<?>)(items)) {
+            if (project.getName().contentEquals(text22)) {
+               flag = true;
                break;
             }
          }
 
-         if (!var6) {
-            var2 = var5;
+         if (!flag) {
+            text2 = text22;
             break;
          }
       }
 
-      return var2;
+      return text2;
    }
 
-   private void a(String var1) {
+   private void verifyPacketCodeAvailable(String text) {
       try {
-         List var2 = PacketManager.ins.newQuery().code(var1).list();
-         if (var2.size() > 0) {
-            Packet var3 = (Packet)var2.get(0);
-            long var4 = var3.getProjectId();
-            Project var6 = ProjectManager.ins.get(var4);
-            String var7 = var6.getGroupId();
-            String var8 = "Duplicate packet code " + var1 + "!<br/>The code under " + var6.getName() + "(" + var4 + ") of " + var7 + " repeated";
-            throw new DuplicatePacketCodeException(var8);
+         List items = PacketManager.ins.newQuery().code(text).list();
+         if (items.size() > 0) {
+            Packet packet = (Packet)items.get(0);
+            long projectId = packet.getProjectId();
+            Project project = ProjectManager.ins.get(projectId);
+            String groupId = project.getGroupId();
+            String text2 = "Duplicate packet code " + text + "!<br/>The code under " + project.getName() + "(" + projectId + ") of " + groupId + " repeated";
+            throw new DuplicatePacketCodeException(text2);
          }
-      } catch (Exception var9) {
-         if (var9 instanceof DuplicatePacketCodeException) {
-            throw var9;
+      } catch (Exception exception) {
+         if (exception instanceof DuplicatePacketCodeException) {
+            throw exception;
          } else {
-            throw new DuplicatePacketCodeException("Duplicate packet code " + var1 + "!<br/>" + var9.getMessage());
+            throw new DuplicatePacketCodeException("Duplicate packet code " + text + "!<br/>" + exception.getMessage());
          }
       }
    }
 
-   private boolean a(Element var1, Project var2, ConfigInfo var3) {
-      boolean var4 = var3.isReplace();
-      boolean var5 = var3.isNewPacketCode();
-      if (!var1.getName().contentEquals("packet")) {
+   private boolean importPacket(Element element, Project project, ConfigInfo configInfo) {
+      boolean flag = configInfo.isReplace();
+      boolean flag2 = configInfo.isNewPacketCode();
+      if (!element.getName().contentEquals("packet")) {
          return false;
       } else {
-         long var6 = Long.valueOf(var1.attributeValue("id"));
-         String var8 = var1.attributeValue("code");
-         String var9 = var1.attributeValue("name");
-         boolean var10 = false;
-         Packet var11 = new Packet();
-         if (StringUtils.isNotBlank(var8)) {
-            if (var4) {
-               List var24 = PacketManager.ins.newQuery().code(var8).list();
-               if (var24.size() > 0) {
-                  var11 = (Packet)var24.get(0);
-                  PacketFileManager.ins.deleteByPacketId(var11.getId());
-                  var10 = true;
+         long longValue = Long.valueOf(element.attributeValue("id"));
+         String text = element.attributeValue("code");
+         String text2 = element.attributeValue("name");
+         boolean flag3 = false;
+         Packet packet = new Packet();
+         if (StringUtils.isNotBlank(text)) {
+            if (flag) {
+               List items = PacketManager.ins.newQuery().code(text).list();
+               if (items.size() > 0) {
+                  packet = (Packet)items.get(0);
+                  PacketFileManager.ins.deleteByPacketId(packet.getId());
+                  flag3 = true;
                }
             }
 
-            if (!var10) {
+            if (!flag3) {
                try {
-                  this.a(var8);
-               } catch (DuplicatePacketCodeException var23) {
-                  if (!var5) {
-                     throw var23;
+                  this.verifyPacketCodeAvailable(text);
+               } catch (DuplicatePacketCodeException duplicatePacketCodeException) {
+                  if (!flag2) {
+                     throw duplicatePacketCodeException;
                   }
 
-                  var8 = "";
+                  text = "";
                }
             }
-         } else if (var4) {
-            List var12 = PacketManager.ins.newQuery().name(var9).list();
-            if (var12.size() > 0) {
-               var11 = (Packet)var12.get(0);
-               PacketFileManager.ins.deleteByPacketId(var11.getId());
-               var10 = true;
+         } else if (flag) {
+            List items2 = PacketManager.ins.newQuery().name(text2).list();
+            if (items2.size() > 0) {
+               packet = (Packet)items2.get(0);
+               PacketFileManager.ins.deleteByPacketId(packet.getId());
+               flag3 = true;
             }
          }
 
-         String var25 = var1.attributeValue("type");
-         PacketType var13 = PacketType.file;
-         if (var25 != null) {
-            var13 = PacketType.valueOf(var25);
+         String text3 = element.attributeValue("type");
+         PacketType packetType = PacketType.file;
+         if (text3 != null) {
+            packetType = PacketType.valueOf(text3);
          }
 
-         var11.setType(var13);
-         var11.setName(var9);
-         var11.setCode(var8);
-         var11.setDesc(var1.attributeValue("desc"));
-         var11.setProjectId(var2.getId());
-         var11.setCreateUser(var2.getCreateUser());
-         var11.setEnable(Boolean.valueOf(var1.attributeValue("enable")));
-         var11.setAuditEnable(Boolean.valueOf(var1.attributeValue("audit-enable")));
-         var11.setRestEnable(Boolean.valueOf(var1.attributeValue("rest-enable")));
-         var11.setRestSecurityEnable(Boolean.valueOf(var1.attributeValue("rest-security-enable")));
-         if (var11.isRestSecurityEnable()) {
-            var11.setRestSecurityUser(var1.attributeValue("rest-security-user"));
-            var11.setRestSecurityPassword(var1.attributeValue("rest-security-password"));
+         packet.setType(packetType);
+         packet.setName(text2);
+         packet.setCode(text);
+         packet.setDesc(element.attributeValue("desc"));
+         packet.setProjectId(project.getId());
+         packet.setCreateUser(project.getCreateUser());
+         packet.setEnable(Boolean.valueOf(element.attributeValue("enable")));
+         packet.setAuditEnable(Boolean.valueOf(element.attributeValue("audit-enable")));
+         packet.setRestEnable(Boolean.valueOf(element.attributeValue("rest-enable")));
+         packet.setRestSecurityEnable(Boolean.valueOf(element.attributeValue("rest-security-enable")));
+         if (packet.isRestSecurityEnable()) {
+            packet.setRestSecurityUser(element.attributeValue("rest-security-user"));
+            packet.setRestSecurityPassword(element.attributeValue("rest-security-password"));
          }
 
-         String var14 = this.a(var1, "audit-input");
-         String var15 = this.a(var1, "audit-output");
-         String var16 = this.a(var1, "rest-input");
-         String var17 = this.a(var1, "rest-output");
-         String var18 = this.a(var1, "input-data");
-         String var19 = this.a(var1, "output-data");
-         var11.setAuditInput(var14);
-         var11.setAuditOutput(var15);
-         var11.setRestInput(var16);
-         var11.setRestOutput(var17);
-         var11.setInputData(var18);
-         var11.setOutputData(var19);
-         if (var10) {
-            PacketManager.ins.update(var11);
-            a.debug("processPacket(replace):" + var11.getName());
+         String text4 = this.readEncodedChild(element, "audit-input");
+         String text5 = this.readEncodedChild(element, "audit-output");
+         String text6 = this.readEncodedChild(element, "rest-input");
+         String text7 = this.readEncodedChild(element, "rest-output");
+         String text8 = this.readEncodedChild(element, "input-data");
+         String text9 = this.readEncodedChild(element, "output-data");
+         packet.setAuditInput(text4);
+         packet.setAuditOutput(text5);
+         packet.setRestInput(text6);
+         packet.setRestOutput(text7);
+         packet.setInputData(text8);
+         packet.setOutputData(text9);
+         if (flag3) {
+            PacketManager.ins.update(packet);
+            ProjectImport.logger.debug("processPacket(replace):" + packet.getName());
          } else {
-            PacketManager.ins.add(var11);
-            a.debug("processPacket(add):" + var11.getName());
+            PacketManager.ins.add(packet);
+            ProjectImport.logger.debug("processPacket(add):" + packet.getName());
          }
 
-         if (var6 != var11.getId()) {
-            String var20 = "package-id=\"" + var6 + "\"";
-            String var21 = "package-id=\"" + var11.getId() + "\"";
-            this.b.put(var20, var21);
+         if (longValue != packet.getId()) {
+            String text10 = "package-id=\"" + longValue + "\"";
+            String text11 = "package-id=\"" + packet.getId() + "\"";
+            this.idTextReplacements.put(text10, text11);
          }
 
-         for(Object var27 : var1.elements()) {
-            if (var27 instanceof Element) {
-               Element var22 = (Element)var27;
-               if (var22.getName().contentEquals("file")) {
-                  this.a(var22, var11);
+         for(Object objectValue : element.elements()) {
+            if (objectValue instanceof Element) {
+               Element element2 = (Element)objectValue;
+               if (element2.getName().contentEquals("file")) {
+                  this.importPacketFile(element2, packet);
                }
             }
          }
@@ -332,116 +332,116 @@ public class ProjectImport {
       }
    }
 
-   private void a(Element var1, Packet var2) {
-      PacketFile var3 = new PacketFile();
-      long var4 = Long.valueOf(var1.attributeValue("id"));
-      String var6 = var1.attributeValue("path");
-      RuleFile var7 = (RuleFile)this.c.get(var4);
-      if (var7 != null) {
-         var3.setFileId(var7.getId());
-      } else if (this.h.containsKey(var6)) {
-         var3.setFileId((Long)this.h.get(var6));
+   private void importPacketFile(Element element, Packet packet) {
+      PacketFile packetFile = new PacketFile();
+      long longValue = Long.valueOf(element.attributeValue("id"));
+      String text = element.attributeValue("path");
+      RuleFile ruleFile = (RuleFile)this.importedFilesByOriginalId.get(longValue);
+      if (ruleFile != null) {
+         packetFile.setFileId(ruleFile.getId());
+      } else if (this.importedFileIdsByPath.containsKey(text)) {
+         packetFile.setFileId((Long)this.importedFileIdsByPath.get(text));
       } else {
-         var3.setFileId(0L);
+         packetFile.setFileId(0L);
       }
 
-      var3.setProjectId(var2.getProjectId());
-      var3.setCreateUser(var2.getCreateUser());
-      var3.setDesc(var1.attributeValue("desc"));
-      var3.setPath(var6);
-      var3.setPacketId(var2.getId());
-      var3.setVersion(var1.attributeValue("version"));
-      a.debug("processPacketFile:" + var3.getFileId());
-      PacketFileManager.ins.add(var3);
+      packetFile.setProjectId(packet.getProjectId());
+      packetFile.setCreateUser(packet.getCreateUser());
+      packetFile.setDesc(element.attributeValue("desc"));
+      packetFile.setPath(text);
+      packetFile.setPacketId(packet.getId());
+      packetFile.setVersion(element.attributeValue("version"));
+      ProjectImport.logger.debug("processPacketFile:" + packetFile.getFileId());
+      PacketFileManager.ins.add(packetFile);
    }
 
-   private boolean b(Element var1, Project var2, ConfigInfo var3) {
-      boolean var4 = var3.isReplace();
-      boolean var5 = var3.isForceLock();
-      if (!var1.getName().contentEquals("file")) {
+   private boolean importReferencedResources(Element element, Project project, ConfigInfo configInfo) {
+      boolean flag = configInfo.isReplace();
+      boolean flag2 = configInfo.isForceLock();
+      if (!element.getName().contentEquals("file")) {
          return false;
       } else {
-         String var6 = var1.attributeValue("path");
-         long var7 = Long.valueOf(var1.attributeValue("id"));
-         RuleFile var9 = new RuleFile();
-         RuleFile var10 = (RuleFile)this.d.get(var6);
-         boolean var11 = false;
-         if (var10 != null && var4) {
-            var9 = var10;
-            var11 = true;
+         String text = element.attributeValue("path");
+         long longValue = Long.valueOf(element.attributeValue("id"));
+         RuleFile ruleFile = new RuleFile();
+         RuleFile ruleFile2 = (RuleFile)this.existingFilesByPath.get(text);
+         boolean flag3 = false;
+         if (ruleFile2 != null && flag) {
+            ruleFile = ruleFile2;
+            flag3 = true;
          }
 
-         String var12 = var1.attributeValue("deleted");
-         if (StringUtils.isNotBlank(var12)) {
-            var9.setDeleted(Boolean.valueOf(var12));
+         String text2 = element.attributeValue("deleted");
+         if (StringUtils.isNotBlank(text2)) {
+            ruleFile.setDeleted(Boolean.valueOf(text2));
          }
 
-         if (var9.isDeleted()) {
+         if (ruleFile.isDeleted()) {
             return false;
          } else {
-            var9.setName(var1.attributeValue("name"));
-            var9.setDigest(var1.attributeValue("digest"));
-            var9.setPath(var1.attributeValue("path"));
-            var9.setLatestVersion(var1.attributeValue("latest-version"));
-            var9.setCreateUser(var2.getCreateUser());
-            var9.setProjectId(var2.getId());
-            var9.setType(var1.attributeValue("type"));
-            String var13 = this.a(var1, "content");
-            String var14 = var9.getType();
-            if (!var14.contentEquals(ResourceType.ActionLibrary.name()) && !var14.contentEquals(ResourceType.ConstantLibrary.name()) && !var14.contentEquals(ResourceType.ParameterLibrary.name()) && !var14.contentEquals(ResourceType.VariableLibrary.name())) {
-               if (!var14.contentEquals(ResourceType.Scorecard.name()) && !var14.contentEquals(ResourceType.ComplexScorecard.name())) {
-                  if (var14.contentEquals(ResourceType.DecisionTable.name()) || var14.contentEquals(ResourceType.CrossDecisionTable.name())) {
-                     var14 = ResourceType.DecisionTable.name();
+            ruleFile.setName(element.attributeValue("name"));
+            ruleFile.setDigest(element.attributeValue("digest"));
+            ruleFile.setPath(element.attributeValue("path"));
+            ruleFile.setLatestVersion(element.attributeValue("latest-version"));
+            ruleFile.setCreateUser(project.getCreateUser());
+            ruleFile.setProjectId(project.getId());
+            ruleFile.setType(element.attributeValue("type"));
+            String text3 = this.readEncodedChild(element, "content");
+            String type = ruleFile.getType();
+            if (!type.contentEquals(ResourceType.ActionLibrary.name()) && !type.contentEquals(ResourceType.ConstantLibrary.name()) && !type.contentEquals(ResourceType.ParameterLibrary.name()) && !type.contentEquals(ResourceType.VariableLibrary.name())) {
+               if (!type.contentEquals(ResourceType.Scorecard.name()) && !type.contentEquals(ResourceType.ComplexScorecard.name())) {
+                  if (type.contentEquals(ResourceType.DecisionTable.name()) || type.contentEquals(ResourceType.CrossDecisionTable.name())) {
+                     type = ResourceType.DecisionTable.name();
                   }
                } else {
-                  var14 = ResourceType.Scorecard.name();
+                  type = ResourceType.Scorecard.name();
                }
             } else {
-               var14 = ResourceType.Library.name();
+               type = ResourceType.Library.name();
             }
 
-            String var15 = var1.attributeValue("fileSet");
-            if (StringUtils.isNotBlank(var15) && Boolean.valueOf(var15)) {
-               var14 = ResourceType.General.name();
+            String text4 = element.attributeValue("fileSet");
+            if (StringUtils.isNotBlank(text4) && Boolean.valueOf(text4)) {
+               type = ResourceType.General.name();
             }
 
-            var9.setContent(var13);
-            RuleFile var16 = this.a(var9.getPath(), var2, var14);
-            if (var16 != null) {
-               var9.setParentId(var16.getId());
+            ruleFile.setContent(text3);
+            RuleFile dir = this.buildDir(ruleFile.getPath(), project, type);
+            if (dir != null) {
+               ruleFile.setParentId(dir.getId());
             }
 
-            if (var11) {
-               VersionFileManager.ins.deleteByFileId(var9.getId());
-               var9.setModifyDate(new Date());
-               var9.setUpdateUser(var2.getCreateUser());
-               FileManager.ins.update(var9);
-               a.debug("processFile(replace):" + var9.getName());
+            if (flag3) {
+               VersionFileManager.ins.deleteByFileId(ruleFile.getId());
+               ruleFile.setModifyDate(new Date());
+               ruleFile.setUpdateUser(project.getCreateUser());
+               FileManager.ins.update(ruleFile);
+               ProjectImport.logger.debug("processFile(replace):" + ruleFile.getName());
             } else {
-               FileManager.ins.add(var9);
-               a.debug("processFile(add):" + var9.getName());
+               FileManager.ins.add(ruleFile);
+               ProjectImport.logger.debug("processFile(add):" + ruleFile.getName());
             }
 
-            if (var7 != var9.getId()) {
-               String var17 = "id=\"" + var7 + "\"";
-               String var18 = "id=\"" + var9.getId() + "\"";
-               this.b.put(var17, var18);
-               var17 = "file=\"" + var7 + "\"";
-               var18 = "file=\"" + var9.getId() + "\"";
-               this.b.put(var17, var18);
+            if (longValue != ruleFile.getId()) {
+               String text5 = "id=\"" + longValue + "\"";
+               String text6 = "id=\"" + ruleFile.getId() + "\"";
+               this.idTextReplacements.put(text5, text6);
+               text5 = "file=\"" + longValue + "\"";
+               text6 = "file=\"" + ruleFile.getId() + "\"";
+               this.idTextReplacements.put(text5, text6);
             }
 
-            if (var5) {
-               FileManager.ins.lock(var9.getId(), var9.getCreateUser());
+            if (flag2) {
+               FileManager.ins.lock(ruleFile.getId(), ruleFile.getCreateUser());
             }
 
-            this.c.put(var7, var9);
+            this.importedFilesByOriginalId.put(longValue, ruleFile);
 
-            for(Object var23 : var1.elements()) {
-               if (var23 instanceof Element) {
-                  Element var19 = (Element)var23;
-                  if (var19.getName().contentEquals("version")) {
-                     this.a(var19, var9);
+            for(Object objectValue : element.elements()) {
+               if (objectValue instanceof Element) {
+                  Element element2 = (Element)objectValue;
+                  if (element2.getName().contentEquals("version")) {
+                     this.importVersionFile(element2, ruleFile);
                   }
                }
             }
@@ -451,161 +451,161 @@ public class ProjectImport {
       }
    }
 
-   private void b(String var1) {
-      for(Project var4 : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type("common").groupId(var1).list())) {
-         for(Packet var7 : (Iterable<Packet>)(Iterable<?>)(PacketManager.ins.newQuery().projectId(var4.getId()).list())) {
-            String var8 = "knowledge project=\"" + var4.getName() + "\" name=\"" + var7.getName() + "\" package-id=\"[0-9]+\"";
-            String var9 = "knowledge project=\"" + var4.getName() + "\" name=\"" + var7.getName() + "\" package-id=\"" + var7.getId() + "\"";
-            this.f.put(var8, var9);
+   private void importReferencedResources(String text) {
+      for(Project project : (Iterable<Project>)(Iterable<?>)(ProjectManager.ins.newQuery().type("common").groupId(text).list())) {
+         for(Packet packet : (Iterable<Packet>)(Iterable<?>)(PacketManager.ins.newQuery().projectId(project.getId()).list())) {
+            String text2 = "knowledge project=\"" + project.getName() + "\" name=\"" + packet.getName() + "\" package-id=\"[0-9]+\"";
+            String text3 = "knowledge project=\"" + project.getName() + "\" name=\"" + packet.getName() + "\" package-id=\"" + packet.getId() + "\"";
+            this.knowledgePackageReferenceReplacements.put(text2, text3);
          }
 
-         List var10 = FileManager.ins.newQuery().containCommonProject(false).tree(var4.getId());
-         String var11 = "";
+         List items = FileManager.ins.newQuery().containCommonProject(false).tree(project.getId());
+         String text4 = "";
 
-         for(RuleFile var13 : (Iterable<RuleFile>)(Iterable<?>)(var10)) {
-            this.a(var11, var13);
+         for(RuleFile ruleFile : (Iterable<RuleFile>)(Iterable<?>)(items)) {
+            this.indexFilePaths(text4, ruleFile);
          }
       }
 
    }
 
-   private void a(String var1, RuleFile var2) {
-      if (StringUtils.isBlank(var1)) {
-         var1 = "/" + var2.getName();
+   private void indexFilePaths(String text, RuleFile ruleFile) {
+      if (StringUtils.isBlank(text)) {
+         text = "/" + ruleFile.getName();
       } else {
-         var1 = var1 + "/" + var2.getName();
+         text = text + "/" + ruleFile.getName();
       }
 
-      if (var2.isDirectory()) {
-         if (var2.getChildren() == null) {
+      if (ruleFile.isDirectory()) {
+         if (ruleFile.getChildren() == null) {
             return;
          }
 
-         for(RuleFile var4 : (Iterable<RuleFile>)(Iterable<?>)(var2.getChildren())) {
-            this.a(var1, var4);
+         for(RuleFile ruleFile2 : (Iterable<RuleFile>)(Iterable<?>)(ruleFile.getChildren())) {
+            this.indexFilePaths(text, ruleFile2);
          }
       } else {
-         String var13 = var2.getType();
-         if (var13 == null) {
+         String type = ruleFile.getType();
+         if (type == null) {
             return;
          }
 
-         if (!var13.contentEquals(ResourceType.ActionLibrary.name()) && !var13.contentEquals(ResourceType.ConstantLibrary.name()) && !var13.contentEquals(ResourceType.ParameterLibrary.name()) && !var13.contentEquals(ResourceType.VariableLibrary.name()) && !var13.contentEquals(ResourceType.ActionTemplate.name()) && !var13.contentEquals(ResourceType.ConditionTemplate.name())) {
-            String var15 = "path=\"" + var13 + ":" + var1 + "\" version=\"([0-9]+(\\.[0-9]+)*)?\" id=\"[0-9]+\"";
-            String var18 = "path=\"" + var13 + ":" + var1 + "\" version=\"\" id=\"" + var2.getId() + "\"";
-            this.g.put(var15, var18);
-            String var19 = var1;
-            if (var1.startsWith("/")) {
-               var19 = var1.substring(1, var1.length());
+         if (!type.contentEquals(ResourceType.ActionLibrary.name()) && !type.contentEquals(ResourceType.ConstantLibrary.name()) && !type.contentEquals(ResourceType.ParameterLibrary.name()) && !type.contentEquals(ResourceType.VariableLibrary.name()) && !type.contentEquals(ResourceType.ActionTemplate.name()) && !type.contentEquals(ResourceType.ConditionTemplate.name())) {
+            String text2 = "path=\"" + type + ":" + text + "\" version=\"([0-9]+(\\.[0-9]+)*)?\" id=\"[0-9]+\"";
+            String text3 = "path=\"" + type + ":" + text + "\" version=\"\" id=\"" + ruleFile.getId() + "\"";
+            this.resourceReferenceReplacements.put(text2, text3);
+            String substring = text;
+            if (text.startsWith("/")) {
+               substring = text.substring(1, text.length());
             }
 
-            var15 = "path=\"" + var13 + ":" + var19 + "\" version=\"([0-9]+(\\.[0-9]+)*)?\" id=\"[0-9]+\"";
-            this.g.put(var15, var18);
-            String var20 = "id=\"[0-9]+\" path=\"" + var13 + ":" + var1 + "\"/";
-            String var21 = "id=\"" + var2.getId() + "\" path=\"" + var13 + ":" + var1 + "\"/";
-            this.g.put(var20, var21);
-            String var9 = "id=\"[0-9]+\" path=\"" + var13 + ":" + var19 + "\"/";
-            this.g.put(var9, var21);
-            String var10 = var13 + ":" + var1;
-            String var11 = var13 + ":" + var19;
-            this.h.put(var10, var2.getId());
-            this.h.put(var11, var2.getId());
+            text2 = "path=\"" + type + ":" + substring + "\" version=\"([0-9]+(\\.[0-9]+)*)?\" id=\"[0-9]+\"";
+            this.resourceReferenceReplacements.put(text2, text3);
+            String text4 = "id=\"[0-9]+\" path=\"" + type + ":" + text + "\"/";
+            String text5 = "id=\"" + ruleFile.getId() + "\" path=\"" + type + ":" + text + "\"/";
+            this.resourceReferenceReplacements.put(text4, text5);
+            String text6 = "id=\"[0-9]+\" path=\"" + type + ":" + substring + "\"/";
+            this.resourceReferenceReplacements.put(text6, text5);
+            String text7 = type + ":" + text;
+            String text8 = type + ":" + substring;
+            this.importedFileIdsByPath.put(text7, ruleFile.getId());
+            this.importedFileIdsByPath.put(text8, ruleFile.getId());
          } else {
-            String var14 = "path=\"" + var13 + ":" + var1 + "\"";
-            String var5 = "id=\"[0-9]+\" " + var14 + "";
-            String var6 = "id=\"" + var2.getId() + "\" " + var14 + "";
-            this.g.put(var5, var6);
-            String var7 = var1;
-            if (var1.startsWith("/")) {
-               var7 = var1.substring(1, var1.length());
+            String text9 = "path=\"" + type + ":" + text + "\"";
+            String text10 = "id=\"[0-9]+\" " + text9 + "";
+            String text11 = "id=\"" + ruleFile.getId() + "\" " + text9 + "";
+            this.resourceReferenceReplacements.put(text10, text11);
+            String substring2 = text;
+            if (text.startsWith("/")) {
+               substring2 = text.substring(1, text.length());
             }
 
-            String var8 = "path=\"" + var13 + ":" + var7 + "\"";
-            var5 = "id=\"[0-9]+\" " + var8 + "";
-            this.g.put(var5, var6);
+            String text12 = "path=\"" + type + ":" + substring2 + "\"";
+            text10 = "id=\"[0-9]+\" " + text12 + "";
+            this.resourceReferenceReplacements.put(text10, text11);
          }
       }
 
    }
 
-   private void a(Element var1, RuleFile var2) {
-      VersionFile var3 = new VersionFile();
-      var3.setProjectId(var2.getProjectId());
-      var3.setFileId(var2.getId());
-      var3.setName(var2.getName());
-      var3.setDigest(var1.attributeValue("digest"));
-      var3.setVersion(var1.attributeValue("version"));
-      var3.setCreateUser(var2.getCreateUser());
-      String var4 = this.a(var1, "content");
-      var3.setContent(var4);
-      String var5 = this.a(var1, "note");
-      var3.setNote(var5);
-      VersionFileManager.ins.saveFile(var3);
-      this.e.add(var3);
+   private void importVersionFile(Element element, RuleFile ruleFile) {
+      VersionFile versionFile = new VersionFile();
+      versionFile.setProjectId(ruleFile.getProjectId());
+      versionFile.setFileId(ruleFile.getId());
+      versionFile.setName(ruleFile.getName());
+      versionFile.setDigest(element.attributeValue("digest"));
+      versionFile.setVersion(element.attributeValue("version"));
+      versionFile.setCreateUser(ruleFile.getCreateUser());
+      String text = this.readEncodedChild(element, "content");
+      versionFile.setContent(text);
+      String text2 = this.readEncodedChild(element, "note");
+      versionFile.setNote(text2);
+      VersionFileManager.ins.saveFile(versionFile);
+      this.importedVersionFiles.add(versionFile);
    }
 
-   protected RuleFile a(String var1, Project var2, String var3) {
-      if (var1.startsWith("/")) {
-         var1 = var1.substring(1);
+   protected RuleFile buildDir(String path, Project project, String type) {
+      if (path.startsWith("/")) {
+         path = path.substring(1);
       }
 
-      int var4 = var1.indexOf(":");
-      if (var4 > -1) {
-         var1 = var1.substring(var4 + 1);
+      int number = path.indexOf(":");
+      if (number > -1) {
+         path = path.substring(number + 1);
       }
 
-      int var5 = var1.indexOf("/");
-      var1 = var1.substring(var5 + 1);
-      var5 = var1.lastIndexOf("/");
-      if (var5 == -1) {
+      int number2 = path.indexOf("/");
+      path = path.substring(number2 + 1);
+      number2 = path.lastIndexOf("/");
+      if (number2 == -1) {
          return null;
       } else {
-         String var6 = var1.substring(0, var5);
-         String[] var7 = var6.split("/");
-         long var8 = 0L;
-         RuleFile var10 = null;
+         String substring = path.substring(0, number2);
+         String[] parts = substring.split("/");
+         long id = 0L;
+         RuleFile ruleFile = null;
 
-         for(String var14 : var7) {
-            DirectoryManagerImpl var15 = (DirectoryManagerImpl)DirectoryManager.ins;
-            var10 = var15.loadDir(var2.getId(), var8, var14, var3);
-            if (var10 == null) {
-               var10 = new RuleFile();
-               var10.setProjectId(var2.getId());
-               var10.setParentId(var8);
-               var10.setName(var14);
-               var10.setType(var3);
-               var10.setCreateUser(var2.getCreateUser());
-               var15.add(var10);
+         for(String text : parts) {
+            DirectoryManagerImpl directoryManagerImpl = (DirectoryManagerImpl)DirectoryManager.ins;
+            ruleFile = directoryManagerImpl.loadDir(project.getId(), id, text, type);
+            if (ruleFile == null) {
+               ruleFile = new RuleFile();
+               ruleFile.setProjectId(project.getId());
+               ruleFile.setParentId(id);
+               ruleFile.setName(text);
+               ruleFile.setType(type);
+               ruleFile.setCreateUser(project.getCreateUser());
+               directoryManagerImpl.add(ruleFile);
             }
 
-            var8 = var10.getId();
+            id = ruleFile.getId();
          }
 
-         return var10;
+         return ruleFile;
       }
    }
 
-   private String a(Element var1, String var2) {
-      String var3 = null;
+   private String readEncodedChild(Element element, String text) {
+      String text2 = null;
 
-      for(Object var5 : var1.elements()) {
-         if (var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            if (var6.getName().contentEquals(var2)) {
-               var3 = var6.getText();
+      for(Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().contentEquals(text)) {
+               text2 = element2.getText();
                break;
             }
          }
       }
 
-      if (StringUtils.isNotBlank(var3)) {
+      if (StringUtils.isNotBlank(text2)) {
          try {
-            var3 = IOUtils.toString(Base64.getDecoder().decode(var3), "utf-8");
-         } catch (IOException var7) {
-            throw new RuleException(var7);
+            text2 = IOUtils.toString(Base64.getDecoder().decode(text2), "utf-8");
+         } catch (IOException iOException) {
+            throw new RuleException(iOException);
          }
       }
 
-      return var3;
+      return text2;
    }
 }

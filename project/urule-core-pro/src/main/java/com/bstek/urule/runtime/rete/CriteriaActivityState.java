@@ -7,18 +7,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class CriteriaActivityState extends ActivityState {
-   private Set<String> a = new HashSet<>();
-   private List<Map<String, Object>> b = new ArrayList<>();
+   private Set<String> classSet = new HashSet<>();
+   private List<Map<String, Object>> factMapList = new ArrayList<>();
 
-   public CriteriaActivityState(String var1) {
-      super(var1);
+   public CriteriaActivityState(String id) {
+      super(id);
    }
 
    public Set<String> getClassSet() {
-      return this.a;
+      return this.classSet;
    }
 
    public List<Map<String, Object>> getFactMapList() {
-      return this.b;
+      return this.factMapList;
    }
 }

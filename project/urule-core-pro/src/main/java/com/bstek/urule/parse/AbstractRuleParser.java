@@ -9,93 +9,93 @@ import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
 public abstract class AbstractRuleParser<T> implements Parser<T> {
-   protected LhsParser a;
-   protected RhsParser b;
-   protected OtherParser c;
+   protected LhsParser lhsParser;
+   protected RhsParser rhsParser;
+   protected OtherParser otherParser;
 
-   public void parseRule(Rule var1, Element var2) {
-      var1.setName(var2.attributeValue("name"));
-      String var3 = var2.attributeValue("salience");
-      if (StringUtils.isNotEmpty(var3)) {
-         var1.setSalience(Integer.valueOf(var3));
+   public void parseRule(Rule rule, Element element) {
+      rule.setName(element.attributeValue("name"));
+      String text = element.attributeValue("salience");
+      if (StringUtils.isNotEmpty(text)) {
+         rule.setSalience(Integer.valueOf(text));
       }
 
-      String var4 = var2.attributeValue("effective-date");
-      SimpleDateFormat var5 = new SimpleDateFormat(Configure.getDateFormat());
-      if (StringUtils.isNotEmpty(var4)) {
+      String text2 = element.attributeValue("effective-date");
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configure.getDateFormat());
+      if (StringUtils.isNotEmpty(text2)) {
          try {
-            var1.setEffectiveDate(var5.parse(var4));
-         } catch (ParseException var15) {
-            throw new RuleException(var15);
+            rule.setEffectiveDate(simpleDateFormat.parse(text2));
+         } catch (ParseException parseException) {
+            throw new RuleException(parseException);
          }
       }
 
-      String var6 = var2.attributeValue("expires-date");
-      if (StringUtils.isNotEmpty(var6)) {
+      String text3 = element.attributeValue("expires-date");
+      if (StringUtils.isNotEmpty(text3)) {
          try {
-            var1.setExpiresDate(var5.parse(var6));
-         } catch (ParseException var14) {
-            throw new RuleException(var14);
+            rule.setExpiresDate(simpleDateFormat.parse(text3));
+         } catch (ParseException parseException2) {
+            throw new RuleException(parseException2);
          }
       }
 
-      String var7 = var2.attributeValue("enabled");
-      if (StringUtils.isNotEmpty(var7)) {
-         var1.setEnabled(Boolean.valueOf(var7));
+      String text4 = element.attributeValue("enabled");
+      if (StringUtils.isNotEmpty(text4)) {
+         rule.setEnabled(Boolean.valueOf(text4));
       }
 
-      String var8 = var2.attributeValue("debug");
-      if (StringUtils.isNotEmpty(var8)) {
-         var1.setDebug(Boolean.valueOf(var8));
+      String text5 = element.attributeValue("debug");
+      if (StringUtils.isNotEmpty(text5)) {
+         rule.setDebug(Boolean.valueOf(text5));
       }
 
-      String var9 = var2.attributeValue("loop");
-      if (StringUtils.isNotEmpty(var9)) {
-         var1.setLoop(Boolean.valueOf(var9));
+      String text6 = element.attributeValue("loop");
+      if (StringUtils.isNotEmpty(text6)) {
+         rule.setLoop(Boolean.valueOf(text6));
       }
 
-      if (StringUtils.isNotBlank(var2.attributeValue("activation-group"))) {
-         var1.setMutexGroup(var2.attributeValue("activation-group"));
+      if (StringUtils.isNotBlank(element.attributeValue("activation-group"))) {
+         rule.setMutexGroup(element.attributeValue("activation-group"));
       } else {
-         var1.setMutexGroup(var2.attributeValue("mutex-group"));
+         rule.setMutexGroup(element.attributeValue("mutex-group"));
       }
 
-      if (StringUtils.isNotBlank(var2.attributeValue("agenda-group"))) {
-         var1.setPendedGroup(var2.attributeValue("agenda-group"));
+      if (StringUtils.isNotBlank(element.attributeValue("agenda-group"))) {
+         rule.setPendedGroup(element.attributeValue("agenda-group"));
       } else {
-         var1.setPendedGroup(var2.attributeValue("pended-group"));
+         rule.setPendedGroup(element.attributeValue("pended-group"));
       }
 
-      String var10 = var2.attributeValue("auto-focus");
-      if (StringUtils.isNotEmpty(var10)) {
-         var1.setAutoFocus(Boolean.valueOf(var10));
+      String text7 = element.attributeValue("auto-focus");
+      if (StringUtils.isNotEmpty(text7)) {
+         rule.setAutoFocus(Boolean.valueOf(text7));
       }
 
-      for (Object var12 : var2.elements()) {
-         if (var12 != null && var12 instanceof Element) {
-            Element var13 = (Element)var12;
-            if (this.a.support(var13.getName())) {
-               var1.setLhs(this.a.parse(var13));
-            } else if (this.b.support(var13.getName())) {
-               var1.setRhs(this.b.parse(var13));
-            } else if (this.c.support(var13.getName())) {
-               var1.setOther(this.c.parse(var13));
-            } else if (var13.getName().equals("remark")) {
-               var1.setRemark(var13.getText());
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (this.lhsParser.support(element2.getName())) {
+               rule.setLhs(this.lhsParser.parse(element2));
+            } else if (this.rhsParser.support(element2.getName())) {
+               rule.setRhs(this.rhsParser.parse(element2));
+            } else if (this.otherParser.support(element2.getName())) {
+               rule.setOther(this.otherParser.parse(element2));
+            } else if (element2.getName().equals("remark")) {
+               rule.setRemark(element2.getText());
             }
          }
       }
    }
 
-   public void setLhsParser(LhsParser var1) {
-      this.a = var1;
+   public void setLhsParser(LhsParser lhsParser) {
+      this.lhsParser = lhsParser;
    }
 
-   public void setRhsParser(RhsParser var1) {
-      this.b = var1;
+   public void setRhsParser(RhsParser rhsParser) {
+      this.rhsParser = rhsParser;
    }
 
-   public void setOtherParser(OtherParser var1) {
-      this.c = var1;
+   public void setOtherParser(OtherParser otherParser) {
+      this.otherParser = otherParser;
    }
 }

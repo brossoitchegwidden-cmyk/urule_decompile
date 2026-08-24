@@ -6,30 +6,30 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
 public class UserServiceManager {
-   private static final Log a = LogFactory.getLog(UserServiceManager.class);
-   private static UserService b;
-   private static boolean c;
+   private static final Log logger = LogFactory.getLog(UserServiceManager.class);
+   private static UserService userServiceImpl;
+   private static boolean customUserService;
 
    public static UserService getUserService() {
-      if (b == null) {
-         ApplicationContext var0 = Utils.getApplicationContext();
+      if (UserServiceManager.userServiceImpl == null) {
+         ApplicationContext applicationContext = Utils.getApplicationContext();
 
          try {
-            b = (UserService)var0.getBean("urule.userService");
-            c = true;
-         } catch (Exception var2) {
-            a.warn("BeanID:UserService undefined!");
+            UserServiceManager.userServiceImpl = (UserService)applicationContext.getBean("urule.userService");
+            UserServiceManager.customUserService = true;
+         } catch (Exception exception) {
+            UserServiceManager.logger.warn("BeanID:UserService undefined!");
          }
 
-         if (b == null) {
-            b = new UserServiceImpl();
+         if (UserServiceManager.userServiceImpl == null) {
+            UserServiceManager.userServiceImpl = new UserServiceImpl();
          }
       }
 
-      return b;
+      return UserServiceManager.userServiceImpl;
    }
 
    public static boolean isCustomUserService() {
-      return c;
+      return UserServiceManager.customUserService;
    }
 }

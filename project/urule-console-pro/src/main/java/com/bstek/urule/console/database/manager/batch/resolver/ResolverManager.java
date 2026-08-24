@@ -6,21 +6,21 @@ import java.util.List;
 public interface ResolverManager {
    ResolverManager ins = new ResolverManagerImpl();
 
-   BatchDataResolver get(Long var1);
+   BatchDataResolver get(Long id);
 
-   void add(BatchDataResolver var1);
+   void add(BatchDataResolver resolver);
 
-   void update(BatchDataResolver var1);
+   void update(BatchDataResolver resolver);
 
-   void remove(Long var1);
+   void remove(Long id);
 
-   void removeByBatchId(Long var1);
+   void removeByBatchId(Long id);
 
-   void removeByProjectId(Long var1);
+   void removeByProjectId(Long id);
 
-   void removeByGroupId(String var1);
+   void removeByGroupId(String groupId);
 
-   List getResolverItemss(Long var1);
+   List getResolverItemss(Long id);
 
    ResolverQuery createQuery();
 }

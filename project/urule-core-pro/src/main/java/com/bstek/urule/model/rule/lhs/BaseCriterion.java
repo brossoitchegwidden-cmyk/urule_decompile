@@ -12,7 +12,7 @@ public abstract class BaseCriterion implements Criterion {
    }
 
    @Override
-   public void setParent(Junction var1) {
-      this.parent = var1;
+   public void setParent(Junction parent) {
+      this.parent = parent;
    }
 }

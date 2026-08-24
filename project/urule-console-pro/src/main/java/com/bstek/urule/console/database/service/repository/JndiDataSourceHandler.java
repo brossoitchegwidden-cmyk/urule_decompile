@@ -6,19 +6,19 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 public class JndiDataSourceHandler implements BatchDataSourceHandler {
-   public DataSource getDataSource(com.bstek.urule.console.database.model.datasource.DataSource var1) {
-      String var2 = var1.getDbJndiName();
+   public DataSource getDataSource(com.bstek.urule.console.database.model.datasource.DataSource repo) {
+      String dbJndiName = repo.getDbJndiName();
 
       try {
-         InitialContext var3 = new InitialContext();
-         if (StringUtils.isNotEmpty(var2) && !var2.startsWith("java:comp/env/")) {
-            var2 = "java:comp/env/" + var2;
+         InitialContext initialContext = new InitialContext();
+         if (StringUtils.isNotEmpty(dbJndiName) && !dbJndiName.startsWith("java:comp/env/")) {
+            dbJndiName = "java:comp/env/" + dbJndiName;
          }
 
-         DataSource var4 = (DataSource)var3.lookup(var2);
-         return var4;
-      } catch (NamingException var5) {
-         var5.printStackTrace();
+         DataSource dataSource = (DataSource)initialContext.lookup(dbJndiName);
+         return dataSource;
+      } catch (NamingException namingException) {
+         java.util.logging.Logger.getLogger(JndiDataSourceHandler.class.getName()).log(java.util.logging.Level.SEVERE, namingException.getMessage(), namingException);
          return null;
       }
    }

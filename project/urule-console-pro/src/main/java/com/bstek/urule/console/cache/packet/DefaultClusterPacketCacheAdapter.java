@@ -19,142 +19,135 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class DefaultClusterPacketCacheAdapter implements ClusterPacketCacheAdapter {
-   private static final Log a = LogFactory.getLog(DefaultClusterPacketCacheAdapter.class);
-   private ClientPacketCacheAdapter b = null;
+   private static final Log logger = LogFactory.getLog(DefaultClusterPacketCacheAdapter.class);
+   private ClientPacketCacheAdapter defaultClientPacketCacheAdapter = null;
 
-   private ClientPacketCacheAdapter a() {
-      if (this.b == null) {
+   private ClientPacketCacheAdapter resolveClientPacketCacheAdapter() {
+      if (this.defaultClientPacketCacheAdapter == null) {
          try {
-            this.b = (ClientPacketCacheAdapter)Utils.getApplicationContext().getBean("urule.clientPacketCacheAdapter");
-         } catch (NoSuchBeanDefinitionException var2) {
-            this.b = new DefaultClientPacketCacheAdapter();
+            this.defaultClientPacketCacheAdapter = (ClientPacketCacheAdapter)Utils.getApplicationContext().getBean("urule.clientPacketCacheAdapter");
+         } catch (NoSuchBeanDefinitionException noSuchBeanDefinitionException) {
+            this.defaultClientPacketCacheAdapter = new DefaultClientPacketCacheAdapter();
          }
       }
 
-      return this.b;
+      return this.defaultClientPacketCacheAdapter;
    }
+   public List removeProject(String groupId, long projectId, List list) {
+      ArrayList removeProjectResult = new ArrayList();
 
-   public List removeProject(String var1, long var2, List var4) {
-      ArrayList var5 = new ArrayList();
-
-      for(PacketConfig var7 : (Iterable<PacketConfig>)(Iterable<?>)(var4)) {
-         this.a().disableClientsPacket(var1, var7.getId());
+      for(PacketConfig packetConfig : (Iterable<PacketConfig>)(Iterable<?>)(list)) {
+         this.resolveClientPacketCacheAdapter().disableClientsPacket(groupId, packetConfig.getId());
       }
 
-      for(UrlConfig var8 : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.cluster, var1).getList())) {
-         String var9 = var8.getUrl() + "/urule" + "/dynamic" + "/syncPacketForRemoveProject";
-         HashMap var10 = new HashMap();
-         var10.put("name", var8.getName());
-         var10.put("url", var8.getUrl());
+      for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(UrlService.ins.load(UrlType.cluster, groupId).getList())) {
+         String text = urlConfig.getUrl() + "/urule" + "/dynamic" + "/syncPacketForRemoveProject";
+         HashMap valuesByKey = new HashMap();
+         valuesByKey.put("name", urlConfig.getName());
+         valuesByKey.put("url", urlConfig.getUrl());
 
          try {
-            var9 = var9 + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8") + "&projectId=" + var2;
-            a.debug("Sync project packet package to cluster node, groupId:" + var1 + ", url:" + var9);
-            String var11 = HttpUtils.sendPostRequest(var9, (byte[])null);
-            if (!"ok".equals(var11)) {
-               throw new RuleException("Sync project packet package to cluster node error, url:" + var9);
+            text = text + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8") + "&projectId=" + projectId;
+            DefaultClusterPacketCacheAdapter.logger.debug("Sync project packet package to cluster node, groupId:" + groupId + ", url:" + text);
+            String text2 = HttpUtils.sendPostRequest(text, (byte[])null);
+            if (!"ok".equals(text2)) {
+               throw new RuleException("Sync project packet package to cluster node error, url:" + text);
             }
 
-            a.debug("Sync success!");
-            var10.put("result", true);
-         } catch (Exception var12) {
-            var10.put("result", false);
-            var10.put("error", ExceptionUtils.buildExceptionStack(var12));
+            DefaultClusterPacketCacheAdapter.logger.debug("Sync success!");
+            valuesByKey.put("result", true);
+         } catch (Exception exception) {
+            valuesByKey.put("result", false);
+            valuesByKey.put("error", ExceptionUtils.buildExceptionStack(exception));
          }
 
-         var5.add(var10);
+         removeProjectResult.add(valuesByKey);
       }
 
-      return var5;
+      return removeProjectResult;
    }
-
-   public List recacheAllPackets(String var1) {
-      List var2 = UrlService.ins.load(UrlType.cluster, var1).getList();
-      ArrayList var3 = new ArrayList();
+   public List recacheAllPackets(String groupId) {
+      List list = UrlService.ins.load(UrlType.cluster, groupId).getList();
+      ArrayList recacheAllPacketsResult = new ArrayList();
 
       try {
-         for(UrlConfig var5 : (Iterable<UrlConfig>)(Iterable<?>)(var2)) {
-            String var6 = var5.getUrl() + "/urule" + "/dynamic" + "/recacheAllPackets";
-            var6 = var6 + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8");
-            HashMap var7 = new HashMap();
-            var7.put("name", var5.getName());
-            var7.put("url", var5.getUrl());
+         for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(list)) {
+            String text = urlConfig.getUrl() + "/urule" + "/dynamic" + "/recacheAllPackets";
+            text = text + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8");
+            HashMap valuesByKey = new HashMap();
+            valuesByKey.put("name", urlConfig.getName());
+            valuesByKey.put("url", urlConfig.getUrl());
 
             try {
-               HttpUtils.sendPostRequest(var6, (byte[])null);
-               var7.put("result", true);
-            } catch (Exception var9) {
-               var7.put("result", false);
-               var7.put("error", this.a(var9));
+               HttpUtils.sendPostRequest(text, (byte[])null);
+               valuesByKey.put("result", true);
+            } catch (Exception exception) {
+               valuesByKey.put("result", false);
+               valuesByKey.put("error", this.buildExceptionStack(exception));
             }
 
-            var3.add(var7);
+            recacheAllPacketsResult.add(valuesByKey);
          }
 
-         return var3;
-      } catch (Exception var10) {
-         var10.printStackTrace();
-         throw new InfoException("集群知识包同步recacheAllPackets出错:" + var10.getMessage());
+         return recacheAllPacketsResult;
+      } catch (Exception exception2) {
+         java.util.logging.Logger.getLogger(DefaultClusterPacketCacheAdapter.class.getName()).log(java.util.logging.Level.SEVERE, exception2.getMessage(), exception2);
+         throw new InfoException("集群知识包同步recacheAllPackets出错:" + exception2.getMessage());
       }
    }
+   public List refreshPacket(String groupId, long packetId) {
+      List list = UrlService.ins.load(UrlType.cluster, groupId).getList();
+      ArrayList refreshPacketResult = new ArrayList();
 
-   public List refreshPacket(String var1, long var2) {
-      List var4 = UrlService.ins.load(UrlType.cluster, var1).getList();
-      ArrayList var5 = new ArrayList();
-
-      for(UrlConfig var7 : (Iterable<UrlConfig>)(Iterable<?>)(var4)) {
-         String var8 = var7.getUrl() + "/urule" + "/dynamic" + "/syncPacket";
-         HashMap var9 = new HashMap();
-         var9.put("name", var7.getName());
-         var9.put("url", var7.getUrl());
+      for(UrlConfig urlConfig : (Iterable<UrlConfig>)(Iterable<?>)(list)) {
+         String text = urlConfig.getUrl() + "/urule" + "/dynamic" + "/syncPacket";
+         HashMap valuesByKey = new HashMap();
+         valuesByKey.put("name", urlConfig.getName());
+         valuesByKey.put("url", urlConfig.getUrl());
 
          try {
-            var8 = var8 + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8") + "&id=" + var2;
-            a.debug("Sync packet package to cluster node, groupId:" + var1 + ", url:" + var8);
-            String var10 = HttpUtils.sendPostRequest(var8, (byte[])null);
-            if (!"ok".equals(var10)) {
-               throw new RuleException("Sync packet package to cluster node error, url:" + var8);
+            text = text + "?" + HttpUtils.buildRequestValidator() + "&systemId=" + URLEncoder.encode(Utils.SystemId, "utf-8") + "&id=" + packetId;
+            DefaultClusterPacketCacheAdapter.logger.debug("Sync packet package to cluster node, groupId:" + groupId + ", url:" + text);
+            String text2 = HttpUtils.sendPostRequest(text, (byte[])null);
+            if (!"ok".equals(text2)) {
+               throw new RuleException("Sync packet package to cluster node error, url:" + text);
             }
 
-            a.debug("Sync success!");
-            var9.put("result", true);
-         } catch (Exception var11) {
-            var9.put("result", false);
-            var9.put("error", ExceptionUtils.buildExceptionStack(var11));
+            DefaultClusterPacketCacheAdapter.logger.debug("Sync success!");
+            valuesByKey.put("result", true);
+         } catch (Exception exception) {
+            valuesByKey.put("result", false);
+            valuesByKey.put("error", ExceptionUtils.buildExceptionStack(exception));
          }
 
-         var5.add(var9);
+         refreshPacketResult.add(valuesByKey);
       }
 
-      return var5;
+      return refreshPacketResult;
    }
 
-   protected String a(Throwable var1) {
-      StringBuilder var2 = new StringBuilder();
-      ByteArrayOutputStream var3 = new ByteArrayOutputStream();
-      PrintStream var4 = new PrintStream(var3);
-      var1.printStackTrace(var4);
-      String var5 = new String(var3.toByteArray());
-      IOUtils.closeQuietly(var4);
-      IOUtils.closeQuietly(var3);
-      var5 = var5.replaceAll("\n", "<br>");
-      if (var2.length() > 0) {
-         var2.append("<br>");
+   protected String buildExceptionStack(Throwable throwable) {
+      StringBuilder stringBuilder = new StringBuilder();
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      PrintStream printStream = new PrintStream(byteArrayOutputStream);
+      throwable.printStackTrace(printStream);
+      String string = new String(byteArrayOutputStream.toByteArray());
+      IOUtils.closeQuietly(printStream);
+      IOUtils.closeQuietly(byteArrayOutputStream);
+      string = string.replaceAll("\n", "<br>");
+      if (stringBuilder.length() > 0) {
+         stringBuilder.append("<br>");
       }
 
-      var2.append(var5);
-      return var2.toString();
+      stringBuilder.append(string);
+      return stringBuilder.toString();
    }
-
-   public void putPacket(long var1, PacketData var3) {
+   public void putPacket(long id, PacketData pd) {
    }
-
-   public void putPacket(String var1, PacketData var2) {
+   public void putPacket(String code, PacketData pd) {
    }
-
-   public void remove(long var1) {
+   public void remove(long id) {
    }
-
-   public void remove(String var1) {
+   public void remove(String code) {
    }
 }

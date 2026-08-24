@@ -13,30 +13,30 @@ public class ExceptionNode extends FlowNode {
    public ExceptionNode() {
    }
 
-   public ExceptionNode(String var1, String var2) {
-      super(var1);
-      this.exception = var2;
+   public ExceptionNode(String name, String exception) {
+      super(name);
+      this.exception = exception;
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      if (var1 != null) {
-         Class var4 = this.buildTargetException();
-         Class var5 = var1.getClass();
-         if (var4.isAssignableFrom(var5)) {
-            if (var3.isDebug()) {
-               var2.getLogger().logExceptionNode(this, var1, var3.getProcessDefinition().getFile());
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      if (ex != null) {
+         Class targetException = this.buildTargetException();
+         Class actualExceptionClass = ex.getClass();
+         if (targetException.isAssignableFrom(actualExceptionClass)) {
+            if (instance.isDebug()) {
+               context.getLogger().logExceptionNode(this, ex, instance.getProcessDefinition().getFile());
             }
 
-            var3.setCurrentNode(this);
-            this.executeNodeEvent(EventType.enter, var2, var3);
+            instance.setCurrentNode(this);
+            this.executeNodeEvent(EventType.enter, context, instance);
             if (!StringUtils.isEmpty(this.exceptionBean)) {
-               ExceptionHandler var6 = (ExceptionHandler)var2.getApplicationContext().getBean(this.exceptionBean);
-               var6.handle(var1, var2, var3);
+               ExceptionHandler exceptionHandler = (ExceptionHandler)context.getApplicationContext().getBean(this.exceptionBean);
+               exceptionHandler.handle(ex, context, instance);
             }
 
-            this.executeNodeEvent(EventType.leave, var2, var3);
-            this.leave(null, var2, var3, null);
+            this.executeNodeEvent(EventType.leave, context, instance);
+            this.leave(null, context, instance, null);
          }
       }
    }
@@ -52,8 +52,8 @@ public class ExceptionNode extends FlowNode {
 
       try {
          this.targetException = Class.forName(this.exception);
-      } catch (Exception var2) {
-         throw new RuleException(var2);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       }
 
       return this.targetException;
@@ -68,15 +68,15 @@ public class ExceptionNode extends FlowNode {
       return this.exception;
    }
 
-   public void setException(String var1) {
-      this.exception = var1;
+   public void setException(String exception) {
+      this.exception = exception;
    }
 
    public String getExceptionBean() {
       return this.exceptionBean;
    }
 
-   public void setExceptionBean(String var1) {
-      this.exceptionBean = var1;
+   public void setExceptionBean(String exceptionBean) {
+      this.exceptionBean = exceptionBean;
    }
 }

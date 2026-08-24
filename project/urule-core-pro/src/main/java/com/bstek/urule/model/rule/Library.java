@@ -9,23 +9,23 @@ public class Library {
    public Library() {
    }
 
-   public Library(long var1, String var3, String var4, LibraryType var5) {
-      this.id = var1;
-      this.path = var3;
-      this.version = var4;
-      this.type = var5;
+   public Library(long id, String path, String version, LibraryType type) {
+      this.id = id;
+      this.path = path;
+      this.version = version;
+      this.type = type;
    }
 
    public long getId() {
       return this.id;
    }
 
-   public void setId(long var1) {
-      this.id = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
-   public void setPath(String var1) {
-      this.path = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public String getPath() {
@@ -36,15 +36,15 @@ public class Library {
       return this.type;
    }
 
-   public void setType(LibraryType var1) {
-      this.type = var1;
+   public void setType(LibraryType type) {
+      this.type = type;
    }
 
    public String getVersion() {
       return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.version = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 }

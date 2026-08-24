@@ -8,15 +8,15 @@ public class RuleParserParser$FunctionImportContext extends ParserRuleContext {
       return (RuleParserParser$PackageDefContext)this.getRuleContext(RuleParserParser$PackageDefContext.class, 0);
    }
 
-   public RuleParserParser$FunctionImportContext(ParserRuleContext var1, int var2) {
-      super(var1, var2);
+   public RuleParserParser$FunctionImportContext(ParserRuleContext parserRuleContext, int number) {
+      super(parserRuleContext, number);
    }
 
    public int getRuleIndex() {
       return 4;
    }
 
-   public <T> T accept(ParseTreeVisitor<? extends T> var1) {
-      return (T)(var1 instanceof RuleParserVisitor ? ((RuleParserVisitor)var1).visitFunctionImport(this) : var1.visitChildren(this));
+   public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
+      return (T)(parseTreeVisitor instanceof RuleParserVisitor ? ((RuleParserVisitor)parseTreeVisitor).visitFunctionImport(this) : parseTreeVisitor.visitChildren(this));
    }
 }

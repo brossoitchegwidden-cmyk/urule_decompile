@@ -3,94 +3,94 @@ package com.bstek.urule.console.database.model;
 import java.util.Date;
 
 public class PacketDeployFile {
-   private long a;
-   private long b;
-   private long c;
-   private long d;
-   private String e;
-   private String f;
-   private String g;
-   private String h;
-   private String i;
-   private Date j;
+   private long id;
+   private long packetDeployId;
+   private long fileId;
+   private long projectId;
+   private String digest;
+   private String path;
+   private String version;
+   private String content;
+   private String createUser;
+   private Date createDate;
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
-   public void setId(long var1) {
-      this.a = var1;
+   public void setId(long id) {
+      this.id = id;
    }
 
    public long getPacketDeployId() {
-      return this.b;
+      return this.packetDeployId;
    }
 
-   public void setPacketDeployId(long var1) {
-      this.b = var1;
+   public void setPacketDeployId(long packetDeployId) {
+      this.packetDeployId = packetDeployId;
    }
 
    public long getFileId() {
-      return this.c;
+      return this.fileId;
    }
 
-   public void setFileId(long var1) {
-      this.c = var1;
+   public void setFileId(long fileId) {
+      this.fileId = fileId;
    }
 
    public long getProjectId() {
-      return this.d;
+      return this.projectId;
    }
 
-   public void setProjectId(long var1) {
-      this.d = var1;
+   public void setProjectId(long projectId) {
+      this.projectId = projectId;
    }
 
    public String getDigest() {
-      return this.e;
+      return this.digest;
    }
 
-   public void setDigest(String var1) {
-      this.e = var1;
+   public void setDigest(String digest) {
+      this.digest = digest;
    }
 
    public String getPath() {
-      return this.f;
+      return this.path;
    }
 
-   public void setPath(String var1) {
-      this.f = var1;
+   public void setPath(String path) {
+      this.path = path;
    }
 
    public String getVersion() {
-      return this.g;
+      return this.version;
    }
 
-   public void setVersion(String var1) {
-      this.g = var1;
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getContent() {
-      return this.h;
+      return this.content;
    }
 
-   public void setContent(String var1) {
-      this.h = var1;
+   public void setContent(String content) {
+      this.content = content;
    }
 
    public String getCreateUser() {
-      return this.i;
+      return this.createUser;
    }
 
-   public void setCreateUser(String var1) {
-      this.i = var1;
+   public void setCreateUser(String createUser) {
+      this.createUser = createUser;
    }
 
    public Date getCreateDate() {
-      return this.j;
+      return this.createDate;
    }
 
-   public void setCreateDate(Date var1) {
-      this.j = var1;
+   public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
    }
 }

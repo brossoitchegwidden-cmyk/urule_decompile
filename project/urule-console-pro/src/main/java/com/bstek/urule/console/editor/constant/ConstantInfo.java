@@ -3,31 +3,31 @@ package com.bstek.urule.console.editor.constant;
 import java.util.List;
 
 public class ConstantInfo {
-   private long a;
-   private String b;
-   private String c;
-   private List d;
+   private long id;
+   private String path;
+   private String type;
+   private List constantCategories;
 
-   public ConstantInfo(long var1, String var3, String var4, List var5) {
-      this.a = var1;
-      this.b = var3;
-      this.c = var4;
-      this.d = var5;
+   public ConstantInfo(long id, String path, String type, List constantCategories) {
+      this.id = id;
+      this.path = path;
+      this.type = type;
+      this.constantCategories = constantCategories;
    }
 
    public long getId() {
-      return this.a;
+      return this.id;
    }
 
    public String getPath() {
-      return this.b;
+      return this.path;
    }
 
    public String getType() {
-      return this.c;
+      return this.type;
    }
 
    public List getConstantCategories() {
-      return this.d;
+      return this.constantCategories;
    }
 }

@@ -27,42 +27,43 @@ import java.util.ArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Element;
 
+/** Parses the left-hand expression of a rule condition. */
 public class LeftParser extends AbstractParser<Left> {
-   private ComplexArithmeticParser a;
-   private SimpleArithmeticParser b;
-   private ValueParser c;
-   private JunctionParser d;
+   private ComplexArithmeticParser complexArithmeticParser;
+   private SimpleArithmeticParser simpleArithmeticParser;
+   private ValueParser valueParser;
+   private JunctionParser junctionParser;
 
-   public Left parse(Element var1) {
-      Left var2 = new Left();
-      String var3 = var1.attributeValue("type");
-      if (StringUtils.isNotEmpty(var3)) {
-         var2.setType(LeftType.valueOf(var3));
+   public Left parse(Element element) {
+      Left left = new Left();
+      String text = element.attributeValue("type");
+      if (StringUtils.isNotEmpty(text)) {
+         left.setType(LeftType.valueOf(text));
       } else {
-         var2.setType(LeftType.variable);
+         left.setType(LeftType.variable);
       }
 
-      switch (var2.getType()) {
+      switch (left.getType()) {
          case variable:
-            var2.setLeftPart(this.g(var1));
+            left.setLeftPart(this.buildVariableLeftPart(element));
             break;
          case function:
-            var2.setLeftPart(this.f(var1));
+            left.setLeftPart(this.buildFunctionLeftPart(element));
             break;
          case method:
-            var2.setLeftPart(this.e(var1));
+            left.setLeftPart(this.buildMethodLeftPart(element));
             break;
          case parameter:
-            var2.setLeftPart(this.g(var1));
+            left.setLeftPart(this.buildVariableLeftPart(element));
             break;
          case predefine:
-            var2.setLeftPart(this.h(var1));
+            left.setLeftPart(this.buildPredefineLeftPart(element));
             break;
          case commonfunction:
-            var2.setLeftPart(this.d(var1));
+            left.setLeftPart(this.buildCommonFunctionLeftPart(element));
             break;
          case operatecollection:
-            var2.setLeftPart(this.a(var1));
+            left.setLeftPart(this.findAccumulateLeftPart(element));
             break;
          case all:
             throw new RuleException("Not support all type.");
@@ -74,28 +75,28 @@ public class LeftParser extends AbstractParser<Left> {
             throw new RuleException("Not support eval type.");
       }
 
-      for (Object var5 : var1.elements()) {
-         if (var5 != null && var5 instanceof Element) {
-            Element var6 = (Element)var5;
-            String var7 = var6.getName();
-            if (this.a.support(var7)) {
-               var2.setArithmetic(this.a.parse(var6));
-            } else if (this.b.support(var7)) {
-               SimpleArithmetic var8 = this.b.parse(var6);
-               var2.setArithmetic(this.a(var8));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            String name = element2.getName();
+            if (this.complexArithmeticParser.support(name)) {
+               left.setArithmetic(this.complexArithmeticParser.parse(element2));
+            } else if (this.simpleArithmeticParser.support(name)) {
+               SimpleArithmetic simpleArithmetic = this.simpleArithmeticParser.parse(element2);
+               left.setArithmetic(this.convertArithmetic(simpleArithmetic));
             }
          }
       }
 
-      return var2;
+      return left;
    }
 
-   private AccumulateLeftPart a(Element var1) {
-      for (Object var3 : var1.elements()) {
-         if (var3 != null && var3 instanceof Element) {
-            Element var4 = (Element)var3;
-            if (var4.getName().equals("accumulate")) {
-               return this.b(var4);
+   private AccumulateLeftPart findAccumulateLeftPart(Element element) {
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("accumulate")) {
+               return this.buildAccumulateLeftPart(element2);
             }
          }
       }
@@ -103,70 +104,70 @@ public class LeftParser extends AbstractParser<Left> {
       return null;
    }
 
-   private AccumulateLeftPart b(Element var1) {
-      AccumulateLeftPart var2 = new AccumulateLeftPart();
-      ArrayList var3 = new ArrayList();
-      ArrayList var4 = new ArrayList();
-      var2.setCalculateItems(var4);
-      var2.setConditionItems(var3);
-      String var5 = var1.attributeValue("target-type");
-      LoopTargetType var6 = LoopTargetType.valueOf(var5);
-      var2.setLoopTargetType(var6);
+   private AccumulateLeftPart buildAccumulateLeftPart(Element element) {
+      AccumulateLeftPart accumulateLeftPart = new AccumulateLeftPart();
+      ArrayList items = new ArrayList();
+      ArrayList items2 = new ArrayList();
+      accumulateLeftPart.setCalculateItems(items2);
+      accumulateLeftPart.setConditionItems(items);
+      String text = element.attributeValue("target-type");
+      LoopTargetType loopTargetType = LoopTargetType.valueOf(text);
+      accumulateLeftPart.setLoopTargetType(loopTargetType);
 
-      for (Object var8 : var1.elements()) {
-         if (var8 != null && var8 instanceof Element) {
-            Element var9 = (Element)var8;
-            if (var9.getName().equals("value")) {
-               Value var15 = this.c.parse(var9);
-               LoopTarget var16 = new LoopTarget();
-               var16.setValue(var15);
-               var2.setLoopTarget(var16);
-            } else if (var9.getName().equals("condition")) {
-               ConditionItem var14 = new ConditionItem();
-               var3.add(var14);
-               var14.setLeft(var9.attributeValue("left"));
-               var14.setOp(Op.valueOf(var9.attributeValue("op")));
-               var14.setValue(this.c(var9));
-            } else if (var9.getName().equals("calculate")) {
-               CalculateItem var13 = new CalculateItem();
-               var4.add(var13);
-               var13.setType(CalculateType.valueOf(var9.attributeValue("type")));
-               String var11 = var9.attributeValue("enable-assignment");
-               var13.setEnableAssignment(Boolean.valueOf(var11));
-               if (var13.isEnableAssignment()) {
-                  var13.setAssignTargetType(var9.attributeValue("assign-target-type"));
-                  var13.setAssignCategoryUuid(var9.attributeValue("category-uuid"));
-                  var13.setAssignVariableCategory(var9.attributeValue("var-category"));
-                  var13.setAssignVariableUuid(var9.attributeValue("uuid"));
-                  var13.setAssignVariable(var9.attributeValue("var"));
-                  var13.setAssignVariableLabel(var9.attributeValue("var-label"));
-                  var13.setKeyLabel(var9.attributeValue("key-label"));
-                  var13.setKeyName(var9.attributeValue("key-name"));
-                  var13.setKeyUuid(var9.attributeValue("key-uuid"));
-                  var13.setKeyCategoryUuid(var9.attributeValue("key-category-uuid"));
-                  String var12 = var9.attributeValue("datatype");
-                  if (StringUtils.isNotBlank(var12)) {
-                     var13.setAssignDatatype(Datatype.valueOf(var12));
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("value")) {
+               Value localValue = this.valueParser.parse(element2);
+               LoopTarget loopTarget = new LoopTarget();
+               loopTarget.setValue(localValue);
+               accumulateLeftPart.setLoopTarget(loopTarget);
+            } else if (element2.getName().equals("condition")) {
+               ConditionItem conditionItem = new ConditionItem();
+               items.add(conditionItem);
+               conditionItem.setLeft(element2.attributeValue("left"));
+               conditionItem.setOp(Op.valueOf(element2.attributeValue("op")));
+               conditionItem.setValue(this.parseNestedValue(element2));
+            } else if (element2.getName().equals("calculate")) {
+               CalculateItem calculateItem = new CalculateItem();
+               items2.add(calculateItem);
+               calculateItem.setType(CalculateType.valueOf(element2.attributeValue("type")));
+               String text2 = element2.attributeValue("enable-assignment");
+               calculateItem.setEnableAssignment(Boolean.valueOf(text2));
+               if (calculateItem.isEnableAssignment()) {
+                  calculateItem.setAssignTargetType(element2.attributeValue("assign-target-type"));
+                  calculateItem.setAssignCategoryUuid(element2.attributeValue("category-uuid"));
+                  calculateItem.setAssignVariableCategory(element2.attributeValue("var-category"));
+                  calculateItem.setAssignVariableUuid(element2.attributeValue("uuid"));
+                  calculateItem.setAssignVariable(element2.attributeValue("var"));
+                  calculateItem.setAssignVariableLabel(element2.attributeValue("var-label"));
+                  calculateItem.setKeyLabel(element2.attributeValue("key-label"));
+                  calculateItem.setKeyName(element2.attributeValue("key-name"));
+                  calculateItem.setKeyUuid(element2.attributeValue("key-uuid"));
+                  calculateItem.setKeyCategoryUuid(element2.attributeValue("key-category-uuid"));
+                  String text3 = element2.attributeValue("datatype");
+                  if (StringUtils.isNotBlank(text3)) {
+                     calculateItem.setAssignDatatype(Datatype.valueOf(text3));
                   }
                }
 
-               var13.setValue(this.c(var9));
-            } else if (var9.getName().equals("and") || var9.getName().equals("or")) {
-               Junction var10 = (Junction)this.d.parse(var9);
-               var2.setJunction(var10);
+               calculateItem.setValue(this.parseNestedValue(element2));
+            } else if (element2.getName().equals("and") || element2.getName().equals("or")) {
+               Junction junction = (Junction)this.junctionParser.parse(element2);
+               accumulateLeftPart.setJunction(junction);
             }
          }
       }
 
-      return var2;
+      return accumulateLeftPart;
    }
 
-   private Value c(Element var1) {
-      for (Object var3 : var1.elements()) {
-         if (var3 != null && var3 instanceof Element) {
-            Element var4 = (Element)var3;
-            if (var4.getName().equals("value")) {
-               return this.c.parse(var4);
+   private Value parseNestedValue(Element element) {
+      for (Object objectValue : element.elements()) {
+         if (objectValue != null && objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("value")) {
+               return this.valueParser.parse(element2);
             }
          }
       }
@@ -174,123 +175,123 @@ public class LeftParser extends AbstractParser<Left> {
       return null;
    }
 
-   private ComplexArithmetic a(SimpleArithmetic var1) {
-      if (var1 == null) {
+   private ComplexArithmetic convertArithmetic(SimpleArithmetic simpleArithmetic) {
+      if (simpleArithmetic == null) {
          return null;
       }
 
-      ComplexArithmetic var2 = new ComplexArithmetic();
-      var2.setType(var1.getType());
-      SimpleValue var3 = new SimpleValue();
-      var2.setValue(var3);
-      SimpleArithmeticValue var4 = var1.getValue();
-      var3.setContent(var4.getContent());
-      SimpleArithmetic var5 = var4.getArithmetic();
-      var3.setArithmetic(this.a(var5));
-      return var2;
+      ComplexArithmetic complexArithmetic = new ComplexArithmetic();
+      complexArithmetic.setType(simpleArithmetic.getType());
+      SimpleValue simpleValue = new SimpleValue();
+      complexArithmetic.setValue(simpleValue);
+      SimpleArithmeticValue simpleArithmeticValue = simpleArithmetic.getValue();
+      simpleValue.setContent(simpleArithmeticValue.getContent());
+      SimpleArithmetic arithmetic = simpleArithmeticValue.getArithmetic();
+      simpleValue.setArithmetic(this.convertArithmetic(arithmetic));
+      return complexArithmetic;
    }
 
-   private CommonFunctionLeftPart d(Element var1) {
-      CommonFunctionLeftPart var2 = new CommonFunctionLeftPart();
-      var2.setName(var1.attributeValue("function-name"));
-      var2.setLabel(var1.attributeValue("function-label"));
+   private CommonFunctionLeftPart buildCommonFunctionLeftPart(Element element) {
+      CommonFunctionLeftPart commonFunctionLeftPart = new CommonFunctionLeftPart();
+      commonFunctionLeftPart.setName(element.attributeValue("function-name"));
+      commonFunctionLeftPart.setLabel(element.attributeValue("function-label"));
 
-      for (Object var4 : var1.elements()) {
-         if (var4 instanceof Element) {
-            Element var5 = (Element)var4;
-            if (var5.getName().equals("function-parameter")) {
-               CommonFunctionParameter var6 = new CommonFunctionParameter();
-               var6.setName(var5.attributeValue("name"));
-               var6.setProperty(var5.attributeValue("property-name"));
-               var6.setPropertyLabel(var5.attributeValue("property-label"));
+      for (Object objectValue : element.elements()) {
+         if (objectValue instanceof Element) {
+            Element element2 = (Element)objectValue;
+            if (element2.getName().equals("function-parameter")) {
+               CommonFunctionParameter commonFunctionParameter = new CommonFunctionParameter();
+               commonFunctionParameter.setName(element2.attributeValue("name"));
+               commonFunctionParameter.setProperty(element2.attributeValue("property-name"));
+               commonFunctionParameter.setPropertyLabel(element2.attributeValue("property-label"));
 
-               for (Object var8 : var5.elements()) {
-                  if (var8 instanceof Element) {
-                     Element var9 = (Element)var8;
-                     if (var9.getName().equals("value")) {
-                        var6.setObjectParameter(this.c.parse(var9));
+               for (Object objectValue2 : element2.elements()) {
+                  if (objectValue2 instanceof Element) {
+                     Element element3 = (Element)objectValue2;
+                     if (element3.getName().equals("value")) {
+                        commonFunctionParameter.setObjectParameter(this.valueParser.parse(element3));
                      }
                   }
                }
 
-               var2.setParameter(var6);
+               commonFunctionLeftPart.setParameter(commonFunctionParameter);
             }
          }
       }
 
-      return var2;
+      return commonFunctionLeftPart;
    }
 
-   private MethodLeftPart e(Element var1) {
-      MethodLeftPart var2 = new MethodLeftPart();
-      var2.setBeanId(var1.attributeValue("bean-name"));
-      var2.setBeanLabel(var1.attributeValue("bean-label"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setCategoryUuid(var1.attributeValue("category-uuid"));
-      var2.setMethodLabel(var1.attributeValue("method-label"));
-      var2.setMethodName(var1.attributeValue("method-name"));
-      var2.setParameters(this.a(var1, this.c));
-      return var2;
+   private MethodLeftPart buildMethodLeftPart(Element element) {
+      MethodLeftPart methodLeftPart = new MethodLeftPart();
+      methodLeftPart.setBeanId(element.attributeValue("bean-name"));
+      methodLeftPart.setBeanLabel(element.attributeValue("bean-label"));
+      methodLeftPart.setUuid(element.attributeValue("uuid"));
+      methodLeftPart.setCategoryUuid(element.attributeValue("category-uuid"));
+      methodLeftPart.setMethodLabel(element.attributeValue("method-label"));
+      methodLeftPart.setMethodName(element.attributeValue("method-name"));
+      methodLeftPart.setParameters(this.parseParameters(element, this.valueParser));
+      return methodLeftPart;
    }
 
-   private FunctionLeftPart f(Element var1) {
-      FunctionLeftPart var2 = new FunctionLeftPart();
-      var2.setName(var1.attributeValue("name"));
-      var2.setParameters(this.a(var1, this.c));
-      return var2;
+   private FunctionLeftPart buildFunctionLeftPart(Element element) {
+      FunctionLeftPart functionLeftPart = new FunctionLeftPart();
+      functionLeftPart.setName(element.attributeValue("name"));
+      functionLeftPart.setParameters(this.parseParameters(element, this.valueParser));
+      return functionLeftPart;
    }
 
-   private VariableLeftPart g(Element var1) {
-      VariableLeftPart var2 = new VariableLeftPart();
-      var2.setCategoryUuid(var1.attributeValue("category-uuid"));
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setVariableName(var1.attributeValue("var"));
-      var2.setVariableLabel(var1.attributeValue("var-label"));
-      String var3 = var1.attributeValue("var-category");
-      if (StringUtils.isNotEmpty(var3)) {
-         var2.setVariableCategory(var3);
+   private VariableLeftPart buildVariableLeftPart(Element element) {
+      VariableLeftPart variableLeftPart = new VariableLeftPart();
+      variableLeftPart.setCategoryUuid(element.attributeValue("category-uuid"));
+      variableLeftPart.setUuid(element.attributeValue("uuid"));
+      variableLeftPart.setVariableName(element.attributeValue("var"));
+      variableLeftPart.setVariableLabel(element.attributeValue("var-label"));
+      String text = element.attributeValue("var-category");
+      if (StringUtils.isNotEmpty(text)) {
+         variableLeftPart.setVariableCategory(text);
       }
 
-      String var4 = var1.attributeValue("datatype");
-      if (StringUtils.isNotEmpty(var4)) {
+      String text2 = element.attributeValue("datatype");
+      if (StringUtils.isNotEmpty(text2)) {
          try {
-            var2.setDatatype(Datatype.valueOf(var4));
-         } catch (Exception var6) {
+            variableLeftPart.setDatatype(Datatype.valueOf(text2));
+         } catch (Exception exception) {
          }
       }
 
-      var2.setKeyName(var1.attributeValue("key-name"));
-      var2.setKeyLabel(var1.attributeValue("key-label"));
-      var2.setKeyCategoryUuid(var1.attributeValue("key-category-uuid"));
-      var2.setKeyUuid(var1.attributeValue("key-uuid"));
-      return var2;
+      variableLeftPart.setKeyName(element.attributeValue("key-name"));
+      variableLeftPart.setKeyLabel(element.attributeValue("key-label"));
+      variableLeftPart.setKeyCategoryUuid(element.attributeValue("key-category-uuid"));
+      variableLeftPart.setKeyUuid(element.attributeValue("key-uuid"));
+      return variableLeftPart;
    }
 
-   private PredefineLeftPart h(Element var1) {
-      PredefineLeftPart var2 = new PredefineLeftPart();
-      var2.setUuid(var1.attributeValue("uuid"));
-      var2.setPropertyUuid(var1.attributeValue("property-uuid"));
-      return var2;
+   private PredefineLeftPart buildPredefineLeftPart(Element element) {
+      PredefineLeftPart predefineLeftPart = new PredefineLeftPart();
+      predefineLeftPart.setUuid(element.attributeValue("uuid"));
+      predefineLeftPart.setPropertyUuid(element.attributeValue("property-uuid"));
+      return predefineLeftPart;
    }
 
-   public void setJunctionParser(JunctionParser var1) {
-      this.d = var1;
+   public void setJunctionParser(JunctionParser junctionParser) {
+      this.junctionParser = junctionParser;
    }
 
-   public void setValueParser(ValueParser var1) {
-      this.c = var1;
+   public void setValueParser(ValueParser valueParser) {
+      this.valueParser = valueParser;
    }
 
-   public void setComplexArithmeticParser(ComplexArithmeticParser var1) {
-      this.a = var1;
+   public void setComplexArithmeticParser(ComplexArithmeticParser complexArithmeticParser) {
+      this.complexArithmeticParser = complexArithmeticParser;
    }
 
-   public void setSimpleArithmeticParser(SimpleArithmeticParser var1) {
-      this.b = var1;
+   public void setSimpleArithmeticParser(SimpleArithmeticParser simpleArithmeticParser) {
+      this.simpleArithmeticParser = simpleArithmeticParser;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("left");
+   public boolean support(String name) {
+      return name.equals("left");
    }
 }

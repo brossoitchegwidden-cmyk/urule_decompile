@@ -7,9 +7,9 @@ import java.io.IOException;
 public interface KnowledgePackageService {
    String BEAN_ID = "urule.knowledgePackageService";
 
-   KnowledgePackage buildKnowledgePackage(String var1) throws IOException;
+   KnowledgePackage buildKnowledgePackage(String packageInfo) throws IOException;
 
-   KnowledgeBase buildKnowledgeBase(String var1) throws IOException;
+   KnowledgeBase buildKnowledgeBase(String packageInfo) throws IOException;
 
-   KnowledgePackage verifyKnowledgePackage(String var1, long var2) throws IOException;
+   KnowledgePackage verifyKnowledgePackage(String packageInfo, long timestamp) throws IOException;
 }

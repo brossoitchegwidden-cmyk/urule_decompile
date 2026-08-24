@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class PowerMathDeserializer implements MathDeserializer {
    @Override
-   public MathSign deserialize(JsonNode var1) {
-      PowerMath var2 = new PowerMath();
-      var2.setBase(JsonUtils.parseValueNode(var1.get("base")));
-      var2.setPower(JsonUtils.parseValueNode(var1.get("power")));
-      return var2;
+   public MathSign deserialize(JsonNode jsonNode) {
+      PowerMath powerMath = new PowerMath();
+      powerMath.setBase(JsonUtils.parseValueNode(jsonNode.get("base")));
+      powerMath.setPower(JsonUtils.parseValueNode(jsonNode.get("power")));
+      return powerMath;
    }
 
    @Override

@@ -8,68 +8,68 @@ import java.util.List;
    ignoreUnknown = true
 )
 public class Permission {
-   private String a;
-   private String b;
-   private List c;
-   private PermissionType d;
-   private boolean e;
-   private boolean f;
+   private String code;
+   private String name;
+   private List roles;
+   private PermissionType type;
+   private boolean checked;
+   private boolean disabled;
 
    public Permission() {
    }
 
-   public Permission(String var1, String var2, List var3, PermissionType var4) {
-      this.a = var1;
-      this.b = var2;
-      this.d = var4;
-      this.c = var3;
+   public Permission(String code, String name, List roles, PermissionType type) {
+      this.code = code;
+      this.name = name;
+      this.type = type;
+      this.roles = roles;
    }
 
    public String getCode() {
-      return this.a;
+      return this.code;
    }
 
-   public void setCode(String var1) {
-      this.a = var1;
+   public void setCode(String code) {
+      this.code = code;
    }
 
    public String getName() {
-      return this.b;
+      return this.name;
    }
 
-   public void setName(String var1) {
-      this.b = var1;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public boolean isChecked() {
-      return this.e;
+      return this.checked;
    }
 
-   public void setChecked(boolean var1) {
-      this.e = var1;
+   public void setChecked(boolean checked) {
+      this.checked = checked;
    }
 
    public PermissionType getType() {
-      return this.d;
+      return this.type;
    }
 
-   public void setType(PermissionType var1) {
-      this.d = var1;
+   public void setType(PermissionType type) {
+      this.type = type;
    }
 
    public boolean isDisabled() {
-      return this.f;
+      return this.disabled;
    }
 
-   public void setDisabled(boolean var1) {
-      this.f = var1;
+   public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
    }
 
    public List getRoles() {
-      return this.c;
+      return this.roles;
    }
 
-   public void setRoles(List var1) {
-      this.c = var1;
+   public void setRoles(List roles) {
+      this.roles = roles;
    }
 }

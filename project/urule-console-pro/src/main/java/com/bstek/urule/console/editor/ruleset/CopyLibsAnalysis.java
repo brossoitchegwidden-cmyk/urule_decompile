@@ -68,398 +68,402 @@ import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
+/**
+ * Walks copied rule structures and collects the libraries referenced by their
+ * conditions, values, actions, and templates.
+ */
 public class CopyLibsAnalysis {
-   private ResourceLibraryBuilder a = (ResourceLibraryBuilder)Utils.getApplicationContext().getBean("urule.resourceLibraryBuilder");
-   private ActionTemplateDeserializer b = (ActionTemplateDeserializer)Utils.getApplicationContext().getBean("urule.actionTemplateDeserializer");
-   private ConditionTemplateDeserializer c = (ConditionTemplateDeserializer)Utils.getApplicationContext().getBean("urule.conditionTemplateDeserializer");
+   private ResourceLibraryBuilder resourceLibraryBuilder = (ResourceLibraryBuilder)Utils.getApplicationContext().getBean("urule.resourceLibraryBuilder");
+   private ActionTemplateDeserializer actionTemplateDeserializer = (ActionTemplateDeserializer)Utils.getApplicationContext().getBean("urule.actionTemplateDeserializer");
+   private ConditionTemplateDeserializer conditionTemplateDeserializer = (ConditionTemplateDeserializer)Utils.getApplicationContext().getBean("urule.conditionTemplateDeserializer");
    public static final CopyLibsAnalysis ins = new CopyLibsAnalysis();
 
    private CopyLibsAnalysis() {
    }
 
-   public String doAnalysis(String var1, Object var2) throws Exception {
-      HashMap var3 = new HashMap();
-      var3.put("parameters", new ArrayList());
-      var3.put("variables", new ArrayList());
-      var3.put("constants", new ArrayList());
-      var3.put("actions", new ArrayList());
-      var3.put("conditionTemplates", new ArrayList());
-      var3.put("actionTemplates", new ArrayList());
-      LibraryIndex var4 = this.b(var1);
-      if (var2 instanceof List) {
-         List var5 = (List)var2;
-         this.a((Criterion)((Criterion)var5.get(0)), (Map)var3, (LibraryIndex)var4);
-      } else if (var2 instanceof Criterion) {
-         Criterion var13 = (Criterion)var2;
-         this.a((Criterion)var13, (Map)var3, (LibraryIndex)var4);
-      } else if (var2 instanceof Action) {
-         Action var14 = (Action)var2;
-         this.a((Action)var14, (Map)var3, (LibraryIndex)var4);
+   public String doAnalysis(String libs, Object obj) throws Exception {
+      HashMap valuesByKey = new HashMap();
+      valuesByKey.put("parameters", new ArrayList());
+      valuesByKey.put("variables", new ArrayList());
+      valuesByKey.put("constants", new ArrayList());
+      valuesByKey.put("actions", new ArrayList());
+      valuesByKey.put("conditionTemplates", new ArrayList());
+      valuesByKey.put("actionTemplates", new ArrayList());
+      LibraryIndex libraryIndex = this.buildLibraryIndex(libs);
+      if (obj instanceof List) {
+         List obj2 = (List)obj;
+         this.analyzeCriterion((Criterion)obj2.get(0), valuesByKey, libraryIndex);
+      } else if (obj instanceof Criterion) {
+         Criterion criterion = (Criterion)obj;
+         this.analyzeCriterion(criterion, valuesByKey, libraryIndex);
+      } else if (obj instanceof Action) {
+         Action action = (Action)obj;
+         this.analyzeAction(action, valuesByKey, libraryIndex);
       } else {
-         if (!(var2 instanceof Rule)) {
-            throw new RuleException("Unknow object :" + var2.getClass().getName());
+         if (!(obj instanceof Rule)) {
+            throw new RuleException("Unknow object :" + obj.getClass().getName());
          }
 
-         Rule var15 = (Rule)var2;
-         if (var15 instanceof LoopRule) {
-            LoopRule var6 = (LoopRule)var15;
-            LoopTarget var7 = var6.getLoopTarget();
-            Value var8 = var7.getValue();
-            this.a((Value)var8, (Map)var3, (LibraryIndex)var4);
+         Rule rule = (Rule)obj;
+         if (rule instanceof LoopRule) {
+            LoopRule loopRule = (LoopRule)rule;
+            LoopTarget loopTarget = loopRule.getLoopTarget();
+            Value localValue = loopTarget.getValue();
+            this.analyzeValue(localValue, valuesByKey, libraryIndex);
 
-            for(LoopRuleUnit var11 : var6.getUnits()) {
-               this.a((Map)var3, (LibraryIndex)var4, (Lhs)var11.getLhs());
-               this.a((Map)var3, (LibraryIndex)var4, (Rhs)var11.getRhs());
-               Other var12 = var11.getOther();
-               if (var12 != null) {
-                  this.a((Map)var3, (LibraryIndex)var4, (List)var12.getActions());
+            for(LoopRuleUnit loopRuleUnit : loopRule.getUnits()) {
+               this.analyzeLhs(valuesByKey, libraryIndex, loopRuleUnit.getLhs());
+               this.analyzeRhs(valuesByKey, libraryIndex, loopRuleUnit.getRhs());
+               Other other = loopRuleUnit.getOther();
+               if (other != null) {
+                  this.analyzeActions(valuesByKey, libraryIndex, other.getActions());
                }
             }
-         } else if (var15 instanceof ScoreRule) {
-            ScoreRule var17 = (ScoreRule)var15;
-            String var18 = var17.getVariableCategory();
-            LibInfo var19 = var4.variableContains(var18);
-            this.a(var3, var19);
+         } else if (rule instanceof ScoreRule) {
+            ScoreRule scoreRule = (ScoreRule)rule;
+            String variableCategory = scoreRule.getVariableCategory();
+            LibInfo libInfo = libraryIndex.variableContains(variableCategory);
+            this.addLibraryInfo(valuesByKey, libInfo);
          } else {
-            this.a((Rule)var15, (Map)var3, (LibraryIndex)var4);
+            this.analyzeRule(rule, valuesByKey, libraryIndex);
          }
       }
 
-      ObjectMapper var16 = JsonMapper.builder().build();
-      return var16.writeValueAsString(var3);
+      ObjectMapper objectMapper = JsonMapper.builder().build();
+      return objectMapper.writeValueAsString(valuesByKey);
    }
 
-   private void a(Rule var1, Map var2, LibraryIndex var3) {
-      Lhs var4 = var1.getLhs();
-      this.a(var2, var3, var4);
-      Rhs var5 = var1.getRhs();
-      this.a(var2, var3, var5);
-      Other var6 = var1.getOther();
-      if (var6 != null) {
-         List var7 = var6.getActions();
-         this.a(var2, var3, var7);
+   private void analyzeRule(Rule rule, Map valuesByKey, LibraryIndex libraryIndex) {
+      Lhs lhs = rule.getLhs();
+      this.analyzeLhs(valuesByKey, libraryIndex, lhs);
+      Rhs rhs = rule.getRhs();
+      this.analyzeRhs(valuesByKey, libraryIndex, rhs);
+      Other other = rule.getOther();
+      if (other != null) {
+         List actions = other.getActions();
+         this.analyzeActions(valuesByKey, libraryIndex, actions);
       }
 
    }
 
-   private void a(Map var1, LibraryIndex var2, List var3) {
-      if (var3 != null) {
-         for(Action var5 : (Iterable<Action>)(Iterable<?>)(var3)) {
-            this.a(var5, var1, var2);
+   private void analyzeActions(Map valuesByKey, LibraryIndex libraryIndex, List actions) {
+      if (actions != null) {
+         for(Action action : (Iterable<Action>)(Iterable<?>)(actions)) {
+            this.analyzeAction(action, valuesByKey, libraryIndex);
          }
 
       }
    }
 
-   private void a(Map var1, LibraryIndex var2, Rhs var3) {
-      if (var3 != null) {
-         List var4 = var3.getActions();
-         this.a(var1, var2, var4);
+   private void analyzeRhs(Map valuesByKey, LibraryIndex libraryIndex, Rhs rhs) {
+      if (rhs != null) {
+         List actions = rhs.getActions();
+         this.analyzeActions(valuesByKey, libraryIndex, actions);
       }
    }
 
-   private void a(Map var1, LibraryIndex var2, Lhs var3) {
-      if (var3 != null) {
-         Criterion var4 = var3.getCriterion();
-         this.a(var4, var1, var2);
+   private void analyzeLhs(Map valuesByKey, LibraryIndex libraryIndex, Lhs lhs) {
+      if (lhs != null) {
+         Criterion criterion = lhs.getCriterion();
+         this.analyzeCriterion(criterion, valuesByKey, libraryIndex);
       }
    }
 
-   private void a(Action var1, Map var2, LibraryIndex var3) {
-      if (var1 instanceof ConsolePrintAction) {
-         ConsolePrintAction var4 = (ConsolePrintAction)var1;
-         Value var5 = var4.getValue();
-         this.a(var5, var2, var3);
-      } else if (var1 instanceof ExecuteCommonFunctionAction) {
-         ExecuteCommonFunctionAction var11 = (ExecuteCommonFunctionAction)var1;
-         CommonFunctionParameter var16 = var11.getParameter();
-         this.a(var2, var3, var16);
-      } else if (var1 instanceof ExecuteMethodAction) {
-         ExecuteMethodAction var12 = (ExecuteMethodAction)var1;
-         String var17 = var12.getBeanLabel();
-         LibInfo var6 = var3.actionContains(var17);
-         this.a(var2, var6);
-         List var7 = var12.getParameters();
-         if (var7 != null) {
-            for(Parameter var9 : (Iterable<Parameter>)(Iterable<?>)(var7)) {
-               Value var10 = var9.getValue();
-               this.a(var10, var2, var3);
+   private void analyzeAction(Action action, Map valuesByKey, LibraryIndex libraryIndex) {
+      if (action instanceof ConsolePrintAction) {
+         ConsolePrintAction consolePrintAction = (ConsolePrintAction)action;
+         Value localValue = consolePrintAction.getValue();
+         this.analyzeValue(localValue, valuesByKey, libraryIndex);
+      } else if (action instanceof ExecuteCommonFunctionAction) {
+         ExecuteCommonFunctionAction executeCommonFunctionAction = (ExecuteCommonFunctionAction)action;
+         CommonFunctionParameter parameter = executeCommonFunctionAction.getParameter();
+         this.analyzeCommonFunctionParameter(valuesByKey, libraryIndex, parameter);
+      } else if (action instanceof ExecuteMethodAction) {
+         ExecuteMethodAction executeMethodAction = (ExecuteMethodAction)action;
+         String beanLabel = executeMethodAction.getBeanLabel();
+         LibInfo libInfo = libraryIndex.actionContains(beanLabel);
+         this.addLibraryInfo(valuesByKey, libInfo);
+         List parameters = executeMethodAction.getParameters();
+         if (parameters != null) {
+            for(Parameter parameter2 : (Iterable<Parameter>)(Iterable<?>)(parameters)) {
+               Value localValue2 = parameter2.getValue();
+               this.analyzeValue(localValue2, valuesByKey, libraryIndex);
             }
          }
-      } else if (var1 instanceof ScoringAction) {
-         ScoringAction var13 = (ScoringAction)var1;
-         Value var18 = var13.getValue();
-         this.a(var18, var2, var3);
-      } else if (var1 instanceof TemplateAction) {
-         TemplateAction var14 = (TemplateAction)var1;
-         String var19 = var14.getId();
-         LibInfo var21 = var3.templateContains(var19);
-         this.a(var2, var21);
-      } else if (var1 instanceof VariableAssignAction) {
-         VariableAssignAction var15 = (VariableAssignAction)var1;
-         String var20 = var15.getVariableCategory();
-         LibInfo var22 = var3.variableContains(var20);
-         this.a(var2, var22);
-         Value var23 = var15.getValue();
-         this.a(var23, var2, var3);
+      } else if (action instanceof ScoringAction) {
+         ScoringAction scoringAction = (ScoringAction)action;
+         Value localValue3 = scoringAction.getValue();
+         this.analyzeValue(localValue3, valuesByKey, libraryIndex);
+      } else if (action instanceof TemplateAction) {
+         TemplateAction templateAction = (TemplateAction)action;
+         String id = templateAction.getId();
+         LibInfo libInfo2 = libraryIndex.templateContains(id);
+         this.addLibraryInfo(valuesByKey, libInfo2);
+      } else if (action instanceof VariableAssignAction) {
+         VariableAssignAction variableAssignAction = (VariableAssignAction)action;
+         String variableCategory = variableAssignAction.getVariableCategory();
+         LibInfo libInfo3 = libraryIndex.variableContains(variableCategory);
+         this.addLibraryInfo(valuesByKey, libInfo3);
+         Value localValue4 = variableAssignAction.getValue();
+         this.analyzeValue(localValue4, valuesByKey, libraryIndex);
       }
 
    }
 
-   private void a(Criterion var1, Map var2, LibraryIndex var3) {
-      if (var1 != null) {
-         if (var1 instanceof Junction) {
-            Junction var4 = (Junction)var1;
-            if (var4.getCriterions() != null) {
-               for(Criterion var6 : var4.getCriterions()) {
-                  this.a(var6, var2, var3);
+   private void analyzeCriterion(Criterion criterion, Map valuesByKey, LibraryIndex libraryIndex) {
+      if (criterion != null) {
+         if (criterion instanceof Junction) {
+            Junction junction = (Junction)criterion;
+            if (junction.getCriterions() != null) {
+               for(Criterion criterion2 : junction.getCriterions()) {
+                  this.analyzeCriterion(criterion2, valuesByKey, libraryIndex);
                }
             }
-         } else if (var1 instanceof ConditionTemplateCriterion) {
-            ConditionTemplateCriterion var7 = (ConditionTemplateCriterion)var1;
-            LibInfo var9 = var3.templateContains(var7.getId());
-            this.a(var2, var9);
-         } else if (var1 instanceof Criteria) {
-            Criteria var8 = (Criteria)var1;
-            Left var10 = var8.getLeft();
-            if (var10 != null) {
-               LeftPart var11 = var10.getLeftPart();
-               this.a(var11, var2, var3);
+         } else if (criterion instanceof ConditionTemplateCriterion) {
+            ConditionTemplateCriterion conditionTemplateCriterion = (ConditionTemplateCriterion)criterion;
+            LibInfo libInfo = libraryIndex.templateContains(conditionTemplateCriterion.getId());
+            this.addLibraryInfo(valuesByKey, libInfo);
+         } else if (criterion instanceof Criteria) {
+            Criteria criteria = (Criteria)criterion;
+            Left left = criteria.getLeft();
+            if (left != null) {
+               LeftPart leftPart = left.getLeftPart();
+               this.analyzeLeftPart(leftPart, valuesByKey, libraryIndex);
             }
 
-            this.a(var8.getValue(), var2, var3);
+            this.analyzeValue(criteria.getValue(), valuesByKey, libraryIndex);
          }
 
       }
    }
 
-   private void a(LeftPart var1, Map var2, LibraryIndex var3) {
-      if (var1 != null) {
-         if (var1 instanceof AccumulateLeftPart) {
-            AccumulateLeftPart var4 = (AccumulateLeftPart)var1;
-            List var5 = var4.getCalculateItems();
-            if (var5 != null) {
-               for(CalculateItem var7 : (Iterable<CalculateItem>)(Iterable<?>)(var5)) {
-                  String var8 = var7.getAssignVariableCategory();
-                  if (var8 != null) {
-                     LibInfo var9 = var3.variableContains(var8);
-                     this.a(var2, var9);
-                     Value var10 = var7.getValue();
-                     this.a(var10, var2, var3);
+   private void analyzeLeftPart(LeftPart leftPart, Map valuesByKey, LibraryIndex libraryIndex) {
+      if (leftPart != null) {
+         if (leftPart instanceof AccumulateLeftPart) {
+            AccumulateLeftPart accumulateLeftPart = (AccumulateLeftPart)leftPart;
+            List calculateItems = accumulateLeftPart.getCalculateItems();
+            if (calculateItems != null) {
+               for(CalculateItem calculateItem : (Iterable<CalculateItem>)(Iterable<?>)(calculateItems)) {
+                  String assignVariableCategory = calculateItem.getAssignVariableCategory();
+                  if (assignVariableCategory != null) {
+                     LibInfo libInfo = libraryIndex.variableContains(assignVariableCategory);
+                     this.addLibraryInfo(valuesByKey, libInfo);
+                     Value localValue = calculateItem.getValue();
+                     this.analyzeValue(localValue, valuesByKey, libraryIndex);
                   }
                }
             }
 
-            List var19 = var4.getConditionItems();
-            if (var19 != null) {
-               for(ConditionItem var27 : (Iterable<ConditionItem>)(Iterable<?>)(var19)) {
-                  Value var31 = var27.getValue();
-                  this.a(var31, var2, var3);
+            List conditionItems = accumulateLeftPart.getConditionItems();
+            if (conditionItems != null) {
+               for(ConditionItem conditionItem : (Iterable<ConditionItem>)(Iterable<?>)(conditionItems)) {
+                  Value localValue2 = conditionItem.getValue();
+                  this.analyzeValue(localValue2, valuesByKey, libraryIndex);
                }
             }
 
-            Junction var24 = var4.getJunction();
-            this.a((Criterion)var24, (Map)var2, (LibraryIndex)var3);
-            LoopTarget var28 = var4.getLoopTarget();
-            if (var28 != null) {
-               this.a(var28.getValue(), var2, var3);
+            Junction junction = accumulateLeftPart.getJunction();
+            this.analyzeCriterion(junction, valuesByKey, libraryIndex);
+            LoopTarget loopTarget = accumulateLeftPart.getLoopTarget();
+            if (loopTarget != null) {
+               this.analyzeValue(loopTarget.getValue(), valuesByKey, libraryIndex);
             }
-         } else if (var1 instanceof CommonFunctionLeftPart) {
-            CommonFunctionLeftPart var11 = (CommonFunctionLeftPart)var1;
-            CommonFunctionParameter var15 = var11.getParameter();
-            this.a(var2, var3, var15);
-         } else if (var1 instanceof FunctionLeftPart) {
-            FunctionLeftPart var12 = (FunctionLeftPart)var1;
-            List var16 = var12.getParameters();
-            if (var16 != null) {
-               for(Parameter var25 : (Iterable<Parameter>)(Iterable<?>)(var16)) {
-                  Value var29 = var25.getValue();
-                  this.a(var29, var2, var3);
+         } else if (leftPart instanceof CommonFunctionLeftPart) {
+            CommonFunctionLeftPart commonFunctionLeftPart = (CommonFunctionLeftPart)leftPart;
+            CommonFunctionParameter parameter = commonFunctionLeftPart.getParameter();
+            this.analyzeCommonFunctionParameter(valuesByKey, libraryIndex, parameter);
+         } else if (leftPart instanceof FunctionLeftPart) {
+            FunctionLeftPart functionLeftPart = (FunctionLeftPart)leftPart;
+            List parameters = functionLeftPart.getParameters();
+            if (parameters != null) {
+               for(Parameter parameter2 : (Iterable<Parameter>)(Iterable<?>)(parameters)) {
+                  Value localValue3 = parameter2.getValue();
+                  this.analyzeValue(localValue3, valuesByKey, libraryIndex);
                }
             }
-         } else if (var1 instanceof MethodLeftPart) {
-            MethodLeftPart var13 = (MethodLeftPart)var1;
-            String var17 = var13.getBeanLabel();
-            LibInfo var21 = var3.actionContains(var17);
-            this.a(var2, var21);
-            List var26 = var13.getParameters();
-            if (var26 != null) {
-               for(Parameter var32 : (Iterable<Parameter>)(Iterable<?>)(var26)) {
-                  Value var33 = var32.getValue();
-                  this.a(var33, var2, var3);
+         } else if (leftPart instanceof MethodLeftPart) {
+            MethodLeftPart methodLeftPart = (MethodLeftPart)leftPart;
+            String beanLabel = methodLeftPart.getBeanLabel();
+            LibInfo libInfo2 = libraryIndex.actionContains(beanLabel);
+            this.addLibraryInfo(valuesByKey, libInfo2);
+            List parameters2 = methodLeftPart.getParameters();
+            if (parameters2 != null) {
+               for(Parameter parameter3 : (Iterable<Parameter>)(Iterable<?>)(parameters2)) {
+                  Value localValue4 = parameter3.getValue();
+                  this.analyzeValue(localValue4, valuesByKey, libraryIndex);
                }
             }
-         } else if (var1 instanceof VariableLeftPart) {
-            VariableLeftPart var14 = (VariableLeftPart)var1;
-            String var18 = var14.getVariableCategory();
-            LibInfo var22 = var3.variableContains(var18);
-            this.a(var2, var22);
+         } else if (leftPart instanceof VariableLeftPart) {
+            VariableLeftPart variableLeftPart = (VariableLeftPart)leftPart;
+            String variableCategory = variableLeftPart.getVariableCategory();
+            LibInfo libInfo3 = libraryIndex.variableContains(variableCategory);
+            this.addLibraryInfo(valuesByKey, libInfo3);
          }
 
       }
    }
 
-   private void a(Map var1, LibraryIndex var2, CommonFunctionParameter var3) {
-      if (var3 != null) {
-         Value var4 = var3.getObjectParameter();
-         this.a(var4, var1, var2);
+   private void analyzeCommonFunctionParameter(Map valuesByKey, LibraryIndex libraryIndex, CommonFunctionParameter commonFunctionParameter) {
+      if (commonFunctionParameter != null) {
+         Value objectParameter = commonFunctionParameter.getObjectParameter();
+         this.analyzeValue(objectParameter, valuesByKey, libraryIndex);
       }
 
    }
 
-   private void a(Value var1, Map var2, LibraryIndex var3) {
-      if (var1 != null) {
-         if (var1 instanceof CommonFunctionValue) {
-            CommonFunctionValue var4 = (CommonFunctionValue)var1;
-            String var5 = var4.getLabel();
-            LibInfo var6 = var3.actionContains(var5);
-            this.a(var2, var6);
-            CommonFunctionParameter var7 = var4.getParameter();
-            this.a(var2, var3, var7);
-         } else if (var1 instanceof ConstantValue) {
-            ConstantValue var11 = (ConstantValue)var1;
-            String var18 = var11.getConstantCategory();
-            LibInfo var24 = var3.constantContains(var18);
-            this.a(var2, var24);
-         } else if (var1 instanceof MethodValue) {
-            MethodValue var12 = (MethodValue)var1;
-            String var19 = var12.getBeanLabel();
-            LibInfo var25 = var3.actionContains(var19);
-            this.a(var2, var25);
-            List var27 = var12.getParameters();
-            if (var27 != null) {
-               for(Parameter var9 : (Iterable<Parameter>)(Iterable<?>)(var27)) {
-                  Value var10 = var9.getValue();
-                  this.a(var10, var2, var3);
+   private void analyzeValue(Value value, Map valuesByKey, LibraryIndex libraryIndex) {
+      if (value != null) {
+         if (value instanceof CommonFunctionValue) {
+            CommonFunctionValue commonFunctionValue = (CommonFunctionValue)value;
+            String label = commonFunctionValue.getLabel();
+            LibInfo libInfo = libraryIndex.actionContains(label);
+            this.addLibraryInfo(valuesByKey, libInfo);
+            CommonFunctionParameter parameter = commonFunctionValue.getParameter();
+            this.analyzeCommonFunctionParameter(valuesByKey, libraryIndex, parameter);
+         } else if (value instanceof ConstantValue) {
+            ConstantValue constantValue = (ConstantValue)value;
+            String constantCategory = constantValue.getConstantCategory();
+            LibInfo libInfo2 = libraryIndex.constantContains(constantCategory);
+            this.addLibraryInfo(valuesByKey, libInfo2);
+         } else if (value instanceof MethodValue) {
+            MethodValue methodValue = (MethodValue)value;
+            String beanLabel = methodValue.getBeanLabel();
+            LibInfo libInfo3 = libraryIndex.actionContains(beanLabel);
+            this.addLibraryInfo(valuesByKey, libInfo3);
+            List parameters = methodValue.getParameters();
+            if (parameters != null) {
+               for(Parameter parameter2 : (Iterable<Parameter>)(Iterable<?>)(parameters)) {
+                  Value localValue = parameter2.getValue();
+                  this.analyzeValue(localValue, valuesByKey, libraryIndex);
                }
             }
-         } else if (var1 instanceof ParameterValue) {
-            LibInfo var13 = var3.variableContains("参数");
-            this.a(var2, var13);
-         } else if (var1 instanceof ParenValue) {
-            ParenValue var14 = (ParenValue)var1;
-            Value var20 = var14.getValue();
-            this.a(var20, var2, var3);
-         } else if (var1 instanceof VariableCategoryValue) {
-            VariableCategoryValue var15 = (VariableCategoryValue)var1;
-            LibInfo var21 = var3.variableContains(var15.getVariableCategory());
-            this.a(var2, var21);
-         } else if (var1 instanceof VariableValue) {
-            VariableValue var16 = (VariableValue)var1;
-            String var22 = var16.getVariableCategory();
-            LibInfo var26 = var3.variableContains(var22);
-            this.a(var2, var26);
+         } else if (value instanceof ParameterValue) {
+            LibInfo libInfo4 = libraryIndex.variableContains("参数");
+            this.addLibraryInfo(valuesByKey, libInfo4);
+         } else if (value instanceof ParenValue) {
+            ParenValue parenValue = (ParenValue)value;
+            Value localValue2 = parenValue.getValue();
+            this.analyzeValue(localValue2, valuesByKey, libraryIndex);
+         } else if (value instanceof VariableCategoryValue) {
+            VariableCategoryValue variableCategoryValue = (VariableCategoryValue)value;
+            LibInfo libInfo5 = libraryIndex.variableContains(variableCategoryValue.getVariableCategory());
+            this.addLibraryInfo(valuesByKey, libInfo5);
+         } else if (value instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue)value;
+            String variableCategory = variableValue.getVariableCategory();
+            LibInfo libInfo6 = libraryIndex.variableContains(variableCategory);
+            this.addLibraryInfo(valuesByKey, libInfo6);
          }
 
-         ComplexArithmetic var17 = var1.getArithmetic();
-         if (var17 != null) {
-            Value var23 = var17.getValue();
-            this.a(var23, var2, var3);
+         ComplexArithmetic arithmetic = value.getArithmetic();
+         if (arithmetic != null) {
+            Value localValue3 = arithmetic.getValue();
+            this.analyzeValue(localValue3, valuesByKey, libraryIndex);
          }
 
       }
    }
 
-   private void a(Map var1, LibInfo var2) {
-      if (var2 != null) {
-         Object var3 = null;
-         if (var1.containsKey(var2.getType())) {
-            var3 = (List)var1.get(var2.getType());
+   private void addLibraryInfo(Map valuesByKey, LibInfo libInfo) {
+      if (libInfo != null) {
+         Object objectValue = null;
+         if (valuesByKey.containsKey(libInfo.getType())) {
+            objectValue = (List)valuesByKey.get(libInfo.getType());
          } else {
-            var3 = new ArrayList();
-            var1.put(var2.getType(), var3);
+            objectValue = new ArrayList();
+            valuesByKey.put(libInfo.getType(), objectValue);
          }
 
-         if (!((List)var3).contains(var2.getMap())) {
-            ((List)var3).add(var2.getMap());
+         if (!((List)objectValue).contains(libInfo.getMap())) {
+            ((List)objectValue).add(libInfo.getMap());
          }
       }
    }
 
-   private LibraryIndex b(String var1) throws Exception {
-      ObjectMapper var2 = JsonMapper.builder().build();
-      LibraryIndex var3 = new LibraryIndex();
-      Map var4 = (Map)var2.readValue(var1, HashMap.class);
-      Iterator var5 = var4.keySet().iterator();
+   private LibraryIndex buildLibraryIndex(String librariesJson) throws Exception {
+      ObjectMapper objectMapper = JsonMapper.builder().build();
+      LibraryIndex libraryIndex = new LibraryIndex();
+      Map valuesByKey = (Map)objectMapper.readValue(librariesJson, HashMap.class);
+      Iterator iterator = valuesByKey.keySet().iterator();
 
       while(true) {
-         String var6;
-         boolean var8;
-         LibraryType var24;
+         String text;
+         boolean flag;
+         LibraryType libraryType;
          while(true) {
-            if (!var5.hasNext()) {
-               return var3;
+            if (!iterator.hasNext()) {
+               return libraryIndex;
             }
 
-            var6 = (String)var5.next();
-            var24 = null;
-            var8 = false;
-            if (var6.contentEquals("parameters")) {
-               var24 = LibraryType.Parameter;
+            text = (String)iterator.next();
+            libraryType = null;
+            flag = false;
+            if (text.contentEquals("parameters")) {
+               libraryType = LibraryType.Parameter;
                break;
             }
 
-            if (var6.contentEquals("variables")) {
-               var24 = LibraryType.Variable;
+            if (text.contentEquals("variables")) {
+               libraryType = LibraryType.Variable;
                break;
             }
 
-            if (var6.contentEquals("constants")) {
-               var24 = LibraryType.Constant;
+            if (text.contentEquals("constants")) {
+               libraryType = LibraryType.Constant;
                break;
             }
 
-            if (var6.contentEquals("actions")) {
-               var24 = LibraryType.Action;
+            if (text.contentEquals("actions")) {
+               libraryType = LibraryType.Action;
                break;
             }
 
-            if (var6.contentEquals("conditionTemplates")) {
-               var24 = LibraryType.ActionTemplate;
-               var8 = true;
+            if (text.contentEquals("conditionTemplates")) {
+               libraryType = LibraryType.ActionTemplate;
+               flag = true;
                break;
             }
 
-            if (var6.contentEquals("actionTemplates")) {
-               var24 = LibraryType.ConditionTemplate;
-               var8 = true;
+            if (text.contentEquals("actionTemplates")) {
+               libraryType = LibraryType.ConditionTemplate;
+               flag = true;
                break;
             }
          }
 
-         for(Map var11 : (Iterable<Map>)(Iterable<?>)((List)var4.get(var6))) {
-            long var12 = (long)(Integer)var11.get("id");
-            Library var14 = new Library();
-            var14.setType(var24);
-            var14.setId(var12);
-            var14.setPath(var11.get("path").toString());
-            var14.setVersion((String)var11.get("version"));
-            if (var8) {
-               KnowledgeBuilder var25 = ServiceUtils.getKnowledgeBuilder();
-               ResourceBase var26 = var25.newResourceBase();
-               var26.addResource(var12, var14.getVersion());
-               Element var17 = this.a(((Resource)var26.getResources().get(0)).getContent());
-               if (var24.equals(LibraryType.ActionTemplate)) {
-                  ActionTemplate var27 = this.b.deserialize(var17);
+         for(Map valuesByKey2 : (Iterable<Map>)(Iterable<?>)((List)valuesByKey.get(text))) {
+            long id = (long)(Integer)valuesByKey2.get("id");
+            Library library = new Library();
+            library.setType(libraryType);
+            library.setId(id);
+            library.setPath(valuesByKey2.get("path").toString());
+            library.setVersion((String)valuesByKey2.get("version"));
+            if (flag) {
+               KnowledgeBuilder knowledgeBuilder = ServiceUtils.getKnowledgeBuilder();
+               ResourceBase resourceBase = knowledgeBuilder.newResourceBase();
+               resourceBase.addResource(id, library.getVersion());
+               Element resource = this.parseResource(((Resource)resourceBase.getResources().get(0)).getContent());
+               if (libraryType.equals(LibraryType.ActionTemplate)) {
+                  ActionTemplate actionTemplate = this.actionTemplateDeserializer.deserialize(resource);
 
-                  for(ActionTemplateUnit var29 : var27.getTemplates()) {
-                     var3.buildTemplateIndex(var29.getId(), var11);
+                  for(ActionTemplateUnit actionTemplateUnit : actionTemplate.getTemplates()) {
+                     libraryIndex.buildTemplateIndex(actionTemplateUnit.getId(), valuesByKey2);
                   }
                } else {
-                  ConditionTemplate var18 = this.c.deserialize(var17);
+                  ConditionTemplate conditionTemplate = this.conditionTemplateDeserializer.deserialize(resource);
 
-                  for(ConditionTemplateUnit var20 : var18.getTemplates()) {
-                     var3.buildTemplateIndex(var20.getId(), var11);
+                  for(ConditionTemplateUnit conditionTemplateUnit : conditionTemplate.getTemplates()) {
+                     libraryIndex.buildTemplateIndex(conditionTemplateUnit.getId(), valuesByKey2);
                   }
                }
             } else {
-               ArrayList var15 = new ArrayList();
-               var15.add(var14);
+               ArrayList items = new ArrayList();
+               items.add(library);
                CopyLibPhaseHolder.set();
 
                try {
-                  ResourceLibrary var16 = this.a.buildResourceLibrary(var15, (List)null);
-                  var3.buildIndex(var16, var11, var24);
+                  ResourceLibrary resourceLibrary = this.resourceLibraryBuilder.buildResourceLibrary(items, (List)null);
+                  libraryIndex.buildIndex(resourceLibrary, valuesByKey2, libraryType);
                } finally {
                   CopyLibPhaseHolder.clean();
                }
@@ -468,13 +472,13 @@ public class CopyLibsAnalysis {
       }
    }
 
-   protected Element a(String var1) {
+   protected Element parseResource(String content) {
       try {
-         Document var2 = DocumentHelper.parseText(var1);
-         Element var3 = var2.getRootElement();
-         return var3;
-      } catch (DocumentException var4) {
-         throw new RuleException(var4);
+         Document text = DocumentHelper.parseText(content);
+         Element rootElement = text.getRootElement();
+         return rootElement;
+      } catch (DocumentException documentException) {
+         throw new RuleException(documentException);
       }
    }
 }

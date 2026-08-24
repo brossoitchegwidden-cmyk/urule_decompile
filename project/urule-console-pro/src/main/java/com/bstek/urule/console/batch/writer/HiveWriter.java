@@ -6,65 +6,39 @@ import com.bstek.urule.console.database.model.batch.BatchDataResolverItem;
 import com.bstek.urule.console.database.model.batch.DataParam;
 import com.bstek.urule.console.util.StringUtils;
 import com.bstek.urule.model.GeneralEntity;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
 public class HiveWriter implements Writer {
-   public void storeRecord(Map var1, BatchDataResolver var2, BatchDataResolverItem var3, GeneralEntity var4) throws Exception {
-      GeneralEntity var5 = var4;
-      HiveStatement var6 = (HiveStatement)var1.get(var3.getName());
-      String var7 = "";
-      NumberFormat var8 = NumberFormat.getNumberInstance();
-
-      for(DataParam var10 : (Iterable<DataParam>)(Iterable<?>)(var3.getParams())) {
-         Object var11 = var5.get(var10.getName());
-         String var12 = var10.getFormatter();
-         if (var11 == null) {
-            var7 = this.a(var7, "null");
-         } else if (var11 instanceof String) {
-            var7 = this.a(var7, "'" + (String)var11 + "'");
-         } else if (!(var11 instanceof Date) && !(var11 instanceof Timestamp)) {
-            var7 = this.a(var7, var11.toString());
+   public void storeRecord(Map stmtMap, BatchDataResolver dataResolver, BatchDataResolverItem storeItem, GeneralEntity record) throws Exception {
+      GeneralEntity record2 = record;
+      HiveStatement hiveStatement = (HiveStatement)stmtMap.get(storeItem.getName());
+      String text = "";
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(storeItem.getParams())) {
+         Object objectValue = record2.get(dataParam.getName());
+         String formatter = dataParam.getFormatter();
+         if (objectValue == null) {
+            text = this.appendColumnValue(text, "null");
+         } else if (objectValue instanceof String) {
+            text = this.appendColumnValue(text, "'" + (String)objectValue + "'");
+         } else if (!(objectValue instanceof Date)) {
+            text = this.appendColumnValue(text, objectValue.toString());
          } else {
-            var12 = "yyyy-MM-dd HH:mm:ss";
-            var7 = this.a(var7, this.a(var11, var8, var12));
+            formatter = "yyyy-MM-dd HH:mm:ss";
+            text = this.appendColumnValue(text, this.formatTemporalValue(objectValue, formatter));
          }
       }
 
-      var6.addBatch(var7);
+      hiveStatement.addBatch(text);
    }
 
-   private String a(String var1, String var2) {
-      return StringUtils.isBlank(var1) ? var2 : var1 + "," + var2;
+   private String appendColumnValue(String text, String text2) {
+      return StringUtils.isBlank(text) ? text2 : text + "," + text2;
    }
 
-   private String a(Object var1, NumberFormat var2, String var3) {
-      String var4 = "";
-      if (var1 instanceof Float) {
-         DecimalFormat var5 = new DecimalFormat(var3);
-         var4 = var5.format((Date)var1);
-      } else if (var1 instanceof Double) {
-         DecimalFormat var7 = new DecimalFormat(var3);
-         var4 = var7.format((Timestamp)var1);
-      } else if (var1 instanceof BigDecimal) {
-         DecimalFormat var8 = new DecimalFormat(var3);
-         var4 = var8.format((Timestamp)var1);
-      } else if (var1 instanceof Date) {
-         SimpleDateFormat var9 = new SimpleDateFormat(var3);
-         var4 = var9.format((Date)var1);
-      } else if (var1 instanceof Timestamp) {
-         SimpleDateFormat var10 = new SimpleDateFormat(var3);
-         var4 = var10.format((Timestamp)var1);
-      } else {
-         SimpleDateFormat var11 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-         var4 = var11.format((Date)var1);
-      }
-
-      return "'" + var4 + "'";
+   private String formatTemporalValue(Object objectValue, String formatter) {
+      SimpleDateFormat dateFormat = new SimpleDateFormat(formatter);
+      return "'" + dateFormat.format((Date)objectValue) + "'";
    }
 }

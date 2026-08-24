@@ -15,8 +15,8 @@ public class RowItemImpl implements RowItem {
       return this.rowNumber;
    }
 
-   public void setRowNumber(int var1) {
-      this.rowNumber = var1;
+   public void setRowNumber(int rowNumber) {
+      this.rowNumber = rowNumber;
    }
 
    @Override
@@ -24,8 +24,8 @@ public class RowItemImpl implements RowItem {
       return this.score;
    }
 
-   public void setScore(Object var1) {
-      this.score = var1;
+   public void setScore(Object score) {
+      this.score = score;
    }
 
    @Override
@@ -34,8 +34,8 @@ public class RowItemImpl implements RowItem {
    }
 
    @Override
-   public void setActualScore(Object var1) {
-      this.actualScore = var1;
+   public void setActualScore(Object actualScore) {
+      this.actualScore = actualScore;
    }
 
    @Override
@@ -43,8 +43,8 @@ public class RowItemImpl implements RowItem {
       return this.weight;
    }
 
-   public void setWeight(String var1) {
-      this.weight = var1;
+   public void setWeight(String weight) {
+      this.weight = weight;
    }
 
    @Override
@@ -52,15 +52,15 @@ public class RowItemImpl implements RowItem {
       return this.cellItems;
    }
 
-   public void setCellItems(List<CellItem> var1) {
-      this.cellItems = var1;
+   public void setCellItems(List<CellItem> cellItems) {
+      this.cellItems = cellItems;
    }
 
-   public void addCellItem(CellItem var1) {
+   public void addCellItem(CellItem cellItem) {
       if (this.cellItems == null) {
          this.cellItems = new ArrayList<>();
       }
 
-      this.cellItems.add(var1);
+      this.cellItems.add(cellItem);
    }
 }

@@ -6,55 +6,55 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryKnowledgeCache implements KnowledgeCache {
-   private Map<String, KnowledgePackageData> a = new ConcurrentHashMap<>();
+   private Map<String, KnowledgePackageData> knowledgePackagesById = new ConcurrentHashMap<>();
 
    protected MemoryKnowledgeCache() {
    }
 
    @Override
-   public KnowledgePackage getKnowledge(String var1) {
-      if (var1.startsWith("/")) {
-         var1 = var1.substring(1, var1.length());
+   public KnowledgePackage getKnowledge(String packageId) {
+      if (packageId.startsWith("/")) {
+         packageId = packageId.substring(1, packageId.length());
       }
 
-      KnowledgePackageData var2 = this.a.get(var1);
-      if (var2 == null) {
+      KnowledgePackageData knowledgePackageData = this.knowledgePackagesById.get(packageId);
+      if (knowledgePackageData == null) {
          return null;
-      } else if (var2.isEnable()) {
-         return var2.getKnowledgePackage();
+      } else if (knowledgePackageData.isEnable()) {
+         return knowledgePackageData.getKnowledgePackage();
       } else {
-         throw new RuleException("Knowledge package [" + var1 + "] is disabled.");
+         throw new RuleException("Knowledge package [" + packageId + "] is disabled.");
       }
    }
 
    @Override
-   public void putKnowledge(String var1, KnowledgePackage var2) {
-      if (var1.startsWith("/")) {
-         var1 = var1.substring(1, var1.length());
+   public void putKnowledge(String packageId, KnowledgePackage knowledgePackage) {
+      if (packageId.startsWith("/")) {
+         packageId = packageId.substring(1, packageId.length());
       }
 
-      this.a.put(var1, new KnowledgePackageData(var2, true));
+      this.knowledgePackagesById.put(packageId, new KnowledgePackageData(knowledgePackage, true));
    }
 
    @Override
-   public void enable(String var1, boolean var2) {
-      if (var1.startsWith("/")) {
-         var1 = var1.substring(1, var1.length());
+   public void enable(String packageId, boolean enable) {
+      if (packageId.startsWith("/")) {
+         packageId = packageId.substring(1, packageId.length());
       }
 
-      KnowledgePackageData var3 = this.a.get(var1);
-      if (var3 != null) {
-         var3.setEnable(var2);
+      KnowledgePackageData knowledgePackageData = this.knowledgePackagesById.get(packageId);
+      if (knowledgePackageData != null) {
+         knowledgePackageData.setEnable(enable);
       }
    }
 
    @Override
-   public void removeKnowledge(String var1) {
-      this.a.remove(var1);
+   public void removeKnowledge(String packageId) {
+      this.knowledgePackagesById.remove(packageId);
    }
 
    @Override
    public void clean() {
-      this.a.clear();
+      this.knowledgePackagesById.clear();
    }
 }

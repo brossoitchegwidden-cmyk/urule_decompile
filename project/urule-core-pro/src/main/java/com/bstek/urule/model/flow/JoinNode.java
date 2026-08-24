@@ -13,8 +13,8 @@ public class JoinNode extends FlowNode {
    public JoinNode() {
    }
 
-   public JoinNode(String var1) {
-      super(var1);
+   public JoinNode(String name) {
+      super(name);
    }
 
    @Override
@@ -23,36 +23,36 @@ public class JoinNode extends FlowNode {
    }
 
    @Override
-   public void enterNode(Exception var1, FlowContext var2, FlowInstance var3) {
-      FlowInstance var4 = var3.getParent();
-      if (var4 == null) {
+   public void enterNode(Exception ex, FlowContext context, FlowInstance instance) {
+      FlowInstance parent = instance.getParent();
+      if (parent == null) {
          throw new RuleException("Invalid flow instance.");
       }
 
-      FlowContextImpl var5 = (FlowContextImpl)var2;
-      Map var6 = var5.getInstanceDataMap();
-      InstanceData var7 = (InstanceData)var6.get(var3.getId());
-      int var8 = var7.getParallelInstanceCount();
-      var7.getBranchCounter().rise();
-      int var9 = var7.getBranchCounter().getCount();
-      if (var9 >= var8) {
-         this.doLeave(var2, var4);
+      FlowContextImpl flowContextImpl = (FlowContextImpl)context;
+      Map instanceDataMap = flowContextImpl.getInstanceDataMap();
+      InstanceData instanceData = (InstanceData)instanceDataMap.get(instance.getId());
+      int parallelInstanceCount = instanceData.getParallelInstanceCount();
+      instanceData.getBranchCounter().rise();
+      int count = instanceData.getBranchCounter().getCount();
+      if (count >= parallelInstanceCount) {
+         this.doLeave(context, parent);
       }
    }
 
-   private void doLeave(FlowContext var1, FlowInstance var2) {
-      Exception var3 = null;
+   private void doLeave(FlowContext flowContext, FlowInstance flowInstance) {
+      Exception exception2 = null;
 
       try {
-         var2.setCurrentNode(this);
-         this.executeNodeEvent(EventType.enter, var1, var2);
-         this.executeNodeEvent(EventType.leave, var1, var2);
-         String var4 = var2.getId() + this.getName();
-         var1.removeVariable(var4);
-      } catch (Exception var8) {
-         var3 = var8;
+         flowInstance.setCurrentNode(this);
+         this.executeNodeEvent(EventType.enter, flowContext, flowInstance);
+         this.executeNodeEvent(EventType.leave, flowContext, flowInstance);
+         String text = flowInstance.getId() + this.getName();
+         flowContext.removeVariable(text);
+      } catch (Exception exception) {
+         exception2 = exception;
       } finally {
-         this.leave(null, var1, var2, var3);
+         this.leave(null, flowContext, flowInstance, exception2);
       }
    }
 }

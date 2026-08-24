@@ -3,84 +3,84 @@ package com.bstek.urule.console.database.model;
 import java.util.List;
 
 public class Page {
-   private int a = 1;
-   private int b = 10;
-   private long c;
-   private long d;
-   private int e;
-   private long f;
-   private List g;
+   private int pageNumber = 1;
+   private int pageSize = 10;
+   private long startRow;
+   private long endRow;
+   private int totalPage;
+   private long totalRows;
+   private List data;
 
-   public Page(int var1, int var2) {
-      this.a = var1;
-      this.b = var2;
-      this.c = var1 <= 1 ? 0L : (long)((var1 - 1) * var2);
-      this.d = (long)(var2 - 1);
+   public Page(int pageIndex, int pageSize) {
+      this.pageNumber = pageIndex;
+      this.pageSize = pageSize;
+      this.startRow = pageIndex <= 1 ? 0L : (long)((pageIndex - 1) * pageSize);
+      this.endRow = (long)(pageSize - 1);
    }
 
    public int getPageNumber() {
-      return this.a;
+      return this.pageNumber;
    }
 
    public int getPageSize() {
-      return this.b;
+      return this.pageSize;
    }
 
-   private void a() {
-      if (this.b > 0) {
-         this.e = Double.valueOf(Math.ceil(Double.valueOf((double)this.f) / (double)this.b)).intValue();
-         this.c = this.a <= 1 ? 0L : (long)((this.a - 1) * this.b);
-         this.d = this.c + (long)this.b - 1L;
+   private void initializeState() {
+      if (this.pageSize > 0) {
+         this.totalPage = Double.valueOf(Math.ceil(Double.valueOf((double)this.totalRows) / (double)this.pageSize)).intValue();
+         this.startRow = this.pageNumber <= 1 ? 0L : (long)((this.pageNumber - 1) * this.pageSize);
+         this.endRow = this.startRow + (long)this.pageSize - 1L;
       } else {
-         this.e = 0;
-         this.c = 0L;
-         this.d = (long)(this.b - 1);
+         this.totalPage = 0;
+         this.startRow = 0L;
+         this.endRow = (long)(this.pageSize - 1);
       }
 
-      if (this.a > this.e) {
-         this.a = this.e;
+      if (this.pageNumber > this.totalPage) {
+         this.pageNumber = this.totalPage;
       }
 
    }
 
    public long getTotalRows() {
-      return this.f;
+      return this.totalRows;
    }
 
-   public void setTotalRows(long var1) {
-      this.f = var1;
-      this.a();
+   public void setTotalRows(long totalRows) {
+      this.totalRows = totalRows;
+      this.initializeState();
    }
 
    public List getData() {
-      return this.g;
+      return this.data;
    }
 
-   public void setData(List var1) {
-      this.g = var1;
+   public void setData(List data) {
+      this.data = data;
    }
 
    public long getStartRow() {
-      return this.c;
+      return this.startRow;
    }
 
    public long getEndRow() {
-      return this.d;
+      return this.endRow;
    }
 
-   public void setEndRow(long var1) {
-      this.d = var1;
+   public void setEndRow(long endRow) {
+      this.endRow = endRow;
    }
 
    public int getTotalPage() {
-      return this.e;
+      return this.totalPage;
    }
 
-   public void setTotalPage(int var1) {
-      this.e = var1;
+   public void setTotalPage(int totalPage) {
+      this.totalPage = totalPage;
    }
 
-   public void setStartRow(long var1) {
-      this.c = var1;
+   public void setStartRow(long startRow) {
+      this.startRow = startRow;
    }
 }

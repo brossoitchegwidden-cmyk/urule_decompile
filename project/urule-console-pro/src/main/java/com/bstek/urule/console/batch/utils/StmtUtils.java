@@ -14,45 +14,45 @@ import org.apache.commons.logging.LogFactory;
 public class StmtUtils {
    public static final Log logger = LogFactory.getLog(StmtUtils.class);
 
-   private static DataParam a(List var0, String var1) {
-      for(DataParam var3 : (Iterable<DataParam>)(Iterable<?>)(var0)) {
-         if (var1.equals(var3.getName())) {
-            return var3;
+   private static DataParam resolveDataParam(List items, String text) {
+      for(DataParam dataParam : (Iterable<DataParam>)(Iterable<?>)(items)) {
+         if (text.equals(dataParam.getName())) {
+            return dataParam;
          }
       }
 
       return null;
    }
 
-   public static void setStmtQueryParameters(ParsedSql var0, List var1, PreparedStatement var2) throws Exception {
-      for(int var3 = 0; var3 < var0.getParameterNames().size(); ++var3) {
-         String var4 = (String)var0.getParameterNames().get(var3);
-         int var5 = var3 + 1;
-         DataParam var6 = a(var1, var4);
-         if (var6 == null) {
-            var2.setObject(var5, (Object)null);
+   public static void setStmtQueryParameters(ParsedSql parsedSql, List params, PreparedStatement stmt) throws Exception {
+      for(int index = 0; index < parsedSql.getParameterNames().size(); ++index) {
+         String text = (String)parsedSql.getParameterNames().get(index);
+         int number = index + 1;
+         DataParam dataParam = resolveDataParam(params, text);
+         if (dataParam == null) {
+            stmt.setObject(number, (Object)null);
          } else {
-            Object var7 = var6.getValue();
-            if (var7 instanceof String) {
-               var2.setString(var5, (String)var7);
-            } else if (var7 instanceof Boolean) {
-               var2.setBoolean(var5, (Boolean)var7);
-            } else if (var7 instanceof Integer) {
-               var2.setInt(var5, (Integer)var7);
-            } else if (var7 instanceof Long) {
-               var2.setLong(var5, (Long)var7);
-            } else if (var7 instanceof Double) {
-               var2.setDouble(var5, (Double)var7);
-            } else if (var7 instanceof Float) {
-               var2.setFloat(var5, (Float)var7);
-            } else if (var7 instanceof BigDecimal) {
-               var2.setBigDecimal(var5, (BigDecimal)var7);
-            } else if (var7 instanceof Array) {
-               var2.setArray(var5, (Array)var7);
-            } else if (var7 instanceof Date) {
-               var2.setTimestamp(var5, new Timestamp(((Date)var7).getTime()));
+            Object objectValue = dataParam.getValue();
+            if (objectValue instanceof String) {
+               stmt.setString(number, (String)objectValue);
+            } else if (objectValue instanceof Boolean) {
+               stmt.setBoolean(number, (Boolean)objectValue);
+            } else if (objectValue instanceof Integer) {
+               stmt.setInt(number, (Integer)objectValue);
+            } else if (objectValue instanceof Long) {
+               stmt.setLong(number, (Long)objectValue);
+            } else if (objectValue instanceof Double) {
+               stmt.setDouble(number, (Double)objectValue);
+            } else if (objectValue instanceof Float) {
+               stmt.setFloat(number, (Float)objectValue);
+            } else if (objectValue instanceof BigDecimal) {
+               stmt.setBigDecimal(number, (BigDecimal)objectValue);
+            } else if (objectValue instanceof Array) {
+               stmt.setArray(number, (Array)objectValue);
+            } else if (objectValue instanceof Date) {
+               stmt.setTimestamp(number, new Timestamp(((Date)objectValue).getTime()));
             } else {
-               var2.setObject(var5, var7);
+               stmt.setObject(number, objectValue);
             }
          }
       }

@@ -4,19 +4,19 @@ import com.bstek.urule.model.flow.ForkNode;
 import org.dom4j.Element;
 
 public class ForkNodeParser extends FlowNodeParser<ForkNode> {
-   public ForkNode parse(Element var1) {
-      ForkNode var2 = new ForkNode(var1.attributeValue("name"));
-      var2.setConnections(this.a(var1));
-      var2.setEventBean(var1.attributeValue("event-bean"));
-      var2.setX(var1.attributeValue("x"));
-      var2.setY(var1.attributeValue("y"));
-      var2.setWidth(var1.attributeValue("width"));
-      var2.setHeight(var1.attributeValue("height"));
-      return var2;
+   public ForkNode parse(Element element) {
+      ForkNode forkNode = new ForkNode(element.attributeValue("name"));
+      forkNode.setConnections(this.parseConnections(element));
+      forkNode.setEventBean(element.attributeValue("event-bean"));
+      forkNode.setX(element.attributeValue("x"));
+      forkNode.setY(element.attributeValue("y"));
+      forkNode.setWidth(element.attributeValue("width"));
+      forkNode.setHeight(element.attributeValue("height"));
+      return forkNode;
    }
 
    @Override
-   public boolean support(String var1) {
-      return var1.equals("fork");
+   public boolean support(String name) {
+      return name.equals("fork");
    }
 }

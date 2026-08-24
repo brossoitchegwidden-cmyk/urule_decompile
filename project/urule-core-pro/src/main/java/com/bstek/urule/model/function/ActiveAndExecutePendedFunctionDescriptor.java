@@ -5,29 +5,26 @@ import com.bstek.urule.runtime.WorkingMemory;
 public class ActiveAndExecutePendedFunctionDescriptor implements FunctionDescriptor {
    @Override
    public Argument getArgument() {
-      Argument var1 = new Argument();
-      var1.setName("执行组名");
-      var1.setEname("groupName");
-      var1.setNeedProperty(false);
-      return var1;
+      Argument argument = new Argument();
+      argument.setName("执行组名");
+      argument.setEname("groupName");
+      argument.setNeedProperty(false);
+      return argument;
    }
-
    @Override
-   public Object doFunction(Object var1, String var2, WorkingMemory var3) {
-      if (var1 == null) {
+   public Object doFunction(Object object, String property, WorkingMemory workingMemory) {
+      if (object == null) {
          return null;
       }
 
-      String var4 = var1.toString();
-      var3.activePendedGroupAndExecute(var4);
+      String text = object.toString();
+      workingMemory.activePendedGroupAndExecute(text);
       return null;
    }
-
    @Override
    public String getName() {
       return "ActivePended";
    }
-
    @Override
    public String getLabel() {
       return "激活执行组并执行";

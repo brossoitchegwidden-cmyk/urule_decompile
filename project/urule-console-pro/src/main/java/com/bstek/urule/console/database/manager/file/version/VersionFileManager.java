@@ -6,19 +6,19 @@ import java.util.List;
 public interface VersionFileManager {
    VersionFileManager ins = new VersionFileManagerImpl();
 
-   VersionFile loadFile(long var1);
+   VersionFile loadFile(long id);
 
-   String loadFileContent(long var1);
+   String loadFileContent(long id);
 
-   List loadFiles(long var1);
+   List loadFiles(long fileId);
 
-   VersionFile loadFile(long var1, String var3);
+   VersionFile loadFile(long fileId, String version);
 
-   void saveFile(VersionFile var1);
+   void saveFile(VersionFile file);
 
-   void deleteByProjectId(long var1);
+   void deleteByProjectId(long projectId);
 
-   void deleteByFileId(long var1);
+   void deleteByFileId(long fileId);
 
    VersionFileQuery newQuery();
 }

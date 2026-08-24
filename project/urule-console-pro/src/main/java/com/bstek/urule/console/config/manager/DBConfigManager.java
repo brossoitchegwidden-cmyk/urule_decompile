@@ -13,91 +13,89 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public abstract class DBConfigManager extends AbstractConfigManager {
-   private static final Log b = LogFactory.getLog(DBConfigManager.class);
+   private static final Log logger = LogFactory.getLog(DBConfigManager.class);
 
-   public DBConfigManager(ApplicationConfig var1) {
-      super(var1);
+   public DBConfigManager(ApplicationConfig applicationConfig) {
+      super(applicationConfig);
    }
-
    public void load() throws ConfigLoadException {
       try {
-         this.d();
-         this.e();
-      } catch (Exception var2) {
-         b.error(var2);
-         throw new ConfigLoadException(var2);
+         this.initializeConnectionSource();
+         this.loadDatabaseProperties();
+      } catch (Exception exception) {
+         DBConfigManager.logger.error(exception);
+         throw new ConfigLoadException(exception);
       }
    }
 
-   protected abstract void initConfig(SetupInfo var1);
-
-   public void init(SetupInfo var1) throws SetupException {
+   protected abstract void initConfig(SetupInfo setupInfo);
+   public void init(SetupInfo setupInfo) throws SetupException {
       try {
-         this.initConfig(var1);
-         this.d();
-         if (var1.isInitializationDb()) {
-            this.a(var1);
+         this.initConfig(setupInfo);
+         this.initializeConnectionSource();
+         if (setupInfo.isInitializationDb()) {
+            this.processSetupInfo(setupInfo);
          }
 
-      } catch (SetupException var3) {
-         throw var3;
-      } catch (Exception var4) {
-         b.error(var4);
-         throw new SetupException(var4);
+      } catch (SetupException setupException) {
+         throw setupException;
+      } catch (Exception exception) {
+         DBConfigManager.logger.error(exception);
+         throw new SetupException(exception);
       }
    }
 
-   protected abstract void d() throws Exception;
+   protected abstract void initializeConnectionSource() throws Exception;
 
-   private void a(SetupInfo var1) throws Exception {
-      Connection var2 = null;
+   private void processSetupInfo(SetupInfo setupInfo) throws Exception {
+      Connection connection = null;
 
       try {
-         b.info("规则数据库初始化...");
-         var2 = this.getConnection();
-         var2.setAutoCommit(false);
-         String var3 = this.getPlatform();
-         if ("dm".equals(var3)) {
-            var3 = "oracle";
-         } else if ("kingbase".equals(var3)) {
-            var3 = "postgresql";
+         DBConfigManager.logger.info("规则数据库初始化...");
+         connection = this.getConnection();
+         connection.setAutoCommit(false);
+         String platform = this.getPlatform();
+         if ("dm".equals(platform)) {
+            platform = "oracle";
+         } else if ("kingbase".equals(platform)) {
+            platform = "postgresql";
          }
 
-         DataSourceInitializer.executeSchema(var2, var3);
-         b.info("规则数据库表结构初始化成功...");
-         DataSourceInitializer.executeInitData(var2, var3);
-         b.info("规则数据库配置数据初始化成功...");
-         var2.commit();
-         b.info("规则数据库初始化完成.");
-      } catch (Exception var7) {
-         b.error("规则数据库初始化失败:" + var7.getMessage());
-         if (var2 != null) {
-            var2.rollback();
+         DataSourceInitializer.executeSchema(connection, platform);
+         DBConfigManager.logger.info("规则数据库表结构初始化成功...");
+         DataSourceInitializer.executeInitData(connection, platform);
+         DBConfigManager.logger.info("规则数据库配置数据初始化成功...");
+         connection.commit();
+         DBConfigManager.logger.info("规则数据库初始化完成.");
+      } catch (Exception exception) {
+         DBConfigManager.logger.error("规则数据库初始化失败:" + exception.getMessage());
+         if (connection != null) {
+            connection.rollback();
          }
 
-         throw var7;
+         throw exception;
       } finally {
-         closeConnection(var2);
+         closeConnection(connection);
       }
 
    }
 
-   public static void closeConnection(Connection var0) {
-      if (var0 != null) {
+   public static void closeConnection(Connection con) {
+      if (con != null) {
          try {
-            var0.close();
-         } catch (SQLException var2) {
-            b.debug("Could not close JDBC Connection", var2);
-         } catch (Throwable var3) {
-            b.debug("Unexpected exception on closing JDBC Connection", var3);
+            con.close();
+         } catch (SQLException sQLException) {
+            DBConfigManager.logger.debug("Could not close JDBC Connection", sQLException);
+         } catch (Throwable throwable) {
+            DBConfigManager.logger.debug("Unexpected exception on closing JDBC Connection", throwable);
          }
       }
 
    }
 
-   protected void e() throws Exception {
-      for(Configuration var3 : (Iterable<Configuration>)(Iterable<?>)(ConfigurationUtils.getConfigurations(this.getConnection()))) {
-         this.a.put(var3.getKey(), var3.getValue());
+   protected void loadDatabaseProperties() throws Exception {
+      for(Configuration configuration : (Iterable<Configuration>)(Iterable<?>)(ConfigurationUtils.getConfigurations(this.getConnection()))) {
+         this.properties.put(configuration.getKey(), configuration.getValue());
       }
 
    }

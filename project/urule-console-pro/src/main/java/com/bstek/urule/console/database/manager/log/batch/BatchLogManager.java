@@ -5,13 +5,16 @@ import com.bstek.urule.console.database.model.batch.BatchLog;
 public interface BatchLogManager {
    BatchLogManager ins = new BatchLogManagerImpl();
 
-   void updateStatus(BatchLog var1);
+   void updateStatus(BatchLog log);
 
-   void add(BatchLog var1);
+   /**新增日志*/
+   void add(BatchLog log);
 
-   void removeByGroupId(String var1);
+   /**删除用户对应的日志*/
+   void removeByGroupId(String groupId);
 
-   void removeByProject(Long var1);
+   /**删除项目对应的日志*/
+   void removeByProject(Long projectId);
 
    BatchLogQuery newQuery();
 }

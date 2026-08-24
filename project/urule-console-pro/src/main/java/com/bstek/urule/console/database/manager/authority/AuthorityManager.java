@@ -7,17 +7,24 @@ import java.util.List;
 public interface AuthorityManager {
    AuthorityManager ins = new AuthorityManagerImpl();
 
-   List getAuthoritysByCode(String var1, String var2);
+   /**获取资源授权信息*/
+   List getAuthoritysByCode(String roleType, String code);
 
-   List getAuthoritysByRole(String var1, long var2);
+   /**获取角色的授权信息*/
+   List getAuthoritysByRole(String roleType, long roleId);
 
-   Authority get(String var1, long var2, String var4);
+   /**获取权限配置对象*/
+   Authority get(String roleType, long roleId, String code);
 
-   void add(Connection var1, Authority var2);
+   /**添加资源的授权信息*/
+   void add(Connection conn, Authority authority);
 
-   void remove(Connection var1, long var2);
+   /**删除资源的授权信息*/
+   void remove(Connection conn, long authId);
 
-   void remove(Connection var1, String var2, long var3, String var5, String var6);
+   /**删除资源的授权信息*/
+   void remove(Connection conn, String roleType, long roleId, String code, String resourceType);
 
-   void removeByRole(String var1, long var2);
+   /**删除角色对应的所有授权信息*/
+   void removeByRole(String roleType, long roleId);
 }

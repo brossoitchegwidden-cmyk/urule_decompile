@@ -13,18 +13,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ServerCacheManager {
-   private static final Log a = LogFactory.getLog(ServerCacheManager.class);
-   private DynamicSpringConfigLoader b = ServiceUtils.getDynamicSpringConfigLoader();
+   private static final Log logger = LogFactory.getLog(ServerCacheManager.class);
+   private DynamicSpringConfigLoader dynamicSpringConfigLoader = ServiceUtils.getDynamicSpringConfigLoader();
 
-   private boolean a(String var1) {
-      if (var1 != null) {
+   private boolean evaluateCondition(String text) {
+      if (text != null) {
          try {
-            var1 = URLDecoder.decode(var1, "utf-8");
-         } catch (UnsupportedEncodingException var3) {
-            a.error(var3);
+            text = URLDecoder.decode(text, "utf-8");
+         } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            ServerCacheManager.logger.error(unsupportedEncodingException);
          }
 
-         if (var1.contentEquals(Utils.SystemId)) {
+         if (text.contentEquals(Utils.SystemId)) {
             return true;
          }
       }
@@ -32,35 +32,40 @@ public class ServerCacheManager {
       return false;
    }
 
-   public void recacheAllPackets(String var1) {
-      if (!this.a(var1)) {
+   /**集群服务器重新加载所有知识包*/
+   public void recacheAllPackets(String systemId) {
+      if (!this.evaluateCondition(systemId)) {
          ((PacketCacheImpl)PacketCache.ins).doRecacheAllPackets();
          IDGenerator.getInstance().clean();
       }
    }
 
-   public void reloadPacket(String var1, long var2) {
-      if (!this.a(var1)) {
-         ((PacketCacheImpl)PacketCache.ins).doReloadPacket(var2);
+   /**集群服务器知识包缓存更新*/
+   public void reloadPacket(String systemId, long id) {
+      if (!this.evaluateCondition(systemId)) {
+         ((PacketCacheImpl)PacketCache.ins).doReloadPacket(id);
       }
    }
 
-   public void removePacket(String var1) {
-      ((PacketCacheImpl)PacketCache.ins).removePacket(var1);
+   /**知识包编码修改*/
+   public void removePacket(String code) {
+      ((PacketCacheImpl)PacketCache.ins).removePacket(code);
    }
 
-   public void syncPacketForRemoveProject(String var1, long var2) {
-      if (!this.a(var1)) {
-         ((PacketCacheImpl)PacketCache.ins).doRemoveProjectPackets(var2);
+   /**集群服务器项目删除时缓存清除*/
+   public void syncPacketForRemoveProject(String systemId, long projectId) {
+      if (!this.evaluateCondition(systemId)) {
+         ((PacketCacheImpl)PacketCache.ins).doRemoveProjectPackets(projectId);
       }
    }
 
-   public void reloadDynamicJars(String var1) throws Exception {
-      if (!this.a(var1)) {
-         String var2 = this.b.buildDynamicJarsStoreDirectPath();
-         int var3 = DynamicJarManager.ins.createJarFiles(var2);
-         if (var3 != 0) {
-            this.b.loadDynamicJars(var2);
+   /**集群服务器动态加载jar*/
+   public void reloadDynamicJars(String systemId) throws Exception {
+      if (!this.evaluateCondition(systemId)) {
+         String dynamicJarsStoreDirectPath = this.dynamicSpringConfigLoader.buildDynamicJarsStoreDirectPath();
+         int jarFiles = DynamicJarManager.ins.createJarFiles(dynamicJarsStoreDirectPath);
+         if (jarFiles != 0) {
+            this.dynamicSpringConfigLoader.loadDynamicJars(dynamicJarsStoreDirectPath);
          }
       }
    }

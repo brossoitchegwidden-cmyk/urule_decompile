@@ -20,98 +20,98 @@ public class PredefineExecutionUnit implements Comparable<PredefineExecutionUnit
    public PredefineExecutionUnit() {
    }
 
-   public PredefineExecutionUnit(PredefineGroupDefinition var1, List<Rule> var2, boolean var3) {
-      this.priority = var1.getPriority();
-      this.init(var1, var2, var3);
+   public PredefineExecutionUnit(PredefineGroupDefinition def, List<Rule> rules, boolean alone) {
+      this.priority = def.getPriority();
+      this.init(def, rules, alone);
    }
 
-   public void buildRete(ResourceLibrary var1, KnowledgeBuilder var2, Map<String, List<ReteUnit>> var3) {
-      this.buildGroupRete(var1, this.group, var2, var3);
+   public void buildRete(ResourceLibrary resourceLibrary, KnowledgeBuilder knowledgeBuilder, Map<String, List<ReteUnit>> pendedGroupRetesMap) {
+      this.buildGroupRete(resourceLibrary, this.group, knowledgeBuilder, pendedGroupRetesMap);
    }
 
-   private void buildGroupRete(ResourceLibrary var1, PredefineGroup var2, KnowledgeBuilder var3, Map<String, List<ReteUnit>> var4) {
-      ReteBuilder var5 = var3.getReteBuilder();
-      List var6 = var2.getRules();
-      var3.buildRules(var6);
-      var3.buildLoopRules(var6, var1);
-      var3.buildRulesConditionActionTemplate(var6, var1);
-      ArrayList var7 = new ArrayList();
-      if (var6.size() > 0) {
-         if (var2.isAlone()) {
-            Collections.sort(var6);
+   private void buildGroupRete(ResourceLibrary resourceLibrary, PredefineGroup predefineGroup, KnowledgeBuilder knowledgeBuilder, Map<String, List<ReteUnit>> valuesByKey) {
+      ReteBuilder reteBuilder = knowledgeBuilder.getReteBuilder();
+      List rules = predefineGroup.getRules();
+      knowledgeBuilder.buildRules(rules);
+      knowledgeBuilder.buildLoopRules(rules, resourceLibrary);
+      knowledgeBuilder.buildRulesConditionActionTemplate(rules, resourceLibrary);
+      ArrayList items = new ArrayList();
+      if (rules.size() > 0) {
+         if (predefineGroup.isAlone()) {
+            Collections.sort(rules);
 
-            for (Rule var9 : (Iterable<Rule>)(Iterable<?>)(var6)) {
-               Rete var10 = var5.buildRete(var9, var1);
-               var7.add(var10);
+            for (Rule rule : (Iterable<Rule>)(Iterable<?>)(rules)) {
+               Rete rete = reteBuilder.buildRete(rule, resourceLibrary);
+               items.add(rete);
             }
 
-            var6.clear();
+            rules.clear();
          }
 
-         Rete var11 = var5.buildRete(var6, var1);
-         if (var11.getPendedGroupRetesMap() != null) {
-            var4.putAll(var11.getPendedGroupRetesMap());
+         Rete rete2 = reteBuilder.buildRete(rules, resourceLibrary);
+         if (rete2.getPendedGroupRetesMap() != null) {
+            valuesByKey.putAll(rete2.getPendedGroupRetesMap());
          }
 
-         var6.clear();
-         KnowledgeBase var13 = new KnowledgeBase(var11, var7, null, null);
-         KnowledgePackageWrapper var14 = new KnowledgePackageWrapper(var13.getKnowledgePackage());
-         var2.resetKnowledgePackageWrapper(var14);
+         rules.clear();
+         KnowledgeBase knowledgeBase = new KnowledgeBase(rete2, items, null, null);
+         KnowledgePackageWrapper knowledgePackageWrapper = new KnowledgePackageWrapper(knowledgeBase.getKnowledgePackage());
+         predefineGroup.resetKnowledgePackageWrapper(knowledgePackageWrapper);
       }
 
-      for (PredefineGroup var12 = var2.getNextGroup(); var12 != null; var12 = var12.getNextGroup()) {
-         this.buildGroupRete(var1, var12, var3, var4);
+      for (PredefineGroup nextGroup = predefineGroup.getNextGroup(); nextGroup != null; nextGroup = nextGroup.getNextGroup()) {
+         this.buildGroupRete(resourceLibrary, nextGroup, knowledgeBuilder, valuesByKey);
       }
    }
 
-   private void init(PredefineGroupDefinition var1, List<Rule> var2, boolean var3) {
-      if (var1 != null && var2.size() != 0) {
-         PredefineGroup var4 = null;
-         PredefineGroup var5 = null;
+   private void init(PredefineGroupDefinition predefineGroupDefinition, List<Rule> rules, boolean flag) {
+      if (predefineGroupDefinition != null && rules.size() != 0) {
+         PredefineGroup predefineGroup = null;
+         PredefineGroup predefineGroup2 = null;
 
-         for (Predefine var7 : var1.getPredefines()) {
-            PredefineGroup var8 = new PredefineGroup(var3);
-            if (var4 == null) {
-               var4 = var8;
+         for (Predefine predefine : predefineGroupDefinition.getPredefines()) {
+            PredefineGroup predefineGroup3 = new PredefineGroup(flag);
+            if (predefineGroup == null) {
+               predefineGroup = predefineGroup3;
             }
 
-            var8.setFilePath(var1.getFilePath());
-            var8.setPredefine(var7);
-            if (var5 != null) {
-               var5.setNextGroup(var8);
+            predefineGroup3.setFilePath(predefineGroupDefinition.getFilePath());
+            predefineGroup3.setPredefine(predefine);
+            if (predefineGroup2 != null) {
+               predefineGroup2.setNextGroup(predefineGroup3);
             }
 
-            var5 = var8;
+            predefineGroup2 = predefineGroup3;
          }
 
-         if (var5 != null) {
-            var5.getRules().addAll(var2);
-            var2.clear();
+         if (predefineGroup2 != null) {
+            predefineGroup2.getRules().addAll(rules);
+            rules.clear();
             this.containsRules = true;
-            this.group = var4;
+            this.group = predefineGroup;
          }
       }
    }
 
-   public int compareTo(PredefineExecutionUnit var1) {
-      int var2 = var1.getPriority();
-      return var2 - this.priority;
+   public int compareTo(PredefineExecutionUnit predefineExecutionUnit) {
+      int priority = predefineExecutionUnit.getPriority();
+      return priority - this.priority;
    }
 
    public int getPriority() {
       return this.priority;
    }
 
-   public void setPriority(int var1) {
-      this.priority = var1;
+   public void setPriority(int priority) {
+      this.priority = priority;
    }
 
    public PredefineGroup getGroup() {
       return this.group;
    }
 
-   public void setContainsRules(boolean var1) {
-      this.containsRules = var1;
+   public void setContainsRules(boolean containsRules) {
+      this.containsRules = containsRules;
    }
 
    public boolean isContainsRules() {

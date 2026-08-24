@@ -4,9 +4,9 @@ import com.bstek.urule.console.database.model.batch.BatchSkipLog;
 import java.util.List;
 
 public interface BatchSkipLogQuery {
-   BatchSkipLogQuery batchLogId(Long var1);
+   BatchSkipLogQuery batchLogId(Long batchLogId);
 
    List list();
 
-   BatchSkipLog details(Long var1);
+   BatchSkipLog details(Long id);
 }

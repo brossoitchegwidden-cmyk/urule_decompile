@@ -24,241 +24,242 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+/** Downloads and unpacks dynamically supplied rule-library JARs. */
 public class RemoteDynamicJarsBuilder implements ApplicationContextAware {
-   private String a;
-   private String b;
-   private String c;
-   private String d;
-   private int e;
-   private String f;
-   private Timer g;
+   private String user;
+   private String pwd;
+   private String dynamicJarsLoadUrl;
+   private String latestJarsCheckUrl;
+   private int remoteLoadInterval;
+   private String lastJarsDigest;
+   private Timer timer;
    public static final String NONE = "n";
-   private Logger h = Logger.getGlobal();
-   private ArgumentsProvider i;
+   private Logger logger = Logger.getGlobal();
+   private ArgumentsProvider argumentsProvider;
    public static final String BEAN_ID = "urule.remoteDynamicJarsBuilder";
 
-   public boolean startIntervalLoadRemoteJars(DynamicSpringConfigLoader var1) throws Exception {
-      if (this.e == 0) {
+   public boolean startIntervalLoadRemoteJars(DynamicSpringConfigLoader loader) throws Exception {
+      if (this.remoteLoadInterval == 0) {
          return false;
       }
 
-      if (this.g == null) {
-         this.g = new Timer();
+      if (this.timer == null) {
+         this.timer = new Timer();
       }
 
-      this.h.info("Start loading dynamic jars from server [" + this.getResporityServerUrl() + "] every " + this.e + " minutes.");
-      int var2 = this.e * 1000 * 60;
-      this.g.schedule(new IntervalTask(var1, this), var2, var2);
+      this.logger.info("Start loading dynamic jars from server [" + this.getResporityServerUrl() + "] every " + this.remoteLoadInterval + " minutes.");
+      int number = this.remoteLoadInterval * 1000 * 60;
+      this.timer.schedule(new IntervalTask(loader, this), number, number);
       return true;
    }
 
-   public boolean requestRemoteJars(String var1) throws Exception {
-      String var2 = this.a();
-      if (var2.equals("n")) {
-         this.f = var2;
+   public boolean requestRemoteJars(String storePath) throws Exception {
+      String latestDigest = this.checkLatestJarsDigest();
+      if (latestDigest.equals(NONE)) {
+         this.lastJarsDigest = latestDigest;
          return false;
       }
 
-      if (this.f != null && this.f.equals(var2)) {
+      if (this.lastJarsDigest != null && this.lastJarsDigest.equals(latestDigest)) {
          return false;
       }
 
-      System.out.println("Start pull dynamic jars from server side.");
-      this.f = var2;
-      HttpURLConnection var3 = null;
-      OutputStreamWriter var4 = null;
-      InputStream var5 = null;
-      java.io.Closeable var6 = null;
-      java.io.Closeable var7 = null;
+      this.logger.info("Start pull dynamic jars from server side.");
+      this.lastJarsDigest = latestDigest;
+      HttpURLConnection httpURLConnection = null;
+      OutputStreamWriter outputStreamWriter = null;
+      InputStream inputStream = null;
+      java.io.Closeable closeable = null;
+      java.io.Closeable closeable2 = null;
 
       try {
-         String var8 = "_u=" + URLEncoder.encode(this.a, "utf-8") + "&_p=" + URLEncoder.encode(this.b, "utf-8") + "";
-         URL var9 = new URL(this.getResporityServerUrl());
-         var3 = (HttpURLConnection)var9.openConnection();
-         var3.setRequestMethod("POST");
-         var3.setRequestProperty("Accept-Charset", "utf-8");
-         var3.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-         var3.setRequestProperty("Content-Length", String.valueOf(var8.length()));
-         var3.setUseCaches(false);
-         var3.setDoOutput(true);
-         var3.connect();
-         var4 = new OutputStreamWriter(var3.getOutputStream());
-         var4.write(var8);
-         var4.flush();
-         if (var3.getResponseCode() != 200) {
-            throw new RuleException("Server request was failed, Response message : " + var3.getResponseMessage());
+         String text = "_u=" + URLEncoder.encode(this.user, "utf-8") + "&_p=" + URLEncoder.encode(this.pwd, "utf-8") + "";
+         URL uRL = new URL(this.getResporityServerUrl());
+         httpURLConnection = (HttpURLConnection)uRL.openConnection();
+         httpURLConnection.setRequestMethod("POST");
+         httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
+         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+         httpURLConnection.setRequestProperty("Content-Length", String.valueOf(text.length()));
+         httpURLConnection.setUseCaches(false);
+         httpURLConnection.setDoOutput(true);
+         httpURLConnection.connect();
+         outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+         outputStreamWriter.write(text);
+         outputStreamWriter.flush();
+         if (httpURLConnection.getResponseCode() != 200) {
+            throw new RuleException("Server request was failed, Response message : " + httpURLConnection.getResponseMessage());
          }
 
-         var5 = var3.getInputStream();
-         this.unzipDynamicJars(var5, var1);
-      } catch (Exception var17) {
-         throw new RuleException(var17);
+         inputStream = httpURLConnection.getInputStream();
+         this.unzipDynamicJars(inputStream, storePath);
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
          try {
-            if (var4 != null) {
-               var4.close();
+            if (outputStreamWriter != null) {
+               outputStreamWriter.close();
             }
 
-            if (var7 != null) {
-               var7.close();
+            if (closeable2 != null) {
+               closeable2.close();
             }
 
-            if (var6 != null) {
-               var6.close();
+            if (closeable != null) {
+               closeable.close();
             }
 
-            if (var5 != null) {
-               var5.close();
+            if (inputStream != null) {
+               inputStream.close();
             }
-         } catch (IOException var16) {
-            var16.printStackTrace();
+         } catch (IOException iOException) {
+            java.util.logging.Logger.getLogger(RemoteDynamicJarsBuilder.class.getName()).log(java.util.logging.Level.SEVERE, iOException.getMessage(), iOException);
          }
 
-         if (var3 != null) {
-            var3.disconnect();
+         if (httpURLConnection != null) {
+            httpURLConnection.disconnect();
          }
       }
 
       return true;
    }
 
-   private String a() {
+   private String checkLatestJarsDigest() {
       try {
-         String var1 = this.f == null ? "" : this.f;
-         String var2 = "_u=" + this.a + "&_p=" + this.b + "&jarsId=" + var1 + "";
-         URL var3 = new URL(this.b());
-         HttpURLConnection var4 = (HttpURLConnection)var3.openConnection();
-         var4.setRequestMethod("POST");
-         var4.setRequestProperty("Accept-Charset", "utf-8");
-         var4.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-         var4.setRequestProperty("Content-Length", String.valueOf(var2.length()));
-         var4.setUseCaches(false);
-         var4.setDoOutput(true);
-         var4.connect();
-         OutputStreamWriter var5 = new OutputStreamWriter(var4.getOutputStream());
-         var5.write(var2);
-         var5.flush();
-         if (var4.getResponseCode() != 200) {
-            throw new RuleException("Server request was failed, Response message : " + var4.getResponseMessage());
+         String currentDigest = this.lastJarsDigest == null ? "" : this.lastJarsDigest;
+         String requestBody = "_u=" + this.user + "&_p=" + this.pwd + "&jarsId=" + currentDigest + "";
+         URL url = new URL(this.resolveLatestJarsCheckUrl());
+         HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
+         httpURLConnection.setRequestMethod("POST");
+         httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
+         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+         httpURLConnection.setRequestProperty("Content-Length", String.valueOf(requestBody.length()));
+         httpURLConnection.setUseCaches(false);
+         httpURLConnection.setDoOutput(true);
+         httpURLConnection.connect();
+         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+         outputStreamWriter.write(requestBody);
+         outputStreamWriter.flush();
+         if (httpURLConnection.getResponseCode() != 200) {
+            throw new RuleException("Server request was failed, Response message : " + httpURLConnection.getResponseMessage());
          }
 
-         InputStream var6 = var4.getInputStream();
-         ObjectMapper var7 = JsonMapper.builder().build();
-         Map var8 = (Map)var7.readValue(var6, HashMap.class);
-         IOUtils.closeQuietly(var6);
-         var4.disconnect();
-         var5.close();
-         boolean var9 = (Boolean)var8.get("match");
-         return var9 ? "n" : (String)var8.get("digest");
-      } catch (Exception var11) {
-         throw new RuleException("当前环境配置了【" + this.b() + "】参数，但访问对应的服务器时出现错误", var11);
+         InputStream inputStream = httpURLConnection.getInputStream();
+         ObjectMapper objectMapper = JsonMapper.builder().build();
+         Map valuesByKey = (Map)objectMapper.readValue(inputStream, HashMap.class);
+         IOUtils.closeQuietly(inputStream);
+         httpURLConnection.disconnect();
+         outputStreamWriter.close();
+         boolean match = (Boolean)valuesByKey.get("match");
+         return match ? "n" : (String)valuesByKey.get("digest");
+      } catch (Exception exception) {
+         throw new RuleException("当前环境配置了【" + this.resolveLatestJarsCheckUrl() + "】参数，但访问对应的服务器时出现错误", exception);
       }
    }
 
-   public void unzipDynamicJars(InputStream var1, String var2) throws Exception {
-      File var3 = new File(var2);
-      if (!var3.exists()) {
-         var3.mkdirs();
+   public void unzipDynamicJars(InputStream inputStream, String storePath) throws Exception {
+      File file = new File(storePath);
+      if (!file.exists()) {
+         file.mkdirs();
       }
 
-      ZipInputStream var4 = new ZipInputStream(var1);
+      ZipInputStream zipInputStream = new ZipInputStream(inputStream);
 
-      for (ZipEntry var5 = var4.getNextEntry(); var5 != null; var5 = var4.getNextEntry()) {
-         String var6 = var2 + "/" + var5.getName();
-         File var7 = new File(var6);
-         FileOutputStream var8 = new FileOutputStream(var7);
-         int var9 = 0;
-         byte[] var10 = new byte[1024];
+      for (ZipEntry nextEntry = zipInputStream.getNextEntry(); nextEntry != null; nextEntry = zipInputStream.getNextEntry()) {
+         String text = storePath + "/" + nextEntry.getName();
+         File file2 = new File(text);
+         FileOutputStream fileOutputStream = new FileOutputStream(file2);
+         int number = 0;
+         byte[] bytes = new byte[1024];
 
-         while ((var9 = var4.read(var10)) != -1) {
-            var8.write(var10, 0, var9);
+         while ((number = zipInputStream.read(bytes)) != -1) {
+            fileOutputStream.write(bytes, 0, number);
          }
 
-         IOUtils.closeQuietly(var8);
+         IOUtils.closeQuietly(fileOutputStream);
       }
 
-      var4.closeEntry();
-      var4.close();
+      zipInputStream.closeEntry();
+      zipInputStream.close();
    }
 
    public void destroy() {
-      if (this.g != null) {
-         this.g.cancel();
+      if (this.timer != null) {
+         this.timer.cancel();
       }
    }
 
-   private String b() {
-      if (this.i != null && this.i.resporityServerUrl() != null) {
-         String var1 = this.i.resporityServerUrl();
-         if (var1.endsWith("/")) {
-            var1 = var1 + "urule/dynamic/checkLatestJarsDir";
+   private String resolveLatestJarsCheckUrl() {
+      if (this.argumentsProvider != null && this.argumentsProvider.resporityServerUrl() != null) {
+         String repositoryUrl = this.argumentsProvider.resporityServerUrl();
+         if (repositoryUrl.endsWith("/")) {
+            repositoryUrl = repositoryUrl + "urule/dynamic/checkLatestJarsDir";
          } else {
-            var1 = var1 + "/urule/dynamic/checkLatestJarsDir";
+            repositoryUrl = repositoryUrl + "/urule/dynamic/checkLatestJarsDir";
          }
 
-         return var1;
+         return repositoryUrl;
       } else {
-         return this.d;
+         return this.latestJarsCheckUrl;
       }
    }
 
    public String getResporityServerUrl() {
-      if (this.i != null && this.i.resporityServerUrl() != null) {
-         String var1 = this.i.resporityServerUrl();
-         if (var1.endsWith("/")) {
-            var1 = var1 + "urule/dynamic/loadDynamicJars";
+      if (this.argumentsProvider != null && this.argumentsProvider.resporityServerUrl() != null) {
+         String resporityServerUrl = this.argumentsProvider.resporityServerUrl();
+         if (resporityServerUrl.endsWith("/")) {
+            resporityServerUrl = resporityServerUrl + "urule/dynamic/loadDynamicJars";
          } else {
-            var1 = var1 + "/urule/dynamic/loadDynamicJars";
+            resporityServerUrl = resporityServerUrl + "/urule/dynamic/loadDynamicJars";
          }
 
-         return var1;
+         return resporityServerUrl;
       } else {
-         return this.c;
+         return this.dynamicJarsLoadUrl;
       }
    }
 
-   public void setRemoteLoadInterval(int var1) {
-      this.e = var1;
+   public void setRemoteLoadInterval(int remoteLoadInterval) {
+      this.remoteLoadInterval = remoteLoadInterval;
    }
 
-   public void setResporityServerUrl(String var1) {
-      if (!StringUtils.isEmpty(var1) && !var1.equals("urule.resporityServerUrl")) {
-         this.a(var1);
+   public void setResporityServerUrl(String resporityServerUrl) {
+      if (!StringUtils.isEmpty(resporityServerUrl) && !resporityServerUrl.equals("urule.resporityServerUrl")) {
+         this.configureRepositoryUrls(resporityServerUrl);
       }
    }
 
-   private void a(String var1) {
-      if (var1.endsWith("/")) {
-         this.d = var1 + "urule/dynamic/checkLatestJarsDir";
-         var1 = var1 + "urule/dynamic/loadDynamicJars";
+   private void configureRepositoryUrls(String repositoryUrl) {
+      if (repositoryUrl.endsWith("/")) {
+         this.latestJarsCheckUrl = repositoryUrl + "urule/dynamic/checkLatestJarsDir";
+         repositoryUrl = repositoryUrl + "urule/dynamic/loadDynamicJars";
       } else {
-         this.d = var1 + "/urule/dynamic/checkLatestJarsDir";
-         var1 = var1 + "/urule/dynamic/loadDynamicJars";
+         this.latestJarsCheckUrl = repositoryUrl + "/urule/dynamic/checkLatestJarsDir";
+         repositoryUrl = repositoryUrl + "/urule/dynamic/loadDynamicJars";
       }
 
-      this.c = var1;
+      this.dynamicJarsLoadUrl = repositoryUrl;
    }
 
-   public void setApplicationContext(ApplicationContext var1) throws BeansException {
-      Collection var2 = var1.getBeansOfType(ArgumentsProvider.class).values();
-      if (var2.size() != 0) {
-         this.i = (ArgumentsProvider)var2.iterator().next();
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      Collection argumentsProviders = applicationContext.getBeansOfType(ArgumentsProvider.class).values();
+      if (argumentsProviders.size() != 0) {
+         this.argumentsProvider = (ArgumentsProvider)argumentsProviders.iterator().next();
       }
    }
 
    public String getUser() {
-      return this.a;
+      return this.user;
    }
 
    public String getPwd() {
-      return this.b;
+      return this.pwd;
    }
 
-   public void setUser(String var1) {
-      this.a = var1;
+   public void setUser(String user) {
+      this.user = user;
    }
 
-   public void setPwd(String var1) {
-      this.b = var1;
+   public void setPwd(String pwd) {
+      this.pwd = pwd;
    }
 }

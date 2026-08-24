@@ -8,38 +8,37 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
 public abstract class AbstractConfigManager implements ConfigManager {
-   private static final Log b = LogFactory.getLog(AbstractConfigManager.class);
-   protected Properties a;
-   private ApplicationConfig c;
+   private static final Log logger = LogFactory.getLog(AbstractConfigManager.class);
+   protected Properties properties;
+   private ApplicationConfig applicationConfig;
 
-   public AbstractConfigManager(ApplicationConfig var1) {
-      this.c = var1;
+   public AbstractConfigManager(ApplicationConfig applicationConfig) {
+      this.applicationConfig = applicationConfig;
    }
 
-   protected void a() {
-      b.debug("[URULE-CONSOLE]初始化规则属性配置信息...");
-      this.a = this.b();
+   protected void initializeProperties() {
+      AbstractConfigManager.logger.debug("[URULE-CONSOLE]初始化规则属性配置信息...");
+      this.properties = this.getApplicationProperties();
    }
-
-   public String getProperty(String var1) {
-      if (this.a != null && this.a.containsKey(var1)) {
-         return this.a.getProperty(var1);
-      } else if (this.b() != null && this.b().containsKey(var1)) {
-         return this.b().getProperty(var1);
+   public String getProperty(String key) {
+      if (this.properties != null && this.properties.containsKey(key)) {
+         return this.properties.getProperty(key);
+      } else if (this.getApplicationProperties() != null && this.getApplicationProperties().containsKey(key)) {
+         return this.getApplicationProperties().getProperty(key);
       } else {
-         return this.c() != null && this.c().getEnvironment().containsProperty(var1) ? this.c().getEnvironment().getProperty(var1) : null;
+         return this.getApplicationContext() != null && this.getApplicationContext().getEnvironment().containsProperty(key) ? this.getApplicationContext().getEnvironment().getProperty(key) : null;
       }
    }
 
    public String getURuleHome() {
-      return this.c.getApplicationHome();
+      return this.applicationConfig.getApplicationHome();
    }
 
-   protected Properties b() {
-      return this.c.getProperties();
+   protected Properties getApplicationProperties() {
+      return this.applicationConfig.getProperties();
    }
 
-   protected ApplicationContext c() {
-      return this.c.getApplicationContext();
+   protected ApplicationContext getApplicationContext() {
+      return this.applicationConfig.getApplicationContext();
    }
 }

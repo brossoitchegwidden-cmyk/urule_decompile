@@ -13,115 +13,115 @@ import java.util.Date;
 import java.util.List;
 
 public class PacketFileQueryImpl implements PacketFileQuery {
-   private Long a;
-   private Long b;
-   private Long c;
-   private List d = new ArrayList();
+   private Long id;
+   private Long packetId;
+   private Long projectId;
+   private List queryParameters = new ArrayList();
 
    protected PacketFileQueryImpl() {
    }
 
    public List list() {
-      String var1 = "select ID_,PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,DESC_,CREATE_USER_,UPDATE_USER_,CREATE_DATE_,UPDATE_DATE_ from URULE_PACKET_FILE";
-      StringBuilder var2 = this.a();
-      if (var2.length() > 0) {
-         var1 = var1 + " where" + var2.toString();
+      String text = "select ID_,PACKET_ID_,FILE_ID_,PROJECT_ID_,PATH_,VERSION_,DESC_,CREATE_USER_,UPDATE_USER_,CREATE_DATE_,UPDATE_DATE_ from URULE_PACKET_FILE";
+      StringBuilder stringBuilder = this.buildWhereClause();
+      if (stringBuilder.length() > 0) {
+         text = text + " where" + stringBuilder.toString();
       }
 
-      Connection var3 = JdbcUtils.getConnection();
+      Connection connection = JdbcUtils.getConnection();
 
-      List var7;
+      List listResult;
       try {
-         PreparedStatement var4 = var3.prepareStatement(var1);
-         JdbcUtils.fillPreparedStatementParameters(this.d, var4);
-         ResultSet var5 = var4.executeQuery();
-         List var6 = this.a(var5);
-         JdbcUtils.closeResultSet(var5);
-         JdbcUtils.closeStatement(var4);
-         var7 = var6;
-      } catch (Exception var11) {
-         throw new RuleException(var11);
+         PreparedStatement preparedStatement = connection.prepareStatement(text);
+         JdbcUtils.fillPreparedStatementParameters(this.queryParameters, preparedStatement);
+         ResultSet resultSet = preparedStatement.executeQuery();
+         List items = this.readPacketFiles(resultSet);
+         JdbcUtils.closeResultSet(resultSet);
+         JdbcUtils.closeStatement(preparedStatement);
+         listResult = items;
+      } catch (Exception exception) {
+         throw new RuleException(exception);
       } finally {
-         JdbcUtils.closeConnection(var3);
+         JdbcUtils.closeConnection(connection);
       }
 
-      return var7;
+      return listResult;
    }
 
-   private List a(ResultSet var1) throws Exception {
-      ArrayList var2 = new ArrayList();
+   private List readPacketFiles(ResultSet resultSet) throws Exception {
+      ArrayList items = new ArrayList();
 
-      while(var1.next()) {
-         PacketFile var3 = new PacketFile();
-         var3.setId(var1.getLong(1));
-         var3.setPacketId(var1.getLong(2));
-         var3.setFileId(var1.getLong(3));
-         var3.setProjectId(var1.getLong(4));
+      while(resultSet.next()) {
+         PacketFile packetFile = new PacketFile();
+         packetFile.setId(resultSet.getLong(1));
+         packetFile.setPacketId(resultSet.getLong(2));
+         packetFile.setFileId(resultSet.getLong(3));
+         packetFile.setProjectId(resultSet.getLong(4));
 
          try {
-            RuleFile var4 = FileManager.ins.get(var3.getFileId());
-            var3.setPath(var4.getPath());
-         } catch (RuleException var5) {
-            var3.setPath("文件已删除");
+            RuleFile ruleFile = FileManager.ins.get(packetFile.getFileId());
+            packetFile.setPath(ruleFile.getPath());
+         } catch (RuleException ruleException) {
+            packetFile.setPath("文件已删除");
          }
 
-         var3.setVersion(var1.getString(6));
-         var3.setDesc(var1.getString(7));
-         var3.setCreateUser(var1.getString(8));
-         var3.setUpdateUser(var1.getString(9));
-         var3.setCreateDate(new Date(var1.getTimestamp(10).getTime()));
-         var3.setUpdateDate(new Date(var1.getTimestamp(11).getTime()));
-         var2.add(var3);
+         packetFile.setVersion(resultSet.getString(6));
+         packetFile.setDesc(resultSet.getString(7));
+         packetFile.setCreateUser(resultSet.getString(8));
+         packetFile.setUpdateUser(resultSet.getString(9));
+         packetFile.setCreateDate(new Date(resultSet.getTimestamp(10).getTime()));
+         packetFile.setUpdateDate(new Date(resultSet.getTimestamp(11).getTime()));
+         items.add(packetFile);
       }
 
-      return var2;
+      return items;
    }
 
-   private StringBuilder a() {
-      this.d.clear();
-      StringBuilder var1 = new StringBuilder();
-      if (this.a != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+   private StringBuilder buildWhereClause() {
+      this.queryParameters.clear();
+      StringBuilder stringBuilder = new StringBuilder();
+      if (this.id != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" ID_=?");
-         this.d.add(this.a);
+         stringBuilder.append(" ID_=?");
+         this.queryParameters.add(this.id);
       }
 
-      if (this.b != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.packetId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PACKET_ID_=?");
-         this.d.add(this.b);
+         stringBuilder.append(" PACKET_ID_=?");
+         this.queryParameters.add(this.packetId);
       }
 
-      if (this.c != null) {
-         if (var1.length() > 0) {
-            var1.append(" and");
+      if (this.projectId != null) {
+         if (stringBuilder.length() > 0) {
+            stringBuilder.append(" and");
          }
 
-         var1.append(" PROJECT_ID_=?");
-         this.d.add(this.c);
+         stringBuilder.append(" PROJECT_ID_=?");
+         this.queryParameters.add(this.projectId);
       }
 
-      return var1;
+      return stringBuilder;
    }
 
-   public PacketFileQuery id(long var1) {
-      this.a = var1;
+   public PacketFileQuery id(long id) {
+      this.id = id;
       return this;
    }
 
-   public PacketFileQuery packetId(long var1) {
-      this.b = var1;
+   public PacketFileQuery packetId(long packetId) {
+      this.packetId = packetId;
       return this;
    }
 
-   public PacketFileQuery projectId(long var1) {
-      this.c = var1;
+   public PacketFileQuery projectId(long projectId) {
+      this.projectId = projectId;
       return this;
    }
 }

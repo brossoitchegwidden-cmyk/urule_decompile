@@ -10,31 +10,31 @@ public class ScriptCell {
       return this.row;
    }
 
-   public void setRow(int var1) {
-      this.row = var1;
+   public void setRow(int row) {
+      this.row = row;
    }
 
    public int getCol() {
       return this.col;
    }
 
-   public void setCol(int var1) {
-      this.col = var1;
+   public void setCol(int col) {
+      this.col = col;
    }
 
    public int getRowspan() {
       return this.rowspan;
    }
 
-   public void setRowspan(int var1) {
-      this.rowspan = var1;
+   public void setRowspan(int rowspan) {
+      this.rowspan = rowspan;
    }
 
    public String getScript() {
       return this.script;
    }
 
-   public void setScript(String var1) {
-      this.script = var1;
+   public void setScript(String script) {
+      this.script = script;
    }
 }

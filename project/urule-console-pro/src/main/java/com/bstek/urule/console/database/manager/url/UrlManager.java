@@ -5,13 +5,13 @@ import com.bstek.urule.console.database.model.UrlConfig;
 public interface UrlManager {
    UrlManager ins = new UrlManagerImpl();
 
-   void add(UrlConfig var1);
+   void add(UrlConfig url);
 
-   void delete(long var1);
+   void delete(long id);
 
-   void update(UrlConfig var1);
+   void update(UrlConfig url);
 
-   UrlConfig load(long var1);
+   UrlConfig load(long id);
 
    UrlQuery newQuery();
 }

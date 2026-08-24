@@ -7,33 +7,48 @@ import java.util.List;
 public interface GroupRoleManager {
    GroupRoleManagerImpl ins = new GroupRoleManagerImpl();
 
-   List loadRoles(String var1);
+   /**获取团队角色列表*/
+   List loadRoles(String groupId);
 
-   List loadUserRoles(String var1, String var2);
+   /**获取用户的角色列表*/
+   List loadUserRoles(String groupId, String account);
 
-   List loadRoleUsers(String var1, long var2);
+   /**获取角色的用户列表*/
+   List loadRoleUsers(String groupId, long roleId);
 
-   GroupRole get(long var1);
+   /**获取团队角色*/
+   GroupRole get(long roleId);
 
-   GroupRole get(String var1, String var2);
+   /**获取团队角色*/
+   GroupRole get(String groupId, String name);
 
-   void add(GroupRole var1);
+   /**新增团队角色*/
+   void add(GroupRole role);
 
-   void update(GroupRole var1);
+   /**更新团队角色*/
+   void update(GroupRole role);
 
-   void remove(Long var1);
+   /**删除团队角色*/
+   void remove(Long id);
 
-   void removeByGroupId(String var1);
+   /**删除团队的所有角色*/
+   void removeByGroupId(String groupId);
 
-   boolean checkExist(String var1, String var2);
+   /**检查同一团队中的角色名称是否重复*/
+   boolean checkExist(String groupId, String name);
 
-   UserRole getUserRole(String var1, long var2);
+   /**获取用户角色关系*/
+   UserRole getUserRole(String userId, long roleId);
 
-   void addUserRole(String var1, String var2, long var3);
+   /**添加用户角色关系*/
+   void addUserRole(String groupId, String userId, long roleId);
 
-   void removeUserRole(String var1, String var2, long var3);
+   /**删除用户角色关系*/
+   void removeUserRole(String groupId, String userId, long roleId);
 
-   void removeRoleUsers(long var1);
+   /**删除角色对应的用户列表*/
+   void removeRoleUsers(long roleId);
 
-   void removeUserRoles(String var1, String var2);
+   /**删除用户对应的角色列表*/
+   void removeUserRoles(String groupId, String userId);
 }
